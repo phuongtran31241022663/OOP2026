@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A2503EB9-B7A2-4594-8D42-17A4812FD173}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Application</RootNamespace>
+    <AssemblyName>Application</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Behaviors\LoggingBehavior.cs" />
+    <Compile Include="Behaviors\ValidationBehavior.cs" />
+    <Compile Include="Class1.cs" />
+    <Compile Include="DTOs\DriverDto.cs" />
+    <Compile Include="DTOs\FareEstimateDto.cs" />
+    <Compile Include="DTOs\PassengerDto.cs" />
+    <Compile Include="DTOs\TripDto.cs" />
+    <Compile Include="Features\Drivers\AcceptTrip\AcceptTripCommand.cs" />
+    <Compile Include="Features\Drivers\AcceptTrip\AcceptTripHandler.cs" />
+    <Compile Include="Features\Drivers\UpdateDriverStatus\UpdateDriverStatusCommand.cs" />
+    <Compile Include="Features\Drivers\UpdateDriverStatus\UpdateDriverStatusHandler.cs" />
+    <Compile Include="Features\Passengers\RateDriver\RateDriverCommand.cs" />
+    <Compile Include="Features\Passengers\RateDriver\RateDriverHandler.cs" />
+    <Compile Include="Features\Passengers\RegisterPassenger\RegisterPassengerCommand.cs" />
+    <Compile Include="Features\Passengers\RegisterPassenger\RegisterPassengerHandler.cs" />
+    <Compile Include="Features\Trips\CancelTrip\CancelTripCommand.cs" />
+    <Compile Include="Features\Trips\CancelTrip\CancelTripHandler.cs" />
+    <Compile Include="Features\Trips\GetTripStatus\GetTripStatusHandler.cs" />
+    <Compile Include="Features\Trips\GetTripStatus\GetTripStatusQuery.cs" />
+    <Compile Include="Features\Trips\RequestTrip\RequestTripCommand.cs" />
+    <Compile Include="Features\Trips\RequestTrip\RequestTripHandler.cs" />
+    <Compile Include="Features\Trips\RequestTrip\RequestTripValidator.cs" />
+    <Compile Include="Interfaces\IDriverMatchingService.cs" />
+    <Compile Include="Interfaces\IFareService.cs" />
+    <Compile Include="Interfaces\IGeocodingService.cs" />
+    <Compile Include="Interfaces\ISimulationService.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Features\Admin\GetReport\" />
+    <Folder Include="Features\Admin\ManagerUser\" />
+    <Folder Include="Features\Drivers\RegisterDriver\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{e3833fc9-876c-4f32-9f03-1ffa44bdf6fd}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Domain\Domain.csproj">
+      <Project>{3ac87c44-ecaa-4de9-8b55-7fd2f65911a9}</Project>
+      <Name>Domain</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
