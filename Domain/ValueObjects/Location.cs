@@ -1,54 +1,39 @@
-﻿using System;
+using Domain.SharedKernel;
+using System;
+using System.Collections.Generic;
 
 namespace Domain.ValueObjects
 {
-    public class Location
+    /// <summary>
+    /// Value Object representing a geographic location.
+    /// Bất biến (immutable) và so sánh theo giá trị (value-based equality).
+    /// </summary>
+    public sealed class Location : ValueObject
     {
         #region Properties
-        public string Name { get; private set; }
-        public string Address { get; private set; }
-        public double Lat { get; private set; }
-        public double Lng { get; private set; }
+       public Coordinate Coordinate { get; set; }
+        public Address Address { get; set; }
         #endregion
+
         #region Constructors
-        protected Location() { }
+        // Constructor cho ORM (như EF Core) - giữ private để đảm bảo tính đóng gói
+        public Location() { }
 
-        public Location(string name, string address, double lat, double lng)
+        public Location(Coordinate coordinate, Address address)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Tên địa điểm không được để trống.");
+            Coordinate = coordinate ?? throw new ArgumentNullException(nameof(coordinate));
+            Address = address ?? throw new ArgumentNullException(nameof(address));
+        }
 
-            if (lat < -90 || lat > 90)
-                throw new ArgumentOutOfRangeException(nameof(lat), "Vĩ độ phải nằm trong khoảng từ -90 đến 90.");
+        #endregion
 
-            if (lng < -180 || lng > 180)
-                throw new ArgumentOutOfRangeException(nameof(lng), "Kinh độ phải nằm trong khoảng từ -180 đến 180.");
-            Name = name;
-            Address = address ?? string.Empty;
-            Lat = lat;
-            Lng = lng;
+        #region ValueObject Equality
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            // Phải bao gồm cả tọa độ và địa chỉ để xác định tính duy nhất của giá trị
+            yield return Coordinate;
+            yield return Address;
         }
         #endregion
-        #region Methods
-        public override bool Equals(object obj)
-        {
-            Location other = obj as Location;
-            if (other == null) return false;
-
-            const double threshold = 0.0001; // ~10m
-
-            return Math.Abs(Lat - other.Lat) <= threshold
-                && Math.Abs(Lng - other.Lng) <= threshold;
-        }
-
-        public override int GetHashCode()
-        {
-            return Lat.GetHashCode() ^ Lng.GetHashCode();
-        }
-        public override string ToString()
-        {
-            return $"{Name} ({Lat:F5}, {Lng:F5})";
-        }
-        #endregion
-}
+    }
 }

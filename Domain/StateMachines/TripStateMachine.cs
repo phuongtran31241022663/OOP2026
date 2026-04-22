@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+using Domain.Enums;
 using System.Collections.Generic;
 
 namespace Domain.StateMachines
@@ -44,5 +44,18 @@ namespace Domain.StateMachines
         [TripStatus.Cancelled] = new HashSet<TripStatus>(),
         [TripStatus.Timeout] = new HashSet<TripStatus>()
     };
+
+    public static bool CanTransition(TripStatus from, TripStatus to)
+    {
+        HashSet<TripStatus> validTargets;
+        return ValidTransitions.TryGetValue(from, out validTargets) && validTargets.Contains(to);
+    }
+        public static bool CanBeCancelled(TripStatus status)
+        {
+            return status == TripStatus.Requested ||
+                   status == TripStatus.Searching ||
+                   status == TripStatus.Matched ||
+                   status == TripStatus.Arrived;
+        }
     }
 }

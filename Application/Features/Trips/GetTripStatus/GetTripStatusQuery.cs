@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Application.Features.Trips.GetTripStatus
+﻿namespace Application.Features.Trips.GetTripStatus
 {
-    internal class GetTripStatusQuery
+    public class GetTripStatusQuery
     {
+        public System.Guid TripId { get; set; }
     }
 }

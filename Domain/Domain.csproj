@@ -47,38 +47,53 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
-    <Compile Include="Entities\Admin.cs" />
-    <Compile Include="Entities\Driver.cs" />
-    <Compile Include="Entities\FareRule.cs" />
-    <Compile Include="Entities\Passenger.cs" />
-    <Compile Include="Entities\Payment.cs" />
-    <Compile Include="Entities\Trip.cs" />
-    <Compile Include="Entities\User.cs" />
-    <Compile Include="Entities\Vehicle.cs" />
+    <Compile Include="FareRules\FareRule.cs" />
+    <Compile Include="FareRules\IFareRuleRepository.cs" />
+    <Compile Include="Reviews\IReviewRepository.cs" />
+    <Compile Include="SharedKernel\Entity.cs" />
+    <Compile Include="SharedKernel\DomainEvent.cs" />
+    <Compile Include="SharedKernel\IRepository.cs" />
+    <Compile Include="SharedKernel\ValueObject.cs" />
     <Compile Include="Enums\DriverStatus.cs" />
     <Compile Include="Enums\TripStatus.cs" />
     <Compile Include="Enums\VehicleType.cs" />
+    <Compile Include="Trips\Events\TripPaidEvent.cs" />
+    <Compile Include="ValueObjects\Coordinate.cs" />
+    <Compile Include="ValueObjects\Fare.cs" />
+    <Compile Include="Reviews\Review.cs" />
+    <Compile Include="Trips\ITripRepository.cs" />
+    <Compile Include="Trips\Trip.cs" />
+    <Compile Include="ValueObjects\Route.cs" />
+    <Compile Include="Users\Admin.cs" />
+    <Compile Include="Users\Drivers\Driver.cs" />
+    <Compile Include="Users\Drivers\IDriverRepository.cs" />
+    <Compile Include="Users\IUserRepository.cs" />
+    <Compile Include="Users\Passengers\IPassengerRepository.cs" />
+    <Compile Include="Users\Passengers\Passenger.cs" />
+    <Compile Include="Users\User.cs" />
+    <Compile Include="Vehicles\Car.cs" />
+    <Compile Include="Vehicles\IVehicleRepository.cs" />
+    <Compile Include="Vehicles\Motorbike.cs" />
+    <Compile Include="Vehicles\Vehicle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ValueObjects\Location.cs" />
+    <Compile Include="ValueObjects\Money.cs" />
     <Compile Include="StateMachines\DriverStateMachine.cs" />
     <Compile Include="StateMachines\TripStateMachine.cs" />
-    <Compile Include="ValueObjects\Fare.cs" />
-    <Compile Include="ValueObjects\Location.cs" />
-    <Compile Include="Entities\Rating.cs" />
-    <Compile Include="ValueObjects\Money.cs" />
-    <Compile Include="ValueObjects\Route.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interfaces\IDriverRepository.cs" />
-    <Compile Include="Interfaces\IDriverMatchingService.cs" />
-    <Compile Include="Interfaces\IFareCalculationService.cs" />
-    <Compile Include="Interfaces\ITripRepository.cs" />
-    <Compile Include="Interfaces\IUserRepository.cs" />
+    <Compile Include="Users\Drivers\Events\DriverLocationUpdatedEvent.cs" />
+    <Compile Include="ValueObjects\Address.cs" />
+    <Compile Include="Users\Drivers\Events\DriverStatusChangedEvent.cs" />
+    <Compile Include="Trips\Events\TripArrivedEvent.cs" />
+    <Compile Include="Trips\Events\TripCancelledEvent.cs" />
+    <Compile Include="Trips\Events\TripCompletedEvent.cs" />
+    <Compile Include="Trips\Events\TripMatchedEvent.cs" />
+    <Compile Include="Trips\Events\TripRequestedEvent.cs" />
+    <Compile Include="Trips\Events\TripSearchingEvent.cs" />
+    <Compile Include="Trips\Events\TripStartedEvent.cs" />
+    <Compile Include="Trips\Events\TripTimeoutEvent.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Events\" />
-    <Folder Include="Exceptions\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

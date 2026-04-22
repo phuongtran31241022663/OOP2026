@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using System;
 
 namespace Application.Features.Drivers.AcceptTrip
 {
-    internal class AcceptTripCommand
+    public class AcceptTripCommand
     {
+        public Guid TripId { get; set; }
+        public Guid DriverId { get; set; }
     }
 }

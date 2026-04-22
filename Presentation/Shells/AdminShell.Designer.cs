@@ -1,4 +1,4 @@
-﻿namespace Presentation.Shells
+namespace Presentation.Shells
 {
     partial class AdminShell
     {
@@ -28,10 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.SuspendLayout();
+            // 
+            // AdminShell
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "AdminShell";
+            this.ClientSize = new System.Drawing.Size(1024, 640);
+            this.Name = "AdminShell";
+            this.Text = "Admin Dashboard";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Load += new System.EventHandler(this.AdminShell_Load);
+            this.ResumeLayout(false);
+
         }
 
         #endregion

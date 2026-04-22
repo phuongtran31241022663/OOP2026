@@ -33,7 +33,34 @@
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Text = "TripNavigationForm";
         }
+// UI components
+        private Panel _topBar;
+        private Label _titleLabel;
+        private Button _refreshButton;
 
+        private Panel _statsStrip;
+        private Label _ReviewLabel;
+        private Label _totalTripsLabel;
+        private Label _incomeLabel;
+        private Label _walletLabel;
+        private Label _revenueTodayLabel;
+
+        private Panel _contentArea;
+        private Panel _emptyPanel;
+        private Label _emptyMessageLabel;
+
+        private Panel _requestPanel;
+        private Label _requestInfoLabel;
+        private Button _acceptButton;
+        private Button _rejectButton;
+
+        private Panel _activeTripPanel;
+        private Label _routeInfoLabel;
+        private Panel _stepBar;
+        private PictureBox[] _stepDots;
+        private Label[] _stepLabels;
+        private Button _actionButton;
+        private ListBox _logListBox;
         #endregion
     }
 }

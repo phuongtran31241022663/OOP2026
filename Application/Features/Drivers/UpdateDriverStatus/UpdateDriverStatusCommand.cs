@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
 namespace Application.Features.Drivers.UpdateDriverStatus
 {
-    internal class UpdateDriverStatusCommand
+    public class UpdateDriverStatusCommand
     {
+        public Guid DriverId { get; set; }
+        public string Status { get; set; }
     }
 }
