@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
+using Domain.Enums;
 
 namespace Presentation.Components
 {
@@ -15,6 +8,48 @@ namespace Presentation.Components
         public TripStatusPanel()
         {
             InitializeComponent();
+        }
+
+        public void UpdateTripStatus(TripStatus status)
+        {
+            switch (status)
+            {
+                case TripStatus.Requested:
+                    _statusLabel.Text = "Đã yêu cầu";
+                    _progressBar.Value = 20;
+                    _stepLabel.Text = "Đang tìm tài xế...";
+                    break;
+                case TripStatus.Matched:
+                    _statusLabel.Text = "Đã ghép đôi";
+                    _progressBar.Value = 40;
+                    _stepLabel.Text = "Tài xế đang đến...";
+                    break;
+                case TripStatus.Arrived:
+                    _statusLabel.Text = "Tài xế đã đến";
+                    _progressBar.Value = 60;
+                    _stepLabel.Text = "Sẵn sàng khởi hành";
+                    break;
+                case TripStatus.Started:
+                    _statusLabel.Text = "Đang chạy";
+                    _progressBar.Value = 80;
+                    _stepLabel.Text = "Đến điểm đích...";
+                    break;
+                case TripStatus.Completed:
+                    _statusLabel.Text = "Hoàn thành";
+                    _progressBar.Value = 100;
+                    _stepLabel.Text = "Cảm ơn đã sử dụng";
+                    break;
+                case TripStatus.Cancelled:
+                    _statusLabel.Text = "Đã hủy";
+                    _progressBar.Value = 0;
+                    _stepLabel.Text = "Chuyến đi đã hủy";
+                    break;
+                default:
+                    _statusLabel.Text = "Không xác định";
+                    _progressBar.Value = 0;
+                    _stepLabel.Text = "Trạng thái không rõ";
+                    break;
+            }
         }
     }
 }

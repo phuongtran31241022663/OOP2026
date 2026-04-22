@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+using Domain.Enums;
 using System.Collections.Generic;
 
 namespace Domain.StateMachines

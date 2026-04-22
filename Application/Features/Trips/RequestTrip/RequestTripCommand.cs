@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
+using Domain.Enums;
+using Domain.ValueObjects;
 
 namespace Application.Features.Trips.RequestTrip
 {
-    internal class RequestTripCommand
+    public class RequestTripCommand
     {
+        public Guid PassengerId { get; set; }
+        public VehicleType VehicleType { get; set; }
+        public Location Pickup { get; set; }
+        public Location Destination { get; set; }
     }
 }

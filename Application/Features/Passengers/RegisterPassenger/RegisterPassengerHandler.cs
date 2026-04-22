@@ -1,33 +1,39 @@
-﻿using Domain.Entities;
+﻿using Domain.Users.Passengers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Features.Passengers.RegisterPassenger
 {
     public class RegisterPassengerHandler
     {
-        private readonly IUserRepository _repo;
+        private readonly IPassengerRepository _repo;
+
+        public RegisterPassengerHandler(IPassengerRepository repo)
+        {
+            _repo = repo;
+        }
 
         public async Task<Passenger> Handle(RegisterPassengerCommand cmd)
         {
-            string phone = DomainValidators.UserValidator.NormalizePhone(cmd.Phone);
-            DomainValidators.UserValidator.ValidatePassword(cmd.Password);
+            // 1. Chỉ kiểm tra quy tắc cần dữ liệu ngoại vi (Database)
+            // Đây là Business Rule thực sự của tầng Application
+            if (await _repo.ExistsByPhone(cmd.Phone))
+            {
+                throw new InvalidOperationException("Số điện thoại này đã được đăng ký trong hệ thống.");
+            }
 
-            if (await _repo.ExistsByPhone(phone))
-                throw new InvalidOperationException("Số điện thoại đã tồn tại.");
-
+            // 2. Khởi tạo đối tượng (Data Integrity check tự chạy trong constructor/setters)
+            // Nếu cmd.Password ngắn hơn 6, dòng này sẽ tự bắn lỗi lên UI.
             Passenger passenger = new Passenger(
-                Guid.NewGuid(),
                 cmd.Name,
-                phone,
-                cmd.Password,
-                true
+                cmd.Phone,
+                cmd.Password
             );
 
-            await _repo.Add(passenger);
+            // 3. Lưu xuống Infrastructure
+            _repo.Add(passenger);
+            await _repo.SaveChangesAsync();
+
             return passenger;
         }
     }

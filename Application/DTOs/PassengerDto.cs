@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Application.DTOs
 {
-    internal class PassengerDto
+    public class PassengerDto
     {
+        public System.Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Phone { get; set; }
+        public bool IsActive { get; set; }
+        public int TotalTrips { get; set; }
     }
 }

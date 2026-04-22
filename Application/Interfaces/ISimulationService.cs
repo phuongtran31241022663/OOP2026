@@ -1,12 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Domain.Interfaces;
 
 namespace Application.Interfaces
 {
-    internal interface ISimulationService
+    public interface ISimulationService
     {
+        void SetTripService(ITripService tripService);
+        void SetDriverSimulationService(IDriverSimulationService driverSimulationService);
+        void StartSimulation();
+        void StopSimulation();
+        void StartTripSimulation(Guid tripId);
+        bool IsTripSimulating(Guid tripId);
+        Task Tick();
+        Task SimulateTripProgress(Guid tripId);
     }
 }

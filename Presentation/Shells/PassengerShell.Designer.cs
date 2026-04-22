@@ -1,4 +1,4 @@
-﻿namespace Presentation.Shells
+namespace Presentation.Shells
 {
     partial class PassengerShell
     {
@@ -13,9 +13,13 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                CleanupShell();
+                if (components != null)
+                {
+                    components.Dispose();
+                }
             }
             base.Dispose(disposing);
         }
@@ -28,12 +32,33 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this._contentPanel = new System.Windows.Forms.Panel();
+            this.SuspendLayout();
+            // 
+            // _contentPanel
+            // 
+            this._contentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._contentPanel.Location = new System.Drawing.Point(0, 0);
+            this._contentPanel.Name = "_contentPanel";
+            this._contentPanel.Size = new System.Drawing.Size(1024, 640);
+            this._contentPanel.TabIndex = 0;
+            // 
+            // PassengerShell
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "PassengerShell";
+            this.ClientSize = new System.Drawing.Size(1024, 640);
+            this.Controls.Add(this._contentPanel);
+            this.Name = "PassengerShell";
+            this.Text = "Passenger Panel";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Load += new System.EventHandler(this.PassengerShell_Load);
+            this.ResumeLayout(false);
+
         }
 
         #endregion
+
+        private System.Windows.Forms.Panel _contentPanel;
     }
 }

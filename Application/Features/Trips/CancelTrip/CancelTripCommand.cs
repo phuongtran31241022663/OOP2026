@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using System;
 
 namespace Application.Features.Trips.CancelTrip
 {
-    internal class CancelTripCommand
+    public class CancelTripCommand
     {
+        public Guid TripId { get; set; }
+        public string Reason { get; set; }
     }
 }

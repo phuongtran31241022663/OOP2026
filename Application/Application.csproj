@@ -40,39 +40,70 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
+  <!-- Include all .cs files recursively -->
   <ItemGroup>
-    <Compile Include="Behaviors\LoggingBehavior.cs" />
+    <Compile Include="Behaviors\ExceptionHandlingBehavior.cs" />
     <Compile Include="Behaviors\ValidationBehavior.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="DTOs\DriverDto.cs" />
-    <Compile Include="DTOs\FareEstimateDto.cs" />
+    <Compile Include="DTOs\DriverMapper.cs" />
+    <Compile Include="DTOs\FareDto.cs" />
     <Compile Include="DTOs\PassengerDto.cs" />
+    <Compile Include="DTOs\PassengerMapper.cs" />
     <Compile Include="DTOs\TripDto.cs" />
+    <Compile Include="DTOs\TripMapper.cs" />
+    <Compile Include="DTOs\TripReportDto.cs" />
+    <Compile Include="DTOs\UserDto.cs" />
     <Compile Include="Features\Drivers\AcceptTrip\AcceptTripCommand.cs" />
     <Compile Include="Features\Drivers\AcceptTrip\AcceptTripHandler.cs" />
+    <Compile Include="Features\Drivers\AcceptTrip\AcceptTripResponse.cs" />
+    <Compile Include="Features\Drivers\RegisterDriver\RegisterDriverCommand.cs" />
+    <Compile Include="Features\Drivers\RegisterDriver\RegisterDriverHandler.cs" />
+    <Compile Include="Features\Drivers\RegisterDriver\RegisterDriverResponse.cs" />
+    <Compile Include="Features\Drivers\RegisterDriver\RegisterDriverValidator.cs" />
     <Compile Include="Features\Drivers\UpdateDriverStatus\UpdateDriverStatusCommand.cs" />
     <Compile Include="Features\Drivers\UpdateDriverStatus\UpdateDriverStatusHandler.cs" />
-    <Compile Include="Features\Passengers\RateDriver\RateDriverCommand.cs" />
-    <Compile Include="Features\Passengers\RateDriver\RateDriverHandler.cs" />
+    <Compile Include="Features\Drivers\UpdateDriverStatus\UpdateDriverStatusResponse.cs" />
     <Compile Include="Features\Passengers\RegisterPassenger\RegisterPassengerCommand.cs" />
     <Compile Include="Features\Passengers\RegisterPassenger\RegisterPassengerHandler.cs" />
+    <Compile Include="Features\Passengers\RegisterPassenger\RegisterPassengerResponse.cs" />
+    <Compile Include="Features\Passengers\RegisterPassenger\RegisterPassengerValidator.cs" />
+    <Compile Include="Features\Trips\AssignDriver\AssignDriverCommand.cs" />
+    <Compile Include="Features\Trips\AssignDriver\AssignDriverHandler.cs" />
+    <Compile Include="Features\Trips\AssignDriver\AssignDriverResponse.cs" />
+    <Compile Include="Features\Trips\AssignDriver\AssignDriverValidator.cs" />
     <Compile Include="Features\Trips\CancelTrip\CancelTripCommand.cs" />
     <Compile Include="Features\Trips\CancelTrip\CancelTripHandler.cs" />
+    <Compile Include="Features\Trips\CancelTrip\CancelTripResponse.cs" />
+    <Compile Include="Features\Trips\CancelTrip\CancelTripValidator.cs" />
+    <Compile Include="Features\Trips\CompleteTrip\CompleteTripCommand.cs" />
+    <Compile Include="Features\Trips\CompleteTrip\CompleteTripHandler.cs" />
+    <Compile Include="Features\Trips\CompleteTrip\CompleteTripResponse.cs" />
     <Compile Include="Features\Trips\GetTripStatus\GetTripStatusHandler.cs" />
     <Compile Include="Features\Trips\GetTripStatus\GetTripStatusQuery.cs" />
+    <Compile Include="Features\Trips\GetTripStatus\GetTripStatusResponse.cs" />
     <Compile Include="Features\Trips\RequestTrip\RequestTripCommand.cs" />
     <Compile Include="Features\Trips\RequestTrip\RequestTripHandler.cs" />
+    <Compile Include="Features\Trips\RequestTrip\RequestTripResponse.cs" />
     <Compile Include="Features\Trips\RequestTrip\RequestTripValidator.cs" />
-    <Compile Include="Interfaces\IDriverMatchingService.cs" />
-    <Compile Include="Interfaces\IFareService.cs" />
-    <Compile Include="Interfaces\IGeocodingService.cs" />
+    <Compile Include="Interfaces\IDriverSimulationService.cs" />
+    <Compile Include="Interfaces\IEventHandler.cs" />
+    <Compile Include="Interfaces\IFareRuleService.cs" />
+    <Compile Include="Interfaces\IFileStorageService.cs" />
+    <Compile Include="Interfaces\IMapService.cs" />
+    <Compile Include="Interfaces\INotificationService.cs" />
+    <Compile Include="Interfaces\IRouteService.cs" />
     <Compile Include="Interfaces\ISimulationService.cs" />
+    <Compile Include="Interfaces\ITripService.cs" />
+    <Compile Include="Interfaces\IUserService.cs" />
+    <Compile Include="obj\Debug\.NETFramework,Version=v4.8.AssemblyAttributes.cs" />
+    <Compile Include="Services\FareRuleService.cs" />
+    <Compile Include="Services\MatchingService.cs" />
+    <Compile Include="Services\RouteService.cs" />
+    <Compile Include="Services\SimulationService.cs" />
+    <Compile Include="Services\TripService.cs" />
+    <Compile Include="Services\UserService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Features\Admin\GetReport\" />
-    <Folder Include="Features\Admin\ManagerUser\" />
-    <Folder Include="Features\Drivers\RegisterDriver\" />
+    <Compile Include="Mappings\MappingProfile.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

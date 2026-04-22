@@ -1,72 +1,57 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using Domain.SharedKernel;
 
 namespace Domain.ValueObjects
 {
-    public class Route
+    /// <summary>
+    /// Value Object để quản lý các số liệu của chuyến đi (khoảng cách và thời gian).
+    /// </summary>
+    public sealed class Route : ValueObject
     {
+        private readonly double _distance; // Km
+        private readonly TimeSpan _duration;
+        private readonly Location _pickup;
+        private readonly Location _destination;
+        private readonly string _encodedPolyline;
+        public double Distance => _distance;
+        public TimeSpan Duration => _duration;
 
-        public double Distance { get; private set; }
-
-        public double Duration { get; private set; }
-
-
-        private List<Location> points = new List<Location>();
-
-        public IReadOnlyList<Location> Points
+        public Location Pickup
         {
-            get { return points.AsReadOnly(); }
+            get { return _pickup; }
         }
 
-        private Location start;
-
-        public Location Start
+        public Location Destination
         {
-            get { return start; }
-            private set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("Điểm bắt đầu không được null.");
-                start = value;
-            }
+            get { return _destination; }
         }
-
-        private Location end;
-
-        public Location End
+        public string EncodedPolyline
         {
-            get { return end; }
-            private set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("Điểm kết thúc không được null.");
-
-                if (start != null && Location.Equals(start, value))
-                    throw new ArgumentException("Start và End không được trùng.");
-
-                end = value;
-            }
+            get { return _encodedPolyline; }
         }
-
-        public Route(Location start, Location end, double distance, double duration, List<Location> points)
+        private Route() { }
+        public Route(Location pickup, Location des, double distance, TimeSpan duration, string encodedPolyline = null)
         {
-            Start = start;
-            End = end;
-            SetDistance(distance);
-            SetDuration(duration);
-            this.points = points ?? new List<Location>();
+            if (distance < 0)
+                throw new ArgumentOutOfRangeException(nameof(distance), "Khoảng cách không được âm.");
+
+            if (duration.TotalSeconds < 0)
+                throw new ArgumentOutOfRangeException(nameof(duration), "Thời gian không được âm.");
+
+            _distance = distance;
+            _duration = duration;
+            _pickup = pickup ?? throw new ArgumentNullException(nameof(pickup));
+            _destination = des ?? throw new ArgumentNullException(nameof(des));
+            _encodedPolyline = encodedPolyline ?? string.Empty;
         }
-
-        private void SetDistance(double d)
+        protected override IEnumerable<object> GetEqualityComponents()
         {
-            if (d < 0) throw new ArgumentException("Distance không hợp lệ.");
-            Distance = d;
-        }
-
-        private void SetDuration(double d)
-        {
-            if (d < 0) throw new ArgumentException("Duration không hợp lệ.");
-            Duration = d;
+            yield return _distance;
+            yield return _duration;
+            yield return _pickup;
+            yield return _destination;
+            yield return _encodedPolyline;
         }
     }
 }
