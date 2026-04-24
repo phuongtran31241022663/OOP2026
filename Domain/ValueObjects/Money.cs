@@ -10,22 +10,44 @@ namespace Domain.ValueObjects
     /// </summary>
     public sealed class Money : ValueObject
     {
-        public decimal Amount { get; }
-        public string Currency { get; }
+        #region Fields
+        private readonly decimal _amount;
+        private readonly string _currency;
+        #endregion
+        #region Properties
+        public decimal Amount
+        {
+            get => _amount;
+            init
+            {
+                if (value < 0)
+                    throw new ArgumentException("Amount cannot be negative", nameof(Amount));
+                _amount = decimal.Round(value, 2, MidpointRounding.AwayFromZero);
+            }
+        }
+
+        public string Currency
+        {
+            get => _currency;
+            init
+            {
+                _currency = string.IsNullOrWhiteSpace(value)
+                    ? "VND"
+                    : value.Trim().ToUpperInvariant();
+            }
+        }
+        #endregion
 
         // Constructor for ORM/persistence
         private Money() { }
 
-        public Money(decimal amount, string currency = "VND")
+        public Money(decimal amount, string currency)
         {
-            if (amount < 0)
-                throw new ArgumentException("Amount cannot be negative");
-
-            Amount = decimal.Round(amount, 2, MidpointRounding.AwayFromZero);
-            Currency = string.IsNullOrWhiteSpace(currency)
-                ? "VND"
-                : currency.Trim().ToUpperInvariant();
+           Amount = amount;
+              Currency = currency;
         }
+
+        public Money(decimal amount) : this(amount, "VND") { }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
@@ -109,3 +131,4 @@ namespace Domain.ValueObjects
         }
     }
 }
+

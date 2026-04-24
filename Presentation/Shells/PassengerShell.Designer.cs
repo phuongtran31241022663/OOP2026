@@ -1,3 +1,5 @@
+using Presentation;
+
 namespace Presentation.Shells
 {
     partial class PassengerShell

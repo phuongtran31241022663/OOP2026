@@ -3,7 +3,7 @@ using Domain.Enums;
 
 namespace Presentation.Components
 {
-    public partial class TripStatusPanel : UserControl
+    public partial class TripStatusPanel : BaseUserControl
     {
         public TripStatusPanel()
         {

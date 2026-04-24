@@ -9,11 +9,11 @@ using Domain.Enums;
 
 namespace Presentation.Shells
 {
-    public partial class PassengerShell : Form
+    public partial class PassengerShell : BaseShell
     {
         private readonly IUserService _userService;
         private readonly ITripService _tripService;
-        private readonly IDriverSimulationService _driverSimulationService;
+        private readonly ISimulationService _simulationService;
 
         private PassengerDto _passenger;
         private TripDto _currentTrip;
@@ -26,12 +26,12 @@ namespace Presentation.Shells
         public PassengerShell(
             IUserService userService,
             ITripService tripService,
-            IDriverSimulationService driverSimulationService,
+            ISimulationService simulationService,
             PassengerDto passenger)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _tripService = tripService ?? throw new ArgumentNullException(nameof(tripService));
-            _driverSimulationService = driverSimulationService ?? throw new ArgumentNullException(nameof(driverSimulationService));
+            _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
             _passenger = passenger ?? throw new ArgumentNullException(nameof(passenger));
 
             InitializeComponent();
@@ -42,8 +42,8 @@ namespace Presentation.Shells
         public PassengerShell(
             IUserService userService,
             ITripService tripService,
-            IDriverSimulationService driverSimulationService)
-            : this(userService, tripService, driverSimulationService, new PassengerDto())
+            ISimulationService simulationService)
+            : this(userService, tripService, simulationService, new PassengerDto())
         {
         }
 
@@ -97,7 +97,7 @@ namespace Presentation.Shells
         {
             // TODO: Create screen instances
             // _screens["Home"] = new BookTripForm(); // Assuming BookTripForm is Home
-            _screens["Trip"] = new Presentation.Screens.Passenger.TripTrackingForm(_tripService, _userService, _driverSimulationService, this);
+            _screens["Trip"] = new Screens.Passenger.TripTrackingForm(_tripService, _userService, _simulationService, this);
             // _screens["History"] = new TripHistoryForm();
             // _screens["Review"] = new ReviewForm();
             // _screens["Profile"] = new ProfileForm(); // TODO: Create if needed

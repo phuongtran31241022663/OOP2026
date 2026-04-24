@@ -2,7 +2,7 @@ using System.Windows.Forms;
 
 namespace Presentation.Screens.Passenger
 {
-    partial class TripTrackingForm: Form
+    partial class TripTrackingForm : BaseForm
     {
         /// <summary>
         /// Required designer variable.

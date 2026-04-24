@@ -10,9 +10,14 @@ namespace Domain.ValueObjects
     /// </summary>
     public sealed class Location : ValueObject
     {
+        #region Fields
+        private readonly Coordinate _coordinate;
+        private readonly Address _address;
+        #endregion
         #region Properties
-       public Coordinate Coordinate { get; set; }
-        public Address Address { get; set; }
+        public Coordinate Coordinate => _coordinate;
+
+        public Address Address => _address;
         #endregion
 
         #region Constructors
@@ -21,8 +26,8 @@ namespace Domain.ValueObjects
 
         public Location(Coordinate coordinate, Address address)
         {
-            Coordinate = coordinate ?? throw new ArgumentNullException(nameof(coordinate));
-            Address = address ?? throw new ArgumentNullException(nameof(address));
+            _coordinate = coordinate;
+            _address = address;
         }
 
         #endregion

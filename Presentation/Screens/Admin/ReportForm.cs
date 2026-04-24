@@ -7,10 +7,11 @@ using System.Linq;
 using System.Text;
 
 using System.Windows.Forms;
+using Presentation;
 
 namespace Presentation.Screens.Admin
 {
-    public partial class ReportForm : Form
+    public partial class ReportForm : BaseForm
     {
         public ReportForm()
         {

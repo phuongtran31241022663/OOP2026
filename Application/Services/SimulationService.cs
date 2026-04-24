@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Domain.Trips;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -7,16 +8,13 @@ namespace Application.Services
 {
     public class SimulationService : ISimulationService
     {
-        private ITripService _tripService;
+        private readonly ITripService _tripService;
+        private readonly IDriverSimulationService _driverSimulationService;
 
-        public void SetTripService(ITripService tripService)
+        public SimulationService(ITripService tripService, IDriverSimulationService driverSimulationService)
         {
             _tripService = tripService;
-        }
-
-        public void SetDriverSimulationService(IDriverSimulationService driverSimulationService)
-        {
-            // Not used in MVP
+            _driverSimulationService = driverSimulationService;
         }
 
         public void StartSimulation()
@@ -44,3 +42,4 @@ namespace Application.Services
         public Task SimulateTripProgress(Guid tripId) => Task.CompletedTask;
     }
 }
+

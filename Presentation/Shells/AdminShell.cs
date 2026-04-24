@@ -9,9 +9,11 @@ using Presentation.ViewModels;
 using Domain.Users;
 using Application.Interfaces;
 
+using Presentation;
+
 namespace Presentation.Shells
 {
-    public partial class AdminShell : Form
+    public partial class AdminShell : BaseShell
     {
         // Dependencies
         private readonly Admin _admin;

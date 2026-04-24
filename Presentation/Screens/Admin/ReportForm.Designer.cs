@@ -1,6 +1,6 @@
 ﻿namespace Presentation.Screens.Admin
 {
-    partial class ReportForm
+    partial class ReportForm : BaseForm
     {
         /// <summary>
         /// Required designer variable.

@@ -1,4 +1,4 @@
-using Domain.Reviews;
+﻿using Domain.Reviews;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,47 +10,35 @@ namespace Infrastructure.Repositories
     {
         public ReviewRepository() : base("reviews.json") { }
 
-        public async Task<Review> GetByIdAsync(Guid id)
-        {
-            return await Task.FromResult(_entities.FirstOrDefault(r => r.Id == id));
-        }
-
-        public async Task<IEnumerable<Review>> GetAllAsync()
-        {
-            return await Task.FromResult(_entities);
-        }
-
         public async Task<IEnumerable<Review>> GetByDriverIdAsync(Guid driverId)
         {
-            return await Task.FromResult(_entities.Where(r => r.DriverId == driverId));
+            await Task.CompletedTask;
+            return _items.Where(r => r.DriverId == driverId);
         }
 
         public async Task<IEnumerable<Review>> GetByTripIdAsync(Guid tripId)
         {
-            return await Task.FromResult(_entities.Where(r => r.TripId == tripId));
+            await Task.CompletedTask;
+            return _items.Where(r => r.TripId == tripId);
         }
 
         public async Task AddAsync(Review review)
         {
-            _entities.Add(review);
+            Add(review);
             await Task.CompletedTask;
         }
 
         public async Task UpdateAsync(Review review)
         {
-            var index = _entities.FindIndex(r => r.Id == review.Id);
-            if (index != -1)
-                _entities[index] = review;
-
+            Update(review);
             await Task.CompletedTask;
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var entity = _entities.FirstOrDefault(r => r.Id == id);
+            var entity = await GetByIdAsync(id);
             if (entity != null)
-                _entities.Remove(entity);
-
+                Delete(entity);
             await Task.CompletedTask;
         }
     }

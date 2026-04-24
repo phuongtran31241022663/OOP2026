@@ -12,14 +12,16 @@ using System.Linq;
 using System.Net.Http;
 using Domain.ValueObjects;
 
+using Presentation;
+
 namespace Presentation.Screens.Passenger
 {
-    public partial class BookTripForm : Form
+    public partial class BookTripForm : BaseForm
     {
         private readonly ITripService _tripService;
         private readonly IUserService _userService;
         private readonly IRouteService _routeService;
-        private readonly IFareRuleService _fareService;
+        private readonly IFareService _fareService;
         private readonly HttpClient _httpClient;
         private readonly PassengerShell _parentShell;
 
@@ -42,7 +44,7 @@ namespace Presentation.Screens.Passenger
             ITripService tripService,
             IUserService userService,
             IRouteService routeService,
-            IFareRuleService fareService,
+            IFareService fareService,
             HttpClient httpClient,
             PassengerShell parentShell)
         {

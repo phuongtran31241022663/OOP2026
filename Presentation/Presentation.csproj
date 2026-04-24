@@ -84,6 +84,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BaseForm.Designer.cs">
+      <DependentUpon>BaseForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BaseShell.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BaseShell.Designer.cs">
+      <DependentUpon>BaseShell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BaseUserControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="BaseUserControl.Designer.cs">
+      <DependentUpon>BaseUserControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Components\DriverCardControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -115,7 +133,7 @@
       <DependentUpon>MapControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Components\StatusPanel.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Components\StatusPanel.Designer.cs">
       <DependentUpon>StatusPanel.cs</DependentUpon>
@@ -246,6 +264,9 @@
     <Compile Include="ViewModels\DriverViewModel.cs" />
     <Compile Include="ViewModels\PassengerViewModel.cs" />
     <Compile Include="ViewModels\TripViewModel.cs" />
+    <EmbeddedResource Include="BaseShell.resx">
+      <DependentUpon>BaseShell.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Components\FarePanel.resx">
       <DependentUpon>FarePanel.cs</DependentUpon>
     </EmbeddedResource>

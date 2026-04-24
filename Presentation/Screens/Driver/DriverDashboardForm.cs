@@ -9,16 +9,18 @@ using Presentation.Components;
 using Application.DTOs;
 using Domain.Users.Drivers;
 
+using Presentation;
+
 namespace Presentation.Screens.Driver
 {
-    public partial class DriverDashboardForm : Form
+    public partial class DriverDashboardForm : BaseForm
     {
         // Dependencies
         private readonly DriverShell _shell;
         private readonly ITripService _tripService;
         private readonly IUserService _userService;
         private readonly ISimulationService _simulationService;
-        private readonly IFareRuleService _fareService;
+        private readonly IFareService _fareService;
 
         // State
         private TripDto _trip;
@@ -55,7 +57,7 @@ namespace Presentation.Screens.Driver
             ITripService tripService,
             IUserService userService,
             ISimulationService simulationService,
-            IFareRuleService fareService)
+            IFareService fareService)
         {
             _shell = shell ?? throw new ArgumentNullException(nameof(shell));
             _tripService = tripService ?? throw new ArgumentNullException(nameof(tripService));

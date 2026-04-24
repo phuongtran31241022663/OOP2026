@@ -1,6 +1,6 @@
 namespace Presentation.Screens.Passenger
 {
-    partial class BookTripForm
+    partial class BookTripForm : BaseForm
     {
         /// <summary>
         /// Required designer variable.

@@ -12,10 +12,10 @@ using Domain.Users.Drivers;
 namespace Presentation.Components
 {
     /// <summary>
-    /// UserControl hiển thị bản đồ với các marker và route.
+    /// BaseUserControl hiển thị bản đồ với các marker và route.
     /// Sử dụng GMap.NET để render bản đồ OpenStreetMap.
     /// </summary>
-    public partial class MapControl : UserControl
+    public partial class MapControl : BaseUserControl
     {
         // Logic fields – NOT designer controls
         private GMapOverlay _staticOverlay; // Static markers (pickup, dropoff)
@@ -82,8 +82,8 @@ namespace Presentation.Components
 
             // Create new marker
             _pickupMarker = new GMarkerGoogle(
-                new PointLatLng(location.Lat, location.Lng),
-                GMarkerGoogleType.green_pushpin);
+         new PointLatLng(location.Coordinate.Latitude, location.Coordinate.Longitude),
+         GMarkerGoogleType.green_pushpin);
             _pickupMarker.ToolTipText = $"Điểm đón: {location.Address}";
             _staticOverlay.Markers.Add(_pickupMarker);
         }
@@ -108,7 +108,7 @@ namespace Presentation.Components
 
             // Create new marker
             _destinationMarker = new GMarkerGoogle(
-                new PointLatLng(location.Lat, location.Lng),
+                new PointLatLng(location.Coordinate.Latitude, location.Coordinate.Longitude),
                 GMarkerGoogleType.red_pushpin);
             _destinationMarker.ToolTipText = $"Điểm đến: {location.Address}";
             _staticOverlay.Markers.Add(_destinationMarker);
@@ -137,13 +137,13 @@ namespace Presentation.Components
 
             // Create new marker
             _driverMarker = new GMarkerGoogle(
-                new PointLatLng(location.Lat, location.Lng),
+         new PointLatLng(location.Coordinate.Latitude, location.Coordinate.Longitude),
                 GMarkerGoogleType.blue_dot);
-            _driverMarker.ToolTipText = $"Tài xế: {location.Lat:F5}, {location.Lng:F5}";
+            _driverMarker.ToolTipText = $"Tài xế: {location.Coordinate.Latitude:F5}, {location.Coordinate.Longitude:F5}";
             _dynamicOverlay.Markers.Add(_driverMarker);
 
             // Follow driver
-            _gMapControl.Position = new PointLatLng(location.Lat, location.Lng);
+            _gMapControl.Position = new PointLatLng(location.Coordinate.Latitude, location.Coordinate.Longitude);
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace Presentation.Components
                 if (driver.Position != null)
                 {
                     GMarkerGoogle marker = new GMarkerGoogle(
-                        new PointLatLng(driver.Position.Lat, driver.Position.Lng),
+                        new PointLatLng(driver.Position.Coordinate.Latitude, driver.Position.Coordinate.Longitude),
                         GMarkerGoogleType.blue_dot);
                     marker.ToolTipText = $"{driver.Name} - {driver.Vehicle.GetVehicleType()}";
                     _dynamicOverlay.Markers.Add(marker);
@@ -194,7 +194,7 @@ namespace Presentation.Components
             for (int i = 0; i < waypoints.Count; i++)
             {
                 DomainLocation wp = waypoints[i];
-                routePoints.Add(new PointLatLng(wp.Lat, wp.Lng));
+                routePoints.Add(new PointLatLng(wp.Coordinate.Latitude, wp.Coordinate.Longitude));
             }
 
             // Create route
@@ -213,7 +213,7 @@ namespace Presentation.Components
         {
             if (location != null)
             {
-                _gMapControl.Position = new PointLatLng(location.Lat, location.Lng);
+                _gMapControl.Position = new PointLatLng(location.Coordinate.Latitude, location.Coordinate.Longitude);
             }
         }
 
@@ -253,7 +253,7 @@ namespace Presentation.Components
             {
                 // Convert screen coordinates to lat/lng
                 var point = _gMapControl.FromLocalToLatLng(e.X, e.Y);
-                var location = new DomainLocation("Custom Location", "", point.Lat, point.Lng);
+                var location = new DomainLocation(point, );
 
                 // Raise event
                 MapClicked?.Invoke(this, location);

@@ -7,10 +7,11 @@ using System.Linq;
 using System.Text;
 
 using System.Windows.Forms;
+using Presentation;
 
 namespace Presentation.Screens.Driver
 {
-    public partial class EarningsForm : Form
+    public partial class EarningsForm : BaseForm
     {
         public EarningsForm()
         {

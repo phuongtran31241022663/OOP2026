@@ -2,7 +2,7 @@
 
 namespace Presentation.Screens.Driver
 {
-    partial class DriverDashboardForm : Form
+    partial class DriverDashboardForm : BaseForm
     {
         /// <summary>
         /// Required designer variable.

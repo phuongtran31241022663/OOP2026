@@ -1,6 +1,6 @@
 ﻿namespace Presentation.Screens.Admin
 {
-    partial class FareRulesForm
+    partial class FareRulesForm : BaseForm
     {
         /// <summary>
         /// Required designer variable.

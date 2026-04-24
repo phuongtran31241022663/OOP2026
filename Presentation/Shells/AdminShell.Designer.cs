@@ -1,6 +1,6 @@
 namespace Presentation.Shells
 {
-    partial class AdminShell
+    partial class AdminShell : BaseShell
     {
         /// <summary>
         /// Required designer variable.

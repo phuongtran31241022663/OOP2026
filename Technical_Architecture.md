@@ -1,454 +1,390 @@
-# Application Layer Technical Documentation
+# Technical Architecture Documentation — RideGo System
+
+> **Based on actual codebase state** — reflects implemented features, known gaps, and current project structure.
+
+---
 
 ## 1. Purpose of Application Layer
 
-The Application Layer acts as an orchestration layer between the Presentation Layer and the Domain Layer. It handles use cases, business workflows, and cross-cutting concerns like validation, logging, and authorization. It uses CQRS pattern with MediatR-like structure (Commands/Queries/Handlers) to process requests, coordinate domain objects, and manage DTOs for data transfer. This layer ensures domain invariants are maintained while providing application-level services and behaviors.
+The Application Layer orchestrates use cases between Presentation and Domain. It coordinates domain objects, enforces application-level validation, and provides DTOs for data transfer. The codebase uses a lightweight CQRS-like structure with `Features/` folders (Commands/Queries/Handlers), but handlers call Application Services directly (no MediatR).
 
-## 3. Use Cases Overview (Command / Query breakdown)
+---
 
-- **Commands** (State-changing operations):
-  - RequestTrip, AssignDriver, StartTrip, CompleteTrip, CancelTrip (Trip management)
-  - RegisterPassenger, UpdateProfile (Passenger management)
-  - AcceptTrip, UpdateDriverStatus (Driver management)
-  - ProcessPayment (Payment processing)
-  - RateDriver (Rating submission)
-  - DeactivateUser, CreateFareRule, UpdateFareRule (Admin actions)
-- **Queries** (Read operations):
-  - GetTripStatus, GetTripById, GetActiveTrips, GetTripHistory (Trip queries)
-  - GetPassengerHistory (Passenger data)
-  - GetDriverEarnings, GetNearbyDrivers (Driver data)
-  - GetPaymentHistory (Payment history)
-  - GetUsers, GetFareRules (Admin queries)
-
-## 4. Application Services (Responsibilities + Methods)
-
-Application Services are defined as interfaces in Application.Interfaces, with implementations in Application.Services (e.g., TripService in Implementations/). They orchestrate domain logic:
-
-- **ITripService**: Manages trip lifecycle. Methods: RequestTrip(), TryAssignDriver(), StartTrip(), CompleteTrip(), CancelTrip(), GetTrip(), etc. Events: TripStatusChanged.
-- **IUserService**: Handles user operations. Methods: RegisterPassenger(), Login(), GetUser().
-- **IDriverMatchingService**: Coordinates driver matching. Methods: FindNearbyDrivers().
-- **IPaymentService**: Processes payments. Methods: ProcessPayment().
-- **IRatingService**: Manages ratings. Methods: CreateRating().
-- **IFareRuleService**: Calculates fares. Methods: CalculateFare().
-- **IAdminService**: Admin functions. Methods: GetAllUsers(), DeactivateUser(), CreateFareRule(), UpdateFareRule(), GetFareRules().
-- **INotificationService**: Sends notifications. Methods: NotifyDriver(), NotifyPassenger().
-- **IEventDispatcher**: Dispatches domain events. Methods: Dispatch().
-- **IAuthorizationService**: Handles RBAC for admin operations. Methods: IsAdmin(), HasPermission().
-- **Other interfaces**: IRouteService, ILocationService, ISimulationService.
-
-## 5. Commands / Queries / Handlers
-
-- **Commands**: Simple DTOs with input data (e.g., RequestTripCommand with PassengerId, Pickup, Destination). No logic, just data carriers.
-- **Queries**: DTOs for read requests (e.g., GetTripStatusQuery with TripId).
-- **Handlers**: Process commands/queries, orchestrate domain calls. Examples:
-  - RequestTripHandler: Validates command, calls TripService.RequestTrip(), returns Trip.
-  - AssignDriverHandler: Calls TripService.TryAssignDriver() with concurrency handling.
-  - GetTripStatusHandler: Retrieves trip via TripService.GetTrip(), maps to DTO.
-  - Handlers use dependency injection for services (e.g., ITripService).
-
-## 6. DTOs / Response Models
-
-- **DTOs**: Transfer data between layers without exposing domain objects.
-  - TripDto: Id, PassengerName, DriverName, Pickup, Destination, Status, Fare, CreatedAt.
-  - DriverDto: Id, Name, Vehicle, Status, Location.
-  - PassengerDto: Id, Name, Phone, TotalTrips.
-  - FareDto: BaseFare, PricePerKm, CommissionRate.
-- **Response Models**: Specialized for queries (e.g., TripReport with aggregated data).
-
-## 7. Validators / Business Rule Enforcement (Application-level)
-
-- **Validators**: Static classes enforcing input validation before domain logic.
-  - RequestTripValidator: Checks PassengerId, Pickup/Destination presence, uniqueness.
-  - AssignDriverValidator: Validates TripId, DriverId.
-  - RegisterPassengerValidator: Ensures required fields for registration.
-- **Enforcement**: Application-level rules (e.g., input sanitization) vs. Domain rules (business invariants). Validators return ValidationResult with errors.
-
-## 8. Workflows (End-to-end flow orchestration)
-
-- **Trip Request Workflow**: RequestTripCommand → RequestTripHandler → Validate → TripService.RequestTrip() → Create Trip aggregate → Emit TripRequestedEvent → Map to TripDto → Return TripDto.
-- **Driver Assignment Workflow**: AcceptTripCommand → AcceptTripHandler → TripService.TryAssignDriver() → Update Trip/Driver states → Handle concurrency → Emit TripMatchedEvent → Map to TripDto → Return TripDto.
-- **Trip Completion Workflow**: CompleteTripCommand → CompleteTripHandler → TripService.CompleteTrip() → Create Payment (Pending) → Update Driver/Passenger TotalTrips → Emit TripCompletedEvent → Map to TripDto → Return TripDto.
-- **Payment Processing Workflow**: ProcessPaymentCommand → ProcessPaymentHandler → IPaymentService.ProcessPayment() → Mark Payment Paid → Driver.PayCommission() → Map to PaymentDto → Return PaymentDto.
-- **Rating Workflow**: RateDriverCommand → RateDriverHandler → IRatingService.CreateRating() → Update Driver AverageRating → Map to RatingDto → Return RatingDto.
-
-## 9. Dependency Mapping (Application → Domain interaction)
-
-- Application Handlers inject Domain interfaces (e.g., ITripService, IDriverRepository via DI).
-- Handlers orchestrate Domain objects: Call Domain services/policies, modify aggregates, handle events.
-- Domain dependencies: Entities (Trip, Driver), Services (FareCalculationService), Policies (ITripAssignmentPolicy, IDriverEligibilityPolicy — interface-based), Repositories (ITripRepository).
-- Flow: Handler → Application Service (interface) → Domain Logic → Repository (interface) → Infrastructure Implementation.
-
-## 10. Design Issues / Inconsistencies (if any)
-
-- **Mixed Orchestration**: Some handlers call Domain services directly (e.g., TripService), others use Application services. Inconsistent; should standardize via Application services.
-- **Thin Handlers**: Handlers are thin, delegating to services, but some include minimal logic. Consider thicker handlers for complex orchestration.
-- **Validation Placement**: Validators are Application-level, but some rules overlap Domain (e.g., Trip state validation). Potential duplication.
-
-# Infrastructure Layer Technical Documentation
-
-## 1. Purpose of Infrastructure Layer
-
-The Infrastructure Layer provides concrete implementations for abstractions defined in Application and Domain layers. It handles external concerns like data persistence, external API integrations, caching, simulation, and background jobs. This layer isolates technical implementations (e.g., JSON storage, HTTP clients) from business logic, ensuring the system remains decoupled from specific technologies.
-
-## 2. Folder / Namespace Structure
+## 2. Project Structure & Layer Mapping
 
 ```
-Infrastructure/
-├── BackgroundJobs/       # Background workers (TripTimeoutWorker, TripMatchingWorker)
-├── Caching/              # In-memory caching (InMemoryDriverCache)
-├── Config/               # Configuration and JSON storage (JsonStorage, ConfigService)
-├── DependencyInjection/  # DI service registrations (InfrastructureServiceExtensions)
-├── ExternalServices/     # API clients (PhotonGeocodingService, NominatimGeocodingService, SimpleRouteService)
-├── Persistence/          # Persistence layer
-│   ├── Repositories/     # Repository implementations (TripRepository, etc.)
-│   └── JsonFileContext.cs # File-based context
-├── Repositories/         # Alternative repository folder (some duplicates)
-└── Simulation/           # Simulation services (DriverSimulationService, InterpolationEngine)
+RideGo2026/
+├── Application/          # Application layer
+│   ├── Interfaces/       # Service interfaces (ITripService, IUserService, IFareService, ISimulationService, IReviewService, IAdminService, IEventHandler)
+│   ├── Services/         # Service implementations
+│   │   ├── TripService.cs
+│   │   ├── UserService.cs
+│   │   ├── FareService.cs
+│   │   ├── MatchingService.cs  (namespace: Domain.Services — should be Application.Services)
+│   │   ├── ReviewService.cs     (namespace: Services — should be Application.Services)
+│   │   ├── SimulationService.cs (stub)
+│   │   └── AdminService.cs (empty)
+│   ├── Features/         # Use-case vertical slices
+│   │   ├── Trips/        # RequestTrip, AssignDriver, CancelTrip, CompleteTrip, GetTripStatus
+│   │   ├── Drivers/      # AcceptTrip, RegisterDriver, UpdateDriverStatus
+│   │   └── Passengers/   # RegisterPassenger
+│   ├── DTOs/             # Data transfer objects
+│   ├── Behaviors/        # Pipeline behaviors (Validation, ExceptionHandling)
+│   ├── Mappings/         # AutoMapper profile (MappingProfile.cs)
+│   └── Services folder also contains PassengerService (namespace Services)
+├── Domain/               # Domain layer (pure)
+│   ├── StateMachines/    # TripStateMachine.cs, DriverStateMachine.cs
+│   ├── Repositories/     # Repository interfaces (IRepository<T>, ITripRepository, IDriverRepository, etc.)
+│   ├── Trips/            # Trip aggregate + Events/
+│   ├── Users/            # User, Passenger, Driver + Drivers/Events/, Passengers/
+│   ├── Vehicles/         # Vehicle (abstract), Car, Motorbike
+│   ├── ValueObjects/     # Money, Coordinate, Address, Location, Route, Fare
+│   ├── FareRules/        # FareRule entity
+│   ├── Reviews/          # Review entity + Events/
+│   └── SharedKernel/     # Entity base, ValueObject base, DomainEvent base
+├── Infrastructure/       # Infrastructure layer
+│   ├── Repositories/     # Concrete repository implementations
+│   │   ├── JsonRepository<T> (generic base)
+│   │   ├── TripRepository.cs
+│   │   ├── DriverRepository.cs
+│   │   ├── PassengerRepository.cs
+│   │   ├── UserRepository.cs
+│   │   ├── VehicleRepository.cs
+│   │   ├── FareRuleRepository.cs
+│   │   ├── ReviewRepository.cs
+│   │   └── FileStorage.cs
+│   ├── ExternalServices/ # API clients
+│   │   └── MapService.cs (IMapService implementation)
+│   └── Interfaces/       # Infrastructure interfaces
+│       ├── IMapService.cs
+│       ├── IFileStorageService.cs
+│       └── IFareRuleRepository.cs (duplicate of Domain interface? — in Domain.Repositories namespace)
+├── Presentation/         # WinForms UI
+│   ├── Program.cs        # DI composition root
+│   ├── Shells/           # MainShell, PassengerShell, DriverShell, AdminShell
+│   ├── Screens/          # Auth, Passenger, Driver, Admin screens
+│   ├── Components/       # Reusable UserControls (MapControl, FarePanel, DriverCardControl, etc.)
+│   ├── ViewModels/       # UI state (PassengerViewModel, DriverViewModel, TripViewModel, AdminViewModel)
+│   └── Helpers/          # AlertHelper, DataMapper, EventHelper, MapHelper, UIHelper
+├── Common/               # Cross-cutting utilities
+│   ├── Constants/        # SimulationConstants, FareConstants
+│   ├── Utilities/        # PasswordHasher
+│   └── Extensions/       # StringExtensions, DecimalExtensions
+└── packages/             # NuGet packages (offline)
 ```
 
-## 3. Database / Persistence Layer
-
-- **No ORM/Database**: Uses file-based JSON persistence instead of relational databases. Designed for demo/scalability simulation without real DB overhead.
-- **JsonStorage<T>**: Generic class for JSON file storage. Key features:
-  - ConcurrentDictionary for in-memory access.
-  - ReaderWriterLockSlim for thread safety.
-  - Atomic writes (temp file → rename).
-  - System.Text.Json for serialization.
-- **Configuration**: File paths configured via ConfigService. No entity mappings (direct JSON serialization of Domain entities).
-
-## 4. Repository Implementations
-
-- **Interfaces → Implementations Mapping**:
-  - ITripRepository (Domain) → TripRepository (Persistence/Repositories): CRUD with version-based concurrency.
-  - IDriverRepository (Domain) → DriverRepository: Driver-specific queries.
-  - IPassengerRepository (Domain) → PassengerRepository: Passenger data access.
-  - IPaymentRepository (Domain) → PaymentRepository: Payment persistence.
-  - IRatingRepository (Domain) → RatingRepository: Rating storage.
-  - IUserRepository (Domain) → UserRepository: Generic user access.
-  - IEventRepository (Domain) → EventRepository: Domain event persistence.
-- **Key Features**: All use JsonStorage<T>, support optimistic concurrency via Version field. Thread-safe with locks.
-
-## 5. External Services Integration
-
-- **APIs / HTTP Clients**:
-  - PhotonGeocodingService: Uses Photon API (OpenStreetMap) for geocoding. HttpClient with retry logic, rate limiting.
-  - NominatimGeocodingService: Fallback geocoding via Nominatim API.
-  - GMapService: Integrates GMap.NET for map rendering (no direct API calls).
-- **Third-party Services**: SimpleRouteService: Implements IRouteService with Haversine distance calculation (no external API, local math).
-- **Network Handling**: HttpClient configured with timeouts, retries. Fallback mechanisms (Photon → Nominatim).
-
-## 6. File / System / Messaging / Cache (if any)
-
-- **File Access**: JsonStorage uses File.ReadAllText/WriteAllText with atomic operations.
-- **System**: ReaderWriterLockSlim for concurrency, ConcurrentDictionary for in-memory data.
-- **Messaging**: No message queues; domain events handled in-memory via IEventDispatcher.
-- **Cache**: InMemoryDriverCache: Caches active drivers by VehicleType, refreshes every 5 minutes from repository.
-
-## 7. Dependency Injection Setup
-
-- **InfrastructureServiceExtensions**: Extension method for IServiceCollection registration.
-- **Registrations** (commented in code, assume implemented):
-  - Application Services: TripService, AdminService (scoped).
-  - Persistence: JsonStorage<> (singleton).
-  - External: HttpClient for geocoding services, GMapService (singleton).
-  - Caching: InMemoryDriverCache (singleton).
-- **Scope**: Services registered as scoped/singleton based on need (e.g., JsonStorage singleton for shared state).
-
-## 8. Data Mapping Strategy (Domain ↔ Persistence models)
-
-- **No Separate Persistence Models**: Direct serialization of Domain entities to JSON. No DTOs or mappers.
-- **Mapping Logic**: JsonStorage serializes/deserializes Domain objects directly. Polymorphism handled via [KnownType] or type handling in JSON.
-- **Concurrency**: Version field in entities for optimistic locking; checked in Update methods.
-- **Strategy**: Embedded in repositories; no explicit mappers (e.g., AutoMapper). Simple, but tightly coupled to Domain structure.
-
-## 9. Cross-layer Interaction Flow (Application → Infrastructure)
-
-- Application Handlers inject Infrastructure services (e.g., ITripService → TripService → TripRepository).
-- Flow: Handler → Application Service → Domain Repository Interface → Infrastructure Repository Implementation → JsonStorage → File I/O.
-- Domain Events: Emitted by aggregates, dispatched via IEventDispatcher to handlers (e.g., NotificationService).
-- External Calls: Application calls (e.g., IRouteService) → Infrastructure implementations (e.g., SimpleRouteService) → Local calc or HTTP.
-
-## 10. Design Issues / Inconsistencies (if any)
-
-- **Critical Issue - Compile Error Risk**: Duplicate repository files in Persistence/Repositories and Repositories folders cause namespace collisions or build errors. Identify the canonical implementations (likely Persistence/Repositories) and remove duplicates from Repositories/.
-- **Red Flag - Incomplete DI Setup**: Registrations commented in InfrastructureServiceExtensions; system cannot run via DI if not implemented. Verify actual registrations in code and ensure all services are properly registered.
-- **No ORM Abstraction**: JSON storage lacks migration/versioning; not scalable for production DB.
-- **Tight Coupling**: Direct serialization of Domain entities limits evolution; changes to entities break persistence.
-- **Simulation vs. Real**: External services (e.g., SimpleRouteService) use mocks; no real API integration for production readiness.
-
-## 11. Common Project Documentation
-
-### Overview
-
-The `Common` project serves as a shared utilities library across all layers of the Ride-Hailing System architecture. It contains cross-cutting concerns and reusable components that are not domain-specific but provide foundational support for the entire application.
-
-### Layer Mapping
-
-- **Layer**: Cross-cutting / Shared Infrastructure
-- **Purpose**: Provide common utilities, extensions, constants, and base classes used across Domain, Application, Infrastructure, and Presentation layers
-- **Dependencies**: None (standalone utility library)
-
-### Project Structure
-
-### Constants/
-
-Shared constants used throughout the application, such as default values, configuration keys, and business rules constants.
-
-### Exceptions/
-
-Base exception classes and custom exceptions for consistent error handling across the system.
-
-### Extensions/
-
-Extension methods that provide additional functionality to .NET types, promoting clean and readable code.
-
-### Helpers/
-
-Utility helper classes for common operations like password hashing, validation helpers, and other miscellaneous utilities.
-
-## Usage Guidelines
-
-- Classes in Common should be stateless and thread-safe
-- Avoid domain-specific logic; keep it generic and reusable
-- Use extension methods judiciously to avoid cluttering the API
-- Exceptions should follow a consistent hierarchy for proper error handling
-
-## Dependencies
-
-This project has no external dependencies and is referenced by all other projects in the solution.
-
-## 3. File-Level (Important `.cs` Files, Categorized)
-
-**Application**
-
-- Service: `Services/TripService.cs`, `Services/PaymentService.cs`, `Services/RatingService.cs`, `Services/RouteService.cs`, `Services/SimulationService.cs`, `Services/AdminService.cs`
-- Service (active compiled impl): `Services/Implementations/UserService.cs`
-- Interface: `Interfaces/ITripService.cs`, `Interfaces/IUserService.cs`, `Interfaces/IRouteService.cs`, `Interfaces/ISimulationService.cs`, `Interfaces/IDriverMatchingService.cs`
-- DTO: `DTOs/TripDto.cs`, `DTOs/DriverDto.cs`, `DTOs/PassengerDto.cs`, `DTOs/UserDto.cs`, `DTOs/FareDto.cs`
-- Mapper: `DTOs/DriverMapper.cs`, `DTOs/PassengerMapper.cs`
-- Other (use-case handlers/commands): `Features/**`
-
-**Domain**
-
-- Entity: `Entities/Trip.cs`, `Entities/Driver.cs`, `Entities/Passenger.cs`, `Entities/User.cs`, `Entities/Payment.cs`, `Entities/Rating.cs`, `Entities/FareRule.cs`, `Entities/Car.cs`, `Entities/Motorbike.cs`
- - Interface: `Interfaces/ITripRepository.cs`, `Interfaces/IDriverRepository.cs`, `Interfaces/IPassengerRepository.cs`, `Interfaces/IUserRepository.cs`, `Interfaces/IPaymentRepository.cs`, `Interfaces/IRatingRepository.cs`
- - Service: `Services/FareCalculationService.cs`, `Services/DriverTripCompatibilityService.cs`, `Services/PaymentCalculationService.cs`, `Services/RouteValidationService.cs`, `Services/Matching/DriverCandidateSelector.cs`, `Services/Matching/DispatchArbitrator.cs`
- - Policy Interface: `Policies/IDriverEligibilityPolicy.cs`, `Policies/ITripAssignmentPolicy.cs`
- - Policy Implementation: `Policies/DriverEligibilityPolicy.cs`, `Policies/TripAssignmentPolicy.cs`
- - Other: `StateMachines/*.cs`, `ValueObjects/*.cs`, `Events/*.cs` (note: orphaned `Event.cs` removed)
-
-**Infrastructure**
-
-- Repository: `Persistence/Repositories/UserRepository.cs`, `DriverRepository.cs`, `PassengerRepository.cs`, `TripRepository.cs`, `PaymentRepository.cs`, `RatingRepository.cs`, `EventRepository.cs`
-- Service/Integration: `ExternalServices/SimpleRouteService.cs`, `PhotonGeocodingService.cs`, `NominatimGeocodingService.cs`, `GMapService.cs`
-- Other infra runtime: `Config/JsonStorage.cs`, `Persistence/JsonFileContext.cs`, `Caching/InMemoryDriverCache.cs`, `BackgroundJobs/*.cs`, `Simulation/*.cs`
-
-**Presentation**
-
-- Form: `Screens/Auth/LoginForm.cs`, `Screens/Auth/RegisterForm.cs`, `Screens/Passenger/BookTripForm.cs`, `Screens/Passenger/TripTrackingForm.cs`, `Screens/Passenger/TripHistoryForm.cs`, `Screens/Passenger/RatingForm.cs`, `Screens/Driver/TripNavigationForm.cs`, `Shells/DriverShell.cs`, `Shells/PassengerShell.cs`, `Shells/AdminShell.cs`, `Shells/MainShell.cs`
-- UserControl: `Components/MapControl.cs`, `FarePanel.cs`, `DriverCardControl.cs`, `LocationPickerControl.cs`, `TripCard.cs`, `TripStatusPanel.cs`, `LocationCard.cs`
-- Other: `Program.cs`, `ViewModels/*.cs`, `Helpers/*.cs`
-
-## 4. Class-Level Main Responsibilities
-
-- `Application.Services.TripService`: orchestrates trip lifecycle with repos + simulation trigger.
-- `Application.Services.Implementations.UserService`: authentication/registration/profile actions.
-- `Application.Services.PaymentService`: payment creation and payment status processing.
-- `Application.Services.RatingService`: rating submission and driver-rating updates.
-- `Application.Services.RouteService`: route/distance calculation (in-memory/simple).
-- `Application.Services.SimulationService`: background tick loop for trip auto-completion simulation.
-- `Infrastructure.Persistence.Repositories.*Repository`: JSON-backed persistence adapters for aggregates.
-- `Domain.Entities.Trip`: trip state machine owner and trip invariants.
-- `Domain.Entities.Driver`: driver state and wallet/rating behavior.
-- `Domain.Services.FareCalculationService`: domain-level fare calculation policy.
-- `Presentation.Shells.DriverShell` / `PassengerShell`: UI container + navigation + trip event wiring using DTOs.
-- `Presentation.Screens.Passenger.BookTripForm`: booking flow UI using DTOs.
-- `Presentation.Screens.Passenger.TripTrackingForm`: active-trip tracking UI using DTOs.
-- `Presentation.Screens.Driver.TripNavigationForm`: driver accept/start/complete trip UI using DTOs.
-- `Presentation.Components.MapControl`: map markers/route rendering wrapper over GMap.NET.
-
-## 5. Method Summary (Controlled Depth: Important Classes Only)
-
-**Application Services**
-
-`AdminService`
-
-- `GetAllUsers()` — merge passenger+driver collections. Interaction: Domain repos/entities. Type: Read.
-- `GetAllTrips()` — return trip list. Interaction: Domain repo/entity. Type: Read.
-- `ActivateAccountUser(Guid)` — activate passenger/driver and persist. Interaction: Domain entity + repo. Type: State change + Write.
-- `DeActivateAccountUser(Guid, Guid)` — deactivate passenger/driver and persist. Interaction: Domain entity + repo. Type: State change + Write.
-- `GetTripReport()` — aggregate trip totals/revenue. Interaction: Domain repo/entity. Type: Read.
-
-`TripService`
-
-- `RequestTrip(...)` — validate passenger, create trip, set searching, store, emit DTO event. Interaction: Domain entities + repos + app event. Type: Write + State change.
-- `TryAssignDriver(...)` — assign driver and set driver `OnTrip`. Interaction: Domain entities + repos + simulation service. Type: State change + Write.
-- `ArriveAtPickup(Guid)` — mark trip arrived at pickup + persist. Interaction: Domain entity + repo. Type: State change + Write.
-- `StartTrip(Guid)` — transition trip started + persist. Interaction: Domain entity + repo. Type: State change + Write.
-- `CompleteTrip(...)` — complete trip, recover driver state, persist. Interaction: Domain entities + repos. Type: State change + Write.
-- `CancelTrip(...)` — cancel trip, recover driver state, persist. Interaction: Domain entities + repos. Type: State change + Write.
-- `GetTripDto(Guid)` / `GetTripsByPassenger(Guid)` / `GetTripsByDriver(Guid)` / `GetPendingTrips()` / `CanTripBeCancelled(Guid)` — query/view mapping returning DTOs. Interaction: Domain repos/entities. Type: Read.
-
-`UserService` (`Services/Implementations/UserService.cs`)
-
-- `RegisterPassenger(...)` / `RegisterDriver(...)` — create user entity and return DTO. Interaction: Domain entities + user repo. Type: Write.
-- `Login(...)` — lookup + password verify, return DTO. Interaction: Domain entity + repo. Type: Read.
-- `GetUserProfile(Guid)` — user fetch, return DTO. Interaction: repo. Type: Read.
-- `UpdateProfileName(...)`, `ChangePhone(...)`, `ChangePassword(...)`, `UpdateUserProfile(...)`, `UpdateDriverLocation(...)`, `TopUpDriverWallet(...)`, `UpdateDriverLicense(...)`, `UpdateDriverVehicle(...)` — mutate entity + update repo. Interaction: Domain entity + repo. Type: State change + Write.
-- `UpdateDriverVehicleInfo(...)` — update vehicle info. Interaction: Domain entity + repo. Type: State change + Write.
-- `UpdateDriverStatus(...)`, `ForceRecoverDriverStatus(...)` — update driver status. Interaction: Domain entity + repo. Type: State change + Write.
-
-`PaymentService`
-
-- `CreatePayment(Trip)` — create payment from completed trip and persist. Interaction: Domain entity + payment repo. Type: Write.
-- `ProcessPayment(Guid)` — mark payment paid + update. Interaction: Domain entity + payment repo. Type: State change + Write.
-- `GetPayment(Guid)`, `GetPaymentByTrip(Guid)` — retrieval. Interaction: payment repo. Type: Read.
-
-`RatingService`
-
-- `CreateRating(...)` — validate trip and ownership, create rating, update trip+driver. Interaction: trip/rating/driver repos + domain entities. Type: State change + Write.
-- `GetRatingByTrip(Guid)`, `GetRatingsByDriver(Guid)` — retrieval. Interaction: rating repo. Type: Read.
-- `SubmitRatingAsync(...)` — wrapper over `CreateRating`. Interaction: trip/rating repos. Type: State change + Write.
-
-`DriverMatchingService`
-
-- `FindBestDriver(Trip)` — select available driver by vehicle type (first match). Interaction: driver repo + domain entities. Type: Read/decision.
-
-`FareRuleService`
-
-- `CalculateFare(Trip)` — compute fare estimate. Interaction: Domain `Trip`. Type: Read/compute.
-- `GetFareRule(VehicleType)` — construct fare rule object. Interaction: Domain entity/value object creation. Type: Read/compute.
-
-`RouteService`
-
-- `CalculateDistanceAsync(...)`, `GetRoutePointsAsync(...)`, `GetFullRouteAsync(...)`, `IsNearAsync(...)`, `GetRoutesAsync(...)` — route math and route object generation. Interaction: Domain value objects only. Type: Read/compute.
-
-`SimulationService`
-
-- `SetTripService(...)` — inject dependency. Interaction: Application service. Type: State change.
-- `StartSimulation()`, `StopSimulation()` — start/stop background loop. Interaction: runtime task system. Type: State change.
-- `Tick()` — advance simulation phases (ToPickup → Arrived → ToDestination → Completed), handle timeouts. Interaction: `_tripService` methods. Type: State change + Write (indirect).
-- `StartTripSimulation(Guid)` — register trip in simulation map. Type: State change.
-- `IsTripSimulating(Guid)` — lookup in map. Type: Read.
-- `SimulateTripProgress(Guid)` — placeholder (not implemented). Type: UNCLEAR.
-
-`NotificationService`
-
-- `NotifyPassenger(...)`, `NotifyDriver(...)`, `NotifyTripUpdate(...)` — raise in-process notification events. Interaction: subscribers/UI. Type: State change (event emission).
-
-`AuthorizationService` (orphan file, not compiled into `Application.csproj`)
-
-- `HasPermission(...)`, `IsInRole(...)` — user-role permission checks. Interaction: user repo/domain entities. Type: Read.
-
-**Repositories**
-
-`UserRepository`
-
-- `Add(User)` — add to in-memory dictionary. Type: Write.
-- `GetById(Guid)`, `GetByPhone(string)` — lookup. Type: Read.
-- `Update(User)` — reference update placeholder. Type: Write (no-op style).
-
-`DriverRepository`
-
-- `InitializeAsync()`, `SaveChangesAsync()` — load/save JSON storage. Type: Read+Write.
-- `GetById(...)`, `GetAll()`, `GetByPhone(...)`, `GetAvailableDrivers()`, `ExistsByPhone(...)` — queries. Type: Read.
-- `Add(...)`, `Update(...)`, `Delete(...)` — persistence writes. Type: Write.
-
-`PassengerRepository`
-
-- `InitializeAsync()`, `SaveChangesAsync()` — JSON sync. Type: Read+Write.
-- `GetById(...)`, `GetAll()`, `GetByPhone(...)`, `ExistsByPhone(...)` — queries. Type: Read.
-- `Add(...)`, `Update(...)`, `Delete(...)` — writes. Type: Write.
-
-`TripRepository`
-
-- `InitializeAsync()`, `SaveChangesAsync()` — JSON sync. Type: Read+Write.
-- `GetById(...)`, `GetAll()`, `GetTripsByDriverId(...)`, `GetTripsByPassengerId(...)`, `GetPendingTrips()` — queries. Type: Read.
-- `Add(...)`, `Delete(...)` — writes. Type: Write.
-- `Update(Trip)` — optimistic-concurrency check + version increment. Type: State change + Write.
-- `UpdateWhereVersionMatches(...)` — conditional mutation with version guard. Type: State change + Write.
-
-`PaymentRepository`
-
-- `InitializeAsync()`, `SaveChangesAsync()` — JSON sync. Type: Read+Write.
-- `GetById(...)`, `GetByTripId(...)` — queries. Type: Read.
-- `Add(...)`, `Update(...)` — writes. Type: Write.
-
-`RatingRepository`
-
-- `InitializeAsync()`, `SaveChangesAsync()` — JSON sync. Type: Read+Write.
-- `GetById(...)`, `GetByDriverId(...)`, `GetByTripId(...)` — queries. Type: Read.
-- `Add(...)`, `Update(...)` — writes. Type: Write.
-
-`EventRepository`
-
-- `Save(DomainEvent)` — append event to JSON file. Type: Write + External call (filesystem).
-- `LoadAll()` / `LoadById(Guid)` — read event log. Type: Read + External call (filesystem).
-
-**Forms/UserControls (Public Methods Only)**
-
-`BookTripForm`
-
-- `OnTripFinished()` — reset booking UI through UI thread invoke. Interaction: UI only. Type: State change.
-- `UpdateDriverInfo(DriverDto)` — render driver card/status. Interaction: Application DTO + UI. Type: State change.
-
-`RatingForm`
-
-- `RefreshData()` — reload pending ratings list. Interaction: UI + service flow in `LoadPending` (currently partially TODO). Type: Read (UI refresh).
-
-`TripHistoryForm`
-
-- `RefreshData()` — reload trip history grid. Interaction: UI + trip service (currently TODO data fetch). Type: Read (UI refresh).
-
-`TripTrackingForm`
-
-- `ApplyTripUpdate(TripDto)` — apply trip DTO and rerender. Interaction: Application DTO + UI. Type: State change.
-- `OnTripStarted(TripDto)` — apply trip DTO and navigate. Interaction: Application DTO + UI. Type: State change.
-- `RefreshData()` — rerender current state. Interaction: UI only. Type: Read/State change.
-
-`DriverTripExecutionForm` (declared in `DriverDashboardForm.cs`)
-
-- `OnNavigatedTo(TripDto)` — initialize screen, load commission, start timer refresh. Interaction: services + UI. Type: State change.
-- `OnNavigatingFrom()` — stop timer. Interaction: UI runtime. Type: State change.
-
-`TripNavigationForm`
-
-- `OnTripAccepted(TripDto)` — switch to active trip view. Interaction: UI + shell state. Type: State change.
-- `OnTripEnded()` — switch to empty/end view. Interaction: UI + shell state. Type: State change.
-
-`DriverShell`
-
-- `SetCurrentTrip(TripDto)` — set shell trip context. Interaction: Application DTO + UI shell. Type: State change.
-- `NavigateTo(string)` — switch displayed child form. Interaction: UI container. Type: State change.
-- `OnTripAccepted(TripDto)`, `OnTripEnded()` — state transition + navigation updates. Interaction: UI shell + application DTO. Type: State change.
-- `ToggleActive()` — toggles driver status and syncs `_userService.UpdateDriverStatus`. Interaction: Application service + UI. Type: State change + Write.
-
-`PassengerShell`
-
-- `NavigateTo(string)` — switch child screen. Interaction: UI container. Type: State change.
-- `OnTripStarted(TripDto)` — set current trip and navigate. Interaction: Application DTO + UI. Type: State change.
-- `OnTripFinished()` — close trip flow + optional rating prompt. Interaction: UI + current trip state. Type: State change.
-
-`MapControl`
-
-- `AddPickupMarker`, `SetPickup`, `AddDestinationMarker`, `SetDestination`, `AddDriverMarker`, `UpdateDriverLocation`, `UpdateDriverMarkers`, `DrawRoute(...)`, `SetCamera`, `ClearMarkers`, `ClearRoute` — visual map state operations. Interaction: UI map + domain location/driver models. Type: State change (UI rendering).
-
-`FarePanel`
-
-- `SetFareFromTrip`, `SetFareDetails`, `SetFare`, `ClearFare` — fare presentation and formatting. Interaction: Domain `Trip`/`Money` + UI. Type: Read + State change.
-
-`DriverCardControl`
-
-- `SetDriver(Driver, double)` — bind driver info to card. Interaction: Domain `Driver` + UI. Type: Read + State change.
-
-`LocationPickerControl`
-
-- `SetPickup(object)`, `SetDestination(object)` — set selected locations. Interaction: UI state. Type: State change.
-
-`TripCard`
-
-- `SetTrip(...)` — bind trip summary display. Interaction: UI data binding. Type: State change.
-
-`StatusPanel`
-
-- `AddLog(...)`, `ShowError(...)`, `ShowWarning(...)`, `ShowInfo(...)` — append logs and show messages. Interaction: UI + filesystem process launch (`OpenLogFile` private). Type: State change (+ external call indirectly for error dialogs/files).
+---
+
+## 3. Use Cases (Implemented + Missing)
+
+| ID | Use Case | Actor | Status | Implementation Notes |
+|---|---|---|---|---|
+| UC1 | Đăng nhập | User | ✅ | UserService.Login() |
+| UC2 | Đăng ký tài xế | Driver | ✅ | UserService.RegisterDriver() |
+| UC3 | Đăng ký hành khách | Passenger | ✅ | UserService.RegisterPassenger() |
+| UC4 | Đặt chuyến | Passenger | ✅ | Sync RequestTrip() Không dùng routing API |
+| UC5 | Ghép tài xế | System | ⚠️ | Chỉ kiểm tra `Status == Available`, chưa lọc VehicleType/Khoảng cách |
+| UC6 | Đến điểm đón | Driver | ✅ | TripService.ArriveAtPickup() |
+| UC7 | Bắt đầu chuyến | Driver | ✅ | TripService.StartTrip() |
+| UC8 | Hoàn thành chuyến | Driver | ✅ | TripService.CompleteTrip() |
+| UC9 | Đánh giá | Passenger | ✅ | ReviewService.AddReviewAsync() |
+| UC10 | Hủy chuyến | Passenger/Driver | ✅ | TripService.CancelTrip() |
+| UC11 | Lịch sử chuyến | Passenger/Driver | ✅ | TripRepository.GetByPassengerId/DriverId |
+| UC12 | Thông tin tài xế matched | Passenger | ✅ | Trip DTO contains DriverId |
+| UC13 | Trạng thái làm việc | Driver | ✅ | UserService.UpdateDriverStatus() |
+| UC14 | Nhận thông tin chuyến | Driver | ✅ | TripService.GetTripAsync() |
+| UC15 | Chấp nhận/Từ chối | Driver | ⚠️ | AcceptTripHandler exists, but UI flow incomplete |
+| UC16 | Admin theo dõi real-time | Admin | ⚠️ | AdminShell + DataGridView, no live map |
+| UC17 | Cấu hình FareRule | Admin | ❌ | AdminService empty, UI missing |
+| UC18 | Driver Radar | Passenger | ❌ | No proximity search implemented |
+| UC19 | Thu nhập tài xế | Driver | ✅ | Driver entity has Income + Wallet |
+| UC20 | Báo cáo thống kê | Admin | ❌ | No reporting service |
+| UC21 | Dẫn đường | Driver | ⚠️ | MapControl displays route if polyline provided; routing not integrated |
+| UC22 | Sửi thông tin cá nhân | User | ⚠️ | UserService has methods; UI partial |
+
+---
+
+## 4. Application Services (Responsibilities)
+
+**TripService** (`Application.Services.TripService`):
+- `CreateTripAsync()` — internal async trip creation (uses Haversine distance)
+- `RequestTrip(Guid, Location, Location, VehicleType)` — sync version (BookTripForm uses this via `ITripService`)
+- `MatchDriverAsync(Guid, Guid)` — assigns driver, updates states
+- `ArriveAtPickup(Guid)` — mark arrived
+- `StartTrip(Guid)` — mark started
+- `CompleteTrip(Guid, decimal)` — complete + payment
+- `CancelTrip(Guid, string)` — cancel
+- `CanTripBeCancelled(Guid)` — check cancellation eligibility
+- `TripStatusChanged` — event `Action<TripDto>`
+
+**UserService** (`Application.Services.UserService`):
+- `RegisterPassenger()`, `RegisterDriver()` with Vehicle
+- `Login()` — phone + password verification
+- `GetUserProfile()`, `UpdateProfileName()`, `ChangePhone()`, `ChangePassword()`
+- `UpdateDriverLocation()`, `TopUpDriverWallet()`, `UpdateDriverLicense()`, `UpdateDriverVehicle()`
+- `UpdateDriverStatus()`, `ForceRecoverDriverStatus()`
+
+**FareService** (`Application.Services.FareService`):
+- Constructor injects `IFareRuleRepository` and `IRouteService` (IRouteService missing → **compile error**)
+- `CalculateFare(VehicleType, double distanceKm)` — uses FareRule
+
+**MatchingService** (`Domain.Services.MatchingService` — namespace mismatch):
+- `MatchDriverToTripAsync(Guid tripId, Guid driverId)` — basic match (status only)
+
+**ReviewService** (`Services.ReviewService` — namespace mismatch):
+- `AddReviewAsync(Guid driverId, Guid passengerId, Guid tripId, int rating, string comment)` — creates review + updates driver rating
+
+**SimulationService** (`Application.Services.SimulationService`):
+- Stub implementation; no background tick; methods are no-ops.
+
+**AdminService** (`Application.Services.AdminService`):
+- Empty stub.
+
+---
+
+## 5. Domain Model
+
+### Entities Base
+`Entity` (abstract) in `Domain.SharedKernel`:
+- `Guid Id`
+- `IReadOnlyCollection<DomainEvent> DomainEvents`
+- Methods: `AddEvent()`, `ClearEvents()`, value-based equality
+
+### User Hierarchy
+`User` (abstract) → `Passenger` (sealed), `Driver`, `Admin`.
+
+Key properties:
+- `User`: Name, Phone, Password (hashed), IsActive
+- `Driver`: Status (DriverStatus), Position (Location), VehicleId, Wallet (Money), Income (Money), TotalTrips, AverageRating, RatingSum, TotalReviews, LicenseNumber
+- `Passenger`: TotalTrips
+- `Admin`: no additional properties
+
+### Vehicle Hierarchy
+`Vehicle` (abstract) → `Car`, `Motorbike`.
+
+Properties: PlateNumber, Brand, Model, Color, Capacity, Type (VehicleType)
+Abstract methods: `GetAvgSpeed()`, `GetMaxPickupDistance()`
+- `Car`: AvgSpeed = 60km/h, MaxPickupDistance = 7km
+- `Motorbike`: AvgSpeed = 40km/h, MaxPickupDistance = 5km
+
+**Note:** Vehicle is an **Entity** (inherits `Entity`), not a Value Object. The documentation previously confusingly referred to VehicleInfo as VO; code shows Vehicle as Entity in `Domain/Vehicles`.
+
+### Trip Aggregate
+`Trip` (`Domain.Trips.Trip`):
+- Properties: Id, Status (TripStatus), PassengerId, DriverId?, VehicleType, Route (Route), Fare (Fare), IsPaid, RequestAt
+- State transitions call `TripStateMachine.CanTransition()` and emit domain events
+- `SetSearching()`, `MatchDriver(Guid driverId)`, `MarkAsArrived()`, `StartTrip()`, `CompleteTrip(Fare fare)`, `Cancel(string reason)`, `MarkTimeout()`
+
+### FareRule Entity
+`FareRule` (`Domain.FareRules.FareRule`):
+- VehicleType, BaseFare (Money), PricePerKm (Money), CommissionRate (double)
+- `CalculateFare(double distanceKm)` → `Fare` VO
+
+### Review Entity
+`Review` (`Domain.Reviews.Review`):
+- DriverId, PassengerId, TripId, Rating (1–5), Comment, CreatedAt
+
+### Value Objects
+**Money**: decimal Amount (2dp), string Currency (default "VND") — immutable, operators
+**Coordinate**: double Latitude, Longitude
+**Address**: structured fields (Name, Street, District, City, Country, HouseNumber, Osm_Value, Locality)
+**Location**: Coordinate + Address — composite VO
+**Route**: Pickup (Location), Destination (Location), Distance (km), Duration (TimeSpan), Polyline (string)
+**Fare**: TotalAmount (Money), Commission (Money), DriverIncome (computed as Total − Commission)
+
+### Enums
+`TripStatus`: Requested (0), Searching (1), Matched (2), Arrived (3), Started (4), Completed (5), Cancelled (6), Timeout (7)
+`DriverStatus`: Offline (0), Available (1), OnTrip (2)
+`VehicleType`: Unknown (0), Motorbike (1), Car (2)
+
+---
+
+## 6. Repository & Persistence
+
+**Repository Interfaces** (Domain):
+- `IRepository<T>` — Add, Update, Delete, GetAll, GetById, SaveChangesAsync, InitializeAsync
+- `IReadRepository<T>` — GetAllAsync, GetByIdAsync
+- Specific: `IUserRepository` (plus GetByPhoneAsync, GetDriversAsync, GetAvailableDriversAsync), `IDriverRepository`, `IPassengerRepository`, `ITripRepository` (plus GetByDriverIdAsync, GetByPassengerIdAsync, GetPendingTripsAsync), `IVehicleRepository`, `IReviewRepository`, `IFareRuleRepository`
+
+**Infrastructure Implementations** (`Infrastructure.Repositories`):
+- `JsonRepository<T>` — generic base using `FileStorage.LoadAsync<T>` / `SaveAsync`
+- Concrete repos inherit `JsonRepository<T>`: `UserRepository`, `DriverRepository`, `PassengerRepository`, `TripRepository`, `VehicleRepository`, `ReviewRepository`, `FareRuleRepository`
+- `FileStorage` — static class handling file I/O with `ReaderWriterLockSlim` for thread safety
+- Data stored in `Data/*.json` files under application base directory
+
+**Concurrency:** Optimistic concurrency via `Version` field in aggregates (Trip, Driver), checked in `UpdateWhereVersionMatches`. However, actual usage in repositories varies; `TripRepository.Update` uses version increment; `JsonRepository.GetById` returns entity without version check; potential race conditions exist.
+
+---
+
+## 7. External Services & Integration
+
+**MapService** (`Infrastructure.ExternalServices.MapService`):
+- Implements `IMapService` interface (`Infrastructure.Interfaces`)
+- Methods:
+  - `GetDistanceAsync(Location, Location)` → `(double distance, double duration)`
+  - `GetRouteAsync(Location start, Location end)` → `Route`
+  - `SearchLocation(string query)` → `List<Location>`
+  - `ReverseGeocodeAsync(double lat, double lng)` → `Location`
+- Integrations: Photon Geocoding API + OSRM Routing API (HTTP endpoints)
+- Custom HTTP client with timeout (10s), User-Agent header, fallback logic (Photon → Nominatim not implemented here)
+
+**GMap.NET** (Presentation):
+- `MapControl` UserControl wraps `GMapControl`; provider = GoogleMap; `AccessMode.ServerAndCache`
+- Markers overlay (pickup, destination, driver)
+- Route rendering using GMapRoute (requires polyline decoding — not implemented)
+
+---
+
+## 8. Known Gaps & Missing Implementations
+
+| Missing Item | Where Referenced | Impact |
+|---|---|---|
+| `IRouteService` / `RouteService` | `Program.cs` (DI), `FareService` ctor, `BookTripForm` ctor, `TripViewModel.LoadRouteInfoAsync`, `PassengerViewModel` ctor | **Compile error** — FareService cannot be constructed |
+| `TripTimeoutWorker` | `Program.cs` lines 40, 99 | **Compile error** — missing class |
+| `TripMatchingWorker` | `Program.cs` lines 41, 100 | **Compile error** — missing class |
+| `IDriverSimulationService` | `SimulationService.cs` line 17, `Program.cs` line 96 | **Compile error** — missing interface |
+| `SimpleRouteService` | docs only | Not referenced; could replace missing IRouteService |
+| `PaymentService`, `PaymentRepository` | Technical_Architecture.md only | Not in code; payment is handled in `TripService.CompleteTrip()` inline |
+| `RatingService` vs `ReviewService` | Interface named `IReviewService`, impl named `ReviewService`; README calls it `RatingService` | Naming inconsistency (acceptable) |
+| `BackgroundJobs/` folder | docs reference | Not present; workers missing |
+| `Simulation/` folder | docs reference | Not present; simulation stub in Application.Services |
+| `Persistence/Repositories/` vs `Repositories/` | docs reference both | Actual: only `Infrastructure/Repositories` exists |
+| `Common/Exceptions/` folder | docs reference | Not present; no custom exceptions found |
+| `Policies/` (DriverEligibilityPolicy, TripAssignmentPolicy) | docs reference | Not present; matching logic inline in MatchingService |
+| `InMemoryDriverCache` | docs reference | Not present |
+
+**LSP/Compiler Errors Present:**
+- `Presentation.Program.cs`: Missing using statements for Infrastructure namespaces; JsonStorage not found; missing worker classes; DI extension methods not available.
+- `SimulationService.cs`: `IDriverSimulationService` undefined.
+- `PassengerShell.cs`: `ITripService` does not define `TripStatusChanged` event (event exists on `TripService` implementation, not on interface `ITripService`) — UI should subscribe to implementation or interface must expose event.
+- `DriverViewModel.cs`: Missing using statements for Domain types (`Driver`, `Trip`, `Vehicle`, `Location`).
+- `AssignDriverHandler.cs`: References `Domain.Interfaces.IDriverRepository` (non-existent) and `ITripService.TryAssignDriver` (method not in interface).
+
+---
+
+## 9. Dependency Mapping (Actual References)
+
+From `.csproj` files:
+
+```
+Presentation -> Application, Common, Domain, Infrastructure
+Application -> Common, Domain
+Infrastructure -> Application, Common, Domain
+Domain -> Common
+Common -> (none)
+```
+
+**Violations of Clean Architecture:**
+- Presentation depends on Infrastructure (should only depend on Application)
+- Presentation depends on Domain (should only depend on Application)
+- Infrastructure depends on Domain (should depend on Domain interfaces only, not concrete domain layer project reference) — acceptable if Domain defines interfaces; but reference direction still inward to Domain.
+
+**Recommended fix:** Move `IRepository<T>` and related interfaces to a separate `Domain.Contracts` project or `Application.Interfaces`, then have Infrastructure reference that. Presentation should depend only on Application (and possibly shared DTOs).
+
+---
+
+## 10. DI Registration (Presentation/Program.cs)
+
+Current registrations (lines 63–101):
+
+```csharp
+// Storage (Infrastructure)
+services.AddSingleton(new JsonStorage<User>("data/users.json"));
+services.AddSingleton(new JsonStorage<Trip>("data/trips.json"));
+services.AddSingleton(new JsonStorage<Driver>("data/drivers.json"));
+services.AddSingleton(new JsonStorage<Passenger>("data/passengers.json"));
+
+// Repositories (Infrastructure)
+services.AddSingleton<IUserRepository, UserRepository>();
+services.AddSingleton<ITripRepository, TripRepository>();
+services.AddSingleton<IDriverRepository, DriverRepository>();
+services.AddSingleton<IPassengerRepository, PassengerRepository>();
+
+// HttpClient for MapService
+services.AddHttpClient<IMapService, MapService>(...);
+
+// Application Services
+services.AddSingleton<IUserService, UserService>();
+services.AddSingleton<ITripService, TripService>();
+services.AddSingleton<IRouteService, RouteService>(); // ❌ RouteService missing
+services.AddSingleton<IFareService, FareService>();
+services.AddSingleton<ISimulationService, SimulationService>();
+services.AddSingleton<IDriverSimulationService, DriverSimulationService>(); // ❌ interface missing
+
+// Background workers (❌ classes missing)
+services.AddSingleton<TripTimeoutWorker>();
+services.AddSingleton<TripMatchingWorker>();
+```
+
+---
+
+## 11. State Machines (Detailed)
+
+**TripStateMachine** (`Domain.StateMachines.TripStateMachine`):
+- `CanTransition(TripStatus from, TripStatus to)` — dictionary lookup
+- `CanBeCancelled(TripStatus status)` — returns true for Requested, Searching, Matched, Arrived (before Started)
+
+Valid transition graph:
+```
+Requested → Searching
+Searching → Matched, Cancelled, Timeout
+Matched → Arrived, Searching, Cancelled
+Arrived → Started, Cancelled
+Started → Completed, Cancelled
+Completed → (none)
+Cancelled → (none)
+Timeout → (none)
+```
+
+**DriverStateMachine** (`Domain.StateMachines.DriverStateMachine` — static class):
+```
+Offline → Available
+Available → OnTrip, Offline
+OnTrip → Available
+```
+
+---
+
+## 12. Domain Events
+
+All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
+
+**Trip Events** (`Domain.Trips.Events`):
+- `TripRequestedEvent` — ctor
+- `TripSearchingEvent` — SetSearching()
+- `TripMatchedEvent` — MatchDriver()
+- `TripArrivedEvent` — MarkAsArrived()
+- `TripStartedEvent` — StartTrip()
+- `TripCompletedEvent` — CompleteTrip()
+- `TripPaidEvent` — ConfirmPayment() (not called in current code)
+- `TripCancelledEvent` — Cancel()
+- `TripTimeoutEvent` — MarkTimeout()
+
+**Driver Events** (`Domain.Users.Drivers.Events`):
+- `DriverStatusChangedEvent` — status change
+- `DriverLocationUpdatedEvent` — position update
+
+**Review Event** (`Domain.Reviews.Events`):
+- `ReviewCreatedEvent` — review submission
+
+---
+
+## 13. UI Threading & Real-time Updates
+
+- `TripService` exposes `public event Action<TripDto> TripStatusChanged`
+- Presentation forms subscribe to this event to refresh UI without polling
+- Example: `PassengerShell`, `PassengerViewModel`, `DriverViewModel`, `TripTrackingForm`
+- **Issue:** `ITripService` interface does NOT declare this event, so Presentation cannot subscribe via interface — violates Liskov; UI must cast to concrete `TripService`.
+
+---
+
+## 14. Testing Strategy (Current State)
+
+No tests found in repository. Suggested:
+- Unit tests for Domain entities (state transitions, invariants)
+- Unit tests for Application Services using mocked repositories
+- Integration tests for JSON repository + file I/O
+
+---
+
+*Document version: 1.1 — Updated 2026-04-24 after full codebase audit. Highlights: removed outdated structures, listed missing implementations, noted namespacing inconsistencies, recorded actual references vs docs.*

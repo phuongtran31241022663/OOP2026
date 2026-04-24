@@ -8,14 +8,16 @@ using Application.Interfaces;
 using Presentation.Screens.Driver;
 using Domain.Enums;
 
+using Presentation;
+
 namespace Presentation.Shells
 {
-    public partial class DriverShell : Form
+    public partial class DriverShell : BaseShell
     {
         private readonly IUserService _userService;
         private readonly ITripService _tripService;
         private readonly ISimulationService _simulationService;
-        private readonly IFareRuleService _fareService;
+        private readonly IFareService _fareService;
 
         private DriverDto _driver;
         private TripDto _currentTrip;
@@ -34,7 +36,7 @@ namespace Presentation.Shells
             IUserService userService,
             ITripService tripService,
             ISimulationService simulationService,
-            IFareRuleService fareService,
+            IFareService fareService,
             DriverDto driver)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));

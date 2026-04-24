@@ -1,6 +1,6 @@
 namespace Presentation.Shells
 {
-    partial class DriverShell
+    partial class DriverShell : BaseShell
     {
         /// <summary>
         /// Required designer variable.

@@ -3,6 +3,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using Domain.ValueObjects;
 
 namespace Presentation.Components
 {
@@ -11,7 +12,7 @@ namespace Presentation.Components
     /// Mỗi slot gồm icon màu + tên địa danh (bold) + địa chỉ chi tiết (muted).
     /// Có đường nối dọc giữa hai điểm như giao diện Grab/Uber.
     /// </summary>
-    public partial class LocationPickerControl : UserControl
+    public partial class LocationPickerControl : BaseUserControl
     {
         // ── State ────────────────────────────────────────────────────────────
         private object _pickup;
@@ -22,7 +23,7 @@ namespace Presentation.Components
         public event EventHandler PickupClicked;
         public event EventHandler DestinationClicked;
 
-        public event Action<LocationPickerControl, Domain.ValueObjects.Location> LocationSelected;
+        public event Action<LocationPickerControl, Location> LocationSelected;
 
         public string Placeholder { get; set; }
 
@@ -190,9 +191,9 @@ namespace Presentation.Components
             int textRight = Width - 40;
             int textWidth = textRight - TextLeft;
 
-            if (loc != null && loc is Domain.ValueObjects.Location location)
+            if (loc != null && loc is Location location)
             {
-                string name = location.Name;
+                string name = location.Address.Name;
                 string addr = location.Address;
                 using (var nameBrush = new SolidBrush(Color.FromArgb(28, 32, 38)))
                     g.DrawString(name, _nameFont, nameBrush,

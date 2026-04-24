@@ -1,6 +1,6 @@
 ﻿namespace Presentation.Shells
 {
-    partial class MainShell
+    partial class MainShell : BaseShell
     {
         /// <summary>
         /// Required designer variable.

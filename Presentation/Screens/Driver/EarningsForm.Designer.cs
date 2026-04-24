@@ -1,6 +1,6 @@
 ﻿namespace Presentation.Screens.Driver
 {
-    partial class EarningsForm
+    partial class EarningsForm : BaseForm
     {
         /// <summary>
         /// Required designer variable.

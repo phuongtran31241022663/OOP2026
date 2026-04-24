@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace Presentation.Screens.Auth
 {
-    public partial class LoginForm : Form
+    public partial class LoginForm : BaseForm
     {
         private readonly IUserService _userService;
 

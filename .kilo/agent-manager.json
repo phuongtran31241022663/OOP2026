@@ -1,14 +1,15 @@
 {
   "worktrees": {},
   "sessions": {
-    "ses_2547785b5ffeLzQHKjqEWhpyEI": {
-      "worktreeId": null,
-      "createdAt": "2026-04-20T15:35:41.452Z"
-    },
     "ses_24ff82ed1ffes2Q7asxNrULLkS": {
       "worktreeId": null,
       "createdAt": "2026-04-21T12:33:15.696Z"
     }
+  },
+  "tabOrder": {
+    "local": [
+      "pending:1"
+    ]
   },
   "sessionsCollapsed": true
 }

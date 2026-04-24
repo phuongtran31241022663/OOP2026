@@ -2,12 +2,9 @@
 
 namespace Presentation.Screens.Admin
 {
-    public partial class AdminDashboardForm : Form
+    public partial class AdminDashboardForm : BaseForm
     {
-        public AdminDashboardForm()
-        {
-            InitializeComponent();
-        }
+       
         // Code đâu?
         private static readonly string[] SectionTitles = {
             "Dashboard", "Người dùng", "Tài xế",

@@ -3,9 +3,11 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
+using Presentation;
+
 namespace Presentation.Shells
 {
-    public partial class MainShell : Form
+    public partial class MainShell : BaseShell
     {
         private readonly Func<Form> _loginFormFactory;
         private readonly Func<Form> _registerFormFactory;

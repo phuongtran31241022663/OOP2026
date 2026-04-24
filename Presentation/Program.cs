@@ -81,7 +81,7 @@ namespace Presentation
             services.AddSingleton<IPassengerRepository, PassengerRepository>();
 
             // HttpClient (IMPORTANT FIX)
-            services.AddHttpClient<IMapService, MapService>(client =>
+            services.AddHttpClient<IMapService, MapApiService>(client =>
             {
                 client.Timeout = TimeSpan.FromSeconds(10);
                 client.DefaultRequestHeaders.Add("User-Agent", "RideHailingApp/1.0");
@@ -91,7 +91,7 @@ namespace Presentation
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<ITripService, TripService>();
             services.AddSingleton<IRouteService, RouteService>();
-            services.AddSingleton<IFareRuleService, FareRuleService>();
+            services.AddSingleton<IFareService, FareService>();
             services.AddSingleton<ISimulationService, SimulationService>();
             services.AddSingleton<IDriverSimulationService, DriverSimulationService>();
 
@@ -129,7 +129,7 @@ namespace Presentation
                     provider.GetRequiredService<ITripService>(),
                     provider.GetRequiredService<IUserService>(),
                     provider.GetRequiredService<IRouteService>(),
-                    provider.GetRequiredService<IFareRuleService>(),
+                    provider.GetRequiredService<IFareService>(),
                     provider.GetRequiredService<IMapService>(), // ✅ FIX: không dùng HttpClient
                     new PassengerShell(
                         provider.GetRequiredService<IUserService>(),
