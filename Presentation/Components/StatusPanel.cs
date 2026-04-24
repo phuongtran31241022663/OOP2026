@@ -10,7 +10,7 @@ namespace Presentation.Components
     /// Panel hiển thị trạng thái hệ thống và log lỗi theo thời gian thực.
     /// Giúp người dùng dễ dàng nhận biết mọi lỗi xảy ra trong ứng dụng.
     /// </summary>
-    public partial class StatusPanel : Panel
+    public partial class StatusPanel : BaseUserControl
     {
         private readonly ConcurrentQueue<LogEntry> _logEntries = new ConcurrentQueue<LogEntry>();
         private int _errorCount = 0;

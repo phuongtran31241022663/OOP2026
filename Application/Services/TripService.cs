@@ -1,14 +1,16 @@
-using Application.DTOs;
+﻿using Application.DTOs;
 using Application.Interfaces;
 using Domain.Enums;
+using Domain.FareRules;
+using Domain.SharedKernel;
 using Domain.Trips;
-using Domain.ValueObjects;
 using Domain.Users.Drivers;
-using Domain.Users.Passengers;
+using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Domain.Repositories;
 
 namespace Application.Services
 {
@@ -20,14 +22,16 @@ namespace Application.Services
         private readonly IDriverRepository _driverRepository;
         private readonly IPassengerRepository _passengerRepository;
         private readonly ISimulationService _simulationService;
-        private readonly IFareRuleService _fareRuleService;
-
+        private readonly IFareService _fareRuleService;
+        private readonly IRepository<Trip> _tripRepo;
+        private readonly IRepository<Driver> _driverRepo;
+        private readonly IRepository<FareRule> _fareRuleRepo;
         public TripService(
             ITripRepository tripRepository,
             IDriverRepository driverRepository,
             IPassengerRepository passengerRepository,
             ISimulationService simulationService,
-            IFareRuleService fareRuleService)
+            IFareService fareRuleService)
         {
             _tripRepository = tripRepository;
             _driverRepository = driverRepository;
@@ -35,7 +39,46 @@ namespace Application.Services
             _simulationService = simulationService;
             _fareRuleService = fareRuleService;
         }
+        public async Task<Trip> CreateTripAsync(Guid passengerId, Location pickup, Location destination, VehicleType vehicleType)
+        {
+            // 1. Tính khoảng cách (giả lập, thực tế gọi Google Maps API)
+            double distance = CalculateDistance(pickup, destination);
+            TimeSpan duration = TimeSpan.FromMinutes(distance * 2); // ước lượng
 
+            var route = new Route(pickup, destination, distance, duration, "");
+
+            // 2. Lấy FareRule để tính giá
+            var rules = await _fareRuleRepo.GetAllAsync();
+            var rule = rules.FirstOrDefault(r => r.VehicleType == vehicleType)
+                ?? throw new Exception("Chưa có quy tắc giá cho loại xe này.");
+
+            var fare = rule.CalculateFare(distance);
+
+            // 3. Tạo Trip
+            var trip = new Trip(passengerId, route, fare, vehicleType);
+
+            // 4. Lưu
+            _tripRepo.Add(trip);
+            await _tripRepo.SaveChangesAsync();
+
+            // 5. Trả về cho client
+            return trip;
+        }
+
+        // Xác nhận tài xế
+        public async Task MatchDriverAsync(Guid tripId, Guid driverId)
+        {
+            var trip = await _tripRepo.GetByIdAsync(tripId) ?? throw new Exception("Không tìm thấy chuyến.");
+            var driver = await _driverRepo.GetByIdAsync(driverId) ?? throw new Exception("Không tìm thấy tài xế.");
+
+            trip.MatchDriver(driverId);
+            driver.SetOnTrip();
+
+            _tripRepo.Update(trip);
+            _driverRepo.Update(driver);
+            await _tripRepo.SaveChangesAsync(); // thực tế cần UnitOfWork để save cả 2 cùng lúc
+            await _driverRepo.SaveChangesAsync();
+        }
         public TripDto RequestTrip(Guid passengerId, Location pickup, Location destination, VehicleType vehicleType)
         {
             if (pickup == null || destination == null)

@@ -11,52 +11,41 @@ namespace Infrastructure.Repositories
     {
         public VehicleRepository() : base("vehicles.json") { }
 
-        public async Task<Vehicle> GetByIdAsync(Guid id)
-        {
-            return await Task.FromResult(_entities.FirstOrDefault(v => v.Id == id));
-        }
-
-        public async Task<IEnumerable<Vehicle>> GetAllAsync()
-        {
-            return await Task.FromResult(_entities);
-        }
-
         public async Task<Vehicle> GetByPlateNumberAsync(string plateNumber)
         {
-            return await Task.FromResult(_entities.FirstOrDefault(v => v.PlateNumber == plateNumber));
+            await Task.CompletedTask;
+            return _items.FirstOrDefault(v => v.PlateNumber == plateNumber);
         }
 
         public async Task<IEnumerable<Vehicle>> GetByTypeAsync(VehicleType type)
         {
-            return await Task.FromResult(_entities.Where(v => v.Type == type));
+            await Task.CompletedTask;
+            return _items.Where(v => v.Type == type);
         }
 
         public async Task<bool> ExistsByPlateNumberAsync(string plateNumber)
         {
-            return await Task.FromResult(_entities.Any(v => v.PlateNumber == plateNumber));
+            await Task.CompletedTask;
+            return _items.Any(v => v.PlateNumber == plateNumber);
         }
 
         public async Task AddAsync(Vehicle vehicle)
         {
-            _entities.Add(vehicle);
+            Add(vehicle);
             await Task.CompletedTask;
         }
 
         public async Task UpdateAsync(Vehicle vehicle)
         {
-            var index = _entities.FindIndex(v => v.Id == vehicle.Id);
-            if (index != -1)
-                _entities[index] = vehicle;
-
+            Update(vehicle);
             await Task.CompletedTask;
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var entity = _entities.FirstOrDefault(v => v.Id == id);
+            var entity = await GetByIdAsync(id);
             if (entity != null)
-                _entities.Remove(entity);
-
+                Delete(entity);
             await Task.CompletedTask;
         }
     }

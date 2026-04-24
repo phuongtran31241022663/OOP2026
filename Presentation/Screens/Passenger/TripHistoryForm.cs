@@ -7,9 +7,11 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
+using Presentation;
+
 namespace Presentation.Screens.Passenger
 {
-    public partial class TripHistoryForm : Form
+    public partial class TripHistoryForm : BaseForm
     {
         // Dependencies
         private readonly Guid _userId;

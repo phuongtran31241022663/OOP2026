@@ -1,6 +1,6 @@
 ﻿namespace Presentation.Screens.Admin
 {
-    partial class UserManagementForm
+    partial class UserManagementForm : BaseForm
     {
         /// <summary>
         /// Required designer variable.

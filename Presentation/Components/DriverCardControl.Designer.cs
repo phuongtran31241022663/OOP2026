@@ -2,7 +2,7 @@
 
 namespace Presentation.Components
 {
-    partial class DriverCardControl
+    partial class DriverCardControl : BaseUserControl
     {
         /// <summary> 
         /// Required designer variable.

@@ -3,14 +3,16 @@ using System.Drawing;
 using System.Windows.Forms;
 using Domain.Enums;
 using Domain.Users.Drivers;
+using Domain.Vehicles;
+using Domain.Reviews;
 
 namespace Presentation.Components
 {
     /// <summary>
-    /// UserControl hiển thị thông tin tài xế dưới dạng card.
+    /// BaseUserControl hiển thị thông tin tài xế dưới dạng card.
     /// Sử dụng trong danh sách tài xế có sẵn hoặc tìm kiếm.
     /// </summary>
-    public partial class DriverCardControl : UserControl
+    public partial class DriverCardControl : BaseUserControl
     {
 
 

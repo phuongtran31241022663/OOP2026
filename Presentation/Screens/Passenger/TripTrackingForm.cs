@@ -7,9 +7,11 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Presentation;
+
 namespace Presentation.Screens.Passenger
 {
-    public partial class TripTrackingForm : Form
+    public partial class TripTrackingForm : BaseForm
     {
         // Dependencies
         private readonly ITripService _tripService;

@@ -1,14 +1,14 @@
-﻿using System.Windows.Forms;
-using Domain.ValueObjects;
+﻿using Domain.ValueObjects;
 using Domain.Trips;
+using Presentation;
 
 namespace Presentation.Components
 {
     /// <summary>
-    /// UserControl hiển thị thông tin giá cước chuyến đi.
+    /// BaseUserControl hiển thị thông tin giá cước chuyến đi.
     /// Bao gồm giá gốc, phụ phí, và tổng cộng.
     /// </summary>
-    public partial class FarePanel : UserControl
+    public partial class FarePanel : BaseUserControl
     {
         /// <summary>
         /// Giá cước hiện tại

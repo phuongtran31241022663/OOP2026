@@ -9,49 +9,43 @@ namespace Domain.ValueObjects
     /// </summary>
     public sealed class Route : ValueObject
     {
-        private readonly double _distance; // Km
-        private readonly TimeSpan _duration;
+        #region Fields
         private readonly Location _pickup;
         private readonly Location _destination;
-        private readonly string _encodedPolyline;
+        private readonly double _distance; // Km
+        private readonly TimeSpan _duration;
+        private readonly string _polyline;
+        #endregion
+        #region Properties
+        public Location Pickup => _pickup;
+        public Location Destination => _destination;
         public double Distance => _distance;
         public TimeSpan Duration => _duration;
-
-        public Location Pickup
-        {
-            get { return _pickup; }
-        }
-
-        public Location Destination
-        {
-            get { return _destination; }
-        }
-        public string EncodedPolyline
-        {
-            get { return _encodedPolyline; }
-        }
+        public string Polyline => _polyline;
+        #endregion
+        #region Constructors
         private Route() { }
-        public Route(Location pickup, Location des, double distance, TimeSpan duration, string encodedPolyline = null)
+       public Route(Location pickup, Location destination, double distance, TimeSpan duration, string polyline)
         {
-            if (distance < 0)
-                throw new ArgumentOutOfRangeException(nameof(distance), "Khoảng cách không được âm.");
+            if (pickup == null) throw new ArgumentNullException(nameof(pickup));
+            if (destination == null) throw new ArgumentNullException(nameof(destination));
+            if (distance <= 0) throw new ArgumentOutOfRangeException(nameof(distance), "Khoảng cách phải lớn hơn 0.");
+            if (duration.TotalSeconds < 0) throw new ArgumentOutOfRangeException(nameof(duration), "Thời gian phải lớn hơn hoặc bằng 0.");
 
-            if (duration.TotalSeconds < 0)
-                throw new ArgumentOutOfRangeException(nameof(duration), "Thời gian không được âm.");
-
+            _pickup = pickup;
+            _destination = destination;
             _distance = distance;
             _duration = duration;
-            _pickup = pickup ?? throw new ArgumentNullException(nameof(pickup));
-            _destination = des ?? throw new ArgumentNullException(nameof(des));
-            _encodedPolyline = encodedPolyline ?? string.Empty;
+            _polyline = polyline ?? string.Empty;
         }
+        #endregion
         protected override IEnumerable<object> GetEqualityComponents()
         {
-            yield return _distance;
-            yield return _duration;
-            yield return _pickup;
-            yield return _destination;
-            yield return _encodedPolyline;
+          yield return Pickup;
+            yield return Destination;
+            yield return Distance;
+            yield return Duration;
+            yield return Polyline;
         }
     }
 }

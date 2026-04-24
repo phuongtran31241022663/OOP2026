@@ -11,60 +11,41 @@ namespace Infrastructure.Repositories
     {
         public TripRepository() : base("trips.json") { }
 
-        public async Task<Trip> GetByIdAsync(Guid id)
-        {
-            return await Task.FromResult(_entities.FirstOrDefault(t => t.Id == id));
-        }
-
-        public async Task<IEnumerable<Trip>> GetAllAsync()
-        {
-            return await Task.FromResult(_entities);
-        }
-
         public async Task<IEnumerable<Trip>> GetByDriverIdAsync(Guid driverId)
         {
-            return await Task.FromResult(
-                _entities.Where(t => t.DriverId == driverId)
-            );
+            await Task.CompletedTask;
+            return _items.Where(t => t.DriverId == driverId);
         }
 
         public async Task<IEnumerable<Trip>> GetByPassengerIdAsync(Guid passengerId)
         {
-            return await Task.FromResult(
-                _entities.Where(t => t.PassengerId == passengerId)
-            );
+            await Task.CompletedTask;
+            return _items.Where(t => t.PassengerId == passengerId);
         }
 
         public async Task<IEnumerable<Trip>> GetPendingTripsAsync()
         {
-            return await Task.FromResult(
-                _entities.Where(t => t.Status == TripStatus.Searching)
-            );
+            await Task.CompletedTask;
+            return _items.Where(t => t.Status == TripStatus.Searching);
         }
 
         public async Task AddAsync(Trip trip)
         {
-            _entities.Add(trip);
+            Add(trip);
             await Task.CompletedTask;
         }
 
         public async Task UpdateAsync(Trip trip)
         {
-            var index = _entities.FindIndex(t => t.Id == trip.Id);
-            if (index == -1)
-                throw new ArgumentException("Trip not found");
-
-            _entities[index] = trip;
-
+            Update(trip);
             await Task.CompletedTask;
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var entity = _entities.FirstOrDefault(t => t.Id == id);
+            var entity = await GetByIdAsync(id);
             if (entity != null)
-                _entities.Remove(entity);
-
+                Delete(entity);
             await Task.CompletedTask;
         }
     }

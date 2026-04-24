@@ -5,30 +5,42 @@ namespace Domain.ValueObjects
 {
     public sealed class Address : ValueObject
     {
-        public string Osm_Value { get; set; }
-        public string HouseNumber { get; set; }
-        public string Name { get; set; }
-        public string Street { get; set; }
-        public string Locality { get; set; }
-        public string District { get; set; }
-        public string City { get; set; }
-        public string Country { get; set; }
-
-        // EF Core cần constructor không tham số
+        #region Backing Fields
+        private readonly string _osm_Value;
+        private readonly string _houseNumber; // có thể null nếu không có số nhà
+        private readonly string _name;
+        private readonly string _street;
+        private readonly string _locality;
+        private readonly string _district;
+        private readonly string _city;
+        private readonly string _country;
+        #endregion
+        #region Properties
+        public string Osm_Value => _osm_Value;
+        public string HouseNumber => _houseNumber;
+        public string Name => _name;
+        public string Street => _street;
+        public string Locality => _locality;
+        public string District => _district;
+        public string City => _city;
+        public string Country => _country;
+        #endregion
+        #region Constructors
+        // Constructor không tham số
         public Address() { }
 
-        public Address(string osm_Value, string houseNumber, string name, string street, string locality, string district, string city, string country)
+      public Address(string name, string street, string district, string city, string country, string houseNumber = null, string osmValue = null, string locality = null)
         {
-            Osm_Value = osm_Value;
-            HouseNumber = houseNumber;
-            Name = name;
-            Street = street;
-            Locality = locality;
-            District = district;
-            City = city;
-            Country = country;
+            _name = name;
+            _street = street;
+            _district = district;
+            _city = city;
+            _country = country;
+            _houseNumber = houseNumber;
+            _osm_Value = osmValue;
+            _locality = locality;
         }
-
+        #endregion
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Name;

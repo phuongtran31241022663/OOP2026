@@ -6,23 +6,35 @@ namespace Domain.ValueObjects
 {
     public sealed class Fare : ValueObject
     {
-        public Money TotalAmount { get; }
-        public Money Commission { get; }
-        public Money DriverIncome { get; }
+        #region Fields
+        private readonly Money _totalAmount;
+        private readonly Money _commission;
+        private readonly Money _driverIncome;
+        #endregion
+        #region Properties   
+        public Money TotalAmount => _totalAmount;
+        public Money Commission => _commission;
+        public Money DriverIncome => _driverIncome;
+        #endregion
+        #region Constructors
 
         public Fare(Money totalAmount, Money commission)
         {
+            if (totalAmount == null) throw new ArgumentNullException(nameof(totalAmount));
+            if (commission == null) throw new ArgumentNullException(nameof(commission));
+            if (totalAmount.Amount < 0) throw new ArgumentException("TotalAmount không thể âm.", nameof(totalAmount));
+            if (commission.Amount < 0) throw new ArgumentException("Commission không thể âm.", nameof(commission));
             if (commission.Amount > totalAmount.Amount)
                 throw new ArgumentException("Hoa hồng không thể lớn hơn tổng cước.");
 
-            TotalAmount = totalAmount;
-            Commission = commission;
-            DriverIncome = new Money(
+            _totalAmount = totalAmount;
+            _commission = commission;
+            _driverIncome = new Money(
                 totalAmount.Amount - commission.Amount,
                 totalAmount.Currency
             );
         }
-
+        #endregion
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return TotalAmount;

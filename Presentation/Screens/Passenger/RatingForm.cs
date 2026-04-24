@@ -8,9 +8,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Presentation;
+
 namespace Presentation.Screens.Passenger
 {
-    public partial class ReviewForm : Form
+    public partial class ReviewForm : BaseForm
     {
         // Dependencies
         private readonly Guid _userId;

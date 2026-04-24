@@ -1,6 +1,6 @@
 namespace Presentation.Components
 {
-    partial class StatusPanel
+    partial class StatusPanel : BaseUserControl
     {
         /// <summary> 
         /// Required designer variable.

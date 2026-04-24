@@ -5,7 +5,8 @@ namespace Domain.Enums
     /// </summary>
     public enum VehicleType
     {
-        Motorbike = 0,
-        Car = 1
+        Unknown = 0,
+        Motorbike = 1,
+        Car = 2
     }
 }
