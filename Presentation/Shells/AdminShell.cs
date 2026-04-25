@@ -186,7 +186,7 @@ namespace Presentation.Shells
             var trips = _viewModel.GetFilteredTrips("");
 
             // TODO: Populate DataGridView with trips
-            // The TripDto already contains PassengerName, DriverName, Pickup, Destination, Status, Fare, CreatedAt
+            // The Trip already contains PassengerName, DriverName, Pickup, Destination, Status, Fare, CreatedAt
         }
 
         private void FilterTrips(string searchTerm)

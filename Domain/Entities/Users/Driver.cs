@@ -1,10 +1,8 @@
 using System;
 using Domain.Enums;
-using Domain.StateMachines;
 using Domain.ValueObjects;
-using static Domain.StateMachines.DriverStateMachine;
 using Domain.Events;
-using Domain.SharedKernel;
+using Domain.StateMachines;
 
 namespace Domain.Entities.Users
 {
@@ -95,7 +93,7 @@ namespace Domain.Entities.Users
 
         public void SetOnTrip()
         {
-            if (!CanTransition(Status, DriverStatus.OnTrip))
+            if (!DriverStateMachine.CanTransition(Status, DriverStatus.OnTrip))
                 throw new InvalidOperationException(
                     $"Không thể chuyển từ '{Status}' sang 'OnTrip'.");
 
@@ -113,7 +111,7 @@ namespace Domain.Entities.Users
                 throw new InvalidOperationException(
                     "Quy tắc nghiệp vụ: Không thể ngắt kết nối khi đang chạy chuyến.");
 
-            if (!CanTransition(Status, DriverStatus.Offline))
+            if (!DriverStateMachine.CanTransition(Status, DriverStatus.Offline))
                 throw new InvalidOperationException(
                     $"Không thể chuyển từ trạng thái '{Status}' sang 'Offline'.");
 
@@ -138,11 +136,11 @@ namespace Domain.Entities.Users
         {
             _totalTrips++;
         }
-        public void UpdateReviews(Review r)
+        public void UpdateReviews(int rating)
         {
-            if (r == null) return;
+            if (rating < 1 || rating > 5) throw new ArgumentOutOfRangeException(nameof(rating));
             TotalReviews++;
-            RatingSum += r.Rating;
+            RatingSum += rating;
         }
         // -- T�i ch�nh -------------------------------------------------------
         public void DepositToWallet(Money amount)

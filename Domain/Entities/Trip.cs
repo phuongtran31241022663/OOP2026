@@ -1,9 +1,9 @@
 using Domain.Enums;
-using Domain.StateMachines;
-using System;
 using Domain.Events;
-using Domain.ValueObjects;
 using Domain.SharedKernel;
+using Domain.States;
+using Domain.ValueObjects;
+using System;
 
 namespace Domain.Entities
 {
@@ -19,6 +19,7 @@ namespace Domain.Entities
         private readonly Route _tripRoute;
         private bool _isPaid;
         private readonly DateTime _requestAt;
+        private ITripState _currentState;
         #endregion
 
         #region Properties
@@ -58,6 +59,7 @@ namespace Domain.Entities
             _tripVehicleType = vehicleType;
             _status = TripStatus.Requested;
             _requestAt = DateTime.UtcNow;
+            _currentState = new RequestedState();
             AddEvent(new TripRequestedEvent(Id, _passengerId, _tripRoute.Pickup, _tripRoute.Destination, _tripVehicleType));
             AddEvent(new TripSearchingEvent(Id));
         }
@@ -71,65 +73,60 @@ namespace Domain.Entities
         }
         #endregion
 
-        #region State Management
-        private void SetStatus(TripStatus newStatus)
+        #region State Pattern helpers (internal)
+        internal void TransitionTo(ITripState newState)
         {
-            if (!TripStateMachine.CanTransition(_status, newStatus))
-            {
-                throw new InvalidOperationException(nameof(Status), new Exception("Quy tắc nghiệp vụ: Chuyển đổi trạng thái chuyến đi không hợp lệ."));
-            }
+            _currentState = newState;
+        }
+        internal void SetStatusInternal(TripStatus newStatus)
+        {
             _status = newStatus;
         }
 
+        internal void SetDriverId(Guid driverId)
+        {
+            _driverId = driverId;
+        }
+
+        #endregion
+
+        #region Public behavior (delegated to state)
         public void SetSearching()
         {
-            SetStatus(TripStatus.Searching);
-            AddEvent(new TripSearchingEvent(Id));
+            _currentState.SetSearching(this);
         }
 
         public void MatchDriver(Guid driverId)
         {
-            if (driverId == Guid.Empty) throw new ArgumentException("DriverId không hợp lệ", nameof(driverId));
-            if (_driverId.HasValue)
-                throw new Exception("Chuyến đi đã được gán tài xế.");
-
-            _driverId = driverId;
-            SetStatus(TripStatus.Matched);
-            AddEvent(new TripMatchedEvent(Id, driverId));
+            _currentState.MatchDriver(this, driverId);
         }
 
         public void MarkAsArrived()
         {
-            if (!DriverId.HasValue)
-               throw new Exception(nameof(DriverId), new Exception("Chuyến di chưa được gán tài xế."));
-
-            SetStatus(TripStatus.Arrived);
-            AddEvent(new TripArrivedEvent(Id));
+            _currentState.MarkAsArrived(this);
         }
-
         public void StartTrip()
         {
-            if (!DriverId.HasValue)
-               throw new Exception(nameof(DriverId), new Exception("Chuyến di chưa được gán tài xế."));
-
-            SetStatus(TripStatus.Started);
-            AddEvent(new TripStartedEvent(Id));
+            _currentState.StartTrip(this);
         }
+
         public void CompleteTrip()
         {
-            if (!DriverId.HasValue)
-               throw new InvalidOperationException("Chuyến đi phải được gán tài xế trước khi hoàn thành.");
-
-            SetStatus(TripStatus.Completed);
-
-            AddEvent(new TripCompletedEvent(
-                Id,
-                PassengerId,
-                DriverId.Value,
-                _tripFare
-            ));
+            _currentState.CompleteTrip(this);
         }
 
+        public void Cancel(string reason)
+        {
+            _currentState.Cancel(this, reason);
+        }
+
+        public void MarkTimeout()
+        {
+            _currentState.MarkTimeout(this);
+        }
+        #endregion
+
+        #region Payment
         public void ConfirmPayment()
         {
             if (_isPaid)
@@ -146,17 +143,6 @@ namespace Domain.Entities
         }
 
 
-        public void Cancel(string reason)
-        {
-            SetStatus(TripStatus.Cancelled);
-            AddEvent(new TripCancelledEvent(Id, reason));
-        }
-
-        public void MarkTimeout()
-        {
-            SetStatus(TripStatus.Timeout);
-            AddEvent(new TripTimeoutEvent(Id));
-        }
         #endregion
 
     }

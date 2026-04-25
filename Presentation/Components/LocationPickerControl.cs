@@ -1,5 +1,4 @@
-﻿// Presentation/Components/LocationPickerControl.cs
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -15,8 +14,8 @@ namespace Presentation.Components
     public partial class LocationPickerControl : BaseUserControl
     {
         // ── State ────────────────────────────────────────────────────────────
-        private object _pickup;
-        private object _destination;
+        private Location _pickup;
+        private Location _destination;
 
         // ── Events ───────────────────────────────────────────────────────────
         /// <summary>Fired khi người dùng click vào slot để chọn địa điểm.</summary>
@@ -25,6 +24,10 @@ namespace Presentation.Components
 
         public event Action<LocationPickerControl, Location> LocationSelected;
 
+        public void SetPickup(Location location) { _pickup = location; Invalidate(); }
+        public void SetDestination(Location location) { _destination = location; Invalidate(); }
+        public Location Pickup => _pickup;
+        public Location Destination => _destination;
         public string Placeholder { get; set; }
 
         // ── Layout constants ─────────────────────────────────────────────────

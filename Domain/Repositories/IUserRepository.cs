@@ -13,13 +13,13 @@ namespace Domain.Repositories
 
         Task<User> GetByIdAsync(Guid id);
         Task<Driver> GetDriverByIdAsync(Guid id);
-        Task<IEnumerable<User>> GetAllAsync();
+        Task<List<User>> GetAllAsync();
         Task<User> GetByPhoneAsync(string phone);
         Task<bool> ExistsByPhoneAsync(string phone);
 
-        Task<IEnumerable<User>> GetDriversAsync();
-        Task<IEnumerable<User>> GetPassengersAsync();
-        Task<IEnumerable<User>> GetAvailableDriversAsync();
+        Task<List<User>> GetDriversAsync();
+        Task<List<User>> GetPassengersAsync();
+        Task<List<Driver>> GetAvailableDriversAsync();
 
         Task AddAsync(User user);
         Task UpdateAsync(User user);

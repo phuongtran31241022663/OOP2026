@@ -1,5 +1,5 @@
 using Application.Interfaces;
-using Application.DTOs;
+
 using Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 using Presentation;
 
-namespace Presentation.Screens.Passenger
+namespace Presentation.Screens.PassengerScreen
 {
     public partial class ReviewForm : BaseForm
     {
@@ -20,8 +20,8 @@ namespace Presentation.Screens.Passenger
         private readonly ITripService _tripService;
 
         // State
-        private List<TripDto> _pendingTrips = new List<TripDto>();
-        private TripDto _selectedTrip;
+        private List<Trip> _pendingTrips = new List<Trip>();
+        private Trip _selectedTrip;
         private int _score = 5;
 
         public ReviewForm(Guid userId, IReviewService ReviewService, ITripService tripService)
@@ -45,7 +45,7 @@ namespace Presentation.Screens.Passenger
                 return;
             }
 
-            var trip = (TripDto)_tripList.Items[e.Index];
+            var trip = (Trip)_tripList.Items[e.Index];
             bool selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
 
             e.Graphics.FillRectangle(selected ? SystemBrushes.Highlight : SystemBrushes.Window, e.Bounds);
@@ -153,7 +153,7 @@ namespace Presentation.Screens.Passenger
         // Event handlers
         private void OnTripSelected(object sender, EventArgs e)
         {
-            var trip = _tripList.SelectedItem as TripDto;
+            var trip = _tripList.SelectedItem as Trip;
             if (trip == null)
             {
                 return;

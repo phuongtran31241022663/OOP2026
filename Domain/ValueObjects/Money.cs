@@ -15,27 +15,8 @@ namespace Domain.ValueObjects
         private readonly string _currency;
         #endregion
         #region Properties
-        public decimal Amount
-        {
-            get => _amount;
-            init
-            {
-                if (value < 0)
-                    throw new ArgumentException("Amount cannot be negative", nameof(Amount));
-                _amount = decimal.Round(value, 2, MidpointRounding.AwayFromZero);
-            }
-        }
-
-        public string Currency
-        {
-            get => _currency;
-            init
-            {
-                _currency = string.IsNullOrWhiteSpace(value)
-                    ? "VND"
-                    : value.Trim().ToUpperInvariant();
-            }
-        }
+       public decimal Amount => _amount;
+        public string Currency => _currency;
         #endregion
 
         // Constructor for ORM/persistence
@@ -43,8 +24,8 @@ namespace Domain.ValueObjects
 
         public Money(decimal amount, string currency)
         {
-           Amount = amount;
-              Currency = currency;
+           _amount = amount;
+              _currency = currency;
         }
 
         public Money(decimal amount) : this(amount, "VND") { }

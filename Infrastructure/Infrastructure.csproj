@@ -82,7 +82,8 @@
     <Compile Include="ExternalServices\MapApiService.cs" />
     <Compile Include="Interfaces\IFareRuleRepository.cs" />
     <Compile Include="Interfaces\IFileStorageService.cs" />
-    <Compile Include="Interfaces\IMapService.cs" />
+    <Compile Include="Interfaces\IGMapService.cs" />
+    <Compile Include="Interfaces\IMapApiService.cs" />
     <Compile Include="Repositories\FareRuleRepository.cs" />
     <Compile Include="Repositories\FileStorage.cs" />
     <Compile Include="Repositories\JsonRepository.cs" />
@@ -95,10 +96,6 @@
     <Compile Include="Repositories\UserRepository.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Application\Application.csproj">
-      <Project>{a2503eb9-b7a2-4594-8d42-17a4812fd173}</Project>
-      <Name>Application</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{e3833fc9-876c-4f32-9f03-1ffa44bdf6fd}</Project>
       <Name>Common</Name>

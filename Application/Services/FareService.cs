@@ -1,7 +1,8 @@
 ﻿using Application.Interfaces;
+using Domain.Entities;
 using Domain.Enums;
-using Domain.FareRules;
 using Domain.ValueObjects;
+using Infrastructure.Interfaces;
 using System;
 using System.Threading.Tasks;
 
@@ -9,15 +10,12 @@ namespace Application.Services
 {
     public class FareService : IFareService
     {
-        private readonly IFareRuleRepository _fareRuleRepository;
-        private readonly IRouteService _routeService;
+        private readonly IFareRuleRepository _fareRuleRepo;
 
-        public FareService(IFareRuleRepository fareRuleRepository, IRouteService routeService)
+       public FareService(IFareRuleRepository fareRuleRepo)
         {
-            _fareRuleRepository = fareRuleRepository;
-            _routeService = routeService;
+            _fareRuleRepo = fareRuleRepo;
         }
-
         public async Task SeedDefaultFareRulesAsync()
         {
             await _fareRuleRepo.InitializeAsync(); // load hiện có
@@ -26,10 +24,9 @@ namespace Application.Services
 
         public async Task<Fare> CalculateFare(VehicleType vehicleType, double distanceKm)
         {
-            var rule = await _fareRuleRepo.GetByVehicleTypeAsync(vehicleType);
+            FareRule rule = await _fareRuleRepo.GetByVehicleTypeAsync(vehicleType);
             if (rule == null)
                 throw new Exception($"Chưa có quy tắc giá cho loại xe {vehicleType}.");
-
             return rule.CalculateFare(distanceKm);
         }
     }

@@ -49,7 +49,7 @@ RideGo là hệ thống gọi xe mô phỏng (ride-hailing simulation) xây dự
 graph TD
     Common[Common - Utilities, Constants]
     Domain[Domain - Entities, Value Objects, State Machines, Domain Events, Repository Interfaces]
-    Application[Application - Services, DTOs, Features, Interfaces]
+    Application[Application - Services, Interfaces]
     Infra[Infrastructure - Repositories, External Services, File Storage]
     UI[Presentation - WinForms UI, Shells, Screens, Components]
 
@@ -76,7 +76,7 @@ Những vi phạm này làm giảm tính testability và tăng coupling. Cần r
 | ------------------ | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Common**         | Tiện ích chung, hằng số, extension methods            | `Common/Utilities`, `Common/Constants`, `Common/Extensions`                                                                                                                               |
 | **Domain**         | Quy tắc nghiệp vụ cốt lõi, không phụ thuộc bên thứ ba | Entities, Value Objects, State Machines (`Domain.StateMachines`), Domain Events, Repository Interfaces (`Domain/Repositories`)                                                            |
-| **Application**    | Điều phối use case, quy trình nghiệp vụ               | Services (`TripService`, `UserService`, `FareService`, `MatchingService`...), Interfaces (`Application.Interfaces`), DTOs, Features (Commands/Queries/Handlers), Behaviors, Mapping       |
+| **Application**    | Điều phối use case, quy trình nghiệp vụ               | Services (`TripService`, `UserService`, `FareService`, `MatchingService`...), Interfaces (`Application.Interfaces`) |
 | **Infrastructure** | Giao tiếp bên ngoài, lưu trữ dữ liệu                  | `JsonRepository<T>`, `FileStorage`, `MapService` (implements `IMapService`), repository implementations (`Infrastructure.Repositories`)                                                   |
 | **Presentation**   | Giao diện tương tác người dùng                        | WinForms Shells (`MainShell`, `PassengerShell`, `DriverShell`, `AdminShell`), Screens (`Screens/`*), Components (`Components/*`), ViewModels, Helpers, DI composition root (`Program.cs`) |
 
@@ -88,7 +88,7 @@ Composition root nằm ở `Presentation/Program.cs`, đăng ký tất cả depe
 - `JsonStorage<T>` (Infrastructure)
 - Repositories (Infrastructure)
 - Application services
-- Background workers (chưa hoàn thiện)
+- Background workers (`TripTimeoutWorker`, `TripMatchingWorker`)
 
 Các UI forms được truyền dependencies qua constructor.
 
@@ -154,7 +154,7 @@ classDiagram
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `User` (abstract)    | `Id`, `Name`, `Phone`, `Password` (hashed), `IsActive`                                                                                                                       | `UpdateName()`, `ChangePassword()`, `VerifyPassword()`                                                                                                     |
 | `Passenger`          | `TotalTrips`                                                                                                                                                                 | `AddTrip()`                                                                                                                                                |
-| `Driver`             | `Status (DriverStatus)`, `Position (Location)`, `VehicleId`, `Wallet (Money)`, `Income (Money)`, `TotalTrips`, `AverageRating`, `RatingSum`, `TotalReviews`, `LicenseNumber` | `SetAvailable()`, `SetOnTrip()`, `SetOffline()`, `UpdatePosition()`, `AddTrip()`, `PayCommission()`, `DepositToWallet()`, `UpdateReviews()`                |
+| `Driver`             | `Status (DriverStatus)`, `Position (Location)`, `VehicleId`, `Wallet (Money)`, `Income (Money)`, `TotalTrips`, `AverageRating`, `RatingSum`, `TotalReviews`, `LicenseNumber` | `SetAvailable()`, `SetOnTrip()`, `SetOffline()`, `UpdatePosition()`, `AddTrip()`, `PayCommission()`, `DepositToWallet()`, `UpdateReviews(int rating)`                |
 | `Admin`              | (kế thừa User)                                                                                                                                                               | Quản lý người dùng, cấu hình hệ thống                                                                                                                      |
 | `Vehicle` (abstract) | `PlateNumber`, `Brand`, `Model`, `Color`, `Capacity`, `Type (VehicleType)`                                                                                                   | `GetAvgSpeed()`, `GetMaxPickupDistance()` (abstract)                                                                                                       |
 | `Car`                | `Type = Car`                                                                                                                                                                 | `AvgSpeed = 60km/h`, `MaxPickupDistance = 7km`                                                                                                             |
@@ -181,15 +181,15 @@ classDiagram
 
 Các events được định nghĩa trong các namespace con của `Domain`:
 
-**Trip Events** (`Domain.Trips.Events`):
+**Trip Events** (`Domain.Events`):
 
 - `TripRequestedEvent`, `TripSearchingEvent`, `TripMatchedEvent`, `TripArrivedEvent`, `TripStartedEvent`, `TripCompletedEvent`, `TripPaidEvent`, `TripCancelledEvent`, `TripTimeoutEvent`
 
-**Driver Events** (`Domain.Users.Drivers.Events`):
+**Driver Events** (`Domain.Events`):
 
 - `DriverStatusChangedEvent`, `DriverLocationUpdatedEvent`
 
-**Review Events** (`Domain.Reviews.Events`):
+**Review Events** (`Domain.Events`):
 
 - `ReviewCreatedEvent`
 
@@ -246,7 +246,7 @@ stateDiagram-v2
 | Started   | Cancelled | Hủy trong khi đang chạy    |
 
 
-`TripStateMachine.CanTransition(from, to)` kiểm tra tính hợp lệ. `CanBeCancelled(status)` xác định xem chuyến có hủy được không (các trạng thái trước Started).
+`ITripState` implementations validate transitions before delegating to `Trip.TransitionTo(...)`. `DriverStateMachine.CanTransition(from, to)` kiểm tra tính hợp lệ cho Driver.
 
 ### 5.2 Driver State Flow
 
@@ -283,7 +283,7 @@ Mỗi transition có thể phát ra event tương ứng, ví dụ:
 
 ### 6.2 State Machine
 
-`TripStateMachine` và `DriverStateMachine` quản lý vòng đời, thay thế switch-case. Đảm bảo chỉ trạng thái hợp lệ mới được thiết lập.
+`ITripState` implementations (`Domain.States`) validate Trip lifecycle transitions; `DriverStateMachine` validates Driver status transitions. Thay thế switch-case, đảm bảo chỉ trạng thái hợp lệ mới được thiết lập.
 
 ### 6.3 Domain Events & Observer
 
@@ -295,11 +295,11 @@ Aggregates phát domain events; `TripService` phát sự kiện `TripStatusChang
 
 ### 6.5 Data Transfer Object (DTO)
 
-`Application/DTOs` chứa các lớp DTO (TripDto, DriverDto, PassengerDto, ...) truyền dữ liệu giữa Application và Presentation.
+No dedicated DTO folder exists; domain entities and primitive types are passed directly between Application and Presentation.
 
 ### 6.6 CQRS-lite
 
-Cấu trúc thư mục `Application/Features` tổ chức theo Use Case: mỗi feature có Command/Query, Handler, Validator, Response. Không sử dụng MediatR; Handler gọi trực tiếp Application Services.
+No dedicated `Application/Features` folder exists. UI calls Application Service interfaces directly (e.g., `ITripService.CreateTripAsync()`, `IMatchingService.MatchDriverToTripAsync()`).
 
 ### 6.7 Dependency Injection
 
@@ -323,18 +323,19 @@ DriverIncome = TotalFare − Commission
 
 ### 7.2 Ghép Tài Xế
 
-`MatchingService.MatchDriverToTripAsync` hiện chỉ kiểm tra:
+`MatchingService.MatchDriverToTripAsync` kiểm tra:
 
 1. Driver tồn tại
 2. `Driver.Status == Available`
 3. Trip tồn tại và ở trạng thái `Searching`
-4. Gọi `trip.MatchDriver(driverId)` để chuyển trạng thái
+4. `VehicleType` của tài xế khớp với yêu cầu của chuyến
+5. Gọi `trip.MatchDriver(driverId)` để chuyển trạng thái
 
 **Chưa triển khai:**
 
-- Lọc theo `VehicleType`
 - Tính khoảng cách từ tài xế đến điểm đón (dùng Haversine hoặc routing API)
 - Kiểm tra số dư ví tài xế (để trừ hoa hồng dự kiến)
+- Lọc thô theo địa chỉ hành chính (phường/quận)
 
 ### 7.3 Xử Lý Địa Chỉ
 

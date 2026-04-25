@@ -9,7 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 using Presentation;
 
-namespace Presentation.Screens.Driver
+namespace Presentation.Screens.DriverScreen
 {
     public partial class EarningsForm : BaseForm
     {

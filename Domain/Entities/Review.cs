@@ -15,38 +15,9 @@ namespace Domain.Entities
         #endregion
 
         #region Properties
-        public Guid DriverId
-        {
-            get => _driverId;
-            init
-            {
-                if (value == Guid.Empty)
-                    throw new ArgumentException("DriverId không được để trống.", nameof(DriverId));
-                _driverId = value;
-            }
-        }
-        public Guid PassengerId
-        {
-            get => _passengerId;
-            init
-            {
-                if (value == Guid.Empty)
-                    throw new ArgumentException("PassengerId không được để trống.", nameof(PassengerId));
-                _passengerId = value;
-            }
-        }
-
-        public Guid TripId
-        {
-            get => _tripId;
-            init
-            {
-                if (value == Guid.Empty)
-                    throw new ArgumentException("TripId không được để trống.", nameof(TripId));
-                _tripId = value;
-            }
-        }
-
+        public Guid DriverId => _driverId;
+        public Guid PassengerId => _passengerId;
+        public Guid TripId => _tripId;
         public int Rating
         {
             get => _rating;
@@ -68,11 +39,11 @@ namespace Domain.Entities
         public DateTime CreatedAt => _createdAt;
         #endregion
 
-      public Review(Guid driverId, Guid passengerId, Guid tripId, int rating, string comment) : base(Guid.NewGuid())
+        public Review(Guid driverId, Guid passengerId, Guid tripId, int rating, string comment) : base(Guid.NewGuid())
         {
-            DriverId = driverId;
-            PassengerId = passengerId;
-            TripId = tripId;
+            _driverId = driverId;
+          _passengerId = passengerId;
+            _tripId = tripId;
             Rating = rating;
             Comment = comment;
             _createdAt = DateTime.UtcNow;

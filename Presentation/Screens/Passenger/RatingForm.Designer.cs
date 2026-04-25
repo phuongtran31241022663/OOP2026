@@ -1,4 +1,4 @@
-namespace Presentation.Screens.Passenger
+namespace Presentation.Screens.PassengerScreen
 {
     partial class ReviewForm : BaseForm
     {

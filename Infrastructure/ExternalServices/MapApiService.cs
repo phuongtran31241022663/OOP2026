@@ -11,7 +11,7 @@ using Infrastructure.Interfaces;
 
 namespace Infrastructure.ExternalServices
 {
-    internal class MapApiService : IMapService
+    internal class MapApiService : IMapApiService
     {
         private readonly HttpClient _httpClient;
         private const string PhotonUrl = "https://photon.komoot.io/api/";
@@ -223,11 +223,6 @@ namespace Infrastructure.ExternalServices
                 Trace.TraceError($"OSRM Routing error: {ex.Message}");
                 return null;
             }
-        }
-        List<Coordinate> DecodePolyline(string polyline)
-        {
-            // thuật toán Google polyline decoding
-            return new List<Coordinate>(); // Implement decoding logic here
         }
         //public string GetMapTileUrl(Coordinate c, int zoom)
         //{

@@ -1,39 +1,33 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Domain.SharedKernel
 {
     public abstract class Entity
     {
+        private readonly List<DomainEvent> _domainEvents = new List<DomainEvent>();
+
         public Guid Id { get; protected set; }
 
-        protected Entity(Guid id)
-        {
-            Id = id;
-        }
-        private List<DomainEvent> _events = new List<DomainEvent>();
+        protected Entity(Guid id) => Id = id;
+        protected Entity() { } // for serialization
 
-        public IReadOnlyCollection<DomainEvent> DomainEvents => _events;
-
-        protected void AddEvent(DomainEvent e)
+        protected internal void AddEvent(DomainEvent eventItem)
         {
-            _events.Add(e);
+            _domainEvents.Add(eventItem);
         }
 
-        public void ClearEvents()
-        {
-            _events.Clear();
-        }
+        public IReadOnlyList<DomainEvent> GetEvents() => _domainEvents.AsReadOnly();
+        public void ClearEvents() => _domainEvents.Clear();
         public override bool Equals(object obj)
         {
-            if (!(obj is Entity other)) return false;
+            if (obj is not Entity other) return false;
             if (ReferenceEquals(this, other)) return true;
+            if (GetType() != other.GetType()) return false;
             return Id.Equals(other.Id);
         }
-
-        public override int GetHashCode()
-        {
-            return Id.GetHashCode();
-        }
+        public override int GetHashCode() => Id.GetHashCode();
+        public static bool operator ==(Entity a, Entity b) => (a is null && b is null) || (a is not null && a.Equals(b));
+        public static bool operator !=(Entity a, Entity b) => !(a == b);
     }
 }
