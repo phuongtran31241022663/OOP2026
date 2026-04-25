@@ -117,9 +117,6 @@ namespace Domain.Entities
         }
         public void CompleteTrip()
         {
-            if (Status != TripStatus.Started)
-               throw new InvalidOperationException("Chuyến đi phải đang tiến hành.");
-
             if (!DriverId.HasValue)
                throw new InvalidOperationException("Chuyến đi phải được gán tài xế trước khi hoàn thành.");
 
@@ -135,9 +132,6 @@ namespace Domain.Entities
 
         public void ConfirmPayment()
         {
-            if (Status != TripStatus.Completed)
-               throw new InvalidOperationException("Chỉ có thể xác nhận thanh toán khi chuyến đã hoàn thành.");
-
             if (_isPaid)
                throw new InvalidOperationException("Chuyến đã được thanh toán.");
 
@@ -154,18 +148,12 @@ namespace Domain.Entities
 
         public void Cancel(string reason)
         {
-            if (Status == TripStatus.Completed)
-               throw new Exception(nameof(Status), new Exception("Không thể hủy chuyến đã hoàn thành."));
-
             SetStatus(TripStatus.Cancelled);
             AddEvent(new TripCancelledEvent(Id, reason));
         }
 
         public void MarkTimeout()
         {
-            if (Status != TripStatus.Searching)
-               throw new Exception(nameof(Status), new Exception("Chỉ có thể timeout khi đang tìm tài xế."));
-
             SetStatus(TripStatus.Timeout);
             AddEvent(new TripTimeoutEvent(Id));
         }
