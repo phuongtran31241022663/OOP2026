@@ -6,7 +6,7 @@
 
 ## 1. Purpose of Application Layer
 
-The Application Layer orchestrates use cases between Presentation and Domain. It coordinates domain objects, enforces application-level validation, and provides DTOs for data transfer. The codebase uses a lightweight CQRS-like structure with `Features/` folders (Commands/Queries/Handlers), but handlers call Application Services directly (no MediatR).
+The Application Layer orchestrates use cases between Presentation and Domain. It coordinates domain objects, enforces application-level validation, and exposes service interfaces for the Presentation layer. Services are organized under `Application/Services` and `Application/Interfaces`.
 
 ---
 
@@ -20,18 +20,17 @@ RideGo2026/
 │   │   ├── TripService.cs
 │   │   ├── UserService.cs
 │   │   ├── FareService.cs
-│   │   ├── MatchingService.cs  (namespace: Domain.Services — should be Application.Services)
-│   │   ├── ReviewService.cs     (namespace: Services — should be Application.Services)
+│   │   ├── MatchingService.cs  (namespace: Application.Services)
+│   │   ├── ReviewService.cs     (namespace: Application.Services)
 │   │   ├── SimulationService.cs (stub)
-│   │   └── AdminService.cs (empty)
-│   ├── Features/         # Use-case vertical slices
-│   │   ├── Trips/        # RequestTrip, AssignDriver, CancelTrip, CompleteTrip, GetTripStatus
-│   │   ├── Drivers/      # AcceptTrip, RegisterDriver, UpdateDriverStatus
-│   │   └── Passengers/   # RegisterPassenger
-│   ├── DTOs/             # Data transfer objects
-│   ├── Behaviors/        # Pipeline behaviors (Validation, ExceptionHandling)
-│   ├── Mappings/         # AutoMapper profile (MappingProfile.cs)
-│   └── Services folder also contains PassengerService (namespace Services)
+│   │   ├── AdminService.cs (fully implemented)
+│   │   ├── DriverService.cs
+│   │   ├── PassengerService.cs
+│   │   └── MapService.cs (Infrastructure wrapper)
+│   ├── Features/         # Reserved for future vertical slices (currently empty)
+│   ├── DTOs/             # Reserved for future DTOs (currently empty)
+│   ├── Behaviors/        # Reserved for pipeline behaviors (currently empty)
+│   └── Mappings/         # Reserved for AutoMapper profiles (currently empty)
 ├── Domain/               # Domain layer (pure)
 │   ├── StateMachines/    # TripStateMachine.cs, DriverStateMachine.cs
 │   ├── Repositories/     # Repository interfaces (IRepository<T>, ITripRepository, IDriverRepository, etc.)
@@ -83,7 +82,7 @@ RideGo2026/
 | UC2 | Đăng ký tài xế | Driver | ✅ | UserService.RegisterDriver() |
 | UC3 | Đăng ký hành khách | Passenger | ✅ | UserService.RegisterPassenger() |
 | UC4 | Đặt chuyến | Passenger | ✅ | Sync RequestTrip() Không dùng routing API |
-| UC5 | Ghép tài xế | System | ⚠️ | Chỉ kiểm tra `Status == Available`, chưa lọc VehicleType/Khoảng cách |
+| UC5 | Ghép tài xế | System | ⚠️ | Kiểm tra `Status == Available` và `VehicleType` match; chưa lọc đầy đủ: cần thêm lọc thô theo địa chỉ hành chính (phường→quận→thành phố), kiểm tra khoảng cách < MaxPickupDistance, và kiểm tra số dư Wallet |
 | UC6 | Đến điểm đón | Driver | ✅ | TripService.ArriveAtPickup() |
 | UC7 | Bắt đầu chuyến | Driver | ✅ | TripService.StartTrip() |
 | UC8 | Hoàn thành chuyến | Driver | ✅ | TripService.CompleteTrip() |
@@ -95,12 +94,12 @@ RideGo2026/
 | UC14 | Nhận thông tin chuyến | Driver | ✅ | TripService.GetTripAsync() |
 | UC15 | Chấp nhận/Từ chối | Driver | ⚠️ | AcceptTripHandler exists, but UI flow incomplete |
 | UC16 | Admin theo dõi real-time | Admin | ⚠️ | AdminShell + DataGridView, no live map |
-| UC17 | Cấu hình FareRule | Admin | ❌ | AdminService empty, UI missing |
+| UC17 | Cấu hình FareRule | Admin | ✅ | AdminService.CreateFareRuleAsync, AdminService.UpdateFareRuleAsync |
 | UC18 | Driver Radar | Passenger | ❌ | No proximity search implemented |
 | UC19 | Thu nhập tài xế | Driver | ✅ | Driver entity has Income + Wallet |
-| UC20 | Báo cáo thống kê | Admin | ❌ | No reporting service |
+| UC20 | Báo cáo thống kê | Admin | ✅ | AdminService.GetTotalGMVAsync, GetTotalNTRAsync, GetCompletionRateAsync, GetAverageSatisfactionAsync |
 | UC21 | Dẫn đường | Driver | ⚠️ | MapControl displays route if polyline provided; routing not integrated |
-| UC22 | Sửi thông tin cá nhân | User | ⚠️ | UserService has methods; UI partial |
+| UC22 | Sửa thông tin cá nhân | User | ⚠️ | UserService has methods; UI partial |
 
 ---
 
@@ -114,8 +113,8 @@ RideGo2026/
 - `StartTrip(Guid)` — mark started
 - `CompleteTrip(Guid, decimal)` — complete + payment
 - `CancelTrip(Guid, string)` — cancel
-- `CanTripBeCancelled(Guid)` — check cancellation eligibility
-- `TripStatusChanged` — event `Action<TripDto>`
+- `CanTripBeCancelledAsync(Guid)` — check cancellation eligibility
+- `TripStatusChanged` — event `EventHandler<TripStatusChangedEventArgs>` (declared on `ITripService` interface)
 
 **UserService** (`Application.Services.UserService`):
 - `RegisterPassenger()`, `RegisterDriver()` with Vehicle
@@ -125,20 +124,20 @@ RideGo2026/
 - `UpdateDriverStatus()`, `ForceRecoverDriverStatus()`
 
 **FareService** (`Application.Services.FareService`):
-- Constructor injects `IFareRuleRepository` and `IRouteService` (IRouteService missing → **compile error**)
+- Constructor injects `IFareRuleRepository`
 - `CalculateFare(VehicleType, double distanceKm)` — uses FareRule
 
-**MatchingService** (`Domain.Services.MatchingService` — namespace mismatch):
-- `MatchDriverToTripAsync(Guid tripId, Guid driverId)` — basic match (status only)
+**MatchingService** (`Application.Services.MatchingService`):
+- `MatchDriverToTripAsync(Guid tripId, Guid driverId)` — match with status + VehicleType check
 
-**ReviewService** (`Services.ReviewService` — namespace mismatch):
+**ReviewService** (`Application.Services.ReviewService`):
 - `AddReviewAsync(Guid driverId, Guid passengerId, Guid tripId, int rating, string comment)` — creates review + updates driver rating
 
 **SimulationService** (`Application.Services.SimulationService`):
 - Stub implementation; no background tick; methods are no-ops.
 
 **AdminService** (`Application.Services.AdminService`):
-- Empty stub.
+- Fully implemented: user/trip/fare rule management, statistics (GMV, NTR, completion rate, satisfaction).
 
 ---
 
@@ -172,7 +171,7 @@ Abstract methods: `GetAvgSpeed()`, `GetMaxPickupDistance()`
 ### Trip Aggregate
 `Trip` (`Domain.Trips.Trip`):
 - Properties: Id, Status (TripStatus), PassengerId, DriverId?, VehicleType, Route (Route), Fare (Fare), IsPaid, RequestAt
-- State transitions call `TripStateMachine.CanTransition()` and emit domain events
+- State transitions validated by `ITripState` implementations before delegating to `Trip.TransitionTo(...)`; emit domain events
 - `SetSearching()`, `MatchDriver(Guid driverId)`, `MarkAsArrived()`, `StartTrip()`, `CompleteTrip(Fare fare)`, `Cancel(string reason)`, `MarkTimeout()`
 
 ### FareRule Entity
@@ -212,14 +211,14 @@ Abstract methods: `GetAvgSpeed()`, `GetMaxPickupDistance()`
 - `FileStorage` — static class handling file I/O with `ReaderWriterLockSlim` for thread safety
 - Data stored in `Data/*.json` files under application base directory
 
-**Concurrency:** Optimistic concurrency via `Version` field in aggregates (Trip, Driver), checked in `UpdateWhereVersionMatches`. However, actual usage in repositories varies; `TripRepository.Update` uses version increment; `JsonRepository.GetById` returns entity without version check; potential race conditions exist.
+**Concurrency:** No explicit optimistic concurrency or `Version` field in aggregates. `JsonRepository<T>` uses a static `Mutex` per type (`"Global\\RideGo_JsonRepo_" + typeof(T).Name`) to serialize file access, preventing concurrent writes but not read-modify-write races.
 
 ---
 
 ## 7. External Services & Integration
 
 **MapService** (`Infrastructure.ExternalServices.MapService`):
-- Implements `IMapService` interface (`Infrastructure.Interfaces`)
+- Implements `IMapService` interface (`Application.Interfaces`)
 - Methods:
   - `GetDistanceAsync(Location, Location)` → `(double distance, double duration)`
   - `GetRouteAsync(Location start, Location end)` → `Route`
@@ -228,10 +227,20 @@ Abstract methods: `GetAvgSpeed()`, `GetMaxPickupDistance()`
 - Integrations: Photon Geocoding API + OSRM Routing API (HTTP endpoints)
 - Custom HTTP client with timeout (10s), User-Agent header, fallback logic (Photon → Nominatim not implemented here)
 
-**GMap.NET** (Presentation):
-- `MapControl` UserControl wraps `GMapControl`; provider = GoogleMap; `AccessMode.ServerAndCache`
-- Markers overlay (pickup, destination, driver)
-- Route rendering using GMapRoute (requires polyline decoding — not implemented)
+**GMap.NET — Phân Tách Theo Kiến Trúc:**
+
+| Thành phần | Layer | Lý do |
+|---|---|---|
+| `GMapControl` (UI widget) | **Presentation** | Control WinForms — chỉ dùng được trong UI |
+| `GMapProviders` (Routing, Geocoding) | **Infrastructure** | Chỉ cần `GMap.NET.Core`, không cần WinForms control; là external service call |
+
+- Presentation cài `GMap.NET.WinForms` — bao gồm cả Core.
+- Infrastructure cài `GMap.NET.Core` — không kéo theo WinForms dependency.
+
+**MapControl** (Presentation UserControl):
+- Wraps `GMapControl`; provider = `GMapProviders.GoogleMap`; `AccessMode.ServerAndCache`
+- Overlays: markers (pickup, destination, driver), route (GMapRoute)
+- Route rendering dùng GMapRoute (cần giải mã Encoded Polyline — chưa hoàn chỉnh)
 
 ---
 
@@ -239,14 +248,14 @@ Abstract methods: `GetAvgSpeed()`, `GetMaxPickupDistance()`
 
 | Missing Item | Where Referenced | Impact |
 |---|---|---|
-| `IRouteService` / `RouteService` | `Program.cs` (DI), `FareService` ctor, `BookTripForm` ctor, `TripViewModel.LoadRouteInfoAsync`, `PassengerViewModel` ctor | **Compile error** — FareService cannot be constructed |
-| `TripTimeoutWorker` | `Program.cs` lines 40, 99 | **Compile error** — missing class |
-| `TripMatchingWorker` | `Program.cs` lines 41, 100 | **Compile error** — missing class |
-| `IDriverSimulationService` | `SimulationService.cs` line 17, `Program.cs` line 96 | **Compile error** — missing interface |
+| `IRouteService` / `RouteService` | `Program.cs` (DI), `BookTripForm` ctor, `TripViewModel.LoadRouteInfoAsync`, `PassengerViewModel` ctor | **Compile error** — `RouteService` class referenced but not found in codebase |
+| `TripTimeoutWorker` | `Program.cs` | Implemented in `Infrastructure/BackgroundJobs/TripTimeoutWorker.cs` ✅ |
+| `TripMatchingWorker` | `Program.cs` | Implemented in `Infrastructure/BackgroundJobs/TripMatchingWorker.cs` ✅ |
+| `IDriverSimulationService` | `SimulationService.cs`, `Program.cs` | **Compile error** — interface referenced but not defined |
 | `SimpleRouteService` | docs only | Not referenced; could replace missing IRouteService |
 | `PaymentService`, `PaymentRepository` | Technical_Architecture.md only | Not in code; payment is handled in `TripService.CompleteTrip()` inline |
 | `RatingService` vs `ReviewService` | Interface named `IReviewService`, impl named `ReviewService`; README calls it `RatingService` | Naming inconsistency (acceptable) |
-| `BackgroundJobs/` folder | docs reference | Not present; workers missing |
+| `BackgroundJobs/` folder | `Infrastructure/BackgroundJobs/` | Present: `TripTimeoutWorker.cs`, `TripMatchingWorker.cs` ✅ |
 | `Simulation/` folder | docs reference | Not present; simulation stub in Application.Services |
 | `Persistence/Repositories/` vs `Repositories/` | docs reference both | Actual: only `Infrastructure/Repositories` exists |
 | `Common/Exceptions/` folder | docs reference | Not present; no custom exceptions found |
@@ -256,9 +265,9 @@ Abstract methods: `GetAvgSpeed()`, `GetMaxPickupDistance()`
 **LSP/Compiler Errors Present:**
 - `Presentation.Program.cs`: Missing using statements for Infrastructure namespaces; JsonStorage not found; missing worker classes; DI extension methods not available.
 - `SimulationService.cs`: `IDriverSimulationService` undefined.
-- `PassengerShell.cs`: `ITripService` does not define `TripStatusChanged` event (event exists on `TripService` implementation, not on interface `ITripService`) — UI should subscribe to implementation or interface must expose event.
+- `PassengerShell.cs`: `ITripService` defines `TripStatusChanged` event (`EventHandler<TripStatusChangedEventArgs>`) ✅.
 - `DriverViewModel.cs`: Missing using statements for Domain types (`Driver`, `Trip`, `Vehicle`, `Location`).
-- `AssignDriverHandler.cs`: References `Domain.Interfaces.IDriverRepository` (non-existent) and `ITripService.TryAssignDriver` (method not in interface).
+- `AssignDriverHandler.cs`: References `Domain.Interfaces.IDriverRepository` (non-existent namespace; should be `Domain.Repositories`) and `ITripService.TryAssignDriver` (method not in interface; use `MatchDriverAsync`).
 
 ---
 
@@ -311,7 +320,7 @@ services.AddSingleton<IFareService, FareService>();
 services.AddSingleton<ISimulationService, SimulationService>();
 services.AddSingleton<IDriverSimulationService, DriverSimulationService>(); // ❌ interface missing
 
-// Background workers (❌ classes missing)
+// Background workers ✅
 services.AddSingleton<TripTimeoutWorker>();
 services.AddSingleton<TripMatchingWorker>();
 ```
@@ -320,8 +329,8 @@ services.AddSingleton<TripMatchingWorker>();
 
 ## 11. State Machines (Detailed)
 
-**TripStateMachine** (`Domain.StateMachines.TripStateMachine`):
-- `CanTransition(TripStatus from, TripStatus to)` — dictionary lookup
+**Trip State Pattern** (`Domain.States.ITripState` + implementations):
+- Each state class (`RequestedState`, `SearchingState`, `MatchedState`, ...) validates transitions before delegating to `Trip.TransitionTo(...)`.
 - `CanBeCancelled(TripStatus status)` — returns true for Requested, Searching, Matched, Arrived (before Started)
 
 Valid transition graph:
@@ -349,32 +358,32 @@ OnTrip → Available
 
 All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 
-**Trip Events** (`Domain.Trips.Events`):
+**Trip Events** (`Domain.Events`):
 - `TripRequestedEvent` — ctor
 - `TripSearchingEvent` — SetSearching()
 - `TripMatchedEvent` — MatchDriver()
 - `TripArrivedEvent` — MarkAsArrived()
 - `TripStartedEvent` — StartTrip()
 - `TripCompletedEvent` — CompleteTrip()
-- `TripPaidEvent` — ConfirmPayment() (not called in current code)
+- `TripPaidEvent` — ConfirmPayment() (called in TripService.CompleteTripAsync)
 - `TripCancelledEvent` — Cancel()
 - `TripTimeoutEvent` — MarkTimeout()
 
-**Driver Events** (`Domain.Users.Drivers.Events`):
+**Driver Events** (`Domain.Events`):
 - `DriverStatusChangedEvent` — status change
 - `DriverLocationUpdatedEvent` — position update
 
-**Review Event** (`Domain.Reviews.Events`):
+**Review Event** (`Domain.Events`):
 - `ReviewCreatedEvent` — review submission
 
 ---
 
 ## 13. UI Threading & Real-time Updates
 
-- `TripService` exposes `public event Action<TripDto> TripStatusChanged`
+- `ITripService` exposes `event EventHandler<TripStatusChangedEventArgs> TripStatusChanged`
 - Presentation forms subscribe to this event to refresh UI without polling
 - Example: `PassengerShell`, `PassengerViewModel`, `DriverViewModel`, `TripTrackingForm`
-- **Issue:** `ITripService` interface does NOT declare this event, so Presentation cannot subscribe via interface — violates Liskov; UI must cast to concrete `TripService`.
+- **Note:** Event is declared on the interface, so UI can subscribe via `ITripService` without casting to concrete `TripService`.
 
 ---
 

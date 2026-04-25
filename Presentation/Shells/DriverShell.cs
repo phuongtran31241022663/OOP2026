@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Timers;
-using Application.DTOs;
+
 using Application.Interfaces;
 using Presentation.Screens.Driver;
 using Domain.Enums;
@@ -19,12 +19,12 @@ namespace Presentation.Shells
         private readonly ISimulationService _simulationService;
         private readonly IFareService _fareService;
 
-        private DriverDto _driver;
-        private TripDto _currentTrip;
+        private Driver _driver;
+        private Trip _currentTrip;
 
-        public TripDto CurrentTrip => _currentTrip;
-        public void SetCurrentTrip(TripDto trip) => _currentTrip = trip;
-        public DriverDto Driver => _driver;
+        public Trip CurrentTrip => _currentTrip;
+        public void SetCurrentTrip(Trip trip) => _currentTrip = trip;
+        public Driver Driver => _driver;
         private bool _activeToggleState;
         private HashSet<Guid> _notifiedTripIds = new HashSet<Guid>();
         private Dictionary<Guid, DateTime> _recentNotifications = new Dictionary<Guid, DateTime>();
@@ -37,7 +37,7 @@ namespace Presentation.Shells
             ITripService tripService,
             ISimulationService simulationService,
             IFareService fareService,
-            DriverDto driver)
+            Driver driver)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _tripService = tripService ?? throw new ArgumentNullException(nameof(tripService));
@@ -230,7 +230,7 @@ namespace Presentation.Shells
             }
         }
 
-        private void OnTripStatusChanged(TripDto trip)
+        private void OnTripStatusChanged(Trip trip)
         {
             if (InvokeRequired)
             {
@@ -243,7 +243,7 @@ namespace Presentation.Shells
         }
 
         // Public methods for external control (called by TripNavigationForm)
-        public void OnTripAccepted(TripDto trip)
+        public void OnTripAccepted(Trip trip)
         {
             SetCurrentTrip(trip);
             // Refresh dashboard if needed
@@ -256,7 +256,7 @@ namespace Presentation.Shells
             NavigateTo("Dashboard");
         }
 
-        private void UpdateTripDisplay(TripDto trip)
+        private void UpdateTripDisplay(Trip trip)
         {
             // Handle navigation based on trip status
             if (trip.DriverId == _driver.Id)

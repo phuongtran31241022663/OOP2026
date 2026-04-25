@@ -1,7 +1,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace Presentation.Screens.Driver
+namespace Presentation.Screens.DriverScreen
 {
     partial class TripNavigationForm : BaseForm
     {

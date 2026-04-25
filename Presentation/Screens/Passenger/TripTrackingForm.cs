@@ -1,5 +1,6 @@
+using Application.Events;
 using Application.Interfaces;
-using Application.DTOs;
+using Domain.Entities;
 using Domain.Enums;
 using Presentation.Shells;
 using System;
@@ -7,39 +8,54 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Presentation;
-
-namespace Presentation.Screens.Passenger
+namespace Presentation.Screens.PassengerScreen
 {
     public partial class TripTrackingForm : BaseForm
     {
-        // Dependencies
         private readonly ITripService _tripService;
         private readonly IUserService _userService;
-        private readonly IDriverSimulationService _driverSimulationService;
         private readonly PassengerShell _parentShell;
+        private Trip _currentTrip;
 
-        // State
-        private TripDto _currentTrip;
-        private DriverDto _currentDriver;
-
-        public TripTrackingForm(ITripService tripService, IUserService userService, IDriverSimulationService driverSimulationService, PassengerShell parentShell)
+        public TripTrackingForm(ITripService tripService, IUserService userService, PassengerShell parentShell)
         {
             _tripService = tripService ?? throw new ArgumentNullException(nameof(tripService));
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            _driverSimulationService = driverSimulationService ?? throw new ArgumentNullException(nameof(driverSimulationService));
             _parentShell = parentShell ?? throw new ArgumentNullException(nameof(parentShell));
-
             InitializeComponent();
-        }
+            // Đăng ký sự kiện Observer
+            _tripService.TripStatusChanged += OnTripStatusChanged;
 
+            // Đảm bảo hủy đăng ký khi form đóng (để tránh memory leak)
+            this.FormClosed += (s, e) => _tripService.TripStatusChanged -= OnTripStatusChanged;
+        }
+        private void OnTripStatusChanged(object sender, TripStatusChangedEventArgs e)
+        {
+            // Chỉ xử lý nếu sự kiện liên quan đến chuyến hiện tại
+            if (_currentTrip == null || e.TripId != _currentTrip.Id)
+                return;
+
+            // Lấy trip mới nhất từ repository
+            Trip updatedTrip = _tripService.GetTripAsync(e.TripId).GetAwaiter().GetResult();
+            if (updatedTrip == null) return;
+
+            // Cập nhật UI (thread-safe)
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => ApplyTripUpdate(updatedTrip)));
+            }
+            else
+            {
+                ApplyTripUpdate(updatedTrip);
+            }
+        }
         private void TripTrackingForm_Load(object sender, EventArgs e)
         {
             ShowEmpty();
         }
 
         // Update from trip
-        public void ApplyTripUpdate(TripDto trip)
+        public void ApplyTripUpdate(Trip trip)
         {
             _currentTrip = trip;
             if (InvokeRequired)
@@ -214,7 +230,7 @@ namespace Presentation.Screens.Passenger
             }
         }
 
-        public void OnTripStarted(Trip trip) => ApplyTripUpdate(_tripService.GetTripDto(trip.Id));
+        public void OnTripStarted(Trip trip) => ApplyTripUpdate(_tripService.GetTrip(trip.Id));
 
         public void RefreshData()
         {

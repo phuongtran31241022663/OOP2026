@@ -1,6 +1,6 @@
 using System.Windows.Forms;
 
-namespace Presentation.Screens.Passenger
+namespace Presentation.Screens.PassengerScreen
 {
     partial class TripTrackingForm : BaseForm
     {

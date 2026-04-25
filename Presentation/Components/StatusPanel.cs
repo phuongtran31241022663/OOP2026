@@ -126,19 +126,13 @@ namespace Presentation.Components
 
         private void ClearLogs(object sender, EventArgs e)
         {
-            // _logEntries.Clear(); // No Clear method
+            while (_logEntries.TryDequeue(out _)) { }
             _errorCount = 0;
             _warningCount = 0;
-
             if (_logTextBox.InvokeRequired)
-            {
                 _logTextBox.Invoke(new Action(_logTextBox.Clear));
-            }
             else
-            {
                 _logTextBox.Clear();
-            }
-
             UpdateErrorCount();
             UpdateStatus("● Sẵn sàng", Color.Green);
         }

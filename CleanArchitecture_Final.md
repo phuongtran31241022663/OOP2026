@@ -5,37 +5,51 @@
 ## Dependency Rule
 
 ```
-Outer → Inner
-Common → Domain → Application → Infrastructure
-                              → Presentation
+Outer → Inner (outer layers depend on inner layers)
+
+Presentation → Application → Infrastructure → Domain → Common
 ```
 
-| Layer          | Vai trò                          | Biết về          | Không biết về              |
-|----------------|----------------------------------|------------------|----------------------------|
-| Domain         | Business rules, core logic       | Chính nó         | Tất cả layer khác          |
-| Application    | Use cases, orchestration         | Domain           | Infrastructure, Presentation |
-| Infrastructure | Implementation, I/O thực tế      | Application      | Presentation               |
-| Presentation   | HTTP, UI, API contract           | Application      | Infrastructure trực tiếp   |
-| Common         | Primitive types, pure functions  | Không ai         | Không ai                   |
+> **RideGo project references (actual `.csproj`):**
+> - `Presentation` → Application, Common, Domain, Infrastructure *(vi phạm — xem note bên dưới)*
+> - `Application` → Common, Domain
+> - `Infrastructure` → Application, Common, Domain
+> - `Domain` → Common
+> - `Common` → *(none)*
+
+| Layer | Vai trò | Biết về | Không biết về |
+|---|---|---|---|
+| Common | Primitive types, pure functions, constants | Chính nó | Tất cả layer khác |
+| Domain | Business rules, core logic | Common | Infrastructure, Application, Presentation |
+| Application | Use cases, orchestration | Common, Domain | Infrastructure, Presentation |
+| Infrastructure | Implementation, I/O thực tế | Common, Domain, Application | Presentation |
+| Presentation | WinForms UI, DI root | Application, Common | Infrastructure trực tiếp *(nên tránh)* |
+
+> **Vi phạm hiện tại:** Presentation references Domain và Infrastructure trực tiếp. Đúng Clean Architecture, Presentation chỉ nên biết Application (và Common cho shared types). Cần refactor dần.
 
 ---
 
-## Pipeline
+## Pipeline (RideGo WinForms)
 
 ```
-HTTP Request
-  → Middleware (HTTP pipeline)
-    → Controller / Endpoint
-      → MediatR
-        → Behavior (Application pipeline: logging, validation, transaction)
-          → Handler
-            → Domain
-              → Repository (Interface) → Infrastructure
+User Action (Button Click / Timer Tick)
+  → WinForms Event Handler (Presentation)
+    → Application Service Interface (ITripService, IUserService...)
+      → Application Service Implementation
+        → Domain Entity / State Machine
+          → Repository Interface (Domain)
+            → JsonRepository<T> (Infrastructure)
+              → FileStorage → data/*.json
 ```
 
-> **Middleware** = cross-cutting ở tầng HTTP (auth, rate limit, correlation ID, exception handler).  
-> **Behavior** = cross-cutting ở tầng Application (logging, validation pipeline, transaction, performance).  
-> Hai thứ này khác nhau hoàn toàn — đừng nhầm.
+> **Observer Pattern** thay thế middleware: `TripService.TripStatusChanged` event được các Form subscribe để cập nhật UI real-time mà không polling.
+>
+> **DI Root** tại `Program.cs` (Presentation) — khởi tạo toàn bộ service graph bằng `Microsoft.Extensions.DependencyInjection`.
+
+**Lưu ý so với Web API pattern:**
+- Không có HTTP middleware — thay bằng WinForms event pipeline.
+- Không dùng MediatR — handler gọi Application Service trực tiếp.
+- Không dùng EF Core — thay bằng `JsonRepository<T>` + `FileStorage`.
 
 ---
 

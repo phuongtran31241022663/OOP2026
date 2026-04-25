@@ -1,18 +1,17 @@
+using Application.Events;
+using Application.Interfaces;
+using Domain.Enums;
+using Presentation.Shells;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Media;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using Domain.Enums;
-using Application.Interfaces;
-using Presentation.Shells;
-using Application.DTOs;
+using Domain.Entities;
 
-using Presentation;
-
-namespace Presentation.Screens.Driver
+namespace Presentation.Screens.DriverScreen
 {
     public partial class TripNavigationForm : BaseForm
     {
@@ -23,7 +22,7 @@ namespace Presentation.Screens.Driver
         private readonly ISimulationService _simulationService;
 
         // State
-        private TripDto _pendingTrip;
+        private Trip _pendingTrip;
         private bool _isLoading;
         private HashSet<Guid> _notifiedIds;
 
@@ -41,9 +40,24 @@ namespace Presentation.Screens.Driver
 
             InitializeComponent();
             RefreshAsync();
+            _tripService.TripStatusChanged += OnTripStatusChanged;
+            this.FormClosed += (s, e) => _tripService.TripStatusChanged -= OnTripStatusChanged;
         }
 
-
+        private void OnTripStatusChanged(object sender, TripStatusChangedEventArgs e)
+        {
+            // Cần kiểm tra xem trip mới này có dành cho driver hiện tại không
+            // Có thể lấy trip từ service và kiểm tra DriverId (nếu đã matched)
+            // Hoặc dựa vào logic nghiệp vụ: nếu driver chưa có trip active thì tìm trip Searching
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => RefreshAsync()));
+            }
+            else
+            {
+                RefreshAsync();
+            }
+        }
 
         private async void RefreshAsync()
         {
@@ -55,11 +69,11 @@ namespace Presentation.Screens.Driver
             try
             {
                 // Step 1: Sync user profile
-                var driverDto = await _userService.GetDriverById(_shell.Driver.Id);
-                if (driverDto != null)
+                var Driver = await _userService.GetDriverById(_shell.Driver.Id);
+                if (Driver != null)
                 {
                     // Update shell driver if needed
-                    // _shell.Driver = driverDto; // Uncomment if shell needs updating
+                    // _shell.Driver = Driver; // Uncomment if shell needs updating
                 }
 
                 // Step 2: Check offline
@@ -87,7 +101,7 @@ namespace Presentation.Screens.Driver
 
                 // Step 5: Find new trips
                 // TODO: var newTrips = await _tripService.GetActiveTripsForDriverAsync(_shell.Driver.Id);
-                var newTrips = new List<TripDto>(); // Placeholder
+                var newTrips = new List<Trip>(); // Placeholder
 
                 if (newTrips.Any())
                 {
@@ -131,7 +145,7 @@ namespace Presentation.Screens.Driver
             _activeTripPanel.Visible = false;
         }
 
-        private void ShowRequestCard(TripDto trip)
+        private void ShowRequestCard(Trip trip)
         {
             _requestInfoLabel.Text = $"{trip.Pickup?.Address ?? "Unknown"} → {trip.Destination?.Address ?? "Unknown"}\n" +
                                    $"Giá: {trip.Fare:N0} đ\n" +

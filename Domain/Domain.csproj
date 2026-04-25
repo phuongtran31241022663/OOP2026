@@ -74,6 +74,7 @@
     <Compile Include="Events\TripRequestedEvent.cs" />
     <Compile Include="Events\TripSearchingEvent.cs" />
     <Compile Include="Events\TripStartedEvent.cs" />
+    <Compile Include="Events\TripStatusChangedEventArgs.cs" />
     <Compile Include="Events\TripTimeoutEvent.cs" />
     <Compile Include="Repositories\IDriverRepository.cs" />
     <Compile Include="Repositories\IFareRuleRepository.cs" />
@@ -87,7 +88,15 @@
     <Compile Include="SharedKernel\Entity.cs" />
     <Compile Include="SharedKernel\ValueObject.cs" />
     <Compile Include="StateMachines\DriverStateMachine.cs" />
-    <Compile Include="StateMachines\TripStateMachine.cs" />
+    <Compile Include="States\ArrivedState.cs" />
+    <Compile Include="States\CancelledState.cs" />
+    <Compile Include="States\CompletedState.cs" />
+    <Compile Include="States\ITripState.cs" />
+    <Compile Include="States\MatchedState.cs" />
+    <Compile Include="States\RequestedState.cs" />
+    <Compile Include="States\SearchingState.cs" />
+    <Compile Include="States\StartedState.cs" />
+    <Compile Include="States\TimeoutState.cs" />
     <Compile Include="ValueObjects\Address.cs" />
     <Compile Include="ValueObjects\Coordinate.cs" />
     <Compile Include="ValueObjects\Fare.cs" />
@@ -95,7 +104,6 @@
     <Compile Include="ValueObjects\Money.cs" />
     <Compile Include="ValueObjects\Route.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="IsExternalInit.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -103,4 +111,3 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
-

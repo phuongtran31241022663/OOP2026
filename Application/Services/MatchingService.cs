@@ -1,47 +1,72 @@
-﻿using Domain.Enums;
+﻿using Application.Interfaces;
+using Domain.Entities;
+using Domain.Entities.Users;
+using Domain.Enums;
 using Domain.Repositories;
-using Domain.Trips;
-using Domain.Users;
-using Domain.Users.Drivers;
 using System;
 using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    /// <summary>
-    /// Matches drivers to trips based on availability and vehicle type.
-    /// </summary>
-    public class MatchingService
+    public class MatchingService : IMatchingService
     {
-        private readonly IUserRepository _userRepository;
         private readonly ITripRepository _tripRepository;
+        private readonly IDriverRepository _driverRepository;
+        private readonly IVehicleRepository _vehicleRepository;
 
-        public MatchingService(IUserRepository userRepository, ITripRepository tripRepository)
+        public MatchingService(ITripRepository tripRepository, IDriverRepository driverRepository, IVehicleRepository vehicleRepository)
         {
-            _userRepository = userRepository;
-            _tripRepository = tripRepository;
+            _tripRepository = tripRepository ?? throw new ArgumentNullException(nameof(tripRepository));
+            _driverRepository = driverRepository ?? throw new ArgumentNullException(nameof(driverRepository));
+            _vehicleRepository = vehicleRepository ?? throw new ArgumentNullException(nameof(vehicleRepository));
         }
 
         public async Task<bool> MatchDriverToTripAsync(Guid tripId, Guid driverId)
         {
-            var trip = await _tripRepository.GetByIdAsync(tripId);
-            var driver = await _userRepository.GetDriverByIdAsync(driverId);
+            Trip trip = await _tripRepository.GetByIdAsync(tripId);
+            if (trip == null)
+            {
+                return false;
+            }
 
-            if (trip == null || driver == null) return false;
-            if (driver.Status != DriverStatus.Available) return false;
+            // Chỉ ghép khi chuyến đang ở trạng thái tìm tài xế
+            if (trip.Status != TripStatus.Searching)
+            {
+                return false;
+            }
 
-            // Additional checks: vehicle type match
-            var vehicleRepo = (IVehicleRepository)_userRepository; // IUserRepository also implements IVehicleRepository? No; but for simplicity we assume we have IVehicleRepository from DI
-            // Actually we should inject IVehicleRepository separately; but in code we only have IUserRepository and ITripRepository.
-            // We'll skip vehicle type matching if we can't get vehicle.
-            // Since constructor doesn't take IVehicleRepository, we skip that check.
+            Driver driver = await _driverRepository.GetByIdAsync(driverId);
+            if (driver == null)
+            {
+                return false;
+            }
 
-            // Let aggregate handle state change
+            if (driver.Status != DriverStatus.Available)
+            {
+                return false;
+            }
+
+            Vehicle vehicle = await _vehicleRepository.GetByIdAsync(driver.VehicleId);
+            if (vehicle == null)
+            {
+                return false;
+            }
+
+            // Kiểm tra loại xe khớp với yêu cầu của chuyến
+            if (vehicle.Type != trip.TripVehicleType)
+            {
+                return false;
+            }
+
             trip.MatchDriver(driver.Id);
             driver.SetOnTrip();
 
             await _tripRepository.UpdateAsync(trip);
-            await _userRepository.UpdateAsync(driver);
+            await _driverRepository.UpdateAsync(driver);
+
+            await _tripRepository.SaveChangesAsync();
+            await _driverRepository.SaveChangesAsync();
+
             return true;
         }
     }

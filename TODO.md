@@ -1,20 +1,46 @@
-# Refactor Domain Entities to Immutable Pattern with readonly fields
+# Sửa tài liệu (Documentation Fixes) - Theo dõi tiến độ
 
-## Steps:
-- [x] Step 1: Refactor Trip.cs ✅
-- [ ] Step 2: Test compilation: msbuild ✅ (check output)
-- [x] Step 3: Refactor Passenger.cs ✅
-- [x] Step 4: Refactor Driver.cs ✅ (removed init, field direct access)
-- [ ] Step 5: Compile verified ✅
-- [x] Step 6: ValueObjects (Fare/Route) refactored to readonly pattern ✅
+## Mục tiêu
+Sửa các điểm sai/lệch trong tài liệu `.md` so với code C# thực tế.
 
-# Fix Inheritance: Forms → BaseForm, Shells → BaseShell, UserControls → BaseUserControl
+## Checklist
 
-## Steps:
-- [x] Step 1: Fix Components (DriverCardControl, StatusPanel)
-- [x] Step 2: Fix Screens/Admin (FareRulesForm, ReportForm, UserManagementForm)
-- [x] Step 3: Fix Screens/Driver (DriverDashboardForm, EarningsForm, TripNavigationForm)
-- [x] Step 4: Fix Screens/Passenger (BookTripForm, ReviewForm, TripHistoryForm, TripTrackingForm)
-- [x] Step 5: Fix Shells (AdminShell, DriverShell, MainShell)
-- [ ] Step 6: Compile verify
+- [ ] 1. Sửa `Common_Project_Documentation.md`
+  - [ ] Xóa/sửa `BaseException` (không tồn tại)
+  - [ ] Cập nhật `PasswordHasher` có cả ở `Helpers/` và `Utilities/`
+- [ ] 2. Sửa `Domain_Model.md`
+  - [ ] Sửa đường dẫn folder thành `Domain/Entities/...`
+  - [ ] Xóa `TripStateMachine` (không tồn tại)
+  - [ ] Sửa `Driver.UpdateReviews(int rating)`
+  - [ ] Chuyển `IRepository.cs` ra `Domain/Repositories/`
+- [ ] 3. Sửa `Presentation_and_UI.md`
+  - [ ] Sửa tên method `ITripService` cho đúng (`CreateTripAsync`, `MatchDriverAsync`, `GetTripAsync`)
+  - [ ] Thay `IDriverMatchingService` → `IMatchingService`
+  - [ ] Xóa các lớp Command/Query không tồn tại
+- [ ] 4. Sửa `README.md`
+  - [ ] Xóa/sửa phần DTOs/Features/Commands (không tồn tại)
+  - [ ] Xóa `TripStateMachine`
+  - [ ] Cập nhật `MatchingService` (đã kiểm tra VehicleType)
+  - [ ] Cập nhật `AdminService` (đã implement)
+  - [ ] Cập nhật workers (`TripTimeoutWorker`, `TripMatchingWorker` đã tồn tại)
+  - [ ] Sửa `FareService` (không inject `IRouteService`)
+  - [ ] Sửa `ITripService` event (đã có trong interface)
+  - [ ] Sửa namespace `ReviewService` → `Application.Services`
+- [ ] 5. Sửa `RideGo_Architecture.md`
+  - [ ] Sửa namespace `MatchingService` → `Application.Services`
+  - [ ] Sửa kiểu event `TripService` → `EventHandler<TripStatusChangedEventArgs>`
+  - [ ] Sửa vị trí `IMapService` → `Application.Interfaces`
+  - [ ] Xóa optimistic concurrency / Version
+  - [ ] Cập nhật `BackgroundJobs` đã tồn tại
+  - [ ] Cập nhật `AdminService` đã implement
+- [ ] 6. Sửa `Technical_Architecture.md`
+  - [ ] Sửa namespace các service cho đúng
+  - [ ] Sửa dependency `FareService`
+  - [ ] Sửa kiểu event `TripService`
+  - [ ] Sửa `IMapService` vị trí
+  - [ ] Xóa Version/concurrency
+  - [ ] Cập nhật `BackgroundJobs`
+- [ ] 7. Sửa `Business_Logic_and_Workflows.md`
+  - [ ] Thay `FareCalculationService` / Policies bằng `FareRule.CalculateFare`
+  - [ ] Sửa `MatchingService` mô tả
 

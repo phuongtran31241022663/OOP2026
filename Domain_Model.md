@@ -11,25 +11,45 @@ Independent of infrastructure; persistence impls in Infrastructure layer.
 ```
 Domain/
 ├── Enums/                    # DriverStatus.cs, TripStatus.cs, VehicleType.cs
-├── FareRules/                # FareRule.cs, IFareRuleRepository.cs
-├── Reviews/                  # Review.cs, IReviewRepository.cs
-├── SharedKernel/             # Entity.cs, DomainEvent.cs, IRepository.cs, ValueObject.cs
-├── StateMachines/            # DriverStateMachine.cs, TripStateMachine.cs
-├── Trips/                    # ITripRepository.cs, Trip.cs
-│   └── Events/               # 9 Trip*Event.cs
-├── Users/                    # Admin.cs, IUserRepository.cs, User.cs (abstract)
-│   ├── Drivers/              # Driver.cs, IDriverRepository.cs
-│   │   └── Events/           # DriverStatusChangedEvent.cs
-│   └── Passengers/           # IPassengerRepository.cs, Passenger.cs
-├── ValueObjects/             # Address.cs, Coordinate.cs, Fare.cs, Location.cs, Money.cs, Route.cs
-└── Vehicles/                 # Car.cs, IVehicleRepository.cs, Motorbike.cs, Vehicle.cs
+├── Entities/                 # Core business entities
+│   ├── FareRule.cs
+│   ├── Review.cs
+│   ├── Trip.cs
+│   ├── User.cs (abstract)
+│   ├── Users/
+│   │   ├── Admin.cs
+│   │   ├── Driver.cs
+│   │   └── Passenger.cs
+│   ├── Vehicles/
+│   │   ├── Car.cs
+│   │   ├── Motorbike.cs
+│   │   └── Vehicle.cs
+│   └── Vehicles/             # (alias for clarity)
+├── Events/                   # Domain events
+│   ├── Trip*.cs (9 events)
+│   ├── DriverStatusChangedEvent.cs
+│   └── ReviewCreatedEvent.cs
+├── SharedKernel/             # Entity.cs, DomainEvent.cs, ValueObject.cs
+├── StateMachines/            # DriverStateMachine.cs
+├── States/                   # State Pattern for Trip lifecycle
+│   ├── ITripState.cs
+│   ├── RequestedState.cs
+│   ├── SearchingState.cs
+│   ├── MatchedState.cs
+│   ├── ArrivedState.cs
+│   ├── StartedState.cs
+│   ├── CompletedState.cs
+│   ├── CancelledState.cs
+│   └── TimeoutState.cs
+├── Repositories/             # IRepository.cs, ITripRepository.cs, IDriverRepository.cs, ...
+└── ValueObjects/             # Address.cs, Coordinate.cs, Fare.cs, Location.cs, Money.cs, Route.cs
 ```
 
 ## 3. Key Entities & Methods
 
-### Base: `Entity<Guid>` (abstract)
-- Properties: `Guid Id` (protected set), `IReadOnlyCollection<DomainEvent> DomainEvents`
-- Methods: `AddEvent(DomainEvent)`, `ClearEvents()`, `Equals/HashCode` by Id.
+### Base: `Entity` (abstract)
+- Properties: `Guid Id` (protected set), `IReadOnlyList<DomainEvent> DomainEvents`
+- Methods: `AddEvent(DomainEvent)`, `GetEvents()`, `ClearEvents()`, `Equals/HashCode` by Id.
 
 ### `User` (abstract : Entity)
 - Properties: `Name`, `Phone`, `Password` (hashed readonly).
@@ -45,7 +65,7 @@ Domain/
 ### `Driver` (: User)
 - Properties: `Status` (DriverStatus), `Position` (Location), `VehicleId` (Guid), `Wallet/Income` (Money), `TotalTrips`, `RatingSum/TotalReviews`, `AverageRating` (computed), `LicenseNumber`.
 - Methods: State: `SetAvailable/OnTrip/Offline` (validate via DriverStateMachine, emit `DriverStatusChangedEvent`).
-  - `UpdatePosition(Location)`, `AddTrip()`, `UpdateReviews(Review)`, `DepositToWallet(Money)`, `PayCommission(Fare)`.
+  - `UpdatePosition(Location)`, `AddTrip()`, `UpdateReviews(int rating)`, `DepositToWallet(Money)`, `PayCommission(Fare)`.
   - `GetDisplayString(DriverStatus)` (static).
 
 ### `Trip` (: Entity)
@@ -82,9 +102,9 @@ Domain/
 - **Trip Events (9):** RequestedEvent(PassengerId,Pickup,Dest,VehicleType), SearchingEvent(Id), MatchedEvent(Id,DriverId,VehicleType), Arrived/StartedEvent(Id), CompletedEvent(Id,PassengerId,DriverId,Fare), PaidEvent(Id,PassengerId,DriverId,TotalAmount), CancelledEvent(Id,Reason), TimeoutEvent(Id).
 - **Driver:** StatusChangedEvent(Id,OldStatus,NewStatus).
 
-## 7. State Machines (static)
-- `TripStateMachine.CanTransition(from,to)`: Dictionary-defined valid flows.
-- `DriverStateMachine.CanTransition(from,to)`.
+## 7. State Machines & State Pattern
+- **DriverStateMachine** (`static class`): `CanTransition(DriverStatus from, DriverStatus to)` — dictionary-defined valid flows.
+- **Trip State Pattern**: `Trip` delegates state behavior to `ITripState` implementations (`RequestedState`, `SearchingState`, `MatchedState`, `ArrivedState`, `StartedState`, `CompletedState`, `CancelledState`, `TimeoutState`). Each state validates transitions before calling `trip.TransitionTo(...)`.
 
 ## 8. Repository Interfaces (Domain only)
 - `IFareRuleRepository`, `IReviewRepository`, `ITripRepository`, `IUserRepository`, `IDriverRepository`, `IPassengerRepository`, `IVehicleRepository`.
@@ -99,5 +119,5 @@ Domain/
 ## 10. Implementation Notes
 - Events accumulated in-memory (`AddEvent`), cleared post-dispatch.
 - Validation in init setters/ctors.
-- No advanced DDD (no AggregateRoot sep, no specs/policies/services beyond state machines)."
+- No advanced DDD (no AggregateRoot sep, no specs/policies/services beyond DriverStateMachine).
 

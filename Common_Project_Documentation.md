@@ -24,16 +24,16 @@ The Common project serves as a cross-cutting shared utilities library used acros
 ```
 Common/
 ├── Constants/           # Application-wide constants (FareConstants, SimulationConstants)
-├── Exceptions/          # Base exception classes (BaseException)
 ├── Extensions/          # .NET type extension methods (StringExtensions, DecimalExtensions)
-└── Helpers/             # Utility helper classes (PasswordHasher)
+├── Helpers/             # Utility helper classes (PasswordHasher)
+└── Utilities/           # Additional utility location (PasswordHasher — duplicate of Helpers)
 ```
 
 **Namespaces:**
 - `Common.Constants`
-- `Common.Exceptions`
 - `Common.Extensions`
 - `Common.Helpers`
+- `Common.Utilities`
 
 ## 4. Components Overview
 
@@ -123,41 +123,7 @@ Static class for simulation engine parameters:
 
 ---
 
-### 4.3 Exceptions
-
-#### BaseException (`Common/Exceptions/BaseException.cs`)
-
-Abstract base class for all application exceptions.
-
-**Features:**
-- Inherits from `System.Exception`
-- Marked `[Serializable]` for cross-appdomain support
-- Provides protected constructors for derived classes:
-
-```csharp
-protected BaseException();
-protected BaseException(string message);
-protected BaseException(string message, Exception inner);
-protected BaseException(SerializationInfo info, StreamingContext context);
-```
-
-**Usage Pattern:**
-```csharp
-public class TripAlreadyAssignedException : BaseException
-{
-    public TripAlreadyAssignedException(Guid tripId)
-        : base($"Trip {tripId} is already assigned to a driver.") { }
-}
-```
-
-**Benefits:**
-- Consistent exception hierarchy across layers
-- Enables catch-all filtering: `catch (BaseException ex)`
-- Supports serialization for remoting/logging
-
----
-
-### 4.4 Helpers
+### 4.3 Helpers
 
 #### PasswordHasher (`Common/Helpers/PasswordHasher.cs`)
 
@@ -214,8 +180,9 @@ if (PasswordHasher.NeedsRehash(user.PasswordHash))
 |-----------------|--------|-------|
 | `Constants/` | ✅ Implemented | FareConstants, SimulationConstants |
 | `Extensions/` | ✅ Implemented | StringExtensions, DecimalExtensions |
-| `Exceptions/` | ⚠️ Partial | BaseException only; specific exceptions missing |
+| `Exceptions/` | ❌ Not present | No exception base class exists in Common |
 | `Helpers/` | ✅ Implemented | PasswordHasher only; missing validation helpers |
+| `Utilities/` | ✅ Implemented | Duplicate PasswordHasher (same as Helpers) |
 | DataMapper helper | ❌ Missing | Not present in Common (in Presentation instead) |
 | MapHelper helper | ❌ Missing | Not present in Common (in Presentation instead) |
 | UIHelper helper | ❌ Missing | Not present in Common (in Presentation instead) |
@@ -225,7 +192,7 @@ if (PasswordHasher.NeedsRehash(user.PasswordHash))
 - Common project implementation is **minimal** compared to typical shared library
 - Presentation-specific helpers (DataMapper, UIHelper, MapHelper) incorrectly placed in `Presentation/Helpers/` instead of `Common/Helpers/`
 - No generic collections helpers, validation helpers, or date/time extensions that typically belong in Common
-- Exception hierarchy shallow (only BaseException); no specific exceptions (e.g., ValidationException, NotFoundException)
+- No exception base class exists in Common; all layers use standard `System.Exception`
 
 ---
 
@@ -241,8 +208,8 @@ if (PasswordHasher.NeedsRehash(user.PasswordHash))
 **Best Practices:**
 1. **Extension Methods:** Use sparingly; only for ubiquitous operations
 2. **Constants:** Group related constants in static classes (no public fields mixed with methods)
-3. **Exceptions:** Derive all custom exceptions from `BaseException`
-4. **Helpers:** Keep helper methods small, focused, well-documented
+3. **Helpers:** Keep helper methods small, focused, well-documented
+4. **Utilities:** Avoid duplicating helpers across `Helpers/` and `Utilities/` folders
 
 **Thread Safety:**
 All Common classes are inherently thread-safe:
@@ -264,19 +231,18 @@ Domain (Entities/Services)
     ↓ uses
 Infrastructure (Repositories/External)
     ↓ uses
-Common (Constants/Extensions/Exceptions/Helpers)
+Common (Constants/Extensions/Helpers/Utilities)
 ```
 
 **Example Integration Points:**
 
 | Common Component | Used By | Purpose |
 |------------------|---------|---------|
-| `FareConstants` | Domain.FareCalculationService, Application.FareRuleService | Base fare lookup |
+| `FareConstants` | Application.FareService | Base fare lookup |
 | `SimulationConstants` | Application.SimulationService, Presentation timers | Simulation tick rate |
-| `StringExtensions.IsValidPhone()` | Application.Validators | Input validation |
+| `StringExtensions.IsValidPhone()` | Application.UserService | Input validation |
 | `DecimalExtensions.ToVndCurrency()` | Presentation UI forms | Fare display formatting |
-| `PasswordHasher` | Application.UserService | User authentication |
-| `BaseException` | Domain, Application, Infrastructure | Consistent error handling |
+| `PasswordHasher` | Domain.User | User authentication |
 
 ---
 
@@ -288,8 +254,8 @@ Common (Constants/Extensions/Exceptions/Helpers)
 | `SimulationConstants.cs` | `Common/Constants/SimulationConstants.cs` | Simulation parameters |
 | `StringExtensions.cs` | `Common/Extensions/StringExtensions.cs` | String utilities |
 | `DecimalExtensions.cs` | `Common/Extensions/DecimalExtensions.cs` | Decimal/financial utilities |
-| `BaseException.cs` | `Common/Exceptions/BaseException.cs` | Base exception type |
 | `PasswordHasher.cs` | `Common/Helpers/PasswordHasher.cs` | Password security utility |
+| `PasswordHasher.cs` | `Common/Utilities/PasswordHasher.cs` | Duplicate of Helpers version |
 
 ---
 
@@ -300,7 +266,7 @@ Based on codebase analysis, recommended additions:
 1. **Date/Time Extensions:** `ToRelativeTime()`, `ToShortDateString()`
 2. **Validation Helpers:** `ValidateRequired()`, `ValidateRange()` in a new `ValidationHelper.cs`
 3. **Collection Extensions:** `ToReadOnlyList()`, `Batch()` for performance
-4. **Exception Types:** Specific exceptions (NotFoundException, ValidationException, ConflictException) inheriting BaseException
+4. **Exception Base Class:** Introduce a shared exception base (e.g., `AppException`) in Common for consistent error handling across layers
 5. **Result Pattern:** `Result<T>` type for functional error handling
 6. **Guard Clauses:** `Guard.Against.Null()`, `Guard.Against.OutOfRange()` static methods
 
@@ -319,7 +285,8 @@ The Common project provides essential shared infrastructure for the Ride-Hailing
 
 **Weaknesses:**
 - Limited set of utilities (could be expanded)
-- Missing specific exception hierarchy
+- No shared exception base class exists in Common
+- Duplicate PasswordHasher in both `Helpers/` and `Utilities/`
 - Helpers scattered across Presentation layer
 
 **Recommendation:** Consolidate all generic UI helpers (DataMapper, UIHelper, AlertHelper, MapHelper) into Common/Helpers, and expand exception types to create a complete application foundation.

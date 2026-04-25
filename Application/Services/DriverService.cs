@@ -1,52 +1,59 @@
-﻿using Domain.Enums;
-using Domain.Users.Drivers;
-using Domain.ValueObjects;
-using Infrastructure.Repositories;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using Application.Interfaces;
+using Domain.Entities.Users;
+using Domain.Repositories;
+using Domain.ValueObjects;
 
-namespace Services
+namespace Application.Services
 {
-    public class DriverService
+    public class DriverService : IDriverService
     {
-        private readonly DriverRepository _driverRepo;
+        private readonly IDriverRepository _driverRepository;
 
-        public DriverService(DriverRepository driverRepo)
+        public DriverService(IDriverRepository driverRepository)
         {
-            _driverRepo = driverRepo;
+            _driverRepository = driverRepository;
+        }
+
+        public async Task<Driver> GetDriverAsync(Guid driverId)
+        {
+            Driver driver = await _driverRepository.GetByIdAsync(driverId);
+            if (driver == null) throw new Exception("Driver not found.");
+            return driver;
         }
 
         public async Task UpdateLocationAsync(Guid driverId, Location newLocation)
         {
-            var driver = await _driverRepo.GetByIdAsync(driverId) ?? throw new Exception("Driver not found.");
+            Driver driver = await _driverRepository.GetByIdAsync(driverId);
+            if (driver == null) throw new Exception("Driver not found.");
             driver.UpdatePosition(newLocation);
-            _driverRepo.Update(driver);
-            await _driverRepo.SaveChangesAsync();
+            await _driverRepository.UpdateAsync(driver);
+            await _driverRepository.SaveChangesAsync();
         }
 
         public async Task SetAvailableAsync(Guid driverId)
         {
-            var driver = await _driverRepo.GetByIdAsync(driverId) ?? throw new Exception("Driver not found.");
+            Driver driver = await _driverRepository.GetByIdAsync(driverId);
+            if (driver == null) throw new Exception("Driver not found.");
             driver.SetAvailable();
-            _driverRepo.Update(driver);
-            await _driverRepo.SaveChangesAsync();
+            await _driverRepository.UpdateAsync(driver);
+            await _driverRepository.SaveChangesAsync();
         }
 
         public async Task SetOfflineAsync(Guid driverId)
         {
-            var driver = await _driverRepo.GetByIdAsync(driverId) ?? throw new Exception("Driver not found.");
+            Driver driver = await _driverRepository.GetByIdAsync(driverId);
+            if (driver == null) throw new Exception("Driver not found.");
             driver.SetOffline();
-            _driverRepo.Update(driver);
-            await _driverRepo.SaveChangesAsync();
+            await _driverRepository.UpdateAsync(driver);
+            await _driverRepository.SaveChangesAsync();
         }
 
         public async Task<List<Driver>> GetAvailableDriversAsync()
         {
-            return (await _driverRepo.GetAvailableDriversAsync()).ToList();
+            return await _driverRepository.GetAvailableDriversAsync();
         }
-
-        public async Task<Driver> GetDriverAsync(Guid driverId) => await _driverRepo.GetByIdAsync(driverId);
     }
 }

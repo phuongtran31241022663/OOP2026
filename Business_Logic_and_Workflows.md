@@ -15,19 +15,21 @@ Hệ thống đặt xe mô phỏng (ride-hailing simulation system) là một ch
 Để phù hợp với quy mô đồ án và đơn giản hóa triển khai, hệ thống sử dụng kiến trúc Layered Architecture với các tầng rõ ràng:
 
 ```
-Presentation (Console / Winform)
+Presentation (WinForms)
         ↓
 Application Layer (Services)
         ↓
-Domain Layer (Entities + Enums + Events)
+Infrastructure (File Repository - JSON)
         ↓
-Infrastructure (File Repository - JSON/Binary)
+Domain Layer (Entities + Enums + Events)
 ```
 
 - **Presentation Layer**: Giao diện người dùng (WinForms), xử lý input/output và hiển thị.
 - **Application Layer**: Các service điều phối logic nghiệp vụ, gọi domain và infrastructure.
-- **Domain Layer**: Chứa entities, enums, events, state machines, business rules.
-- **Infrastructure Layer**: Repository lưu trữ dữ liệu bằng JSON/Binary files.
+- **Infrastructure Layer**: Repository lưu trữ dữ liệu bằng JSON files (Newtonsoft.Json).
+- **Domain Layer**: Chứa entities, enums, events, state machines, business rules. **Không phụ thuộc vào bất kỳ layer nào khác.**
+
+> **Nguyên tắc vàng:** Luồng phụ thuộc luôn hướng vào Domain. Domain không biết Infrastructure hay Presentation tồn tại. Điều này cho phép thay thế lớp lưu trữ (JSON → SQL Server) mà không sửa business logic.
 
 ### 1.2. Lợi ích của kiến trúc phân tầng
 
@@ -143,20 +145,81 @@ Mô hình trạng thái chuyến đi (state machine) giúp kiểm soát logic ng
 
 ### 5.1. Quy Trình Ghép Tài Xế
 
-1. **Lọc theo loại xe**: Chỉ chọn tài xế có phương tiện phù hợp yêu cầu.
-2. **Loại bỏ không đủ điều kiện**: Loại tài xế Offline, đang OnTrip, bị khóa, không đủ điểm đánh giá.
-3. **Tính khoảng cách**: Sử dụng thuật toán Haversine để tính khoảng cách và tìm tài xế gần nhất.
-4. **Chọn tài xế gần nhất**: Ưu tiên tài xế có khoảng cách ngắn nhất, điểm đánh giá cao.
-5. **Gửi request lần lượt**: Gửi yêu cầu đến từng tài xế theo thứ tự ưu tiên, mỗi tài xế có thời gian xác nhận (timeout).
-6. **Xử lý race condition**: Kiểm tra trạng thái tài xế trước khi ghép, đảm bảo một tài xế chỉ nhận một chuyến tại một thời điểm.
-7. **Retry logic**: Nếu tài xế từ chối hoặc timeout, thử tài xế tiếp theo, lặp lại cho đến khi hết danh sách hoặc hết thời gian chờ.
-8. **Hiển thị bản đồ**: Cập nhật vị trí tài xế trên bản đồ cho hành khách.
+Vì không dùng LINQ, hệ thống duyệt `foreach` trên toàn bộ danh sách `Driver` được tải từ `DriverRepository`.
+
+**Tiêu chí lọc (theo thứ tự):**
+
+1. **Lọc theo loại xe**: Chỉ chọn tài xế có `VehicleType` khớp yêu cầu (`Car` / `Motorbike`).
+2. **Loại bỏ không đủ điều kiện**: Loại tài xế `Offline`, đang `OnTrip`.
+3. **Lọc thô theo địa chỉ hành chính** (xem mục 5.1.1 bên dưới) — tránh gọi route API cho toàn bộ danh sách.
+4. **Kiểm tra khoảng cách**: Khoảng cách từ vị trí tài xế đến điểm đón < `MaxPickupDistance` của phương tiện.
+5. **Kiểm tra ví**: Số dư `Wallet` đủ để khấu trừ hoa hồng dự kiến.
+6. **Gửi request lần lượt**: Theo thứ tự ưu tiên, mỗi tài xế có thời gian xác nhận (timeout).
+7. **Retry logic**: Nếu tài xế từ chối hoặc timeout, thử tài xế tiếp theo cho đến hết danh sách.
+8. **Fallback**: Nếu hết tài xế → `Trip.MarkTimeout()`.
+
+#### 5.1.1. Lọc Thô Theo Địa Chỉ Hành Chính
+
+**Bài toán:** Không thể gọi route API cho hàng nghìn tài xế cùng lúc — quá tốn tài nguyên.
+
+**Giải pháp:** Lọc bằng cấp địa chỉ trước, sau đó mới tính route cho nhóm nhỏ:
+
+```
+Pickup point
+    │
+    ▼ Reverse Geocoding (GMap.NET Placemark)
+Lấy: LocalityName (phường) → SubAdminArea (quận) → AdminArea (thành phố)
+    │
+    ▼ Lọc Driver (foreach, không LINQ)
+Cùng phường? → đủ số lượng? → Tính route cho nhóm nhỏ
+    │ Không đủ
+    ▼
+Mở rộng lên quận → đủ? → Tính route
+    │ Không đủ
+    ▼
+Mở rộng lên thành phố → Tính route
+```
+
+Cách tiếp cận này thực tế, không cần công nghệ mới, phù hợp với constraint "không LINQ".
 
 ### 5.2. Xử Lý Race Condition
 
-- **Race condition** xảy ra khi nhiều request cùng lúc cố gắng cập nhật trạng thái tài xế/chuyến đi.
-- **Giải pháp**: Kiểm tra trạng thái hiện tại trước khi update, reject nếu trạng thái đã thay đổi.
-- **Ví dụ**: Khi tài xế A nhận chuyến, hệ thống update trạng thái từ Available → OnTrip nếu và chỉ nếu trạng thái hiện tại vẫn là Available.
+**Vấn đề:** Khi hai tài xế cùng nhấn "Chấp nhận" một chuyến tại cùng một mili giây — cả hai đều đọc `Trip.Status == Searching` và cùng tiến hành ghép.
+
+**Giải pháp chính xác:** Dùng `SemaphoreSlim` để tạo "khóa" tại `MatchDriverAsync`:
+
+```csharp
+private static readonly SemaphoreSlim _matchLock = new SemaphoreSlim(1, 1);
+
+public async Task MatchDriverAsync(Guid tripId, Guid driverId)
+{
+    await _matchLock.WaitAsync();
+    try
+    {
+        Trip trip = await _tripRepository.GetByIdAsync(tripId);
+        Driver driver = await _driverRepository.GetByIdAsync(driverId);
+
+        if (trip.Status != TripStatus.Searching)
+            throw new InvalidOperationException("Trip đã được nhận bởi tài xế khác.");
+        if (driver.Status != DriverStatus.Available)
+            throw new InvalidOperationException("Tài xế không còn sẵn sàng.");
+
+        trip.MatchDriver(driverId);
+        driver.SetOnTrip();
+
+        _tripRepository.Update(trip);
+        _driverRepository.Update(driver);
+        await _tripRepository.SaveChangesAsync();
+        await _driverRepository.SaveChangesAsync();
+    }
+    finally
+    {
+        _matchLock.Release();
+    }
+}
+```
+
+Khi luồng đầu tiên đang xử lý, các luồng khác chờ ở `WaitAsync()`. Sau khi `Trip.Status` chuyển sang `Matched` và được lưu, luồng tiếp theo đọc lại trạng thái và bị từ chối ngay.
 
 ### 5.3. Retry Logic & Fallback
 
@@ -306,7 +369,7 @@ Mô hình trạng thái chuyến đi (state machine) giúp kiểm soát logic ng
 
 Hệ thống đặt xe mô phỏng sử dụng kiến trúc Layered Architecture đơn giản, phù hợp với quy mô đồ án, tập trung vào thuật toán ghép tài xế, quản lý trạng thái, và giao tiếp cơ bản. Việc mô phỏng giúp kiểm thử logic nghiệp vụ, đào tạo và phát triển giải pháp vận tải.
 
-Các vấn đề then chốt cần giải quyết bao gồm: thuật toán dispatch đơn giản, xử lý race condition cơ bản, tracking vị trí, lưu trữ dữ liệu JSON/Binary, và xây dựng UI/UX thân thiện cho hành khách, tài xế và admin.
+Các vấn đề then chốt cần giải quyết bao gồm: thuật toán dispatch với lọc địa chỉ hành chính, xử lý race condition bằng `SemaphoreSlim`, tracking vị trí mô phỏng, lưu trữ dữ liệu bằng Newtonsoft.Json, và xây dựng UI/UX thân thiện cho hành khách, tài xế và admin.
 
 ---
 
@@ -323,7 +386,7 @@ Làm quen với Event-Driven Programming.
 Sử dụng các Control như Timer (cho simulation), DataGridView (hiển thị danh sách), và sự kiện MouseClick trên Panel (giả lập bản đồ).
 Serialization
 Hiểu về Persistence & Data Stream.
-Sử dụng System.Text.Json hoặc BinaryFormatter (nếu giảng viên yêu cầu) để lưu toàn bộ List<Trip> xuống file .json sau mỗi chuyến đi.
+Sử dụng **Newtonsoft.Json** (`JsonConvert.SerializeObject` / `JsonConvert.DeserializeObject<List<T>>`) để lưu dữ liệu xuống file `.json`. Cấu hình `TypeNameHandling.All` để bảo toàn tính đa hình khi `List<User>` chứa cả `Driver` lẫn `Passenger`.
 Không LINQ
 Nắm vững cấu trúc dữ liệu và giải thuật.
 Thay vì drivers.Where(...), bạn sẽ viết hàm lọc tài xế bằng vòng lặp foreach kết hợp với cấu trúc if-else truyền thống.

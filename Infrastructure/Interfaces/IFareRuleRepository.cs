@@ -1,8 +1,9 @@
 ﻿using Domain.Enums;
-using Domain.FareRules;
+using Domain.Entities;
 using System.Threading.Tasks;
+using Domain.Repositories;
 
-namespace Domain.Repositories
+namespace Infrastructure.Interfaces
 {
     public interface IFareRuleRepository : IRepository<FareRule>
     {

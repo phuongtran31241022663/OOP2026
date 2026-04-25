@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Timers;
-using Application.DTOs;
+
 using Application.Interfaces;
 using Domain.Enums;
 
@@ -16,7 +16,7 @@ namespace Presentation.Shells
         private readonly ISimulationService _simulationService;
 
         private PassengerDto _passenger;
-        private TripDto _currentTrip;
+        private Trip _currentTrip;
 
         public PassengerDto Passenger => _passenger;
         private Dictionary<string, Form> _screens = new Dictionary<string, Form>();
@@ -73,7 +73,7 @@ namespace Presentation.Shells
             NavigateTo("Home");
         }
 
-        private void OnTripStatusChanged(TripDto trip)
+        private void OnTripStatusChanged(Trip trip)
         {
             if (InvokeRequired)
             {
@@ -85,7 +85,7 @@ namespace Presentation.Shells
             }
         }
 
-        private void UpdateTripDisplay(TripDto trip)
+        private void UpdateTripDisplay(Trip trip)
         {
             if (trip.Status == TripStatus.Searching)
             {
@@ -190,7 +190,7 @@ namespace Presentation.Shells
             MessageBox.Show(message, "Trip Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        public void OnTripStarted(TripDto trip)
+        public void OnTripStarted(Trip trip)
         {
             _currentTrip = trip;
             NavigateTo("Trip");

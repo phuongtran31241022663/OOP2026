@@ -1,7 +1,6 @@
 using Presentation.Shells;
 using System.Windows.Forms;
 using Application.Interfaces;
-using Application.DTOs;
 using Domain.Enums;
 using System;
 using System.Drawing;
@@ -11,16 +10,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using Domain.ValueObjects;
+using Domain.Entities;
 
-using Presentation;
-
-namespace Presentation.Screens.Passenger
+namespace Presentation.Screens.PassengerScreen
 {
     public partial class BookTripForm : BaseForm
     {
         private readonly ITripService _tripService;
         private readonly IUserService _userService;
-        private readonly IRouteService _routeService;
+        private readonly IMapService _mapService;
         private readonly IFareService _fareService;
         private readonly HttpClient _httpClient;
         private readonly PassengerShell _parentShell;
@@ -31,8 +29,8 @@ namespace Presentation.Screens.Passenger
         private Location _Pickup;
         private Location _destination;
         private List<Location> _history = new List<Location>();
-        private List<DriverDto> _nearbyDrivers = new List<DriverDto>();
-        private TripDto _currentTrip;
+        private List<Driver> _nearbyDrivers = new List<Driver>();
+        private Trip _currentTrip;
         private decimal _Fare;
         private double _Distance;
         private TimeSpan _Duration;
@@ -72,8 +70,12 @@ namespace Presentation.Screens.Passenger
         }
 
         private void LoadLocationHistory()
+        { public Location(Coordinate coordinate, Address address)
         {
-            _history = new List<Location>
+            _coordinate = coordinate;
+            _address = address;
+        }
+        _history = new List<Location>
             {
                 new Location("UEH Campus", "", 10.8751, 106.8003),
                 new Location("Ben Thanh Market", "", 10.7718, 106.6983),
@@ -394,7 +396,7 @@ namespace Presentation.Screens.Passenger
         // Public API
         public void OnTripFinished() => BeginInvoke(new Action(ResetToIdle));
 
-        public void UpdateDriverInfo(DriverDto driver)
+        public void UpdateDriverInfo(Driver driver)
         {
             if (InvokeRequired)
             {

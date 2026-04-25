@@ -2,7 +2,7 @@ using System;
 
 namespace Domain.Entities.Users
 {
-    public sealed class Passenger : User
+    public class Passenger : User
     {
         #region Fields
         private int _totalTrips;

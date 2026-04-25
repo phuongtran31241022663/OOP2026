@@ -47,7 +47,7 @@ Presentation/
 ## 5. Event Handling Flow
 
 - **User actions → handlers → application calls**:
-  - Button clicks (e.g., Book Trip button in BookTripForm) → Event handler (btnBookTrip_Click) → Validates input → Calls Application service (e.g., \_tripService.RequestTrip()) → Updates UI state/ViewModel.
+  - Button clicks (e.g., Book Trip button in BookTripForm) → Event handler (btnBookTrip_Click) → Validates input → Calls Application service (e.g., \_tripService.CreateTripAsync()) → Updates UI state/ViewModel.
   - Map clicks (MapControl.MapClicked event) → Sets Pickup/Destination in ViewModel → Updates map markers.
   - Timer ticks (e.g., \_pollTimer in PassengerShell) → Polls Application for trip status → Updates TripStatusPanel.
   - Form loads (e.g., PassengerShell_Load) → Initializes ViewModel → Loads data via Application queries.
@@ -63,17 +63,17 @@ Presentation/
 ## 7. Interaction with Application Layer
 
 - **Commands / Queries usage**: UI calls Application interfaces directly.
-  - Commands: RequestTripCommand (via ITripService.RequestTrip), AssignDriverCommand (via ITripService.TryAssignDriver).
-  - Queries: GetTripStatusQuery (via ITripService.GetTrip), GetNearbyDriversQuery (via IDriverMatchingService).
+  - Commands: `CreateTripAsync` (via `ITripService`), `MatchDriverAsync` (via `ITripService`), `CancelTripAsync` (via `ITripService`).
+  - Queries: `GetTripAsync` (via `ITripService`), `GetActiveTripForPassengerAsync` (via `ITripService`), `GetAvailableDriversAsync` (via `IUserService` / `IDriverService`).
   - Direct service call pattern, inspired by CQRS concept, implemented via direct async service calls.
-  - DTOs: Application DTOs (TripDto, DriverDto) used for data transfer; mapped via DataMapper helpers. UI must not access Domain entities directly to maintain layer boundaries.
+  - Domain entities are passed directly between layers (no DTO layer exists yet); UI must not modify Domain entities directly to maintain layer boundaries.
 
 ## 8. State Management (if any)
 
 - **In-Form State**: Forms hold local state (e.g., \_currentTrip in PassengerShell, \_selectedVehicle in BookTripForm).
 - **ViewModel State**: ViewModels maintain UI state (e.g., PassengerViewModel.CurrentTrip, AvailableDrivers list).
 - **Shell State**: Shells manage global state per user (e.g., PassengerShell.\_passenger, \_currentTrip).
-- **Polling**: Timers poll Application for real-time updates (e.g., trip status every 5 seconds via GetTripStatusQuery endpoint). Interval balances UI responsiveness with server load; impacts performance especially under high concurrency.
+- **Polling**: Timers poll Application for real-time updates (e.g., trip status every 5 seconds via `GetTripAsync`). Interval balances UI responsiveness with server load; impacts performance especially under high concurrency.
 - **No centralized state**: Relies on in-memory state and Application services; no Redux-like store.
 
 ## 9. Error Handling & User Feedback
@@ -91,9 +91,9 @@ Presentation/
 - **State Duplication**: State in Forms and ViewModels overlaps (e.g., \_currentTrip in both PassengerShell and PassengerViewModel). Resolution: ViewModel should be the single source of truth; Forms read state from ViewModels only.
 - **Incomplete ViewModels**: Many TODOs in ViewModels (e.g., commented service calls); not fully implemented.
 
-## 4. User Flows
+## 11. User Flows
 
-### 4.1 Passenger
+### 11.1 Passenger
 
 - **Login/Register**
 - **Select Pickup/Destination** (via map click or search)
@@ -105,7 +105,7 @@ Presentation/
 - **Pay & Rate Driver**
 - **View Trip History**
 
-### 4.2 Driver
+### 11.2 Driver
 
 - **Login/Register**
 - **Toggle Availability**
@@ -115,7 +115,7 @@ Presentation/
 - **Track Earnings**
 - **View Trip History**
 
-### 4.3 Admin
+### 11.3 Admin
 
 - **Login**
 - **Manage Users (CRUD)**
@@ -123,21 +123,32 @@ Presentation/
 - **Configure Fare Rules**
 - **Generate Reports**
 
-## 5. Map Interaction Design
+## 12. GMap.NET — Phân Tách Theo Kiến Trúc
+
+| Thành phần | Layer | Package cài đặt |
+|---|---|---|
+| `GMapControl` (UI widget, bản đồ hiển thị) | **Presentation** | `GMap.NET.WinForms` |
+| `GMapProviders` (Routing, Geocoding API) | **Infrastructure** | `GMap.NET.Core` |
+
+- **Presentation** cài `GMap.NET.WinForms` (bao gồm Core).
+- **Infrastructure** chỉ cần `GMap.NET.Core` — không kéo theo WinForms dependency, phù hợp với Clean Architecture.
+- `MapControl` (UserControl trong Presentation) wraps `GMapControl`; cấu hình `AccessMode.ServerAndCache` để cache tile giảm băng thông.
+
+## 13. Map Interaction Design
 
 - **Layers in GMap.NET**:
   - **Static Overlay**: Pickup (green), Destination (red).
-  - **Route Overlay**: Trip path.
-  - **Dynamic Overlay**: Driver marker with smooth animation.
-  - **Nearby Overlay**: Idle drivers for realism.
-- **Camera Control**: Auto-zoom to fit trip bounds, avoid flicker.
-- **Simulation**: Timer-driven interpolation for smooth movement.
+  - **Route Overlay**: Trip path (GMapRoute từ danh sách PointLatLng sau khi giải mã Encoded Polyline).
+  - **Dynamic Overlay**: Driver marker với smooth animation (Timer 500–1000ms, interpolation).
+  - **Nearby Overlay**: Idle drivers for realism (UC18 Driver Radar).
+- **Camera Control**: Auto-zoom to fit trip bounds, tránh flicker bằng Double Buffering.
+- **Simulation**: Timer-driven interpolation — cập nhật vị trí điểm N → N+1, gọi `gMapControl.Invalidate()`.
 
-## 6. Real-Time Updates in WinForms
+## 14. Real-Time Updates in WinForms
 
-- **Timer Control**: Updates driver positions every 50–100ms.
+- **Timer Control**: Updates driver positions every 500–1000ms (simulation tick).
 - **DataGridView**: Displays trip lists, driver statuses.
-- **Event-driven notifications**: MessageBox or custom notification panel.
+- **Observer Pattern**: `ITripService.TripStatusChanged` event (`EventHandler<TripStatusChangedEventArgs>`) — Forms subscribe, không polling.
 - **Async Tasks**: Prevent UI blocking during route calculation or file I/O.
 
 ## 7. Best Practices

@@ -1,6 +1,5 @@
 ﻿using Domain.Enums;
 using Domain.Entities;
-using Domain.SharedKernel;
 using System.Threading.Tasks;
 
 namespace Domain.Repositories

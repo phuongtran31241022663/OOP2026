@@ -1,5 +1,5 @@
 using Application.Interfaces;
-using Application.DTOs;
+
 using Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 using Presentation;
 
-namespace Presentation.Screens.Passenger
+namespace Presentation.Screens.PassengerScreen
 {
     public partial class TripHistoryForm : BaseForm
     {
@@ -18,7 +18,7 @@ namespace Presentation.Screens.Passenger
         private readonly ITripService _tripService;
 
         // State
-        private List<TripDto> _trips = new List<TripDto>();
+        private List<Trip> _trips = new List<Trip>();
 
         public TripHistoryForm()
         {

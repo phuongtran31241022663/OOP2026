@@ -1,4 +1,4 @@
-﻿namespace Presentation.Screens.Driver
+﻿namespace Presentation.Screens.DriverScreen
 {
     partial class EarningsForm : BaseForm
     {

@@ -5,12 +5,12 @@ namespace Presentation.Helpers
 {
     public static class DataMapper
     {
-        public static object ToTripDto(object trip)
+        public static object ToTrip(object trip)
         {
             return new { Id = "mock", Status = "mock" };
         }
 
-        public static object ToDriverDto(object driver)
+        public static object ToDriver(object driver)
         {
             return new { Id = "mock", Name = "mock" };
         }

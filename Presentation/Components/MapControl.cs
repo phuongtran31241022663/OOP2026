@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
+using Domain.ValueObjects;
 using GMap.NET;
 using GMap.NET.MapProviders;
 using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
 using DomainLocation = Domain.ValueObjects.Location;
-using Domain.Users.Drivers;
 
 namespace Presentation.Components
 {
@@ -251,11 +251,11 @@ namespace Presentation.Components
         {
             if (e.Button == MouseButtons.Left)
             {
-                // Convert screen coordinates to lat/lng
-                var point = _gMapControl.FromLocalToLatLng(e.X, e.Y);
-                var location = new DomainLocation(point, );
-
-                // Raise event
+                PointLatLng point = _gMapControl.FromLocalToLatLng(e.X, e.Y);
+                // Tạo Location tạm với coordinate, address để trống (hoặc gọi reverse geocoding)
+                Coordinate coord = new Coordinate(point.Lat, point.Lng);
+                Address addr = new Address("", "", "", "", "", "", "", "");
+                DomainLocation location = new DomainLocation(coord, addr);
                 MapClicked?.Invoke(this, location);
             }
         }

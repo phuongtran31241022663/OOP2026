@@ -1,32 +1,33 @@
-using Application.DTOs;
-using Domain.Enums;
+﻿using Application.Events;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Application.Interfaces
 {
     public interface ITripService
     {
-        event Action<TripDto> TripStatusChanged;
+        // Observer pattern event
+        event EventHandler<TripStatusChangedEventArgs> TripStatusChanged;
 
-        // Command operations (sync)
-        TripDto RequestTrip(Guid passengerId, Location pickup, Location destination, VehicleType vehicleType);
-        bool TryAssignDriver(Guid tripId, Guid driverId);
-        void ArriveAtPickup(Guid tripId);
-        void StartTrip(Guid tripId);
-        void CompleteTrip(Guid tripId, decimal fareAmount);
-        void CancelTrip(Guid tripId, string reason);
+        // Commands (async)
+        Task<Trip> CreateTripAsync(Guid passengerId, Route route, Fare fare, VehicleType vehicleType);
+        Task MatchDriverAsync(Guid tripId, Guid driverId);
+        Task MarkAsArrivedAsync(Guid tripId);
+        Task StartTripAsync(Guid tripId);
+        Task CompleteTripAsync(Guid tripId);
+        Task CancelTripAsync(Guid tripId, string reason);
 
-        // Query operations (sync)
-        Trip GetTrip(Guid tripId);
-        Trip GetActiveTripForDriver(Guid driverId);
-        Trip GetActiveTripForPassenger(Guid passengerId);
-        List<Trip> GetPendingTrips();
-        List<Trip> GetTripsByDriver(Guid driverId);
-        List<Trip> GetTripsByPassenger(Guid passengerId);
-        TripDto GetTripDto(Guid tripId);
-        bool CanTripBeCancelled(Guid tripId);
+        // Queries (async)
+        Task<Trip> GetTripAsync(Guid tripId);
+        Task<Trip> GetActiveTripForDriverAsync(Guid driverId);
+        Task<Trip> GetActiveTripForPassengerAsync(Guid passengerId);
+        Task<List<Trip>> GetPendingTripsAsync();
+        Task<List<Trip>> GetTripsByDriverAsync(Guid driverId);
+        Task<List<Trip>> GetTripsByPassengerAsync(Guid passengerId);
+        Task<bool> CanTripBeCancelledAsync(Guid tripId);
     }
 }

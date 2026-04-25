@@ -1,15 +1,7 @@
 ﻿using Application.Interfaces;
 using Application.Services;
-using Domain.Trips;
-using Domain.Users;
-using Domain.Users.Drivers;
-using Domain.Users.Passengers;
-using Infrastructure.BackgroundJobs;
 using Infrastructure.ExternalServices;
-using Infrastructure.Persistence;
-using Infrastructure.Simulation;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Presentation.Screens.Auth;
 using Presentation.Screens.Passenger;
 using Presentation.Shells;
@@ -90,7 +82,7 @@ namespace Presentation
             // Application services
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<ITripService, TripService>();
-            services.AddSingleton<IRouteService, RouteService>();
+            services.AddSingleton<IRouteService, MapService>();
             services.AddSingleton<IFareService, FareService>();
             services.AddSingleton<ISimulationService, SimulationService>();
             services.AddSingleton<IDriverSimulationService, DriverSimulationService>();

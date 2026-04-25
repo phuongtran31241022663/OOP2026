@@ -1,17 +1,18 @@
-﻿using System;
+﻿using Application.Events;
+using Application.Interfaces;
+using Domain.Entities;
+using Domain.Enums;
+using Domain.Entities.Users;
+using Presentation.Components;
+using Presentation.Shells;
+using System;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Application.Interfaces;
-using Presentation.Shells;
-using Presentation.Components;
-using Application.DTOs;
-using Domain.Users.Drivers;
+using Domain.ValueObjects;
 
-using Presentation;
-
-namespace Presentation.Screens.Driver
+namespace Presentation.Screens.DriverScreen
 {
     public partial class DriverDashboardForm : BaseForm
     {
@@ -21,9 +22,7 @@ namespace Presentation.Screens.Driver
         private readonly IUserService _userService;
         private readonly ISimulationService _simulationService;
         private readonly IFareService _fareService;
-
-        // State
-        private TripDto _trip;
+        private Trip _trip;
         private Driver _driver;
         private System.Timers.Timer _timer;
         private int _isRefreshing;
@@ -67,8 +66,24 @@ namespace Presentation.Screens.Driver
 
             InitializeComponent();
             InitializeUI();
+            _tripService.TripStatusChanged += OnTripStatusChanged;
+            this.FormClosed += (s, e) => _tripService.TripStatusChanged -= OnTripStatusChanged;
         }
+        private void OnTripStatusChanged(object sender, TripStatusChangedEventArgs e)
+        {
+            // Chỉ xử lý nếu đang có trip và trùng ID
+            if (_trip == null || e.TripId != _trip.Id)
+                return;
 
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => RefreshAsync()));
+            }
+            else
+            {
+                RefreshAsync();
+            }
+        }
         private void InitializeUI()
         {
             // Adjust splitter distance to 75%
@@ -159,7 +174,7 @@ namespace Presentation.Screens.Driver
         }
 
         // Lifecycle methods
-        public void OnNavigatedTo(TripDto trip = null)
+        public void OnNavigatedTo(Trip trip = null)
         {
             _trip = trip ?? _shell.CurrentTrip;
 

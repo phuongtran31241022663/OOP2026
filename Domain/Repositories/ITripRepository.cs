@@ -1,4 +1,3 @@
-using Domain.SharedKernel;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -8,8 +7,7 @@ namespace Domain.Repositories
 {
     public interface ITripRepository : IRepository<Trip>
     {
-        Task<IEnumerable<Trip>> GetByDriverIdAsync(Guid driverId);
-        Task<IEnumerable<Trip>> GetByPassengerIdAsync(Guid passengerId);
-        Task<IEnumerable<Trip>> GetPendingTripsAsync();
+        Task<List<Trip>> GetByDriverIdAsync(Guid driverId);
+        Task<List<Trip>> GetByPassengerIdAsync(Guid passengerId);
     }
 }
