@@ -1,12 +1,5 @@
-﻿using Application.Interfaces;
-using Application.Services;
-using Infrastructure.ExternalServices;
-using Microsoft.Extensions.DependencyInjection;
-using Presentation.Screens.Auth;
-using Presentation.Screens.Passenger;
+﻿using Presentation.Screens.Auth;
 using Presentation.Shells;
-using System;
-using System.Windows.Forms;
 
 namespace Presentation
 {
@@ -122,7 +115,7 @@ namespace Presentation
                     provider.GetRequiredService<IUserService>(),
                     provider.GetRequiredService<IRouteService>(),
                     provider.GetRequiredService<IFareService>(),
-                    provider.GetRequiredService<IMapService>(), // ✅ FIX: không dùng HttpClient
+                    provider.GetRequiredService<IMapService>(),
                     new PassengerShell(
                         provider.GetRequiredService<IUserService>(),
                         provider.GetRequiredService<ITripService>(),
