@@ -194,6 +194,24 @@
     <Compile Include="Screens\Auth\RegisterForm.Designer.cs">
       <DependentUpon>RegisterForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Screens\DriverScreen\DriverDashboardForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Screens\DriverScreen\DriverDashboardForm.Designer.cs">
+      <DependentUpon>DriverDashboardForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Screens\DriverScreen\EarningsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Screens\DriverScreen\EarningsForm.Designer.cs">
+      <DependentUpon>EarningsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Screens\DriverScreen\TripNavigationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Screens\DriverScreen\TripNavigationForm.Designer.cs">
+      <DependentUpon>TripNavigationForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Screens\Driver\DriverDashboardForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -212,28 +230,28 @@
     <Compile Include="Screens\Driver\TripNavigationForm.Designer.cs">
       <DependentUpon>TripNavigationForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Screens\Passenger\BookTripForm.cs">
+    <Compile Include="Screens\PassengerScreen\BookTripForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Screens\Passenger\BookTripForm.Designer.cs">
+    <Compile Include="Screens\PassengerScreen\BookTripForm.Designer.cs">
       <DependentUpon>BookTripForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Screens\Passenger\RatingForm.cs">
+    <Compile Include="Screens\PassengerScreen\RatingForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Screens\Passenger\RatingForm.Designer.cs">
+    <Compile Include="Screens\PassengerScreen\RatingForm.Designer.cs">
       <DependentUpon>RatingForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Screens\Passenger\TripHistoryForm.cs">
+    <Compile Include="Screens\PassengerScreen\TripHistoryForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Screens\Passenger\TripHistoryForm.Designer.cs">
+    <Compile Include="Screens\PassengerScreen\TripHistoryForm.Designer.cs">
       <DependentUpon>TripHistoryForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Screens\Passenger\TripTrackingForm.cs">
+    <Compile Include="Screens\PassengerScreen\TripTrackingForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Screens\Passenger\TripTrackingForm.Designer.cs">
+    <Compile Include="Screens\PassengerScreen\TripTrackingForm.Designer.cs">
       <DependentUpon>TripTrackingForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Shells\AdminShell.cs">
