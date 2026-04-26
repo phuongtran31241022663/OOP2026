@@ -22,7 +22,7 @@ namespace Infrastructure.ExternalServices
         }
 
         #region Geocoding
-        public async Task<List<DomainLocation>> SearchLocation(string q)
+        public async Task<List<DomainLocation>> SearchLocationAsync(string q)
         {
             return new List<DomainLocation>();
         }

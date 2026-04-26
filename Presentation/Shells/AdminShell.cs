@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Domain.ValueObjects;
+using Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -6,7 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Presentation.ViewModels;
-using Domain.Users;
+using Domain.Entities.Users;
 using Application.Interfaces;
 
 using Presentation;
@@ -224,3 +226,4 @@ namespace Presentation.Shells
         // TODO: Implement panel-specific methods
     }
 }
+

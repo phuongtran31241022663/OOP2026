@@ -14,7 +14,7 @@ Hệ thống gọi xe mô phỏng (ride-hailing simulation) xây dựng bằng C
 - .NET Framework 4.8 Windows Forms
 - GMap.NET 2.1.7 (Google Maps provider)
 - Newtonsoft.Json
-- Microsoft.Extensions.DependencyInjection
+- Manual Service Composition (khởi tạo bằng `new` trong `Program.cs`)
 
 ---
 
@@ -28,7 +28,7 @@ Hệ thống được tổ chức theo mô hình 5 lớp:
 - **Domain Layer**: Core business — entities, value objects, state machines, domain events, repository interfaces. Pure, không phụ thuộc hạ tầng.
 - **Application Layer**: Orchestration — services (TripService, UserService, FareService, MatchingService), interfaces.
 - **Infrastructure Layer**: Technical implementations — JSON persistence (JsonRepository, JsonStorage), external APIs (MapService — Photon + OSRM), `GMapProviders` (Routing/Geocoding API calls — chỉ cần `GMap.NET.Core`).
-- **Presentation Layer**: WinForms UI — Shells, Screens, Components (`GMapControl` — UI widget, cài `GMap.NET.WinForms`), ViewModels, DI composition root.
+- **Presentation Layer**: WinForms UI — Shells, Screens, Components (`GMapControl` — UI widget, cài `GMap.NET.WinForms`), ViewModels, manual composition root.
 
 **Lưu ý:** Presentation tham chiếu trực tiếp Domain và Infrastructure (vi phạm Clean Architecture). Cần refactor để Presentation chỉ phụ thuộc vào Application.
 
@@ -140,7 +140,7 @@ Transition rules enforced via `DriverStateMachine.CanTransition(from, to)` stati
 | Domain Events | Aggregates emit events (9 Trip events, 2 Driver events, 1 Review event) |
 | Value Object | Immutable VOs with operator overloading |
 | Observer | `ITripService.TripStatusChanged` event (`EventHandler<TripStatusChangedEventArgs>`) — UI subscribes |
-| DI | `Microsoft.Extensions.DependencyInjection` in `Presentation/Program.cs` |
+  | Manual Service Composition | Khởi tạo services bằng `new` trong `Presentation/Program.cs` |
 
 ---
 

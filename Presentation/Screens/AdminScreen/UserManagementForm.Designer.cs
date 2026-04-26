@@ -1,4 +1,4 @@
-﻿namespace Presentation.Screens.AdminScreen
+﻿namespace Presentation.Screens.AdminScreenScreen
 {
     partial class UserManagementForm : BaseForm
     {

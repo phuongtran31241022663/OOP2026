@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -81,7 +84,7 @@ namespace Presentation.Screens.DriverScreen
 
             _titleLabel = new Label
             {
-                Text = "Điều phối chuyến",
+                Text = "Äiá»u phá»‘i chuyáº¿n",
                 Font = new Font("Arial", 16, FontStyle.Bold),
                 Location = new Point(20, 15),
                 AutoSize = true
@@ -89,7 +92,7 @@ namespace Presentation.Screens.DriverScreen
 
             _refreshButton = new Button
             {
-                Text = "Làm mới",
+                Text = "LÃ m má»›i",
                 Location = new Point(this.Width - 120, 10),
                 Size = new Size(100, 35),
                 Anchor = AnchorStyles.Top | AnchorStyles.Right
@@ -152,7 +155,7 @@ namespace Presentation.Screens.DriverScreen
 
             _emptyMessageLabel = new Label
             {
-                Text = "Không có chuyến nào",
+                Text = "KhÃ´ng cÃ³ chuyáº¿n nÃ o",
                 Font = new Font("Arial", 14, FontStyle.Italic),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Dock = DockStyle.Fill
@@ -186,7 +189,7 @@ namespace Presentation.Screens.DriverScreen
             var buttonPanel = new Panel { Dock = DockStyle.Fill };
             _acceptButton = new Button
             {
-                Text = "Chấp nhận",
+                Text = "Cháº¥p nháº­n",
                 Size = new Size(100, 35),
                 Location = new Point(50, 5),
                 BackColor = Color.LightGreen
@@ -195,7 +198,7 @@ namespace Presentation.Screens.DriverScreen
 
             _rejectButton = new Button
             {
-                Text = "Từ chối",
+                Text = "Tá»« chá»‘i",
                 Size = new Size(100, 35),
                 Location = new Point(160, 5),
                 BackColor = Color.LightCoral
@@ -254,7 +257,7 @@ namespace Presentation.Screens.DriverScreen
             _stepDots = new PictureBox[4];
             _stepLabels = new Label[4];
 
-            string[] stepTexts = { "Đã ghép đôi", "Đã đến điểm đón", "Bắt đầu chuyến", "Hoàn thành" };
+            string[] stepTexts = { "ÄÃ£ ghÃ©p Ä‘Ã´i", "ÄÃ£ Ä‘áº¿n Ä‘iá»ƒm Ä‘Ã³n", "Báº¯t Ä‘áº§u chuyáº¿n", "HoÃ n thÃ nh" };
 
             for (int i = 0; i < 4; i++)
             {

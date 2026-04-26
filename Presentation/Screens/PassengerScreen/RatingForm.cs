@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 using Application.Interfaces;
 
 using Domain.Enums;
@@ -78,7 +81,7 @@ namespace Presentation.Screens.PassengerScreen
 
             TextRenderer.DrawText(
                 e.Graphics,
-                $"{trip.Fare?.Amount:N0} đ",
+                $"{trip.Fare?.Amount:N0} Ä‘",
                 new Font("Segoe UI", 8, FontStyle.Bold),
                 new Point(x, y + 36),
                 fg);
@@ -89,8 +92,8 @@ namespace Presentation.Screens.PassengerScreen
         private async void LoadPending()
         {
             _refreshBtn.Enabled = false;
-            _refreshBtn.Text = "Đang tải...";
-            _statusLabel.Text = "Đang tải...";
+            _refreshBtn.Text = "Äang táº£i...";
+            _statusLabel.Text = "Äang táº£i...";
 
             try
             {
@@ -107,18 +110,18 @@ namespace Presentation.Screens.PassengerScreen
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Lỗi tải danh sách: {ex.Message}",
-                    "Lỗi",
+                    $"Lá»—i táº£i danh sÃ¡ch: {ex.Message}",
+                    "Lá»—i",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
             finally
             {
                 _refreshBtn.Enabled = true;
-                _refreshBtn.Text = "Làm mới";
+                _refreshBtn.Text = "LÃ m má»›i";
                 _statusLabel.Text = _pendingTrips.Count == 0
-                    ? "Không còn chuyến nào cần đánh giá"
-                    : $"{_pendingTrips.Count} chuyến chờ đánh giá";
+                    ? "KhÃ´ng cÃ²n chuyáº¿n nÃ o cáº§n Ä‘Ã¡nh giÃ¡"
+                    : $"{_pendingTrips.Count} chuyáº¿n chá» Ä‘Ã¡nh giÃ¡";
             }
         }
 
@@ -133,8 +136,8 @@ namespace Presentation.Screens.PassengerScreen
             }
 
             _listHeader.Text = _pendingTrips.Count == 0
-                ? "Không có chuyến nào"
-                : $"Chuyến chờ đánh giá ({_pendingTrips.Count})";
+                ? "KhÃ´ng cÃ³ chuyáº¿n nÃ o"
+                : $"Chuyáº¿n chá» Ä‘Ã¡nh giÃ¡ ({_pendingTrips.Count})";
         }
 
         private void ResetSelection()
@@ -163,7 +166,7 @@ namespace Presentation.Screens.PassengerScreen
 
             _tripInfoLabel.Text =
                 $"{trip.Pickup?.Address ?? "--"}  ->  {trip.Destination?.Address ?? "--"}\n" +
-                $"Thời gian: {trip.CreatedAt:dd/MM/yyyy  HH:mm}      Giá: {trip.Fare?.Amount:N0} đ";
+                $"Thá»i gian: {trip.CreatedAt:dd/MM/yyyy  HH:mm}      GiÃ¡: {trip.Fare?.Amount:N0} Ä‘";
 
             _score = 5;
             RefreshStars();
@@ -206,8 +209,8 @@ namespace Presentation.Screens.PassengerScreen
             if (_score < 3 && string.IsNullOrWhiteSpace(_commentBox.Text))
             {
                 MessageBox.Show(
-                    "Vui lòng nhập nhận xét khi đánh giá dưới 3 sao.",
-                    "Cần nhận xét",
+                    "Vui lÃ²ng nháº­p nháº­n xÃ©t khi Ä‘Ã¡nh giÃ¡ dÆ°á»›i 3 sao.",
+                    "Cáº§n nháº­n xÃ©t",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
                 _commentBox.Focus();
@@ -224,7 +227,7 @@ namespace Presentation.Screens.PassengerScreen
                     _commentBox.Text.Trim());
 
                 _successLabel.Visible = true;
-                _statusLabel.Text = "Đã gửi đánh giá thành công";
+                _statusLabel.Text = "ÄÃ£ gá»­i Ä‘Ã¡nh giÃ¡ thÃ nh cÃ´ng";
 
                 await Task.Delay(1500);
 
@@ -234,8 +237,8 @@ namespace Presentation.Screens.PassengerScreen
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Lỗi gửi đánh giá: {ex.Message}",
-                    "Lỗi",
+                    $"Lá»—i gá»­i Ä‘Ã¡nh giÃ¡: {ex.Message}",
+                    "Lá»—i",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
                 _submitBtn.Enabled = true;
@@ -248,3 +251,4 @@ namespace Presentation.Screens.PassengerScreen
         public void RefreshData() => LoadPending();
     }
 }
+

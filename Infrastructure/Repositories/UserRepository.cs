@@ -1,10 +1,12 @@
-﻿using Domain.Users;
-using Domain.Users.Drivers;
-using Domain.Users.Passengers;
+﻿// Infrastructure/Repositories/UserRepository.cs
+using Domain.Entities;
+using Domain.Entities.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Domain.Repositories;
+using Domain.Enums;
 
 namespace Infrastructure.Repositories
 {
@@ -30,42 +32,22 @@ namespace Infrastructure.Repositories
             return _items.Any(u => u.Phone == phone);
         }
 
-        public async Task<IEnumerable<User>> GetDriversAsync()
+        public async Task<List<User>> GetDriversAsync()
         {
             await Task.CompletedTask;
-            return _items.OfType<Driver>();
+            return _items.OfType<Driver>().Cast<User>().ToList();
         }
 
-        public async Task<IEnumerable<User>> GetPassengersAsync()
+        public async Task<List<User>> GetPassengersAsync()
         {
             await Task.CompletedTask;
-            return _items.Where(u => u is Passenger);
+            return _items.Where(u => u is Passenger).ToList();
         }
 
-        public async Task<IEnumerable<User>> GetAvailableDriversAsync()
+        public async Task<List<Driver>> GetAvailableDriversAsync()
         {
             await Task.CompletedTask;
-            return _items.OfType<Driver>().Where(d => d.Status == Domain.Enums.DriverStatus.Available);
-        }
-
-        public async Task AddAsync(User user)
-        {
-            Add(user);
-            await Task.CompletedTask;
-        }
-
-        public async Task UpdateAsync(User user)
-        {
-            Update(user);
-            await Task.CompletedTask;
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            var entity = await GetByIdAsync(id);
-            if (entity != null)
-                Delete(entity);
-            await Task.CompletedTask;
+            return _items.OfType<Driver>().Where(d => d.Status == DriverStatus.Available).ToList();
         }
     }
 }

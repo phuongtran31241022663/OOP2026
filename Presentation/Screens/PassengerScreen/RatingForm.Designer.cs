@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 namespace Presentation.Screens.PassengerScreen
 {
     partial class ReviewForm : BaseForm
@@ -89,7 +92,7 @@ namespace Presentation.Screens.PassengerScreen
             this._refreshBtn.Name = "_refreshBtn";
             this._refreshBtn.Size = new System.Drawing.Size(80, 40);
             this._refreshBtn.TabIndex = 1;
-            this._refreshBtn.Text = "Làm mới";
+            this._refreshBtn.Text = "LÃ m má»›i";
             this._refreshBtn.UseVisualStyleBackColor = true;
             this._refreshBtn.Click += new System.EventHandler(this.RefreshBtn_Click);
             // 
@@ -101,7 +104,7 @@ namespace Presentation.Screens.PassengerScreen
             this.headerTitleLabel.Name = "headerTitleLabel";
             this.headerTitleLabel.Size = new System.Drawing.Size(240, 40);
             this.headerTitleLabel.TabIndex = 0;
-            this.headerTitleLabel.Text = "Đánh giá chuyến đi";
+            this.headerTitleLabel.Text = "ÄÃ¡nh giÃ¡ chuyáº¿n Ä‘i";
             this.headerTitleLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // _statusBar
@@ -174,7 +177,7 @@ namespace Presentation.Screens.PassengerScreen
             this._listHeader.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
             this._listHeader.Size = new System.Drawing.Size(380, 24);
             this._listHeader.TabIndex = 0;
-            this._listHeader.Text = "Chuyến chờ đánh giá";
+            this._listHeader.Text = "Chuyáº¿n chá» Ä‘Ã¡nh giÃ¡";
             this._listHeader.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // _ReviewPanel
@@ -211,7 +214,7 @@ namespace Presentation.Screens.PassengerScreen
             this._successLabel.Name = "_successLabel";
             this._successLabel.Size = new System.Drawing.Size(180, 32);
             this._successLabel.TabIndex = 0;
-            this._successLabel.Text = "✓ Đánh giá thành công!";
+            this._successLabel.Text = "âœ“ ÄÃ¡nh giÃ¡ thÃ nh cÃ´ng!";
             this._successLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this._successLabel.Visible = false;
             // 
@@ -223,7 +226,7 @@ namespace Presentation.Screens.PassengerScreen
             this._submitBtn.Name = "_submitBtn";
             this._submitBtn.Size = new System.Drawing.Size(110, 32);
             this._submitBtn.TabIndex = 1;
-            this._submitBtn.Text = "Gửi đánh giá";
+            this._submitBtn.Text = "Gá»­i Ä‘Ã¡nh giÃ¡";
             this._submitBtn.UseVisualStyleBackColor = true;
             this._submitBtn.Click += new System.EventHandler(this.OnSubmitClicked);
             // 
@@ -238,7 +241,7 @@ namespace Presentation.Screens.PassengerScreen
             this.commentGroup.Size = new System.Drawing.Size(616, 100);
             this.commentGroup.TabIndex = 2;
             this.commentGroup.TabStop = false;
-            this.commentGroup.Text = "Nhận xét";
+            this.commentGroup.Text = "Nháº­n xÃ©t";
             // 
             // _commentBox
             // 
@@ -263,7 +266,7 @@ namespace Presentation.Screens.PassengerScreen
             this.starGroup.Size = new System.Drawing.Size(616, 64);
             this.starGroup.TabIndex = 1;
             this.starGroup.TabStop = false;
-            this.starGroup.Text = "Số sao";
+            this.starGroup.Text = "Sá»‘ sao";
             // 
             // _scoreHint
             // 
@@ -305,7 +308,7 @@ namespace Presentation.Screens.PassengerScreen
             this._starBtn1.Size = new System.Drawing.Size(26, 26);
             this._starBtn1.TabIndex = 0;
             this._starBtn1.Tag = 1;
-            this._starBtn1.Text = "★";
+            this._starBtn1.Text = "â˜…";
             this._starBtn1.UseVisualStyleBackColor = true;
             this._starBtn1.Click += new System.EventHandler(this.OnStarClicked);
             // 
@@ -322,7 +325,7 @@ namespace Presentation.Screens.PassengerScreen
             this._starBtn2.Size = new System.Drawing.Size(26, 26);
             this._starBtn2.TabIndex = 1;
             this._starBtn2.Tag = 2;
-            this._starBtn2.Text = "★";
+            this._starBtn2.Text = "â˜…";
             this._starBtn2.UseVisualStyleBackColor = true;
             this._starBtn2.Click += new System.EventHandler(this.OnStarClicked);
             // 
@@ -339,7 +342,7 @@ namespace Presentation.Screens.PassengerScreen
             this._starBtn3.Size = new System.Drawing.Size(26, 26);
             this._starBtn3.TabIndex = 2;
             this._starBtn3.Tag = 3;
-            this._starBtn3.Text = "★";
+            this._starBtn3.Text = "â˜…";
             this._starBtn3.UseVisualStyleBackColor = true;
             this._starBtn3.Click += new System.EventHandler(this.OnStarClicked);
             // 
@@ -356,7 +359,7 @@ namespace Presentation.Screens.PassengerScreen
             this._starBtn4.Size = new System.Drawing.Size(26, 26);
             this._starBtn4.TabIndex = 3;
             this._starBtn4.Tag = 4;
-            this._starBtn4.Text = "★";
+            this._starBtn4.Text = "â˜…";
             this._starBtn4.UseVisualStyleBackColor = true;
             this._starBtn4.Click += new System.EventHandler(this.OnStarClicked);
             // 
@@ -373,7 +376,7 @@ namespace Presentation.Screens.PassengerScreen
             this._starBtn5.Size = new System.Drawing.Size(26, 26);
             this._starBtn5.TabIndex = 4;
             this._starBtn5.Tag = 5;
-            this._starBtn5.Text = "★";
+            this._starBtn5.Text = "â˜…";
             this._starBtn5.UseVisualStyleBackColor = true;
             this._starBtn5.Click += new System.EventHandler(this.OnStarClicked);
             // 
@@ -388,7 +391,7 @@ namespace Presentation.Screens.PassengerScreen
             this.tripInfoGroup.Size = new System.Drawing.Size(616, 80);
             this.tripInfoGroup.TabIndex = 0;
             this.tripInfoGroup.TabStop = false;
-            this.tripInfoGroup.Text = "Thông tin chuyến đi";
+            this.tripInfoGroup.Text = "ThÃ´ng tin chuyáº¿n Ä‘i";
             // 
             // _tripInfoLabel
             // 
@@ -417,7 +420,7 @@ namespace Presentation.Screens.PassengerScreen
             this.promptTextLabel.Name = "promptTextLabel";
             this.promptTextLabel.Size = new System.Drawing.Size(640, 578);
             this.promptTextLabel.TabIndex = 0;
-            this.promptTextLabel.Text = "Chọn một chuyến đi để đánh giá";
+            this.promptTextLabel.Text = "Chá»n má»™t chuyáº¿n Ä‘i Ä‘á»ƒ Ä‘Ã¡nh giÃ¡";
             this.promptTextLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // ReviewForm
@@ -491,3 +494,4 @@ namespace Presentation.Screens.PassengerScreen
         private System.Windows.Forms.Button[] _starBtns;
     }
 }
+

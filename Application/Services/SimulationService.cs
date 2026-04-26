@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Application.Interfaces;
 
 namespace Application.Services
@@ -13,5 +14,7 @@ namespace Application.Services
         public void StopSimulation() { }
         public void StartTripSimulation(Guid tripId) { }
         public bool IsTripSimulating(Guid tripId) => false;
+        public Task Tick() => Task.CompletedTask;
+        public Task SimulateTripProgress(Guid tripId) => Task.CompletedTask;
     }
 }

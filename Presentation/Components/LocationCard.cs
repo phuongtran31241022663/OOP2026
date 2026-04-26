@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 // Presentation/Components/LocationCard.cs
 using System;
 using System.Drawing;
@@ -6,18 +9,18 @@ using System.Windows.Forms;
 namespace Presentation.Components
 {
     /// <summary>
-    /// BaseUserControl hiển thị thông tin địa điểm với style nhất quán.
-    /// Thay thế việc dùng TextBox để hiển thị thông tin địa điểm.
+    /// BaseUserControl hiá»ƒn thá»‹ thÃ´ng tin Ä‘á»‹a Ä‘iá»ƒm vá»›i style nháº¥t quÃ¡n.
+    /// Thay tháº¿ viá»‡c dÃ¹ng TextBox Ä‘á»ƒ hiá»ƒn thá»‹ thÃ´ng tin Ä‘á»‹a Ä‘iá»ƒm.
     /// </summary>
     public partial class LocationCard : BaseUserControl
     {
         /// <summary>
-        /// Sự kiện khi người dùng click vào location card
+        /// Sá»± kiá»‡n khi ngÆ°á»i dÃ¹ng click vÃ o location card
         /// </summary>
         public event Action<LocationCard> Clicked;
 
         /// <summary>
-        /// Địa điểm được hiển thị
+        /// Äá»‹a Ä‘iá»ƒm Ä‘Æ°á»£c hiá»ƒn thá»‹
         /// </summary>
         public object GeoLocation { get; private set; }
 
@@ -40,7 +43,7 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Set thông tin địa điểm từ các tham số riêng
+        /// Set thÃ´ng tin Ä‘á»‹a Ä‘iá»ƒm tá»« cÃ¡c tham sá»‘ riÃªng
         /// </summary>
         public void SetLocation(string name, string address, double lat, double lng)
         {

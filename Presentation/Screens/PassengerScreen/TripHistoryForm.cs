@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 using Application.Interfaces;
 
 using Domain.Enums;
@@ -51,8 +54,8 @@ namespace Presentation.Screens.PassengerScreen
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Lỗi tải lịch sử: {ex.Message}",
-                    "Lỗi",
+                    $"Lá»—i táº£i lá»‹ch sá»­: {ex.Message}",
+                    "Lá»—i",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
@@ -65,8 +68,8 @@ namespace Presentation.Screens.PassengerScreen
         private void SetLoading(bool loading)
         {
             _refreshBtn.Enabled = !loading;
-            _refreshBtn.Text = loading ? "Đang tải..." : "Làm mới";
-            _statusLabel.Text = loading ? "Đang tải..." : BuildStatusText();
+            _refreshBtn.Text = loading ? "Äang táº£i..." : "LÃ m má»›i";
+            _statusLabel.Text = loading ? "Äang táº£i..." : BuildStatusText();
         }
 
         private void UpdateSummary()
@@ -75,10 +78,10 @@ namespace Presentation.Screens.PassengerScreen
             var cancelled = _trips.Where(t => t.Status == TripStatus.Cancelled).ToList();
             decimal spent = completed.Sum(t => t.Fare?.Amount ?? 0);
 
-            _totalLabel.Text = $"Tổng chuyến: {_trips.Count}";
-            _spentLabel.Text = $"Chi tiêu: {spent:N0} đ";
-            _completedLabel.Text = $"Hoàn thành: {completed.Count}";
-            _cancelledLabel.Text = $"Đã hủy: {cancelled.Count}";
+            _totalLabel.Text = $"Tá»•ng chuyáº¿n: {_trips.Count}";
+            _spentLabel.Text = $"Chi tiÃªu: {spent:N0} Ä‘";
+            _completedLabel.Text = $"HoÃ n thÃ nh: {completed.Count}";
+            _cancelledLabel.Text = $"ÄÃ£ há»§y: {cancelled.Count}";
         }
 
         private void RenderGrid()
@@ -89,7 +92,7 @@ namespace Presentation.Screens.PassengerScreen
             {
                 _grid.Visible = false;
                 _emptyLabel.Visible = true;
-                _statusLabel.Text = "Không có dữ liệu";
+                _statusLabel.Text = "KhÃ´ng cÃ³ dá»¯ liá»‡u";
                 return;
             }
 
@@ -102,7 +105,7 @@ namespace Presentation.Screens.PassengerScreen
                     trip.Pickup?.Address ?? "--",
                     trip.Destination?.Address ?? "--",
                     trip.DriverName ?? "--",
-                    $"{trip.Fare?.Amount:N0} đ",
+                    $"{trip.Fare?.Amount:N0} Ä‘",
                     StatusText(trip.Status),
                     trip.RequestedAt.ToString("dd/MM HH:mm"));
                 _grid.Rows[row].Tag = trip.Status;
@@ -115,8 +118,8 @@ namespace Presentation.Screens.PassengerScreen
         {
             int total = _trips.Count;
             return total == 0
-                ? "Không có chuyến đi"
-                : $"{total} chuyến đi  ·  trang 1/1";
+                ? "KhÃ´ng cÃ³ chuyáº¿n Ä‘i"
+                : $"{total} chuyáº¿n Ä‘i  Â·  trang 1/1";
         }
 
         private void OnCellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -159,17 +162,17 @@ namespace Presentation.Screens.PassengerScreen
             switch (status)
             {
                 case TripStatus.Completed:
-                    return "Hoàn thành";
+                    return "HoÃ n thÃ nh";
                 case TripStatus.Cancelled:
-                    return "Đã hủy";
+                    return "ÄÃ£ há»§y";
                 case TripStatus.Started:
-                    return "Đang chạy";
+                    return "Äang cháº¡y";
                 case TripStatus.Matched:
-                    return "Đã ghép đôi";
+                    return "ÄÃ£ ghÃ©p Ä‘Ã´i";
                 case TripStatus.Searching:
-                    return "Đang tìm";
+                    return "Äang tÃ¬m";
                 case TripStatus.Requested:
-                    return "Đã yêu cầu";
+                    return "ÄÃ£ yÃªu cáº§u";
                 default:
                     return "--";
             }
@@ -180,3 +183,4 @@ namespace Presentation.Screens.PassengerScreen
         public void RefreshData() => LoadTrips();
     }
 }
+

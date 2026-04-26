@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 namespace Presentation.Shells
 {
     partial class DriverShell : BaseShell
@@ -102,3 +105,4 @@ namespace Presentation.Shells
         private System.Windows.Forms.Panel _contentPanel;
     }
 }
+

@@ -1,4 +1,6 @@
-﻿using Domain.ValueObjects;
+﻿using Domain.Entities.Users;
+using Domain.Entities;
+using Domain.ValueObjects;
 using Domain.Trips;
 using Presentation;
 
@@ -75,3 +77,4 @@ namespace Presentation.Components
         }
     }
 }
+

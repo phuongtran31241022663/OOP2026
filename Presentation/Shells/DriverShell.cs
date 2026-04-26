@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -275,4 +278,5 @@ namespace Presentation.Shells
         }
     }
 }
+
 

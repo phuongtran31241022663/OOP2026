@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 namespace Presentation.Components
 {
     partial class TripCard
@@ -47,7 +50,7 @@ namespace Presentation.Components
                 ForeColor = System.Drawing.Color.Black,
                 Location = new System.Drawing.Point(16, 8),
                 AutoSize = true,
-                Text = "Chờ xử lý"
+                Text = "Chá» xá»­ lÃ½"
             };
 
             // Route label
@@ -59,7 +62,7 @@ namespace Presentation.Components
                 AutoSize = false,
                 Width = 320,
                 Height = 18,
-                Text = "Điểm đón → Điểm đến"
+                Text = "Äiá»ƒm Ä‘Ã³n â†’ Äiá»ƒm Ä‘áº¿n"
             };
 
             // Info label (fare, vehicle type)
@@ -69,7 +72,7 @@ namespace Presentation.Components
                 ForeColor = System.Drawing.Color.Gray,
                 Location = new System.Drawing.Point(16, 52),
                 AutoSize = true,
-                Text = "15.000 VNĐ • Xe máy"
+                Text = "15.000 VNÄ â€¢ Xe mÃ¡y"
             };
 
             // Time label
@@ -99,6 +102,8 @@ namespace Presentation.Components
         private System.Windows.Forms.Label _lblRoute;
         private System.Windows.Forms.Label _lblInfo;
         private System.Windows.Forms.Label _lblTime;
-        private System.Windows.Forms.Panel _statusIndicator;        #endregion
+        private System.Windows.Forms.Panel _statusIndicator;
+        #endregion
     }
 }
+

@@ -1,4 +1,7 @@
-﻿namespace Presentation.Components
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
+namespace Presentation.Components
 {
     partial class TripStatusPanel
     {
@@ -78,3 +81,4 @@
         private System.Windows.Forms.Label _stepLabel;
     }
 }
+

@@ -1,3 +1,5 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
 using Application.Events;
 using Application.Interfaces;
 using Domain.Entities;
@@ -23,23 +25,23 @@ namespace Presentation.Screens.PassengerScreen
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _parentShell = parentShell ?? throw new ArgumentNullException(nameof(parentShell));
             InitializeComponent();
-            // Đăng ký sự kiện Observer
+            // ÄÄƒng kÃ½ sá»± kiá»‡n Observer
             _tripService.TripStatusChanged += OnTripStatusChanged;
 
-            // Đảm bảo hủy đăng ký khi form đóng (để tránh memory leak)
+            // Äáº£m báº£o há»§y Ä‘Äƒng kÃ½ khi form Ä‘Ã³ng (Ä‘á»ƒ trÃ¡nh memory leak)
             this.FormClosed += (s, e) => _tripService.TripStatusChanged -= OnTripStatusChanged;
         }
         private void OnTripStatusChanged(object sender, TripStatusChangedEventArgs e)
         {
-            // Chỉ xử lý nếu sự kiện liên quan đến chuyến hiện tại
+            // Chá»‰ xá»­ lÃ½ náº¿u sá»± kiá»‡n liÃªn quan Ä‘áº¿n chuyáº¿n hiá»‡n táº¡i
             if (_currentTrip == null || e.TripId != _currentTrip.Id)
                 return;
 
-            // Lấy trip mới nhất từ repository
+            // Láº¥y trip má»›i nháº¥t tá»« repository
             Trip updatedTrip = _tripService.GetTripAsync(e.TripId).GetAwaiter().GetResult();
             if (updatedTrip == null) return;
 
-            // Cập nhật UI (thread-safe)
+            // Cáº­p nháº­t UI (thread-safe)
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => ApplyTripUpdate(updatedTrip)));
@@ -85,9 +87,9 @@ namespace Presentation.Screens.PassengerScreen
             ShowActive();
             UpdateBanner();
 
-            _pickupLabel.Text = $"Điểm đón: {_currentTrip.Pickup?.Address ?? "--"}";
-            _destLabel.Text = $"Điểm đến: {_currentTrip.Destination?.Address ?? "--"}";
-            _fareLabel.Text = $"Giá: {_currentTrip.Fare:N0} đ";
+            _pickupLabel.Text = $"Äiá»ƒm Ä‘Ã³n: {_currentTrip.Pickup?.Address ?? "--"}";
+            _destLabel.Text = $"Äiá»ƒm Ä‘áº¿n: {_currentTrip.Destination?.Address ?? "--"}";
+            _fareLabel.Text = $"GiÃ¡: {_currentTrip.Fare:N0} Ä‘";
 
             UpdateCancelButton();
 
@@ -112,15 +114,15 @@ namespace Presentation.Screens.PassengerScreen
             {
                 case TripStatus.Requested:
                 case TripStatus.Searching:
-                    text = "Đang tìm tài xế...";
+                    text = "Äang tÃ¬m tÃ i xáº¿...";
                     color = Color.LightYellow;
                     break;
                 case TripStatus.Matched:
-                    text = "Tài xế đang đến";
+                    text = "TÃ i xáº¿ Ä‘ang Ä‘áº¿n";
                     color = Color.FromArgb(255, 224, 160);
                     break;
                 case TripStatus.Started:
-                    text = "Đang trên đường đến đích";
+                    text = "Äang trÃªn Ä‘Æ°á»ng Ä‘áº¿n Ä‘Ã­ch";
                     color = Color.FromArgb(200, 255, 200);
                     break;
                 default:
@@ -139,7 +141,7 @@ namespace Presentation.Screens.PassengerScreen
             bool canCancel = _tripService.CanTripBeCancelled(_currentTrip.Id);
 
             _cancelBtn.Enabled = canCancel;
-            _cancelBtn.Text = canCancel ? "Hủy chuyến" : "Không thể hủy";
+            _cancelBtn.Text = canCancel ? "Há»§y chuyáº¿n" : "KhÃ´ng thá»ƒ há»§y";
             _cancelBtn.ForeColor = canCancel ? Color.DarkRed : SystemColors.GrayText;
         }
 
@@ -169,10 +171,10 @@ namespace Presentation.Screens.PassengerScreen
 
         private void ShowDriverCard()
         {
-            _driverNameLabel.Text = $"Tên: {_currentDriver.Name}";
-            _driverPhoneLabel.Text = $"SĐT: {_currentDriver.Phone}";
-            _driverReviewLabel.Text = $"Đánh giá: {_currentDriver.Review.ToString("F1")} ★";
-            _vehicleLabel.Text = $"Biển số: {_currentDriver.VehiclePlate}";
+            _driverNameLabel.Text = $"TÃªn: {_currentDriver.Name}";
+            _driverPhoneLabel.Text = $"SÄT: {_currentDriver.Phone}";
+            _driverReviewLabel.Text = $"ÄÃ¡nh giÃ¡: {_currentDriver.Review.ToString("F1")} â˜…";
+            _vehicleLabel.Text = $"Biá»ƒn sá»‘: {_currentDriver.VehiclePlate}";
             _driverCard.Visible = true;
         }
 
@@ -181,7 +183,7 @@ namespace Presentation.Screens.PassengerScreen
         {
             _emptyPanel.Visible = true;
             _activePanel.Visible = false;
-            _statusBarLabel.Text = "Không có chuyến đi đang hoạt động";
+            _statusBarLabel.Text = "KhÃ´ng cÃ³ chuyáº¿n Ä‘i Ä‘ang hoáº¡t Ä‘á»™ng";
         }
 
         private void ShowActive()
@@ -204,8 +206,8 @@ namespace Presentation.Screens.PassengerScreen
             }
 
             var confirm = MessageBox.Show(
-                "Xác nhận hủy chuyến đi?",
-                "Hủy chuyến",
+                "XÃ¡c nháº­n há»§y chuyáº¿n Ä‘i?",
+                "Há»§y chuyáº¿n",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
@@ -223,8 +225,8 @@ namespace Presentation.Screens.PassengerScreen
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Không thể hủy chuyến: {ex.Message}",
-                    "Lỗi",
+                    $"KhÃ´ng thá»ƒ há»§y chuyáº¿n: {ex.Message}",
+                    "Lá»—i",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
@@ -241,3 +243,4 @@ namespace Presentation.Screens.PassengerScreen
         }
     }
 }
+

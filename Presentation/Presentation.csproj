@@ -212,24 +212,6 @@
     <Compile Include="Screens\DriverScreen\TripNavigationForm.Designer.cs">
       <DependentUpon>TripNavigationForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Screens\Driver\DriverDashboardForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\Driver\DriverDashboardForm.Designer.cs">
-      <DependentUpon>DriverDashboardForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\Driver\EarningsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\Driver\EarningsForm.Designer.cs">
-      <DependentUpon>EarningsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\Driver\TripNavigationForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\Driver\TripNavigationForm.Designer.cs">
-      <DependentUpon>TripNavigationForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Screens\PassengerScreen\BookTripForm.cs">
       <SubType>Form</SubType>
     </Compile>

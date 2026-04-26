@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 namespace Presentation.Screens.PassengerScreen
 {
     partial class BookTripForm : BaseForm
@@ -28,6 +31,49 @@ namespace Presentation.Screens.PassengerScreen
         /// </summary>
         private void InitializeComponent()
         {
+            this.rootLayout = new System.Windows.Forms.TableLayoutPanel();
+            this._mapControl = new Presentation.Components.MapControl();
+            this._sidebar = new System.Windows.Forms.Panel();
+            this.sidebarTitle = new System.Windows.Forms.Label();
+            this.locationGroup = new System.Windows.Forms.GroupBox();
+            this.pickupRow = new System.Windows.Forms.TableLayoutPanel();
+            this.pickupSlotLabel = new System.Windows.Forms.Label();
+            this._pickupPicker = new Presentation.Components.LocationPickerControl();
+            this.destinationRow = new System.Windows.Forms.TableLayoutPanel();
+            this.destinationSlotLabel = new System.Windows.Forms.Label();
+            this._destinationPicker = new Presentation.Components.LocationPickerControl();
+
+            this.vehicleGroup = new System.Windows.Forms.GroupBox();
+            this._vehicleCombo = new System.Windows.Forms.ComboBox();
+            this.fareGroup = new System.Windows.Forms.GroupBox();
+            this._durationLabel = new System.Windows.Forms.Label();
+            this._distanceLabel = new System.Windows.Forms.Label();
+            this._fareLabel = new System.Windows.Forms.Label();
+            this.nearbyGroup = new System.Windows.Forms.GroupBox();
+            this._nearbyLabel = new System.Windows.Forms.Label();
+            this._driverCard = new System.Windows.Forms.Panel();
+            this._driverReviewLabel = new System.Windows.Forms.Label();
+            this._driverPhoneLabel = new System.Windows.Forms.Label();
+            this._driverNameLabel = new System.Windows.Forms.Label();
+            this.buttonPanel = new System.Windows.Forms.Panel();
+            this._cancelBtn = new System.Windows.Forms.Button();
+            this._requestBtn = new System.Windows.Forms.Button();
+            this._suggestions = new System.Windows.Forms.ListBox();
+            this._statusBar = new System.Windows.Forms.Panel();
+            this._statusLabel = new System.Windows.Forms.Label();
+            this.rootLayout.SuspendLayout();
+            this._sidebar.SuspendLayout();
+            this.locationGroup.SuspendLayout();
+            this.pickupRow.SuspendLayout();
+            this.destinationRow.SuspendLayout();
+            this.vehicleGroup.SuspendLayout();
+            this.fareGroup.SuspendLayout();
+            this.nearbyGroup.SuspendLayout();
+            this._driverCard.SuspendLayout();
+            this.buttonPanel.SuspendLayout();
+            this._statusBar.SuspendLayout();
+            this.SuspendLayout();
+
             this.rootLayout = new System.Windows.Forms.TableLayoutPanel();
             this._mapControl = new Presentation.Components.MapControl();
             this._sidebar = new System.Windows.Forms.Panel();
@@ -94,7 +140,7 @@ namespace Presentation.Screens.PassengerScreen
             this._mapControl.Size = new System.Drawing.Size(710, 634);
             this._mapControl.TabIndex = 0;
             this._mapControl.MapClicked += OnMapClicked;
-            // 
+            // .
             // _sidebar
             // 
             this._sidebar.BackColor = System.Drawing.SystemColors.Control;
@@ -123,7 +169,7 @@ namespace Presentation.Screens.PassengerScreen
             this.sidebarTitle.Name = "sidebarTitle";
             this.sidebarTitle.Size = new System.Drawing.Size(286, 28);
             this.sidebarTitle.TabIndex = 0;
-            this.sidebarTitle.Text = "Đặt chuyến đi";
+            this.sidebarTitle.Text = "Äáº·t chuyáº¿n Ä‘i";
             this.sidebarTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // locationGroup
@@ -138,7 +184,7 @@ namespace Presentation.Screens.PassengerScreen
             this.locationGroup.Size = new System.Drawing.Size(286, 110);
             this.locationGroup.TabIndex = 1;
             this.locationGroup.TabStop = false;
-            this.locationGroup.Text = "Địa điểm";
+            this.locationGroup.Text = "Äá»‹a Ä‘iá»ƒm";
             // 
             // pickupRow
             // 
@@ -172,7 +218,7 @@ namespace Presentation.Screens.PassengerScreen
             this._pickupPicker.Dock = System.Windows.Forms.DockStyle.Fill;
             this._pickupPicker.Location = new System.Drawing.Point(23, 3);
             this._pickupPicker.Name = "_pickupPicker";
-            this._pickupPicker.Placeholder = "Điểm đón";
+            this._pickupPicker.Placeholder = "Äiá»ƒm Ä‘Ã³n";
             this._pickupPicker.Size = new System.Drawing.Size(252, 22);
             this._pickupPicker.TabIndex = 1;
             this._pickupPicker.LocationSelected += OnPickupSelected;
@@ -209,7 +255,7 @@ namespace Presentation.Screens.PassengerScreen
             this._destinationPicker.Dock = System.Windows.Forms.DockStyle.Fill;
             this._destinationPicker.Location = new System.Drawing.Point(23, 3);
             this._destinationPicker.Name = "_destinationPicker";
-            this._destinationPicker.Placeholder = "Điểm đến";
+            this._destinationPicker.Placeholder = "Äiá»ƒm Ä‘áº¿n";
             this._destinationPicker.Size = new System.Drawing.Size(252, 22);
             this._destinationPicker.TabIndex = 1;
             this._destinationPicker.LocationSelected += OnDestinationLocationSelected;
@@ -225,7 +271,7 @@ namespace Presentation.Screens.PassengerScreen
             this.vehicleGroup.Size = new System.Drawing.Size(286, 52);
             this.vehicleGroup.TabIndex = 2;
             this.vehicleGroup.TabStop = false;
-            this.vehicleGroup.Text = "Loại xe";
+            this.vehicleGroup.Text = "Loáº¡i xe";
             // 
             // _vehicleCombo
             // 
@@ -256,7 +302,7 @@ namespace Presentation.Screens.PassengerScreen
             this.fareGroup.Size = new System.Drawing.Size(286, 92);
             this.fareGroup.TabIndex = 3;
             this.fareGroup.TabStop = false;
-            this.fareGroup.Text = "Ước tính";
+            this.fareGroup.Text = "Æ¯á»›c tÃ­nh";
             // 
             // _fareLabel
             // 
@@ -266,7 +312,7 @@ namespace Presentation.Screens.PassengerScreen
             this._fareLabel.Name = "_fareLabel";
             this._fareLabel.Size = new System.Drawing.Size(278, 18);
             this._fareLabel.TabIndex = 0;
-            this._fareLabel.Text = "Giá: --";
+            this._fareLabel.Text = "GiÃ¡: --";
             // 
             // _distanceLabel
             // 
@@ -276,7 +322,7 @@ namespace Presentation.Screens.PassengerScreen
             this._distanceLabel.Name = "_distanceLabel";
             this._distanceLabel.Size = new System.Drawing.Size(278, 18);
             this._distanceLabel.TabIndex = 1;
-            this._distanceLabel.Text = "Khoảng cách: --";
+            this._distanceLabel.Text = "Khoáº£ng cÃ¡ch: --";
             // 
             // _durationLabel
             // 
@@ -286,7 +332,7 @@ namespace Presentation.Screens.PassengerScreen
             this._durationLabel.Name = "_durationLabel";
             this._durationLabel.Size = new System.Drawing.Size(278, 18);
             this._durationLabel.TabIndex = 2;
-            this._durationLabel.Text = "Thời gian: --";
+            this._durationLabel.Text = "Thá»i gian: --";
             // 
             // nearbyGroup
             // 
@@ -299,7 +345,7 @@ namespace Presentation.Screens.PassengerScreen
             this.nearbyGroup.Size = new System.Drawing.Size(286, 48);
             this.nearbyGroup.TabIndex = 4;
             this.nearbyGroup.TabStop = false;
-            this.nearbyGroup.Text = "Tài xế gần đây";
+            this.nearbyGroup.Text = "TÃ i xáº¿ gáº§n Ä‘Ã¢y";
             // 
             // _nearbyLabel
             // 
@@ -310,7 +356,7 @@ namespace Presentation.Screens.PassengerScreen
             this._nearbyLabel.Name = "_nearbyLabel";
             this._nearbyLabel.Size = new System.Drawing.Size(278, 18);
             this._nearbyLabel.TabIndex = 0;
-            this._nearbyLabel.Text = "Chưa có dữ liệu";
+            this._nearbyLabel.Text = "ChÆ°a cÃ³ dá»¯ liá»‡u";
             // 
             // _driverCard
             // 
@@ -335,7 +381,7 @@ namespace Presentation.Screens.PassengerScreen
             this._driverNameLabel.Name = "_driverNameLabel";
             this._driverNameLabel.Size = new System.Drawing.Size(272, 18);
             this._driverNameLabel.TabIndex = 0;
-            this._driverNameLabel.Text = "Tài xế: --";
+            this._driverNameLabel.Text = "TÃ i xáº¿: --";
             // 
             // _driverPhoneLabel
             // 
@@ -345,7 +391,7 @@ namespace Presentation.Screens.PassengerScreen
             this._driverPhoneLabel.Name = "_driverPhoneLabel";
             this._driverPhoneLabel.Size = new System.Drawing.Size(272, 18);
             this._driverPhoneLabel.TabIndex = 1;
-            this._driverPhoneLabel.Text = "SĐT: --";
+            this._driverPhoneLabel.Text = "SÄT: --";
             // 
             // _driverReviewLabel
             // 
@@ -355,7 +401,7 @@ namespace Presentation.Screens.PassengerScreen
             this._driverReviewLabel.Name = "_driverReviewLabel";
             this._driverReviewLabel.Size = new System.Drawing.Size(272, 18);
             this._driverReviewLabel.TabIndex = 2;
-            this._driverReviewLabel.Text = "Đánh giá: --";
+            this._driverReviewLabel.Text = "ÄÃ¡nh giÃ¡: --";
             // 
             // buttonPanel
             // 
@@ -376,7 +422,7 @@ namespace Presentation.Screens.PassengerScreen
             this._cancelBtn.Name = "_cancelBtn";
             this._cancelBtn.Size = new System.Drawing.Size(90, 30);
             this._cancelBtn.TabIndex = 0;
-            this._cancelBtn.Text = "Hủy chuyến";
+            this._cancelBtn.Text = "Há»§y chuyáº¿n";
             this._cancelBtn.UseVisualStyleBackColor = true;
             this._cancelBtn.Visible = false;
             this._cancelBtn.Click += new System.EventHandler(this.OnCancelClicked);
@@ -388,7 +434,7 @@ namespace Presentation.Screens.PassengerScreen
             this._requestBtn.Name = "_requestBtn";
             this._requestBtn.Size = new System.Drawing.Size(90, 30);
             this._requestBtn.TabIndex = 1;
-            this._requestBtn.Text = "Đặt xe ngay";
+            this._requestBtn.Text = "Äáº·t xe ngay";
             this._requestBtn.UseVisualStyleBackColor = true;
             this._requestBtn.Click += new System.EventHandler(this.OnRequestClicked);
             // 
@@ -427,7 +473,7 @@ namespace Presentation.Screens.PassengerScreen
             this._statusLabel.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
             this._statusLabel.Size = new System.Drawing.Size(286, 34);
             this._statusLabel.TabIndex = 0;
-            this._statusLabel.Text = "Sẵn sàng";
+            this._statusLabel.Text = "Sáºµn sÃ ng";
             this._statusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // BookTripForm
@@ -492,3 +538,4 @@ namespace Presentation.Screens.PassengerScreen
         private System.Windows.Forms.Label _statusLabel;
     }
 }
+

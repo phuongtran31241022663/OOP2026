@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 namespace Presentation.Screens.Auth
 {
     partial class LoginForm
@@ -43,7 +46,7 @@ namespace Presentation.Screens.Auth
             this.lblPhone.Name = "lblPhone";
             this.lblPhone.Size = new System.Drawing.Size(95, 16);
             this.lblPhone.TabIndex = 0;
-            this.lblPhone.Text = "Số điện thoại:";
+            this.lblPhone.Text = "Sá»‘ Ä‘iá»‡n thoáº¡i:";
             // 
             // lblPassword
             // 
@@ -52,7 +55,7 @@ namespace Presentation.Screens.Auth
             this.lblPassword.Name = "lblPassword";
             this.lblPassword.Size = new System.Drawing.Size(66, 16);
             this.lblPassword.TabIndex = 1;
-            this.lblPassword.Text = "Mật khẩu:";
+            this.lblPassword.Text = "Máº­t kháº©u:";
             // 
             // txtPhone
             // 
@@ -75,7 +78,7 @@ namespace Presentation.Screens.Auth
             this.btnLogin.Name = "btnLogin";
             this.btnLogin.Size = new System.Drawing.Size(80, 28);
             this.btnLogin.TabIndex = 4;
-            this.btnLogin.Text = "Đăng nhập";
+            this.btnLogin.Text = "ÄÄƒng nháº­p";
             this.btnLogin.UseVisualStyleBackColor = true;
             this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
             // 
@@ -85,7 +88,7 @@ namespace Presentation.Screens.Auth
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(80, 28);
             this.btnCancel.TabIndex = 5;
-            this.btnCancel.Text = "Hủy";
+            this.btnCancel.Text = "Há»§y";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
@@ -104,7 +107,7 @@ namespace Presentation.Screens.Auth
             this.MinimizeBox = false;
             this.Name = "LoginForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Đăng nhập";
+            this.Text = "ÄÄƒng nháº­p";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -120,3 +123,4 @@ namespace Presentation.Screens.Auth
         private System.Windows.Forms.Button btnCancel;
     }
 }
+

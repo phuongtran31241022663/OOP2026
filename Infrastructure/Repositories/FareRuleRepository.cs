@@ -1,10 +1,11 @@
-﻿using Domain.Entities;
+﻿// Infrastructure/Repositories/FareRuleRepository.cs
+using Domain.Entities;
 using Domain.Enums;
 using Domain.ValueObjects;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Infrastructure.Interfaces;
+using Domain.Repositories;
 
 namespace Infrastructure.Repositories
 {
@@ -24,7 +25,7 @@ namespace Infrastructure.Repositories
 
             if (!_items.Any(r => r.VehicleType == VehicleType.Motorbike))
             {
-                Add(new FareRule(
+                _items.Add(new FareRule(
                     VehicleType.Motorbike,
                     new Money(15000, "VND"),
                     new Money(3000, "VND"),
@@ -34,7 +35,7 @@ namespace Infrastructure.Repositories
 
             if (!_items.Any(r => r.VehicleType == VehicleType.Car))
             {
-                Add(new FareRule(
+                _items.Add(new FareRule(
                     VehicleType.Car,
                     new Money(25000, "VND"),
                     new Money(5000, "VND"),
@@ -43,26 +44,6 @@ namespace Infrastructure.Repositories
             }
 
             await SaveChangesAsync();
-        }
-
-        public async Task AddAsync(FareRule rule)
-        {
-            Add(rule);
-            await Task.CompletedTask;
-        }
-
-        public async Task UpdateAsync(FareRule rule)
-        {
-            Update(rule);
-            await Task.CompletedTask;
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            var entity = await GetByIdAsync(id);
-            if (entity != null)
-                Delete(entity);
-            await Task.CompletedTask;
         }
     }
 }

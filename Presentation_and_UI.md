@@ -86,7 +86,7 @@ Presentation/
 
 ## 10. Design Issues / Inconsistencies (if any)
 
-- **Direct Service Injection**: Forms inject Application services directly, mixing UI and Application concerns; should use ViewModels as mediators.
+- **Direct Service Reference (manual)**: Forms reference Application services directly (passed via constructor/manual composition), mixing UI and Application concerns; should use ViewModels as mediators.
 - **Mock Mappings**: DataMapper uses mocks ("mock" strings); incomplete implementation.
 - **State Duplication**: State in Forms and ViewModels overlaps (e.g., \_currentTrip in both PassengerShell and PassengerViewModel). Resolution: ViewModel should be the single source of truth; Forms read state from ViewModels only.
 - **Incomplete ViewModels**: Many TODOs in ViewModels (e.g., commented service calls); not fully implemented.

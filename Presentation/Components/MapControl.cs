@@ -1,3 +1,5 @@
+﻿using Domain.Entities.Users;
+using Domain.Entities;
 using Domain.ValueObjects;
 using GMap.NET;
 using GMap.NET.MapProviders;
@@ -12,12 +14,12 @@ using DomainLocation = Domain.ValueObjects.Location;
 namespace Presentation.Components
 {
     /// <summary>
-    /// BaseUserControl hiển thị bản đồ với các marker và route.
-    /// Sử dụng GMap.NET để render bản đồ OpenStreetMap.
+    /// BaseUserControl hiá»ƒn thá»‹ báº£n Ä‘á»“ vá»›i cÃ¡c marker vÃ  route.
+    /// Sá»­ dá»¥ng GMap.NET Ä‘á»ƒ render báº£n Ä‘á»“ OpenStreetMap.
     /// </summary>
     public partial class MapControl : BaseUserControl
     {
-        // Logic fields – NOT designer controls
+        // Logic fields â€“ NOT designer controls
         private GMapOverlay _staticOverlay; // Static markers (pickup, dropoff)
         private GMapOverlay _routeOverlay; // Trip route
         private GMapOverlay _dynamicOverlay; // Dynamic markers (drivers)
@@ -26,7 +28,7 @@ namespace Presentation.Components
         private GMapMarker _driverMarker;
 
         /// <summary>
-        /// Sự kiện khi người dùng click vào bản đồ
+        /// Sá»± kiá»‡n khi ngÆ°á»i dÃ¹ng click vÃ o báº£n Ä‘á»“
         /// </summary>
         public event Action<MapControl, DomainLocation> MapClicked;
 
@@ -63,7 +65,7 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Set vị trí pickup trên bản đồ
+        /// Set vá»‹ trÃ­ pickup trÃªn báº£n Ä‘á»“
         /// </summary>
         public void AddPickupMarker(DomainLocation location)
         {
@@ -84,12 +86,12 @@ namespace Presentation.Components
             _pickupMarker = new GMarkerGoogle(
          new PointLatLng(location.Coordinate.Latitude, location.Coordinate.Longitude),
          GMarkerGoogleType.green_pushpin);
-            _pickupMarker.ToolTipText = $"Điểm đón: {location.Address}";
+            _pickupMarker.ToolTipText = $"Äiá»ƒm Ä‘Ã³n: {location.Address}";
             _staticOverlay.Markers.Add(_pickupMarker);
         }
 
         /// <summary>
-        /// Set vị trí destination trên bản đồ
+        /// Set vá»‹ trÃ­ destination trÃªn báº£n Ä‘á»“
         /// </summary>
         public void AddDestinationMarker(DomainLocation location)
         {
@@ -110,12 +112,12 @@ namespace Presentation.Components
             _destinationMarker = new GMarkerGoogle(
                 new PointLatLng(location.Coordinate.Latitude, location.Coordinate.Longitude),
                 GMarkerGoogleType.red_pushpin);
-            _destinationMarker.ToolTipText = $"Điểm đến: {location.Address}";
+            _destinationMarker.ToolTipText = $"Äiá»ƒm Ä‘áº¿n: {location.Address}";
             _staticOverlay.Markers.Add(_destinationMarker);
         }
 
         /// <summary>
-        /// Thêm marker tài xế trên bản đồ
+        /// ThÃªm marker tÃ i xáº¿ trÃªn báº£n Ä‘á»“
         /// </summary>
         public void AddDriverMarker(DomainLocation location)
         {
@@ -123,7 +125,7 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Cập nhật vị trí tài xế trên bản đồ
+        /// Cáº­p nháº­t vá»‹ trÃ­ tÃ i xáº¿ trÃªn báº£n Ä‘á»“
         /// </summary>
         public void UpdateDriverLocation(DomainLocation location)
         {
@@ -139,7 +141,7 @@ namespace Presentation.Components
             _driverMarker = new GMarkerGoogle(
          new PointLatLng(location.Coordinate.Latitude, location.Coordinate.Longitude),
                 GMarkerGoogleType.blue_dot);
-            _driverMarker.ToolTipText = $"Tài xế: {location.Coordinate.Latitude:F5}, {location.Coordinate.Longitude:F5}";
+            _driverMarker.ToolTipText = $"TÃ i xáº¿: {location.Coordinate.Latitude:F5}, {location.Coordinate.Longitude:F5}";
             _dynamicOverlay.Markers.Add(_driverMarker);
 
             // Follow driver
@@ -147,7 +149,7 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Hiển thị danh sách tài xế trên bản đồ
+        /// Hiá»ƒn thá»‹ danh sÃ¡ch tÃ i xáº¿ trÃªn báº£n Ä‘á»“
         /// </summary>
         public void UpdateDriverMarkers(List<Driver> drivers)
         {
@@ -172,7 +174,7 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Vẽ route giữa 2 điểm
+        /// Váº½ route giá»¯a 2 Ä‘iá»ƒm
         /// </summary>
         public void DrawRoute(DomainLocation from, DomainLocation to, Color color)
         {
@@ -180,7 +182,7 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Vẽ route trên bản đồ
+        /// Váº½ route trÃªn báº£n Ä‘á»“
         /// </summary>
         public void DrawRoute(List<DomainLocation> waypoints)
         {
@@ -218,7 +220,7 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Xóa tất cả markers
+        /// XÃ³a táº¥t cáº£ markers
         /// </summary>
         public void ClearMarkers()
         {
@@ -230,7 +232,7 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Xóa route
+        /// XÃ³a route
         /// </summary>
         public void ClearRoute()
         {
@@ -252,7 +254,7 @@ namespace Presentation.Components
             if (e.Button == MouseButtons.Left)
             {
                 PointLatLng point = _gMapControl.FromLocalToLatLng(e.X, e.Y);
-                // Tạo Location tạm với coordinate, address để trống (hoặc gọi reverse geocoding)
+                // Táº¡o Location táº¡m vá»›i coordinate, address Ä‘á»ƒ trá»‘ng (hoáº·c gá»i reverse geocoding)
                 Coordinate coord = new Coordinate(point.Lat, point.Lng);
                 Address addr = new Address("", "", "", "", "", "", "", "");
                 DomainLocation location = new DomainLocation(coord, addr);
@@ -261,3 +263,4 @@ namespace Presentation.Components
         }
     }
 }
+

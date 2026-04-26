@@ -70,7 +70,7 @@ Domain/
 
 ### `Trip` (: Entity)
 - Properties: `Status` (TripStatus), `PassengerId/DriverId?` (Guid), `TripVehicleType`, `TripRoute` (Route), `TripFare` (Fare), `Distance/Duration?` (computed), `IsPaid`, `RequestAt`.
-- Methods: State transitions (validate via TripStateMachine, emit events):
+- Methods: State transitions (validate via ITripState implementations, emit events):
   | Method | New Status | Emits Event |
   |--------|------------|-------------|
   | `SetSearching()` | Searching | TripSearchingEvent |

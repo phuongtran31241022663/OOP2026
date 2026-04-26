@@ -1,4 +1,7 @@
-﻿// Presentation/BaseShell_Designer.cs
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
+// Presentation/BaseShell_Designer.cs
 using System.Drawing;
 using System.Windows.Forms;
 
