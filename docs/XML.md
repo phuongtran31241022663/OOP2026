@@ -1,0 +1,31 @@
+﻿---
+
+## 2. XML.md
+
+```markdown
+# XML Documentation Comments
+
+Tất cả XML docs bắt đầu bằng `///` (ba dấu slash). IDE sẽ tự động sinh khung khi bạn gõ `///` phía trên một thành phần có thể có tài liệu (class, method, property, enum, delegate, event…).
+
+## 1. Các thẻ cơ bản nhất
+
+| Thẻ                      | Mục đích                                                                             | Ví dụ                                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `<summary>`              | Mô tả ngắn gọn, nên viết như một câu trả lời cho "Đối tượng/phương thức này làm gì?" | `<summary>Lấy danh sách các xe đang hoạt động.</summary>`                                |
+| `<remarks>`              | Bổ sung chi tiết: thuật toán, ràng buộc, ví dụ, chú ý khi sử dụng.                   | `<remarks>Phương thức này không an toàn luồng. Nó sử dụng cache trong bộ nhớ.</remarks>` |
+| `<param name="...">`     | Mô tả tham số. Tên phải khớp chính xác với tham số của phương thức.                  | `<param name="vehicleId">ID của xe cần tìm.</param>`                                     |
+| `<returns>`              | Mô tả giá trị trả về.                                                                | `<returns>Đối tượng VehicleData, hoặc null nếu không tìm thấy.</returns>`                |
+| `<exception cref="...">` | Liệt kê các ngoại lệ có thể bị ném (dùng `cref` để tham chiếu kiểu).                 | `<exception cref="ArgumentNullException">Nếu vehicleId là null.</exception>`             |
+| `<example>`              | Ví dụ sử dụng. Thường chứa thẻ `<code>` bên trong.                                   | Xem mục 2.3                                                                              |
+
+## 2. Các thẻ nâng cao và liên kết
+
+- `<see cref="..."/>`: Tạo liên kết đến một thành phần khác (class, method, property). Dùng trong `<summary>` hoặc `<remarks>` để dẫn tới tài liệu liên quan.
+- `<seealso cref="..."/>`: Tạo mục "Xem thêm". Thường đặt ở cuối comment.
+- `<typeparam name="...">`: Mô tả tham số kiểu generic (tương tự `<param>` nhưng dành cho `<T>`).
+- `<inheritdoc/>`: Kế thừa toàn bộ tài liệu từ thành phần cơ sở (lớp cha hoặc interface). Cực kỳ hữu ích khi ghi đè phương thức mà không thay đổi ngữ nghĩa.
+- `<list type="bullet">`: Tạo danh sách trong `<remarks>`.
+- `<para>`: Ngắt đoạn trong `<summary>` hoặc `<remarks>`.
+- `<c>`: Đánh dấu đoạn code ngắn (inline).
+- `<code>`: Khối code, thường dùng kèm `<example>`.
+```

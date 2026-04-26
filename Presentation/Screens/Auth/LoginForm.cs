@@ -31,7 +31,7 @@ namespace Presentation.Screens.Auth
                 if (_userService == null)
                     throw new InvalidOperationException("User service not initialized.");
 
-                AuthenticatedUser = await _userService.Login(txtPhone.Text, txtPassword.Text);
+                AuthenticatedUser = await _userService.LoginAsync(txtPhone.Text, txtPassword.Text);
                 MessageBox.Show("ÄÄƒng nháº­p thÃ nh cÃ´ng");
                 DialogResult = DialogResult.OK;
             }

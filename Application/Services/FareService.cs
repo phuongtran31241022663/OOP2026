@@ -2,7 +2,7 @@
 using Domain.Entities;
 using Domain.Enums;
 using Domain.ValueObjects;
-using Infrastructure.Interfaces;
+using Domain.Repositories;
 using System;
 using System.Threading.Tasks;
 
