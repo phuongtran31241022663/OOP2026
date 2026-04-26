@@ -167,7 +167,7 @@ namespace Presentation.Components
                     GMarkerGoogle marker = new GMarkerGoogle(
                         new PointLatLng(driver.Position.Coordinate.Latitude, driver.Position.Coordinate.Longitude),
                         GMarkerGoogleType.blue_dot);
-                    marker.ToolTipText = $"{driver.Name} - {driver.Vehicle.GetVehicleType()}";
+                    marker.ToolTipText = $"{driver.Name} - {driver.VehicleId}";
                     _dynamicOverlay.Markers.Add(marker);
                 }
             }

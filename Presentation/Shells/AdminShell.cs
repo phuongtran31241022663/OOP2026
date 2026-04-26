@@ -7,9 +7,9 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Presentation.ViewModels;
 using Domain.Entities.Users;
 using Application.Interfaces;
+using Domain.Enums;
 
 using Presentation;
 
@@ -138,17 +138,11 @@ namespace Presentation.Shells
         {
             try
             {
-                var user = _viewModel.AllUsers.FirstOrDefault(u => u.Id == userId);
-                if (user == null) return;
-
-                if (user.IsActive)
-                {
-                    _adminService.DeActivateAccountUser(userId, _admin.Id);
-                }
-                else
-                {
-                    _adminService.ActivateAccountUser(userId);
-                }
+                MessageBox.Show(
+                    "Toggle active/inactive is not implemented in current admin service.",
+                    "Info",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
 
                 // Refresh data
                 await _viewModel.LoadDataAsync();
@@ -224,6 +218,119 @@ namespace Presentation.Shells
         }
 
         // TODO: Implement panel-specific methods
+    }
+
+    internal class AdminViewModel
+    {
+        private readonly Admin _admin;
+        private readonly IAdminService _adminService;
+        private readonly List<Trip> _allTrips = new List<Trip>();
+
+        public int TotalUsers { get; private set; }
+        public int ActiveDrivers { get; private set; }
+        public int OnTripDrivers { get; private set; }
+        public int OngoingTrips { get; private set; }
+        public int TotalTrips { get; private set; }
+        public decimal TotalRevenue { get; private set; }
+
+        public List<User> AllUsers { get; private set; }
+        public List<Driver> AllDrivers { get; private set; }
+        public List<Passenger> AllPassengers { get; private set; }
+
+        public AdminViewModel(Admin admin, IAdminService adminService)
+        {
+            _admin = admin;
+            _adminService = adminService;
+            AllUsers = new List<User>();
+            AllDrivers = new List<Driver>();
+            AllPassengers = new List<Passenger>();
+        }
+
+        public async Task LoadDataAsync()
+        {
+            List<User> users = await _adminService.GetAllUsersAsync();
+            List<Driver> drivers = await _adminService.GetAllDriversAsync();
+            List<Passenger> passengers = await _adminService.GetAllPassengersAsync();
+            List<Trip> trips = await _adminService.GetAllTripsAsync();
+
+            AllUsers = users ?? new List<User>();
+            AllDrivers = drivers ?? new List<Driver>();
+            AllPassengers = passengers ?? new List<Passenger>();
+
+            _allTrips.Clear();
+            if (trips != null)
+            {
+                _allTrips.AddRange(trips);
+            }
+
+            TotalUsers = AllUsers.Count;
+            TotalTrips = _allTrips.Count;
+            ActiveDrivers = 0;
+            OnTripDrivers = 0;
+            OngoingTrips = 0;
+
+            for (int i = 0; i < AllDrivers.Count; i++)
+            {
+                Driver driver = AllDrivers[i];
+                if (driver.Status == DriverStatus.Available)
+                {
+                    ActiveDrivers++;
+                }
+                if (driver.Status == DriverStatus.OnTrip)
+                {
+                    OnTripDrivers++;
+                }
+            }
+
+            for (int i = 0; i < _allTrips.Count; i++)
+            {
+                Trip trip = _allTrips[i];
+                if (trip.Status == TripStatus.Searching ||
+                    trip.Status == TripStatus.Matched ||
+                    trip.Status == TripStatus.Arrived ||
+                    trip.Status == TripStatus.Started)
+                {
+                    OngoingTrips++;
+                }
+            }
+
+            decimal gmv = await _adminService.GetTotalGMVAsync();
+            TotalRevenue = gmv;
+        }
+
+        public List<Trip> GetFilteredTrips(string searchTerm)
+        {
+            List<Trip> result = new List<Trip>();
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                result.AddRange(_allTrips);
+                return result;
+            }
+
+            string term = searchTerm.Trim();
+            for (int i = 0; i < _allTrips.Count; i++)
+            {
+                Trip trip = _allTrips[i];
+                if (trip.Id.ToString().IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    trip.Status.ToString().IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    result.Add(trip);
+                }
+            }
+
+            return result;
+        }
+
+        public string GetTripReport()
+        {
+            return string.Format(
+                "Admin: {0}\nTotal trips: {1}\nTotal users: {2}\nTotal revenue: {3:N0}",
+                _admin != null ? _admin.Name : "N/A",
+                TotalTrips,
+                TotalUsers,
+                TotalRevenue);
+        }
     }
 }
 

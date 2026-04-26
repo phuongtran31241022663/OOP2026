@@ -1,27 +1,17 @@
-﻿using Domain.ValueObjects;
-using Domain.Entities.Users;
-using Domain.Entities;
 using Application.Interfaces;
-
-using Domain.Enums;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
-
-using Presentation;
 
 namespace Presentation.Screens.PassengerScreen
 {
     public partial class TripHistoryForm : BaseForm
     {
-        // Dependencies
         private readonly Guid _userId;
         private readonly ITripService _tripService;
-
-        // State
-        private List<Trip> _trips = new List<Trip>();
+        private readonly List<Trip> _trips = new List<Trip>();
 
         public TripHistoryForm()
         {
@@ -29,11 +19,10 @@ namespace Presentation.Screens.PassengerScreen
         }
 
         public TripHistoryForm(Guid userId, ITripService tripService)
+            : this()
         {
             _userId = userId;
-            _tripService = tripService ?? throw new ArgumentNullException(nameof(tripService));
-
-            InitializeComponent();
+            _tripService = tripService;
         }
 
         private void TripHistoryForm_Load(object sender, EventArgs e)
@@ -43,144 +32,71 @@ namespace Presentation.Screens.PassengerScreen
 
         private async void LoadTrips()
         {
-            SetLoading(true);
-            try
-            {
-                _trips = _tripService.GetTripsByPassenger(_userId).ToList();
-
-                UpdateSummary();
-                RenderGrid();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Lá»—i táº£i lá»‹ch sá»­: {ex.Message}",
-                    "Lá»—i",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-            finally
-            {
-                SetLoading(false);
-            }
-        }
-
-        private void SetLoading(bool loading)
-        {
-            _refreshBtn.Enabled = !loading;
-            _refreshBtn.Text = loading ? "Äang táº£i..." : "LÃ m má»›i";
-            _statusLabel.Text = loading ? "Äang táº£i..." : BuildStatusText();
-        }
-
-        private void UpdateSummary()
-        {
-            var completed = _trips.Where(t => t.Status == TripStatus.Completed).ToList();
-            var cancelled = _trips.Where(t => t.Status == TripStatus.Cancelled).ToList();
-            decimal spent = completed.Sum(t => t.Fare?.Amount ?? 0);
-
-            _totalLabel.Text = $"Tá»•ng chuyáº¿n: {_trips.Count}";
-            _spentLabel.Text = $"Chi tiÃªu: {spent:N0} Ä‘";
-            _completedLabel.Text = $"HoÃ n thÃ nh: {completed.Count}";
-            _cancelledLabel.Text = $"ÄÃ£ há»§y: {cancelled.Count}";
-        }
-
-        private void RenderGrid()
-        {
             _grid.Rows.Clear();
+            _statusLabel.Text = "Dang tai...";
 
-            if (!_trips.Any())
+            if (_tripService != null)
             {
-                _grid.Visible = false;
-                _emptyLabel.Visible = true;
-                _statusLabel.Text = "KhÃ´ng cÃ³ dá»¯ liá»‡u";
-                return;
+                List<Trip> trips = await _tripService.GetTripsByPassengerAsync(_userId);
+                _trips.Clear();
+                if (trips != null)
+                {
+                    _trips.AddRange(trips);
+                }
             }
 
-            _grid.Visible = true;
-            _emptyLabel.Visible = false;
-
-            foreach (var trip in _trips.OrderByDescending(t => t.RequestedAt))
+            for (int i = 0; i < _trips.Count; i++)
             {
-                int row = _grid.Rows.Add(
-                    trip.Pickup?.Address ?? "--",
-                    trip.Destination?.Address ?? "--",
-                    trip.DriverName ?? "--",
-                    $"{trip.Fare?.Amount:N0} Ä‘",
-                    StatusText(trip.Status),
-                    trip.RequestedAt.ToString("dd/MM HH:mm"));
-                _grid.Rows[row].Tag = trip.Status;
+                Trip trip = _trips[i];
+                _grid.Rows.Add(
+                    trip.TripRoute != null ? trip.TripRoute.Pickup.ToString() : "--",
+                    trip.TripRoute != null ? trip.TripRoute.Destination.ToString() : "--",
+                    trip.Distance.HasValue ? trip.Distance.Value.ToString("F1") + " km" : "--",
+                    trip.TripFare != null ? trip.TripFare.TotalAmount.Amount.ToString("N0") + " d" : "--",
+                    trip.Status.ToString(),
+                    trip.RequestAt.ToString("dd/MM HH:mm"));
             }
 
-            _statusLabel.Text = BuildStatusText();
+            _emptyLabel.Visible = _trips.Count == 0;
+            _grid.Visible = _trips.Count > 0;
+            _statusLabel.Text = string.Format("{0} chuyen", _trips.Count);
+            _totalLabel.Text = string.Format("Tong chuyen: {0}", _trips.Count);
+            _completedLabel.Text = "Hoan thanh: --";
+            _cancelledLabel.Text = "Da huy: --";
+            _spentLabel.Text = "Tong chi tieu: --";
         }
 
-        private string BuildStatusText()
+        private void OnRefreshClicked(object sender, EventArgs e)
         {
-            int total = _trips.Count;
-            return total == 0
-                ? "KhÃ´ng cÃ³ chuyáº¿n Ä‘i"
-                : $"{total} chuyáº¿n Ä‘i  Â·  trang 1/1";
+            LoadTrips();
         }
 
         private void OnCellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+            {
+                return;
+            }
+
             if (_grid.Columns[e.ColumnIndex].Name != "Status")
             {
                 return;
             }
 
-            if (!(_grid.Rows[e.RowIndex].Tag is TripStatus))
+            string status = e.Value == null ? string.Empty : e.Value.ToString();
+            if (status == "Completed")
             {
-                return;
+                e.CellStyle.BackColor = Color.Honeydew;
             }
-
-            var status = (TripStatus)_grid.Rows[e.RowIndex].Tag;
-
-            switch (status)
+            else if (status == "Cancelled")
             {
-                case TripStatus.Completed:
-                    e.CellStyle.BackColor = Color.FromArgb(200, 240, 200);
-                    e.CellStyle.ForeColor = Color.FromArgb(0, 80, 0);
-                    break;
-                case TripStatus.Cancelled:
-                    e.CellStyle.BackColor = Color.FromArgb(255, 200, 200);
-                    e.CellStyle.ForeColor = Color.FromArgb(120, 0, 0);
-                    break;
-                case TripStatus.Started:
-                    e.CellStyle.BackColor = Color.FromArgb(255, 240, 190);
-                    e.CellStyle.ForeColor = Color.FromArgb(96, 64, 0);
-                    break;
-                default:
-                    e.CellStyle.BackColor = SystemColors.Window;
-                    e.CellStyle.ForeColor = SystemColors.ControlText;
-                    break;
+                e.CellStyle.BackColor = Color.MistyRose;
             }
         }
 
-        private static string StatusText(TripStatus status)
+        public void RefreshData()
         {
-            switch (status)
-            {
-                case TripStatus.Completed:
-                    return "HoÃ n thÃ nh";
-                case TripStatus.Cancelled:
-                    return "ÄÃ£ há»§y";
-                case TripStatus.Started:
-                    return "Äang cháº¡y";
-                case TripStatus.Matched:
-                    return "ÄÃ£ ghÃ©p Ä‘Ã´i";
-                case TripStatus.Searching:
-                    return "Äang tÃ¬m";
-                case TripStatus.Requested:
-                    return "ÄÃ£ yÃªu cáº§u";
-                default:
-                    return "--";
-            }
+            LoadTrips();
         }
-
-        private void OnRefreshClicked(object sender, EventArgs e) => LoadTrips();
-
-        public void RefreshData() => LoadTrips();
     }
 }
-

@@ -48,4 +48,8 @@ Sửa các điểm sai/lệch trong tài liệu `.md` so với code C# thực t�
   - [x] Sửa `Driver.UpdateReviews(int rating)`
   - [x] Chuyển `IRepository.cs` ra `Domain/Repositories/`
 - [x] 11. Cập nhật `TODO.md` trạng thái
-
+- [x] 12. Gộp các file tài liệu (ngoại trừ PSPEC, DEVLOG, README, Limit, Agent)
+  - [x] Tạo `Architecture_and_Design.md` — gộp RideGo_Architecture + CleanArchitecture_Final + Technical_Architecture
+  - [x] Tạo `Domain_Reference.md` — gộp Domain_Model + domain_class_library
+  - [x] Tạo `Business_and_UI_Guide.md` — gộp Business_Logic_and_Workflows + Presentation_and_UI + Common_Project_Documentation
+  - [x] Xóa 8 file cũ

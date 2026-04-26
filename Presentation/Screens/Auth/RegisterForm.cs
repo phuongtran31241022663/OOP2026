@@ -28,26 +28,22 @@ namespace Presentation.Screens.Auth
                 if (_userService == null)
                     throw new InvalidOperationException("User service not initialized.");
 
-                if (cmbType.SelectedItem?.ToString() == "Driver")
+                if (cmbType.SelectedItem != null && cmbType.SelectedItem.ToString() == "Driver")
                 {
-                    var defaultVehicle = new Motorbike(
-                        Guid.Empty,
-                        "59A1-NEW",
-                        "Honda",
-                        "Wave",
-                        "Black");
-                    var defaultLocation = new Location("HCM", "District 1", 10.7769, 106.7009);
-                    await _userService.RegisterDriver(
+                    Coordinate coordinate = new Coordinate(10.7769, 106.7009);
+                    Address address = new Address("HCM", "", "District 1", "Ho Chi Minh", "Vietnam");
+                    Location defaultLocation = new Location(coordinate, address);
+                    await _userService.RegisterDriverAsync(
                         txtName.Text,
                         txtPhone.Text,
                         txtPassword.Text,
-                        defaultVehicle,
-                        defaultLocation,
-                        "GPLX-NEW");
+                        "GPLX-NEW",
+                        Guid.NewGuid(),
+                        defaultLocation);
                 }
                 else
                 {
-                    await _userService.RegisterPassenger(txtName.Text, txtPhone.Text, txtPassword.Text);
+                    await _userService.RegisterPassengerAsync(txtName.Text, txtPhone.Text, txtPassword.Text);
                 }
 
                 MessageBox.Show("ÄÄƒng kÃ½ thÃ nh cÃ´ng");

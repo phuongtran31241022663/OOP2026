@@ -1,7 +1,6 @@
 ﻿using Domain.Entities.Users;
 using Domain.Entities;
 using Domain.ValueObjects;
-using Domain.Trips;
 using Presentation;
 
 namespace Presentation.Components
@@ -30,7 +29,7 @@ namespace Presentation.Components
             if (trip == null) return;
 
             // For now, simple calculation
-            decimal totalFare = trip.Fare.TotalAmount.Amount;
+            decimal totalFare = trip.TripFare.TotalAmount.Amount;
             decimal baseFare = totalFare * 0.3m;
             decimal distanceFare = totalFare * 0.6m;
             decimal commission = totalFare * 0.1m;
