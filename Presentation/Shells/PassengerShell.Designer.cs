@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 using Presentation;
 
 namespace Presentation.Shells
@@ -64,3 +67,4 @@ namespace Presentation.Shells
         private System.Windows.Forms.Panel _contentPanel;
     }
 }
+

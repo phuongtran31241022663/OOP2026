@@ -1,0 +1,157 @@
+﻿Lập trình hướng đối tượng (OOP) trong C#
+---
+
+
+1. Tổng quan về OOP và vị trí của C#
+
+
+C# do Microsoft phát triển, được thiết kế là một ngôn ngữ thuần hướng đối tượng từ lõi. Mọi thứ trong C# đều là đối tượng, kể cả các kiểu dữ liệu cơ sở (thông qua cơ chế boxing/unboxing). Điều này khác biệt với C++ (lai) hay Java (mọi class đều kế thừa từ Object). C# tích hợp chặt chẽ với .NET, cho phép OOP không chỉ nằm ở cú pháp mà còn ở kiến trúc thư viện, mô hình bất đồng bộ (async/await), LINQ, và toàn bộ hệ sinh thái.
+
+
+OOP trong C# xoay quanh lớp (class), cấu trúc (struct), giao diện (interface), bản ghi (record) và các mối quan hệ giữa chúng. Triết lý OOP được thể hiện qua bốn trụ cột cơ bản: Đóng gói, Kế thừa, Đa hình, Trừu tượng. Tuy nhiên, chỉ dừng ở bốn trụ cột là chưa đủ để “chuyên sâu”, cần phải xét đến cách C# hiện thực chúng như thế nào và cung cấp thêm những công cụ gì để viết mã OOP hiệu quả, an toàn.
+
+
+---
+
+
+2. Bốn trụ cột OOP trong C#
+
+
+2.1 Đóng gói (Encapsulation) – Kiểm soát truy xuất và bảo vệ trạng thái
+
+
+Đóng gói không chỉ đơn thuần là ẩn dữ liệu bằng private. Trong C#, nó bao gồm:
+
+
+· Access Modifiers: public, private, protected, internal, protected internal, private protected. Sự kết hợp cho phép kiểm soát chi tiết phạm vi truy xuất, từ nội bộ assembly đến lớp dẫn xuất.
+· Properties: Cơ chế cho phép truy xuất dữ liệu như trường nhưng lại là phương thức. Có thể đặt logic kiểm tra trong getter/setter, tạo thuộc tính chỉ đọc, chỉ ghi, hoặc tự động:
+  ```csharp
+  public class Account
+  {
+      public decimal Balance { get; private set; } // chỉ đọc từ bên ngoài
+  
+      public void Deposit(decimal amount)
+      {
+          if (amount <= 0) throw new ArgumentException();
+          Balance += amount;
+      }
+  }
+  ```
+· Encapsulation ở mức assembly: Sử dụng internal để ẩn chi tiết triển khai giữa các assembly, rất quan trọng trong kiến trúc nhiều tầng.
+
+
+2.2 Kế thừa (Inheritance) – Chia sẻ hành vi và phân cấp
+
+
+C# chỉ hỗ trợ đơn kế thừa lớp (một lớp chỉ có một lớp cha trực tiếp), nhưng đa kế thừa hành vi thông qua interface. Điều này tránh được vấn đề “diamond problem” phức tạp như trong C++.
+
+
+· Kế thừa lớp: Dùng dấu : để kế thừa. Lớp dẫn xuất có thể mở rộng, thay thế hoặc bổ sung hành vi.
+· Virtual / Override / New: C# yêu cầu minh bạch ý định ghi đè:
+  · Phương thức virtual ở lớp cơ sở.
+  · override ở lớp dẫn xuất để ghi đè.
+  · new nếu muốn ẩn phương thức cơ sở (không đa hình).
+  · sealed override để ngăn ghi đè tiếp.
+  ```csharp
+  class Animal
+  {
+      public virtual void Speak() => Console.WriteLine("...");
+  }
+  class Dog : Animal
+  {
+      public override void Speak() => Console.WriteLine("Woof");
+  }
+  class Cat : Animal
+  {
+      public new void Speak() => Console.WriteLine("Meow"); // Không đa hình
+  }
+  Animal a = new Cat();
+  a.Speak(); // "..." – vì không có override
+  ```
+· Lớp trừu tượng và thành viên trừu tượng: Không thể khởi tạo, được thiết kế để kế thừa. Phương thức trừu tượng không có thân và buộc phải override.
+· Lớp sealed: Ngăn chặn kế thừa, tối ưu hiệu năng và bảo vệ tính toàn vẹn. Nhiều lớp trong BCL (Base Class Library) là sealed (như String).
+
+
+Kế thừa trong C# hỗ trợ calling base class constructor qua base(), gọi phương thức cơ sở dùng base.Method(), và các kiểu covariance/contravariance trên generic interface (sẽ bàn sau).
+
+
+2.3 Đa hình (Polymorphism) – Linh hoạt tại thời gian chạy
+
+
+Đa hình trong C# có thể chia thành:
+
+
+· Đa hình lúc biên dịch (Compile-time): Thể hiện qua nạp chồng phương thức (overloading), nạp chồng toán tử (operator overloading), và generic. C# hỗ trợ nạp chồng hầu hết toán tử (ngoại trừ một số như =, ?:). Ví dụ nạp chồng + cho lớp phức số.
+· Đa hình lúc chạy (Run-time): Dựa trên phương thức ảo, giao diện. Khi một biến kiểu cơ sở tham chiếu đến đối tượng dẫn xuất, lời gọi phương thức được quyết định dựa vào kiểu thực sự của đối tượng. Đây là cốt lõi của nguyên lý Liskov Substitution.
+· Đa hình dựa trên giao diện: Một lớp có thể triển khai nhiều giao diện, cho phép đối tượng được nhìn nhận dưới nhiều vai trò khác nhau. Điều này phổ biến trong Dependency Injection.
+
+
+2.4 Trừu tượng (Abstraction) – Định nghĩa hợp đồng, ẩn chi tiết
+
+
+Trừu tượng trong C# được thể hiện qua:
+
+
+· Abstract class: Cung cấp triển khai một phần, giữ trạng thái chung.
+· Interface: Mô tả hành vi thuần túy, không có triển khai (đến phiên bản C# 7 trở về trước).
+· Abstract và Interface kết hợp: Lựa chọn abstract hay interface phụ thuộc vào việc có cần chia sẻ trạng thái hay không. Nguyên tắc phổ biến là “Ưu tiên interface”, vì C# chỉ có đơn kế thừa, và interface cho phép mô-đun hóa tốt hơn.
+
+
+---
+
+
+3. Các cơ chế OOP nâng cao đặc trưng trong C#
+
+
+3.1 Generic và Đa hình tham số
+
+
+Generics cho phép tạo mã kiểu an toàn mà không cần boxing/unboxing. Ví dụ List<T>, Dictionary<TKey, TValue>. C# cung cấp:
+
+
+· Ràng buộc (Constraints): where T : class, new(), struct, IMyInterface, class, new(), etc.
+· Generic type inference: Trình biên dịch tự suy luận kiểu khi gọi phương thức generic.
+· Covariance/Contravariance trên interface và delegate: Cho phép IEnumerable<string> có thể gán cho IEnumerable<object> (covariant – out T), hoặc Action<object> gán cho Action<string> (contravariant – in T).
+
+
+Đây là dạng “đa hình tham số”, giúp tái sử dụng mã cao, và vẫn giữ đầy đủ tính OOP vì generic class có thể kế thừa, triển khai interface.
+
+
+3.2 Delegates và Events – Hướng đối tượng cho hành vi
+
+
+Delegate là kiểu đối tượng trỏ tới phương thức, đáp ứng nguyên lý “phương thức là first-class citizen”. Delegate hỗ trợ multicast (nhiều phương thức) và có thể kết hợp với nhau. Sự kiện (event) là một cơ chế đóng gói delegate, ngăn chặn việc gán lại từ bên ngoài, giữ mẫu observer an toàn.
+
+
+C# cung cấp sẵn các delegate generic như Action, Func, Predicate. Từ đó, các mẫu chiến lược (Strategy), quan sát (Observer) trở nên tự nhiên. Lambda expressions và closures càng làm cho delegate mạnh mẽ, nhưng cần chú ý đến captured variables để tránh lỗi logic phức tạp.
+
+
+3.3 LINQ và phong cách hướng đối tượng
+
+
+LINQ (Language Integrated Query) biến thao tác dữ liệu thành biểu thức truy vấn trực tiếp trong C#. Nó không phải thuần OOP kiểu truyền thống, nhưng kết quả trả về là các đối tượng (IEnumerable<T>, IQueryable<T>), và các toán tử được xây dựng bằng phương thức mở rộng (extension method) trên các interface. Đây là một dạng “internal DSL” dựa trên nền tảng OOP, thể hiện sức mạnh của đa hình (cùng một câu LINQ có thể chạy trên mảng, list, database thông qua IQueryProvider).
+
+
+---
+
+
+4. Nguyên lý SOLID và cách C# hỗ trợ áp dụng
+
+
+OOP chuyên sâu không thể tách rời các nguyên lý thiết kế. C# chứa các tính năng hỗ trợ trực tiếp:
+
+
+· Single Responsibility: Partial class, namespace, và khả năng tổ chức code thành các file riêng biệt giúp phân chia trách nhiệm.
+· Open/Closed: Abstract class, interface và kế thừa cho phép mở rộng mà không sửa đổi code cũ. Default interface methods (C# 8) càng củng cố nguyên lý này.
+· Liskov Substitution: Hệ thống kiểu mạnh của C# (chống kế thừa phi lý), covariance/contravariance đảm bảo tính đúng đắn khi thay thế. Cảnh báo vi phạm qua new thay vì override.
+· Interface Segregation: C# hỗ trợ nhiều interface, có thể thiết kế các interface nhỏ chuyên biệt. Nên tránh “fat interface”.
+· Dependency Inversion: Dependency Injection (DI) là mẫu chủ đạo trong .NET. Container tích hợp sẵn (từ .NET Core) giúp tự động giải quyết phụ thuộc qua interface. 
+
+
+---
+
+
+5. Kết luận
+
+
+Lập trình hướng đối tượng trong C# là một hệ sinh thái phong phú, vượt xa các khái niệm sách giáo khoa. . Để viết code OOP chuyên sâu trong C#, lập trình viên cần nắm vững các cơ chế đóng gói, kế thừa, đa hình và trừu tượng ở mức triển khai thực tế, đồng thời khai thác được các nguyên lý SOLID, mô hình thiết kế, và các cải tiến hiện đại đúng thời điểm. Điều đó giúp tạo ra phần mềm dễ bảo trì, mở rộng, và đạt hiệu năng cao trên nền tảng .NET.

@@ -1,6 +1,6 @@
 # RideGo — Hệ Thống Mô Phỏng Ride-Hailing trên .NET Framework 4.8
 
-> **Nền tảng:** C# WinForms · .NET Framework 4.8 · GMap.NET 2.1.7 · Newtonsoft.Json · Microsoft.Extensions.DependencyInjection
+> **Nền tảng:** C# WinForms · .NET Framework 4.8 · GMap.NET 2.1.7 · Newtonsoft.Json · Manual Service Composition
 
 ---
 
@@ -23,7 +23,7 @@ RideGo là hệ thống gọi xe mô phỏng (ride-hailing simulation) xây dự
 | UI                   | Windows Forms                                  |
 | Bản đồ               | GMap.NET.WinForms 2.1.7 (Google Maps provider) |
 | Serialization        | Newtonsoft.Json                                |
-| Dependency Injection | Microsoft.Extensions.DependencyInjection       |
+| Service Composition  | Manual — khởi tạo bằng `new` trong `Program.cs` |
 | Actor                | Passenger, Driver, Admin                       |
 | Lưu trữ              | File JSON                                      |
 
@@ -78,19 +78,19 @@ Những vi phạm này làm giảm tính testability và tăng coupling. Cần r
 | **Domain**         | Quy tắc nghiệp vụ cốt lõi, không phụ thuộc bên thứ ba | Entities, Value Objects, State Machines (`Domain.StateMachines`), Domain Events, Repository Interfaces (`Domain/Repositories`)                                                            |
 | **Application**    | Điều phối use case, quy trình nghiệp vụ               | Services (`TripService`, `UserService`, `FareService`, `MatchingService`...), Interfaces (`Application.Interfaces`) |
 | **Infrastructure** | Giao tiếp bên ngoài, lưu trữ dữ liệu                  | `JsonRepository<T>`, `FileStorage`, `MapService` (implements `IMapService`), repository implementations (`Infrastructure.Repositories`)                                                   |
-| **Presentation**   | Giao diện tương tác người dùng                        | WinForms Shells (`MainShell`, `PassengerShell`, `DriverShell`, `AdminShell`), Screens (`Screens/`*), Components (`Components/*`), ViewModels, Helpers, DI composition root (`Program.cs`) |
+| **Presentation**   | Giao diện tương tác ngườ dùng                        | WinForms Shells (`MainShell`, `PassengerShell`, `DriverShell`, `AdminShell`), Screens (`Screens/`*), Components (`Components/*`), ViewModels, Helpers, Manual composition root (`Program.cs`) |
 
 
-### Dependency Injection
+### Manual Service Composition
 
-Composition root nằm ở `Presentation/Program.cs`, đăng ký tất cả dependencies:
+Composition root nằm ở `Presentation/Program.cs` — khởi tạo toàn bộ dependencies bằng `new` trực tiếp (không dùng DI container):
 
 - `JsonStorage<T>` (Infrastructure)
 - Repositories (Infrastructure)
 - Application services
 - Background workers (`TripTimeoutWorker`, `TripMatchingWorker`)
 
-Các UI forms được truyền dependencies qua constructor.
+Các UI forms nhận dependencies qua constructor (manual pass).
 
 ---
 
@@ -301,9 +301,9 @@ No dedicated DTO folder exists; domain entities and primitive types are passed d
 
 No dedicated `Application/Features` folder exists. UI calls Application Service interfaces directly (e.g., `ITripService.CreateTripAsync()`, `IMatchingService.MatchDriverToTripAsync()`).
 
-### 6.7 Dependency Injection
+### 6.7 Manual Service Composition
 
-Sử dụng `Microsoft.Extensions.DependencyInjection`. Composition root tại `Presentation/Program.cs` đăng ký tất cả dependencies, bao gồm cả Infrastructure types.
+Không sử dụng DI container. Composition root tại `Presentation/Program.cs` khởi tạo tất cả dependencies bằng `new`, bao gồm cả Infrastructure types. Các forms nhận services qua constructor do code tự quản lý.
 
 ---
 
@@ -343,7 +343,7 @@ Chưa có logic lọc tài xế theo địa chỉ hành chính (phường/quận
 
 ### 7.4 Race Condition & Timeout
 
-Chưa có cơ chế khóa đồng thời (SemaphoreSlim) khi nhiều tài xế cùng chấp nhận một chuyến. Background workers (`TripTimeoutWorker`, `TripMatchingWorker`) chưa tồn tại; timeout chưa được xử lý.
+Chưa có cơ chế khóa đồng thời (`SemaphoreSlim`) khi nhiều tài xế cùng chấp nhận một chuyến. Background workers (`TripTimeoutWorker`, `TripMatchingWorker`) đã được triển khai trong `Infrastructure/BackgroundJobs/` — khởi tạo bằng `new` trong `Program.cs`.
 
 ---
 
@@ -449,10 +449,10 @@ FUNCTION CompleteTrip(tripId, fareAmount):
 | UC14 | Nhận thông tin chuyến    | Driver             | Xem thông tin Trip được yêu cầu          | ✅                                         |
 | UC15 | Chấp nhận / Từ chối      | Driver             | Accept hoặc Reject chuyến                | ⚠️ (chưa hoàn chỉnh)                      |
 | UC16 | Admin theo dõi real-time | Admin              | Xem chuyến đang diễn ra trên map         | ⚠️ (UI cơ bản)                            |
-| UC17 | Cấu hình FareRule        | Admin              | Điều chỉnh giá cước, hoa hồng            | ❌ (AdminService trống)                    |
+| UC17 | Cấu hình FareRule        | Admin              | Điều chỉnh giá cước, hoa hồng            | ✅                                         |
 | UC18 | Driver Radar             | Passenger          | Xem tài xế gần khi đang searching        | ❌                                         |
 | UC19 | Thu nhập tài xế          | Driver             | Xem Income + lịch sử giao dịch           | ⚠️ (Driver có Income, UI chưa)            |
-| UC20 | Báo cáo thống kê         | Admin              | GMV, NTR, tỷ lệ hoàn thành, satisfaction | ❌                                         |
+| UC20 | Báo cáo thống kê         | Admin              | GMV, NTR, tỷ lệ hoàn thành, satisfaction | ✅                                         |
 | UC21 | Dẫn đường                | Driver             | Điều hướng đến điểm đón / điểm trả       | ⚠️ (MapControl hiển thị, chưa tính đường) |
 | UC22 | Sửa thông tin cá nhân    | User               | Cập nhật name, phone...                  | ⚠️ (có service, UI chưa)                  |
 

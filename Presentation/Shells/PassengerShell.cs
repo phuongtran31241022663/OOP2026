@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,10 +18,10 @@ namespace Presentation.Shells
         private readonly ITripService _tripService;
         private readonly ISimulationService _simulationService;
 
-        private PassengerDto _passenger;
+        private Passenger _passenger;
         private Trip _currentTrip;
 
-        public PassengerDto Passenger => _passenger;
+        public Passenger Passenger => _passenger;
         private Dictionary<string, Form> _screens = new Dictionary<string, Form>();
         private System.Timers.Timer _pollTimer;
         private Dictionary<Guid, DateTime> _recentNotifications = new Dictionary<Guid, DateTime>();
@@ -27,7 +30,7 @@ namespace Presentation.Shells
             IUserService userService,
             ITripService tripService,
             ISimulationService simulationService,
-            PassengerDto passenger)
+            Passenger passenger)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _tripService = tripService ?? throw new ArgumentNullException(nameof(tripService));
@@ -43,7 +46,7 @@ namespace Presentation.Shells
             IUserService userService,
             ITripService tripService,
             ISimulationService simulationService)
-            : this(userService, tripService, simulationService, new PassengerDto())
+            : this(userService, tripService, simulationService, new Passenger())
         {
         }
 
@@ -279,3 +282,4 @@ namespace Presentation.Shells
         // TODO: Implement other methods as per specification
     }
 }
+

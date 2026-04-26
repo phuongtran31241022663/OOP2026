@@ -1,9 +1,10 @@
-﻿using Domain.Enums;
-using Domain.Trips;
+﻿// Infrastructure/Repositories/TripRepository.cs
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Domain.Repositories;
 
 namespace Infrastructure.Repositories
 {
@@ -11,42 +12,16 @@ namespace Infrastructure.Repositories
     {
         public TripRepository() : base("trips.json") { }
 
-        public async Task<IEnumerable<Trip>> GetByDriverIdAsync(Guid driverId)
+        public async Task<List<Trip>> GetByDriverIdAsync(Guid driverId)
         {
             await Task.CompletedTask;
-            return _items.Where(t => t.DriverId == driverId);
+            return _items.Where(t => t.DriverId == driverId).ToList();
         }
 
-        public async Task<IEnumerable<Trip>> GetByPassengerIdAsync(Guid passengerId)
+        public async Task<List<Trip>> GetByPassengerIdAsync(Guid passengerId)
         {
             await Task.CompletedTask;
-            return _items.Where(t => t.PassengerId == passengerId);
-        }
-
-        public async Task<IEnumerable<Trip>> GetPendingTripsAsync()
-        {
-            await Task.CompletedTask;
-            return _items.Where(t => t.Status == TripStatus.Searching);
-        }
-
-        public async Task AddAsync(Trip trip)
-        {
-            Add(trip);
-            await Task.CompletedTask;
-        }
-
-        public async Task UpdateAsync(Trip trip)
-        {
-            Update(trip);
-            await Task.CompletedTask;
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            var entity = await GetByIdAsync(id);
-            if (entity != null)
-                Delete(entity);
-            await Task.CompletedTask;
+            return _items.Where(t => t.PassengerId == passengerId).ToList();
         }
     }
 }

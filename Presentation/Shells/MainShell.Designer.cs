@@ -1,4 +1,7 @@
-﻿namespace Presentation.Shells
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
+namespace Presentation.Shells
 {
     partial class MainShell : BaseShell
     {

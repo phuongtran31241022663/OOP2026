@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net.Http;
 using Domain.ValueObjects;
 using Domain.Entities;
+using Domain.Entities.Users;
 
 namespace Presentation.Screens.PassengerScreen
 {
@@ -41,14 +42,14 @@ namespace Presentation.Screens.PassengerScreen
         public BookTripForm(
             ITripService tripService,
             IUserService userService,
-            IRouteService routeService,
+            IMapService mapService,
             IFareService fareService,
             HttpClient httpClient,
             PassengerShell parentShell)
         {
             _tripService = tripService ?? throw new ArgumentNullException(nameof(tripService));
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            _routeService = routeService ?? throw new ArgumentNullException(nameof(routeService));
+            _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
             _fareService = fareService ?? throw new ArgumentNullException(nameof(fareService));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _parentShell = parentShell ?? throw new ArgumentNullException(nameof(parentShell));
@@ -70,12 +71,8 @@ namespace Presentation.Screens.PassengerScreen
         }
 
         private void LoadLocationHistory()
-        { public Location(Coordinate coordinate, Address address)
         {
-            _coordinate = coordinate;
-            _address = address;
-        }
-        _history = new List<Location>
+            _history = new List<Location>
             {
                 new Location("UEH Campus", "", 10.8751, 106.8003),
                 new Location("Ben Thanh Market", "", 10.7718, 106.6983),

@@ -1,70 +1,71 @@
-﻿namespace Presentation.Screens.AdminScreen
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
+namespace Presentation.Screens.AdminScreen
 {
     partial class AdminDashboardForm : BaseForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
+        // ── Tab index constants ───────────────────────────────────────────────
+        private const int TAB_DASHBOARD = 0;
+        private const int TAB_USERS = 1;
+        private const int TAB_DRIVERS = 2;
+        private const int TAB_PASSENGERS = 3;
+        private const int TAB_TRIPS = 4;
+        private const int TAB_FARE_RULES = 5;
+        private const int TAB_REPORTS = 6;
+
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
+            if (disposing && components != null)
                 components.Dispose();
-            }
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "AdminDashboardForm : BaseForm";
-            
+            this.ClientSize = new System.Drawing.Size(1280, 768);
+            this.Text = "Quản trị hệ thống";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
         }
- // ── DataGridViews ─────────────────────────────────────────────────────
-        private DataGridView _dgvUsers     = null!;
-        private DataGridView _dgvDrivers   = null!;
-        private DataGridView _dgvPassengers = null!;
-        private DataGridView _dgvTrips     = null!;
-        private DataGridView _dgvFareRules = null!;
 
-        // ── Stats labels ──────────────────────────────────────────────────────
-        private Label _lblStatsTotalUsers    = null!;
-        private Label _lblStatsActiveDrivers = null!;
-        private Label _lblStatsOnTripDrivers = null!;
-        private Label _lblStatsOngoingTrips  = null!;
+        // ── DataGridViews ─────────────────────────────────────────────────────
+        private System.Windows.Forms.DataGridView _dgvUsers;
+        private System.Windows.Forms.DataGridView _dgvDrivers;
+        private System.Windows.Forms.DataGridView _dgvPassengers;
+        private System.Windows.Forms.DataGridView _dgvTrips;
+        private System.Windows.Forms.DataGridView _dgvFareRules;
 
-        // ── Report labels (Trips page) ────────────────────────────────────────
-        private Label _lblTotalTrips   = null!;
-        private Label _lblTotalRevenue = null!;
-        private Label _lblDriverIncome = null!;
-        private Label _lblCommission   = null!;
+        // ── Stats labels (header stats bar) ───────────────────────────────────
+        private System.Windows.Forms.Label _lblStatsTotalUsers;
+        private System.Windows.Forms.Label _lblStatsActiveDrivers;
+        private System.Windows.Forms.Label _lblStatsOnTripDrivers;
+        private System.Windows.Forms.Label _lblStatsOngoingTrips;
+
+        // ── Trip report strip labels ──────────────────────────────────────────
+        private System.Windows.Forms.Label _lblTotalTrips;
+        private System.Windows.Forms.Label _lblTotalRevenue;
+        private System.Windows.Forms.Label _lblDriverIncome;
+        private System.Windows.Forms.Label _lblCommission;
 
         // ── Search boxes ──────────────────────────────────────────────────────
-        private TextBox _txtSearchUsers      = null!;
-        private TextBox _txtSearchDrivers    = null!;
-        private TextBox _txtSearchPassengers = null!;
-        private TextBox _txtSearchTrips      = null!;
+        private System.Windows.Forms.TextBox _txtSearchUsers;
+        private System.Windows.Forms.TextBox _txtSearchDrivers;
+        private System.Windows.Forms.TextBox _txtSearchPassengers;
+        private System.Windows.Forms.TextBox _txtSearchTrips;
 
-        // ── Navigation (Panel-based — NO TabControl) ──────────────────────────
-        private readonly Dictionary<int, Panel>  _contentPanels  = new();
-        private readonly Dictionary<int, Button> _navButtons     = new();
+        // ── Navigation state ──────────────────────────────────────────────────
+        private readonly System.Collections.Generic.Dictionary<int, System.Windows.Forms.Panel>
+            _contentPanels = new System.Collections.Generic.Dictionary<int, System.Windows.Forms.Panel>();
+
+        private readonly System.Collections.Generic.Dictionary<int, System.Windows.Forms.Button>
+            _navButtons = new System.Collections.Generic.Dictionary<int, System.Windows.Forms.Button>();
+
         private int _currentSection = TAB_DASHBOARD;
-        private Label _lblSectionTitle = null!;
 
-        #endregion
+        private System.Windows.Forms.Label _lblSectionTitle;
     }
 }

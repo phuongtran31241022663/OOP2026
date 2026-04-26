@@ -1,0 +1,225 @@
+﻿Tính đa hình (Polymorphism) trong C#
+
+
+Đa hình là trụ cột thứ ba của Lập trình hướng đối tượng, cho phép một thực thể (phương thức, toán tử, đối tượng) có thể hành xử theo nhiều cách khác nhau tùy vào ngữ cảnh. Trong C#, đa hình không chỉ giới hạn ở các phương thức ảo hay giao diện, mà còn được mở rộng mạnh mẽ qua nạp chồng toán tử, generic, pattern matching, và các tính năng hiện đại như static abstract interface members. Hiểu sâu về đa hình sẽ giúp bạn thiết kế hệ thống linh hoạt, giảm phụ thuộc và tận dụng tối đa các mẫu thiết kế (design patterns) cũng như các công nghệ bạn đã nghiên cứu (serialization, async, Windows Forms, GMap.NET).
+
+
+---
+
+
+1. Đa hình thời gian chạy (Run‑time Polymorphism) – Trái tim của OOP
+
+
+Đây là hình thức đa hình mà hành vi thực sự được quyết định tại thời điểm thực thi, dựa trên kiểu thực tế của đối tượng (chứ không phải kiểu khai báo của biến). C# hiện thực nó qua ba cơ chế chính:
+
+
+1.1 Phương thức ảo, ghi đè và lớp trừu tượng
+
+
+```csharp
+public abstract class Animal
+{
+    public string Name { get; set; }
+    // Phương thức trừu tượng – không có thân, buộc lớp con ghi đè
+    public abstract string MakeSound();
+    // Phương thức ảo – có thân mặc định, cho phép ghi đè
+    public virtual string Describe() => $"I am {Name}";
+}
+
+
+public class Dog : Animal
+{
+    public override string MakeSound() => "Woof";
+    public override string Describe() => $"I am a dog named {Name}";
+}
+
+
+public class Cat : Animal
+{
+    public override string MakeSound() => "Meow";
+    // Không ghi đè Describe, dùng hành vi mặc định từ Animal
+}
+```
+
+
+```csharp
+Animal a = new Dog { Name = "Rex" };
+Console.WriteLine(a.MakeSound()); // "Woof" – gọi phương thức bị ghi đè
+Console.WriteLine(a.Describe());  // "I am a dog named Rex" – đa hình
+```
+
+
+Cơ chế Virtual Method Table (vtable): Mỗi lớp có một bảng chứa địa chỉ các phương thức ảo của nó. Khi bạn gọi a.MakeSound(), CLR tra vtable của đối tượng thực tế (Dog) và gọi đúng địa chỉ của Dog.MakeSound(). Điều này có chi phí nhỏ, nhưng JIT có thể tối ưu hóa (devirtualization) nếu biết chính xác kiểu (ví dụ lớp sealed, hoặc phương thức được gọi trực tiếp không qua biến interface).
+
+
+1.2 Interface – Đa hình thông qua hợp đồng
+
+
+Interface cho phép một lớp có nhiều “bộ mặt” khác nhau, tách biệt hoàn toàn hành vi khỏi lớp cụ thể. Đây là chìa khóa cho các mẫu như Strategy, Observer, Factory.
+
+
+```csharp
+public interface IFlyable { void Fly(); }
+public interface ISwimmable { void Swim(); }
+
+
+public class Duck : Animal, IFlyable, ISwimmable
+{
+    public override string MakeSound() => "Quack";
+    public void Fly() => Console.WriteLine("Duck flying");
+    public void Swim() => Console.WriteLine("Duck swimming");
+}
+```
+
+
+Bây giờ ta có thể dùng Duck ở bất kỳ đâu cần IFlyable hoặc ISwimmable, thể hiện đa hình interface.
+
+
+1.3 sealed override – Điểm dừng của chuỗi đa hình
+
+
+Khi bạn muốn khóa không cho ghi đè thêm nữa (vì lý do thiết kế hoặc hiệu năng), dùng sealed override:
+
+
+```csharp
+public class Wolf : Dog
+{
+    // sealed override: lớp cháu không thể ghi đè MakeSound nữa
+    public sealed override string MakeSound() => "Howl";
+}
+```
+
+
+Điều này vừa bảo vệ tính toàn vẹn, vừa cho phép JIT devirtualize các lời gọi đến MakeSound trên kiểu Wolf.
+
+
+---
+
+
+2. Đa hình thời gian biên dịch (Compile‑time Polymorphism)
+
+
+Hành vi được quyết định ngay khi biên dịch, không cần vtable.
+
+
+2.1 Nạp chồng phương thức (Method Overloading)
+
+
+Cùng tên phương thức, khác tham số (số lượng, kiểu, hoặc cả hai). Trình biên dịch chọn ứng cử viên dựa trên tham số truyền vào.
+
+
+```csharp
+public class Calculator
+{
+    public int Add(int a, int b) => a + b;
+    public double Add(double a, double b) => a + b;
+    public int Add(int a, int b, int c) => a + b + c;
+}
+```
+
+
+2.2 Nạp chồng toán tử (Operator Overloading)
+
+
+Cho phép định nghĩa cách các toán tử (+, -, *, ==, v.v.) hoạt động trên kiểu do bạn định nghĩa.
+
+
+```csharp
+public readonly struct Complex
+{
+    public double Real { get; }
+    public double Imag { get; }
+    public Complex(double r, double i) => (Real, Imag) = (r, i);
+    public static Complex operator +(Complex a, Complex b)
+        => new Complex(a.Real + b.Real, a.Imag + b.Imag);
+    public override string ToString() => $"{Real}+{Imag}i";
+}
+// Dùng: var c = a + b;
+```
+
+
+2.3 Đa hình tham số (Parametric Polymorphism) qua Generic
+
+
+Generic cho phép viết code độc lập kiểu mà vẫn an toàn kiểu. Kết hợp với ràng buộc (constraints), bạn có thể gọi phương thức của kiểu tham số một cách an toàn.
+
+
+```csharp
+public T Max<T>(T a, T b) where T : IComparable<T>
+    => a.CompareTo(b) > 0 ? a : b;
+```
+
+
+Covariance & Contravariance trên interface generic cho phép chuyển đổi kiểu an toàn mà không cần ép kiểu:
+
+
+· IEnumerable<string> có thể được gán cho IEnumerable<object> (covariant – out T).
+· Action<object> có thể nhận Action<string>? Thực ra là ngược lại: Action<string> có thể nhận Action<object> (contravariant – in T).
+
+
+Ví dụ thực tế: phương thức void ProcessItems(IEnumerable<object> items) có thể nhận List<string> nhờ covariance.
+
+
+---
+
+
+3. Đa hình trong các Design Pattern và ứng dụng thực tế
+
+
+3.1 Strategy, State, Observer
+
+
+Ba pattern bạn đã tìm hiểu đều dựa trên đa hình:
+
+
+· Strategy: Context giữ tham chiếu đến IStrategy, và gọi Execute(). Đa hình đảm bảo thuật toán cụ thể (concrete strategy) được thực thi.
+· State: Context ủy thác cho IState. Mỗi trạng thái là một đối tượng khác nhau, hành vi thay đổi nhờ đa hình.
+· Observer: event và delegate là cơ chế đa hình cho phép gọi nhiều phương thức khác nhau (subscriber) qua cùng một delegate.
+
+
+3.2 Serialization với đa hình
+
+
+Khi serialize một đối tượng có kiểu khai báo là lớp cơ sở nhưng thực tế là lớp dẫn xuất, cần discriminator để deserialize đúng kiểu.
+
+
+3.3 UI và Đa hình (Windows Forms / WPF)
+
+
+Mọi control đều kế thừa từ Control, và bạn thường xuyên ghi đè OnPaint để vẽ tùy biến. Khi hệ thống gọi control.OnPaint(), nó dùng virtual dispatch để chạy code vẽ của bạn – đây chính là đa hình.
+
+
+3.4 Bất đồng bộ và đa hình
+
+
+Một phương thức virtual có thể trả về Task và được ghi đè bởi phương thức async Task. Trình biên dịch đảm bảo rằng lời gọi qua kiểu cơ sở vẫn await được bình thường, giữ nguyên tính đa hình.
+
+
+---
+
+
+4. Các cạm bẫy thường gặp và best practices
+
+
+· Vi phạm Liskov Substitution Principle (LSP): Lớp dẫn xuất không nên thay đổi hành vi kỳ vọng của lớp cơ sở. Ví dụ, nếu lớp Rectangle có phương thức SetWidth, SetHeight, lớp Square kế thừa và ghi đè để ép buộc cả hai cạnh bằng nhau sẽ vi phạm LSP. Hãy thiết kế lại bằng cách dùng interface IShape hoặc composition.
+· Quá lạm dụng is/as: Kiểm tra kiểu và ép kiểu thường xuyên làm mất đi vẻ đẹp của đa hình. Hãy ưu tiên đưa hành vi vào phương thức ảo hoặc dùng pattern matching khi thực sự cần.
+· Virtual method trong constructor: Không bao giờ gọi phương thức ảo từ constructor lớp cơ sở, vì khi đó lớp dẫn xuất chưa được khởi tạo hoàn toàn, dẫn đến hành vi khó lường.
+· Hiệu năng: Virtual dispatch nhanh hơn type checking nhiều lần, nhưng vẫn chậm hơn gọi trực tiếp một chút. Đừng viết code “sợ ảo” mà tránh dùng virtual, nhưng hãy sealed cho những lớp/ phương thức cuối cùng để JIT tối ưu.
+· Nạp chồng toán tử: Sử dụng một cách nhất quán và có ý nghĩa. Đừng làm người đọc ngạc nhiên (ví dụ, không nên overload + để thực hiện phép trừ).
+
+
+---
+
+
+5. Kết luận
+
+
+Đa hình trong C# là sự tổng hòa của nhiều cơ chế: từ phương thức ảo, interface, generic, cho đến pattern matching và static abstracts. Nó thấm sâu vào mọi ngóc ngách của lập trình .NET – từ các design pattern (Strategy, State, Observer) đến serialization, UI và lập trình bất đồng bộ. Nắm vững đa hình cho phép bạn:
+
+
+· Viết code mở, dễ mở rộng, đóng với sửa đổi (Open/Closed Principle).
+· Áp dụng Dependency Injection hiệu quả.
+· Kết hợp nhuần nhuyễn các công nghệ như GMap.NET (gọi API, cập nhật marker), WinForms (kế thừa control), hoặc thư viện real‑time.
+
+
+Hãy luôn nhớ rằng đa hình là công cụ, không phải mục tiêu. Hãy chọn đúng hình thức đa hình cho từng bài toán, và để cho các nguyên lý SOLID dẫn đường cho thiết kế của bạn.

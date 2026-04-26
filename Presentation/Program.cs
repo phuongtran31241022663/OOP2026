@@ -1,4 +1,7 @@
-﻿using Presentation.Screens.Auth;
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
+using Presentation.Screens.Auth;
 using Presentation.Shells;
 
 namespace Presentation

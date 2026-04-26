@@ -1,46 +1,51 @@
 # Sửa tài liệu (Documentation Fixes) - Theo dõi tiến độ
 
 ## Mục tiêu
-Sửa các điểm sai/lệch trong tài liệu `.md` so với code C# thực tế.
+Sửa các điểm sai/lệch trong tài liệu `.md` so với code C# thực tế và vi phạm Limit.md.
 
 ## Checklist
 
-- [ ] 1. Sửa `Common_Project_Documentation.md`
-  - [ ] Xóa/sửa `BaseException` (không tồn tại)
-  - [ ] Cập nhật `PasswordHasher` có cả ở `Helpers/` và `Utilities/`
-- [ ] 2. Sửa `Domain_Model.md`
-  - [ ] Sửa đường dẫn folder thành `Domain/Entities/...`
-  - [ ] Xóa `TripStateMachine` (không tồn tại)
-  - [ ] Sửa `Driver.UpdateReviews(int rating)`
-  - [ ] Chuyển `IRepository.cs` ra `Domain/Repositories/`
-- [ ] 3. Sửa `Presentation_and_UI.md`
-  - [ ] Sửa tên method `ITripService` cho đúng (`CreateTripAsync`, `MatchDriverAsync`, `GetTripAsync`)
-  - [ ] Thay `IDriverMatchingService` → `IMatchingService`
-  - [ ] Xóa các lớp Command/Query không tồn tại
-- [ ] 4. Sửa `README.md`
-  - [ ] Xóa/sửa phần DTOs/Features/Commands (không tồn tại)
-  - [ ] Xóa `TripStateMachine`
-  - [ ] Cập nhật `MatchingService` (đã kiểm tra VehicleType)
-  - [ ] Cập nhật `AdminService` (đã implement)
-  - [ ] Cập nhật workers (`TripTimeoutWorker`, `TripMatchingWorker` đã tồn tại)
-  - [ ] Sửa `FareService` (không inject `IRouteService`)
-  - [ ] Sửa `ITripService` event (đã có trong interface)
-  - [ ] Sửa namespace `ReviewService` → `Application.Services`
-- [ ] 5. Sửa `RideGo_Architecture.md`
-  - [ ] Sửa namespace `MatchingService` → `Application.Services`
-  - [ ] Sửa kiểu event `TripService` → `EventHandler<TripStatusChangedEventArgs>`
-  - [ ] Sửa vị trí `IMapService` → `Application.Interfaces`
-  - [ ] Xóa optimistic concurrency / Version
-  - [ ] Cập nhật `BackgroundJobs` đã tồn tại
-  - [ ] Cập nhật `AdminService` đã implement
-- [ ] 6. Sửa `Technical_Architecture.md`
-  - [ ] Sửa namespace các service cho đúng
-  - [ ] Sửa dependency `FareService`
-  - [ ] Sửa kiểu event `TripService`
-  - [ ] Sửa `IMapService` vị trí
-  - [ ] Xóa Version/concurrency
-  - [ ] Cập nhật `BackgroundJobs`
-- [ ] 7. Sửa `Business_Logic_and_Workflows.md`
-  - [ ] Thay `FareCalculationService` / Policies bằng `FareRule.CalculateFare`
-  - [ ] Sửa `MatchingService` mô tả
+- [x] 1. Sửa `Business_Logic_and_Workflows.md`
+  - [x] Xóa/sửa mục 9 "Dependency Mapping" vi phạm DI (thay bằng manual dependency)
+  - [x] Giữ nguyên phần educational constraints
+- [x] 2. Sửa `CleanArchitecture_Final.md`
+  - [x] Xóa toàn bộ tham chiếu `Microsoft.Extensions.DependencyInjection`, `IServiceCollection`, `IServiceProvider`, `DI Root`
+  - [x] Xóa EF Core (`AppDbContext`, `Migrations`, `Interceptors`, `ReadDbContext`)
+  - [x] Xóa MediatR (`Behaviors/`, `IRequest`, `IRequestHandler`)
+  - [x] Xóa `AutoMapper` (`MappingProfile`)
+  - [x] Xóa `NetArchTest`
+  - [x] Xóa C# 8+ keywords: `record`, `global using`, file-scoped namespaces, `required`, `init`, `IAsyncEnumerable`, `await foreach`
+  - [x] Sửa pipeline mô tả về WinForms event-driven thay vì HTTP pipeline
+  - [x] Sửa `Presentation` → không dùng Minimal API, không có `Endpoints/`, `Middleware/`, `Filters/`, `Contracts/`
+- [x] 3. Sửa `DEVLOG.md`
+  - [x] Thay "services.AddSingleton/DI container/Microsoft.Extensions.DependencyInjection" → "manual instantiation/new trực tiếp"
+  - [x] Giữ nguyên bug/fix hợp lệ
+- [x] 4. Sửa `PSPEC.md`
+  - [x] Xóa "DI Container: Microsoft.Extensions.DependencyInjection" khỏi tech stack
+  - [x] Sửa bảng Pattern: thay "Dependency Injection" thành "Manual Service Composition"
+- [x] 5. Sửa `README.md`
+  - [x] Xóa "Microsoft.Extensions.DependencyInjection" khỏi công nghệ
+  - [x] Sửa bảng Design Patterns: thay "DI" thành "Manual Service Composition"
+- [x] 6. Sửa `RideGo_Architecture.md`
+  - [x] Xóa toàn bộ section "Dependency Injection"
+  - [x] Sửa mô tả khởi tạo service graph: thay "DI composition root" = "manual instantiation trong Program.cs"
+  - [x] Xóa `Microsoft.Extensions.DependencyInjection` ở header
+  - [x] Sửa mục 6.7
+- [x] 7. Sửa `Technical_Architecture.md`
+  - [x] Xóa section 10 "DI Registration"
+  - [x] Sửa mô tả khởi tạo repositories/services = manual `new`
+  - [x] Xóa `AddHttpClient` (thay bằng `new HttpClient()` hoặc `WebRequest`)
+  - [x] Sửa mô tả `MapService`
+- [x] 8. Sửa `Presentation_and_UI.md`
+  - [x] Sửa "Direct Service Injection" → "Direct Service Reference (manual)"
+  - [x] Xóa đề cập "injection" nếu mang nghĩa DI container
+- [x] 9. Sửa `Common_Project_Documentation.md`
+  - [x] Xóa/sửa `BaseException` (không tồn tại)
+  - [x] Cập nhật `PasswordHasher` có cả ở `Helpers/` và `Utilities/`
+- [x] 10. Sửa `Domain_Model.md`
+  - [x] Sửa đường dẫn folder thành `Domain/Entities/...`
+  - [x] Xóa `TripStateMachine` (không tồn tại)
+  - [x] Sửa `Driver.UpdateReviews(int rating)`
+  - [x] Chuyển `IRepository.cs` ra `Domain/Repositories/`
+- [x] 11. Cập nhật `TODO.md` trạng thái
 

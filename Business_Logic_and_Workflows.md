@@ -401,15 +401,16 @@ Mọi biến phải được khai báo rõ ràng, ví dụ: Passenger customer =
 
 ## 8. Workflows (End-to-end flow orchestration)
 
-- **Trip Request Workflow**: RequestTripCommand → RequestTripHandler → Validate → TripService.RequestTrip() → Create Trip aggregate → Emit TripRequestedEvent → Map to TripDto → Return TripDto.
-- **Driver Assignment Workflow**: AcceptTripCommand → AcceptTripHandler → TripService.TryAssignDriver() → Update Trip/Driver states → Handle concurrency → Emit TripMatchedEvent → Map to TripDto → Return TripDto.
-- **Trip Completion Workflow**: CompleteTripCommand → CompleteTripHandler → TripService.CompleteTrip() → Create Payment (Pending) → Update Driver/Passenger TotalTrips → Emit TripCompletedEvent → Map to TripDto → Return TripDto.
-- **Payment Processing Workflow**: ProcessPaymentCommand → ProcessPaymentHandler → IPaymentService.ProcessPayment() → Mark Payment Paid → Driver.PayCommission() → Map to PaymentDto → Return PaymentDto.
-- **Rating Workflow**: RateDriverCommand → RateDriverHandler → IRatingService.CreateRating() → Update Driver AverageRating → Map to RatingDto → Return RatingDto.
+- **Trip Request Workflow**: Passenger UI → `ITripService.RequestTrip(passengerId, pickup, dest, vehicleType)` → `new Trip(...)` → `trip.SetSearching()` → `TripRepository.Add(trip)` → `TripRepository.SaveChangesAsync()` → Return `Trip`.
+- **Driver Assignment Workflow**: Driver UI → `ITripService.MatchDriverAsync(tripId, driverId)` → Check `trip.Status == Searching` + `driver.Status == Available` → `trip.MatchDriver(driverId)` + `driver.SetOnTrip()` → Update repositories → Save changes → Emit `TripMatchedEvent`.
+- **Trip Completion Workflow**: Driver UI → `ITripService.CompleteTrip(tripId, fareAmount)` → `trip.CompleteTrip()` → `trip.ConfirmPayment()` → `driver.PayCommission(fare)` + `driver.SetAvailable()` + `passenger.AddTrip()` → Update repositories → Save changes → Emit `TripCompletedEvent` + `TripPaidEvent`.
+- **Rating Workflow**: Passenger UI → `IReviewService.AddReviewAsync(driverId, passengerId, tripId, rating, comment)` → `new Review(...)` → `driver.UpdateReviews(rating)` → Update repositories → Save changes → Emit `ReviewCreatedEvent`.
 
 ## 9. Dependency Mapping (Application → Domain interaction)
 
-- Application Handlers inject Domain interfaces (e.g., ITripService, IDriverRepository via DI).
-- Handlers orchestrate Domain objects: Call Domain services/policies, modify aggregates, handle events.
- - Domain dependencies: Entities (Trip, Driver), Services (FareCalculationService), Policies (ITripAssignmentPolicy, IDriverEligibilityPolicy — instance-based with DI), Repositories (ITripRepository).
-- Flow: Handler → Application Service (interface) → Domain Logic → Repository (interface) → Infrastructure Implementation.
+> **Lưu ý:** Hệ thống không sử dụng Dependency Injection container. Các dependency được khởi tạo bằng `new` trực tiếp hoặc truyền qua constructor do code tự quản lý (manual composition).
+
+- Application Services nhận Repository interfaces qua constructor (manual pass, không dùng DI container).
+- Services điều phối Domain objects: Gọi entity methods, modify aggregates, handle events.
+- Domain dependencies: Entities (`Trip`, `Driver`), `FareRule.CalculateFare(double)`, Repository interfaces (`ITripRepository`, `IDriverRepository`).
+- Flow: UI Event Handler → Application Service (interface) → Domain Entity / State Machine → Repository (interface) → Infrastructure Implementation (`JsonRepository<T>`).

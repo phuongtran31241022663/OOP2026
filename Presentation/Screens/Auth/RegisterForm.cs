@@ -1,3 +1,5 @@
+﻿using Domain.Entities.Users;
+using Domain.Entities;
 using Application.Interfaces;
 using Domain.ValueObjects;
 using System;
@@ -48,7 +50,7 @@ namespace Presentation.Screens.Auth
                     await _userService.RegisterPassenger(txtName.Text, txtPhone.Text, txtPassword.Text);
                 }
 
-                MessageBox.Show("Đăng ký thành công");
+                MessageBox.Show("ÄÄƒng kÃ½ thÃ nh cÃ´ng");
                 DialogResult = DialogResult.OK;
             }
             catch (Exception ex)
@@ -60,3 +62,4 @@ namespace Presentation.Screens.Auth
         private void btnCancel_Click(object sender, EventArgs e) => DialogResult = DialogResult.Cancel;
     }
 }
+

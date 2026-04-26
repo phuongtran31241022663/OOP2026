@@ -1,0 +1,208 @@
+﻿Serialize và Deserialize trong C#
+
+
+1. Định nghĩa và vai trò trong OOP
+
+
+Serialization (tuần tự hóa) là quá trình chuyển đổi một đối tượng đang sống trong bộ nhớ (object graph) thành một định dạng phẳng có thể lưu trữ hoặc truyền tải (ví dụ: mảng byte, chuỗi JSON, XML). Deserialization là quá trình ngược, tái tạo đối tượng từ dữ liệu đã được tuần tự hóa.
+
+
+Trong mô hình OOP, các đối tượng thường có trạng thái (dữ liệu) và hành vi (phương thức). Serialization tập trung vào việc bảo tồn trạng thái, trong khi hành vi được phục hồi thông qua metadata của lớp. Điều này đặt ra nhiều thách thức về đóng gói, kế thừa, tham chiếu vòng, và tính toàn vẹn của đối tượng.
+
+
+2. Các kỹ thuật Serialization trong C#
+
+
+2.1 System.Text.Json – Tiêu chuẩn hiện đại, hiệu năng cao
+
+
+Ra mắt từ .NET Core 3.0, System.Text.Json là lựa chọn mặc định cho JSON trong các ứng dụng mới, với hiệu năng vượt trội và độ an toàn cao.
+
+
+Ví dụ cơ bản:
+
+
+```csharp
+using System.Text.Json;
+
+
+var person = new Person { Name = "John", Age = 30 };
+string json = JsonSerializer.Serialize(person);
+// {"Name":"John","Age":30}
+
+
+Person deserialized = JsonSerializer.Deserialize<Person>(json);
+```
+
+
+Kiểm soát bằng Attributes:
+
+
+· [JsonIgnore] loại trừ thuộc tính.
+· [JsonPropertyName("custom_name")] ánh xạ tên.
+· [JsonInclude] để bao gồm thuộc tính private.
+· [JsonConstructor] để chỉ định constructor dùng khi deserialize (quan trọng với bất biến).
+Ví dụ với Record bất biến:
+
+
+```csharp
+public record Person(string Name, int Age);
+var p = new Person("Jane", 25);
+string json = JsonSerializer.Serialize(p);
+// {"Name":"Jane","Age":25}
+var p2 = JsonSerializer.Deserialize<Person>(json);
+```
+
+
+System.Text.Json tự động sử dụng constructor có tham số khớp tên để tạo đối tượng bất biến.
+
+
+2.2 Newtonsoft.Json – Cực kỳ linh hoạt, chín muồi
+
+
+Thư viện bên thứ ba (Json.NET) vượt trội về tính năng: type handling, custom converters phong phú, reference loop handling, LINQ to JSON. Vẫn cần thiết khi gặp các kịch bản phức tạp.
+
+
+Ví dụ xử lý tham chiếu vòng:
+
+
+```csharp
+var settings = new JsonSerializerSettings
+{
+    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+    PreserveReferencesHandling = PreserveReferencesHandling.Objects
+};
+```
+
+
+Type handling để bảo toàn đa hình:
+
+
+```csharp
+var settings = new JsonSerializerSettings
+{
+    TypeNameHandling = TypeNameHandling.Objects,
+    SerializationBinder = new KnownTypesBinder()
+};
+```
+
+
+Cho phép serialize đối tượng của lớp dẫn xuất nhưng vẫn deserialize đúng kiểu gốc.
+
+
+3. Xử lý tính chất OOP
+
+
+3.1 Đóng gói và quyền truy xuất
+
+
+Một nguyên tắc OOP quan trọng là không phơi bày dữ liệu nội bộ. Khi serialize, ta phải chọn trường công khai hoặc dùng cơ chế đặc biệt để truy cập thành viên private nếu cần. System.Text.Json hỗ trợ serialize/deserialize các thành viên private nếu được đánh dấu [JsonInclude] hoặc sử dụng JsonSerializerOptions.IncludeFields = true.
+
+
+3.2 Kế thừa và đa hình
+
+
+Đây là phần phức tạp. JSON không có khái niệm kiểu. Muốn deserialize một danh sách Animal nhưng các phần tử thực chất là Dog, Cat, ta cần lưu thông tin kiểu.
+
+
+· Newtonsoft.Json: dùng TypeNameHandling để nhúng tên kiểu vào JSON (bảo mật cần cấu hình cẩn thận).
+JSON sẽ có discriminator "$type" (mặc định) hoặc tùy chỉnh.
+
+
+3.3 Object graph và tham chiếu vòng
+
+
+OOP thường có các đối tượng liên kết hai chiều (ví dụ: Order chứa List<OrderDetail>, mỗi OrderDetail trỏ về Order). Nếu serialize đơn thuần sẽ gây vòng lặp vô hạn.
+
+
+· Dùng ReferenceHandler.Preserve trong System.Text.Json để lưu metadata $id, $ref giống Json.NET.
+
+
+Ví dụ cấu hình System.Text.Json:
+
+
+```csharp
+var options = new JsonSerializerOptions
+{
+    ReferenceHandler = ReferenceHandler.Preserve
+};
+```
+
+
+4. Kiểm soát quá trình tuần tự hóa
+
+
+4.1 Callbacks và ISerializable
+
+
+· ISerializable (trong System.Runtime.Serialization): cơ chế cũ, hiếm dùng trừ khi cần tương thích với BinaryFormatter (deprecated) hoặc các hệ thống legacy.
+· Callbacks: [OnSerializing], [OnSerialized], [OnDeserializing], [OnDeserialized] cho phép thực thi code trước/sau khi serialize/deserialize để chuẩn bị trạng thái, kiểm tra tính toàn vẹn.
+
+
+4.2 Custom Converters
+
+
+Mỗi thư viện đều hỗ trợ converter để ánh xạ kiểu phức tạp hoặc can thiệp sâu vào quá trình.
+
+
+System.Text.Json:
+
+
+```csharp
+public class DateOnlyConverter : JsonConverter<DateOnly>
+{
+    public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        => DateOnly.Parse(reader.GetString());
+    public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options)
+        => writer.WriteStringValue(value.ToString("yyyy-MM-dd"));
+}
+```
+
+
+Đăng ký qua JsonSerializerOptions.Converters.Add(new DateOnlyConverter()).
+
+
+5. Serialization với kiểu bất biến và Value Object
+
+
+Các record, record struct, hoặc kiểu thiết kế theo DDD (Value Object) có thể không có setter công khai. Các serializer hiện đại tìm constructor có tham số trùng tên thuộc tính (case-insensitive) để khởi tạo. Ví dụ System.Text.Json có thể deserialize readonly struct hoặc record mà không cần setter.
+
+
+6. Bảo mật và các nguy cơ
+
+
+· Deserialization từ nguồn không tin cậy có thể dẫn đến tấn công (remote code execution).
+  · Tránh BinaryFormatter, NetDataContractSerializer với kiểu không kiểm soát.
+  · Với JSON, nếu dùng TypeNameHandling (Newtonsoft) phải kết hợp SerializationBinder để whitelist các kiểu được phép.
+  · System.Text.Json an toàn hơn nhờ không tự động resolve type từ payload, nhưng vẫn cần cẩn thận nếu dùng JsonDerivedType và các kiểu không mong muốn.
+
+
+7. Hiệu năng: So sánh và lựa chọn
+
+
+Tiêu chí System.Text.Json Newtonsoft.Json
+Tốc độ serialize Rất nhanh Trung bình
+Quản lý bộ nhớ Ít cấp phát Nhiều hơn
+Tính năng Cơ bản + phân biệt kiểu, reference handler Rất phong phú (LINQ to JSON, converter dễ dàng, ...)
+Tương thích nền tảng .NET Core 3.0+ Mọi nền tảng
+Bảo mật Cao hơn (mặc định không type loading) Cần cấu hình cẩn thận
+
+
+Từ .NET 6 trở đi, System.Text.Json đã tiến bộ vượt bậc, đáp ứng hầu hết kịch bản. Newtonsoft vẫn hữu ích cho code cũ hoặc nhu cầu cực kỳ phức tạp.
+
+
+8. Ứng dụng vào kiến trúc hướng đối tượng
+
+
+Serialize/deserialize thường được sử dụng trong các tầng:
+
+
+· DTO (Data Transfer Object): object chỉ chứa dữ liệu để truyền qua network, serialize/deserialize là cầu nối. Kết hợp record giúp code sạch.
+· Aggregate persistence trong DDD: serialize cả aggregate sang JSON/BSON để lưu vào NoSQL.
+· Message queuing (RabbitMQ, Azure Service Bus): object được serialize trước khi gửi, deserialize khi nhận.
+
+
+9. Kết luận
+
+
+Serialize và deserialize trong C# là một phần không thể thiếu của kiến trúc OOP hiện đại. Chúng đòi hỏi người thiết kế phải cân bằng giữa tính đóng gói, tính kế thừa, hiệu năng và bảo mật. Với sự phát triển của System.Text.Json và các tính năng như record, JsonDerivedType, C# đã cung cấp một nền tảng mạnh mẽ để xử lý tuần tự hóa một cách an toàn, nhanh chóng và phù hợp với các nguyên lý hướng đối tượng hiện đại.

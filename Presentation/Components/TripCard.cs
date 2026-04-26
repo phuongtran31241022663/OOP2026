@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 // Presentation/Components/TripCard.cs
 using System;
 using System.Drawing;
@@ -6,18 +9,18 @@ using System.Windows.Forms;
 namespace Presentation.Components
 {
     /// <summary>
-    /// BaseUserControl hiển thị thông tin chuyến đi với style nhất quán.
-    /// Dùng với FlowLayoutPanel để hiển thị danh sách chuyến.
+    /// BaseUserControl hiá»ƒn thá»‹ thÃ´ng tin chuyáº¿n Ä‘i vá»›i style nháº¥t quÃ¡n.
+    /// DÃ¹ng vá»›i FlowLayoutPanel Ä‘á»ƒ hiá»ƒn thá»‹ danh sÃ¡ch chuyáº¿n.
     /// </summary>
     public partial class TripCard : BaseUserControl
     {
         /// <summary>
-        /// Sự kiện khi người dùng click vào trip card
+        /// Sá»± kiá»‡n khi ngÆ°á»i dÃ¹ng click vÃ o trip card
         /// </summary>
         public event Action<TripCard> Clicked;
 
         /// <summary>
-        /// Trip được hiển thị
+        /// Trip Ä‘Æ°á»£c hiá»ƒn thá»‹
         /// </summary>
         public object Trip { get; private set; }
 
@@ -40,7 +43,7 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Set thông tin trip từ các tham số
+        /// Set thÃ´ng tin trip tá»« cÃ¡c tham sá»‘
         /// </summary>
         public void SetTrip(string status, string route, string info, string time, Color statusColor)
         {

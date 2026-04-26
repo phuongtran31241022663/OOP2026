@@ -51,17 +51,16 @@ namespace Infrastructure.ExternalServices
                     {
                         var p = f.Properties;
 
-                        // Khởi tạo Address theo đúng thứ tự constructor: 
                         var addr = new Address(
-      p.Osm_Value ?? "",      // osm_Value
-      p.HouseNumber ?? "",    // houseNumber
-      p.Name ?? "",           // name
-      p.Street ?? "",         // street
-      p.Locality ?? "",       // locality
-      p.District ?? "",       // district
-      p.City ?? "",// city 
-      p.Country ?? "Việt Nam" // country
-  );
+       name: p.Name ?? "",
+       street: p.Street ?? "",
+       district: p.District ?? "",
+       city: p.City ?? "",
+       country: p.Country ?? "Việt Nam",
+       houseNumber: p.HouseNumber,
+       osmValue: p.Osm_Value,
+       locality: p.Locality
+   );
 
                         var coord = new Coordinate(f.Geometry.Coordinates[1], f.Geometry.Coordinates[0]);
 
@@ -100,15 +99,15 @@ namespace Infrastructure.ExternalServices
                     var p = feature.Properties;
                     // 2. Tạo Address
                     var addr = new Address(
-                     p.Osm_Value ?? "",
-                     p.HouseNumber ?? "",
-                     p.Name ?? "",
-                     p.Street ?? "",
-                     p.Locality ?? "",
-                     p.District ?? "",
-                     p.City ?? "",
-                     p.Country ?? "Việt Nam"
-                 );
+    name: "Unknown",
+    street: "",
+    district: "",
+    city: "",
+    country: "Việt Nam",
+    houseNumber: null,
+    osmValue: null,
+    locality: null
+);
 
                     // 4. Tạo Location và Coordinate
                     var coord = new Coordinate(feature.Geometry.Coordinates[1], feature.Geometry.Coordinates[0]);
@@ -125,9 +124,18 @@ namespace Infrastructure.ExternalServices
         private Location CreateUnknownLocation(double lat, double lon)
         {
             return new Location(
-     new Coordinate(lon, lat),
-     new Address("Địa điểm chưa xác định", "", "", "", "", "", "", "Việt Nam")
- );
+                new Coordinate(lat, lon),
+                new Address(
+                    name: "Địa điểm chưa xác định",
+                    street: "",
+                    district: "",
+                    city: "",
+                    country: "Việt Nam",
+                    houseNumber: null,
+                    osmValue: null,
+                    locality: null
+                )
+            );
         }
         #endregion
 

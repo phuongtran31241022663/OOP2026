@@ -1,4 +1,6 @@
-﻿using System;
+using Domain.Entities.Users;
+using Domain.Entities;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -80,8 +82,6 @@ namespace Presentation.Components
             Invalidate();
         }
 
-        public object Pickup => _pickup;
-        public object Destination => _destination;
         public bool IsReady => _pickup != null && _destination != null;
 
         // ── Hit testing ──────────────────────────────────────────────────────

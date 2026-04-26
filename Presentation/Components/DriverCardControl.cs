@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Domain.ValueObjects;
+using System;
 using System.Drawing;
-using System.Windows.Forms;
 using Domain.Enums;
-using Domain.Users.Drivers;
-using Domain.Vehicles;
-using Domain.Reviews;
+using Domain.Entities.Users;
+using Domain.Entities;
 
 namespace Presentation.Components
 {
@@ -34,30 +33,28 @@ namespace Presentation.Components
         /// <summary>
         /// Set thông tin tài xế để hiển thị
         /// </summary>
-        public void SetDriver(Driver driver, double distanceKm = 0)
+        public void SetDriver(Driver driver, string vehicleDisplayText = null, double distanceKm = 0)
         {
             Driver = driver;
-
             if (driver == null) return;
 
             _lblName.Text = driver.Name;
             _lblPhone.Text = driver.Phone;
-            _lblReview.Text = $"★ {driver.Review:F1}";
+            _lblReview.Text = $"★ {driver.AverageRating:F1}";
 
-            // Status
             UpdateStatus(driver.Status);
 
-            // Vehicle with null check
-            if (driver.Vehicle != null)
+            if (!string.IsNullOrEmpty(vehicleDisplayText))
             {
-                _lblVehicle.Text = $"{driver.Vehicle.GetVehicleType()} • {driver.Vehicle.PlateNumber}";
+                _lblVehicle.Text = vehicleDisplayText;
+                _lblVehicle.Visible = true;
             }
             else
             {
-                _lblVehicle.Text = "No vehicle info";
+                _lblVehicle.Visible = false;
+                _lblVehicle.Text = "";
             }
 
-            // Distance
             if (distanceKm > 0)
             {
                 _lblDistance.Text = $"{distanceKm:F1} km";
@@ -112,3 +109,4 @@ namespace Presentation.Components
         }
     }
 }
+

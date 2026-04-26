@@ -29,10 +29,10 @@ RideGo2026/
 │   │   └── MapService.cs (Infrastructure wrapper)
 │   ├── Features/         # Reserved for future vertical slices (currently empty)
 │   ├── DTOs/             # Reserved for future DTOs (currently empty)
-│   ├── Behaviors/        # Reserved for pipeline behaviors (currently empty)
-│   └── Mappings/         # Reserved for AutoMapper profiles (currently empty)
+│   ├── Behaviors/        # Reserved for cross-cutting concerns (currently empty)
+│   └── Mappings/         # Reserved for object mapping utilities (currently empty)
 ├── Domain/               # Domain layer (pure)
-│   ├── StateMachines/    # TripStateMachine.cs, DriverStateMachine.cs
+│   ├── StateMachines/    # DriverStateMachine.cs (static class), ITripState + state implementations in Domain/States/
 │   ├── Repositories/     # Repository interfaces (IRepository<T>, ITripRepository, IDriverRepository, etc.)
 │   ├── Trips/            # Trip aggregate + Events/
 │   ├── Users/            # User, Passenger, Driver + Drivers/Events/, Passengers/
@@ -59,7 +59,7 @@ RideGo2026/
 │       ├── IFileStorageService.cs
 │       └── IFareRuleRepository.cs (duplicate of Domain interface? — in Domain.Repositories namespace)
 ├── Presentation/         # WinForms UI
-│   ├── Program.cs        # DI composition root
+│   ├── Program.cs        # Manual composition root
 │   ├── Shells/           # MainShell, PassengerShell, DriverShell, AdminShell
 │   ├── Screens/          # Auth, Passenger, Driver, Admin screens
 │   ├── Components/       # Reusable UserControls (MapControl, FarePanel, DriverCardControl, etc.)
@@ -248,7 +248,7 @@ Abstract methods: `GetAvgSpeed()`, `GetMaxPickupDistance()`
 
 | Missing Item | Where Referenced | Impact |
 |---|---|---|
-| `IRouteService` / `RouteService` | `Program.cs` (DI), `BookTripForm` ctor, `TripViewModel.LoadRouteInfoAsync`, `PassengerViewModel` ctor | **Compile error** — `RouteService` class referenced but not found in codebase |
+| `IRouteService` / `RouteService` | `Program.cs` (manual), `BookTripForm` ctor, `TripViewModel.LoadRouteInfoAsync`, `PassengerViewModel` ctor | **Compile error** — `RouteService` class referenced but not found in codebase |
 | `TripTimeoutWorker` | `Program.cs` | Implemented in `Infrastructure/BackgroundJobs/TripTimeoutWorker.cs` ✅ |
 | `TripMatchingWorker` | `Program.cs` | Implemented in `Infrastructure/BackgroundJobs/TripMatchingWorker.cs` ✅ |
 | `IDriverSimulationService` | `SimulationService.cs`, `Program.cs` | **Compile error** — interface referenced but not defined |
@@ -263,7 +263,7 @@ Abstract methods: `GetAvgSpeed()`, `GetMaxPickupDistance()`
 | `InMemoryDriverCache` | docs reference | Not present |
 
 **LSP/Compiler Errors Present:**
-- `Presentation.Program.cs`: Missing using statements for Infrastructure namespaces; JsonStorage not found; missing worker classes; DI extension methods not available.
+- `Presentation.Program.cs`: Missing using statements for Infrastructure namespaces; JsonStorage not found; missing worker classes; manual composition required.
 - `SimulationService.cs`: `IDriverSimulationService` undefined.
 - `PassengerShell.cs`: `ITripService` defines `TripStatusChanged` event (`EventHandler<TripStatusChangedEventArgs>`) ✅.
 - `DriverViewModel.cs`: Missing using statements for Domain types (`Driver`, `Trip`, `Vehicle`, `Location`).
@@ -292,37 +292,47 @@ Common -> (none)
 
 ---
 
-## 10. DI Registration (Presentation/Program.cs)
+## 10. Manual Service Composition (Presentation/Program.cs)
 
-Current registrations (lines 63–101):
+Dependencies are composed manually using `new` (no DI container):
 
 ```csharp
-// Storage (Infrastructure)
-services.AddSingleton(new JsonStorage<User>("data/users.json"));
-services.AddSingleton(new JsonStorage<Trip>("data/trips.json"));
-services.AddSingleton(new JsonStorage<Driver>("data/drivers.json"));
-services.AddSingleton(new JsonStorage<Passenger>("data/passengers.json"));
+static class Program
+{
+    [STAThread]
+    static void Main()
+    {
+        // Storage (Infrastructure)
+        JsonStorage<User> userStorage = new JsonStorage<User>("data/users.json");
+        JsonStorage<Trip> tripStorage = new JsonStorage<Trip>("data/trips.json");
+        JsonStorage<Driver> driverStorage = new JsonStorage<Driver>("data/drivers.json");
+        JsonStorage<Passenger> passengerStorage = new JsonStorage<Passenger>("data/passengers.json");
 
-// Repositories (Infrastructure)
-services.AddSingleton<IUserRepository, UserRepository>();
-services.AddSingleton<ITripRepository, TripRepository>();
-services.AddSingleton<IDriverRepository, DriverRepository>();
-services.AddSingleton<IPassengerRepository, PassengerRepository>();
+        // Repositories (Infrastructure)
+        IUserRepository userRepository = new UserRepository(userStorage);
+        ITripRepository tripRepository = new TripRepository(tripStorage);
+        IDriverRepository driverRepository = new DriverRepository(driverStorage);
+        IPassengerRepository passengerRepository = new PassengerRepository(passengerStorage);
 
-// HttpClient for MapService
-services.AddHttpClient<IMapService, MapService>(...);
+        // External services
+        IMapService mapService = new MapService(); // uses new HttpClient() internally
 
-// Application Services
-services.AddSingleton<IUserService, UserService>();
-services.AddSingleton<ITripService, TripService>();
-services.AddSingleton<IRouteService, RouteService>(); // ❌ RouteService missing
-services.AddSingleton<IFareService, FareService>();
-services.AddSingleton<ISimulationService, SimulationService>();
-services.AddSingleton<IDriverSimulationService, DriverSimulationService>(); // ❌ interface missing
+        // Application Services
+        IUserService userService = new UserService(userRepository, driverRepository, passengerRepository);
+        ITripService tripService = new TripService(tripRepository, driverRepository, passengerRepository, mapService);
+        IFareService fareService = new FareService(new FareRuleRepository(new JsonStorage<FareRule>("data/farerules.json")));
+        IMatchingService matchingService = new MatchingService(tripRepository, driverRepository);
+        IReviewService reviewService = new ReviewService(new ReviewRepository(new JsonStorage<Review>("data/reviews.json")), driverRepository);
+        IAdminService adminService = new AdminService(userRepository, tripRepository, new FareRuleRepository(new JsonStorage<FareRule>("data/farerules.json")));
 
-// Background workers ✅
-services.AddSingleton<TripTimeoutWorker>();
-services.AddSingleton<TripMatchingWorker>();
+        // Background workers
+        TripTimeoutWorker timeoutWorker = new TripTimeoutWorker(tripRepository);
+        TripMatchingWorker matchingWorker = new TripMatchingWorker(tripRepository, driverRepository, matchingService);
+
+        // Launch main shell with composed services
+        Application.Run(new MainShell(userService, tripService, fareService, matchingService, reviewService, adminService));
+    }
+}
 ```
 
 ---

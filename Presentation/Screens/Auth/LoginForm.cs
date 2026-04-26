@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 using Application.Interfaces;
 
 using System;
@@ -9,7 +12,7 @@ namespace Presentation.Screens.Auth
     {
         private readonly IUserService _userService;
 
-        public UserDto AuthenticatedUser { get; private set; }
+        public User AuthenticatedUser { get; private set; }
 
         public LoginForm()
         {
@@ -29,7 +32,7 @@ namespace Presentation.Screens.Auth
                     throw new InvalidOperationException("User service not initialized.");
 
                 AuthenticatedUser = await _userService.Login(txtPhone.Text, txtPassword.Text);
-                MessageBox.Show("Đăng nhập thành công");
+                MessageBox.Show("ÄÄƒng nháº­p thÃ nh cÃ´ng");
                 DialogResult = DialogResult.OK;
             }
             catch (Exception ex)
@@ -41,3 +44,4 @@ namespace Presentation.Screens.Auth
         private void btnCancel_Click(object sender, EventArgs e) => DialogResult = DialogResult.Cancel;
     }
 }
+

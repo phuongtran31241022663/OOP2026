@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 using System.Windows.Forms;
 
 namespace Presentation.Screens.PassengerScreen
@@ -122,7 +125,7 @@ namespace Presentation.Screens.PassengerScreen
             this._emptyMsgLabel.Name = "_emptyMsgLabel";
             this._emptyMsgLabel.Size = new System.Drawing.Size(1018, 36);
             this._emptyMsgLabel.TabIndex = 0;
-            this._emptyMsgLabel.Text = "Chưa có chuyến đi nào";
+            this._emptyMsgLabel.Text = "ChÆ°a cÃ³ chuyáº¿n Ä‘i nÃ o";
             this._emptyMsgLabel.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             // 
             // _goHomeBtn
@@ -133,7 +136,7 @@ namespace Presentation.Screens.PassengerScreen
             this._goHomeBtn.Name = "_goHomeBtn";
             this._goHomeBtn.Size = new System.Drawing.Size(130, 28);
             this._goHomeBtn.TabIndex = 1;
-            this._goHomeBtn.Text = "Về trang chủ";
+            this._goHomeBtn.Text = "Vá» trang chá»§";
             this._goHomeBtn.UseVisualStyleBackColor = true;
             this._goHomeBtn.Click += new System.EventHandler(this.OnGoHomeClicked);
             // 
@@ -178,7 +181,7 @@ namespace Presentation.Screens.PassengerScreen
             this.mapPlaceholderLabel.Name = "mapPlaceholderLabel";
             this.mapPlaceholderLabel.Size = new System.Drawing.Size(764, 580);
             this.mapPlaceholderLabel.TabIndex = 0;
-            this.mapPlaceholderLabel.Text = "Live map - điểm đón · tài xế · điểm đến";
+            this.mapPlaceholderLabel.Text = "Live map - Ä‘iá»ƒm Ä‘Ã³n Â· tÃ i xáº¿ Â· Ä‘iá»ƒm Ä‘áº¿n";
             this.mapPlaceholderLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // infoColumn
@@ -203,7 +206,7 @@ namespace Presentation.Screens.PassengerScreen
             this._cancelBtn.Name = "_cancelBtn";
             this._cancelBtn.Size = new System.Drawing.Size(244, 30);
             this._cancelBtn.TabIndex = 2;
-            this._cancelBtn.Text = "Hủy chuyến";
+            this._cancelBtn.Text = "Há»§y chuyáº¿n";
             this._cancelBtn.UseVisualStyleBackColor = true;
             this._cancelBtn.Click += new System.EventHandler(this.OnCancelClicked);
             // 
@@ -232,7 +235,7 @@ namespace Presentation.Screens.PassengerScreen
             this.driverTitleLabel.Name = "driverTitleLabel";
             this.driverTitleLabel.Size = new System.Drawing.Size(230, 18);
             this.driverTitleLabel.TabIndex = 0;
-            this.driverTitleLabel.Text = "Thông tin tài xế";
+            this.driverTitleLabel.Text = "ThÃ´ng tin tÃ i xáº¿";
             // 
             // _driverNameLabel
             // 
@@ -242,7 +245,7 @@ namespace Presentation.Screens.PassengerScreen
             this._driverNameLabel.Name = "_driverNameLabel";
             this._driverNameLabel.Size = new System.Drawing.Size(230, 18);
             this._driverNameLabel.TabIndex = 1;
-            this._driverNameLabel.Text = "Tên: --";
+            this._driverNameLabel.Text = "TÃªn: --";
             // 
             // _driverPhoneLabel
             // 
@@ -252,7 +255,7 @@ namespace Presentation.Screens.PassengerScreen
             this._driverPhoneLabel.Name = "_driverPhoneLabel";
             this._driverPhoneLabel.Size = new System.Drawing.Size(230, 18);
             this._driverPhoneLabel.TabIndex = 2;
-            this._driverPhoneLabel.Text = "SĐT: --";
+            this._driverPhoneLabel.Text = "SÄT: --";
             // 
             // _driverReviewLabel
             // 
@@ -262,7 +265,7 @@ namespace Presentation.Screens.PassengerScreen
             this._driverReviewLabel.Name = "_driverReviewLabel";
             this._driverReviewLabel.Size = new System.Drawing.Size(230, 18);
             this._driverReviewLabel.TabIndex = 3;
-            this._driverReviewLabel.Text = "Đánh giá: --";
+            this._driverReviewLabel.Text = "ÄÃ¡nh giÃ¡: --";
             // 
             // _vehicleLabel
             // 
@@ -272,7 +275,7 @@ namespace Presentation.Screens.PassengerScreen
             this._vehicleLabel.Name = "_vehicleLabel";
             this._vehicleLabel.Size = new System.Drawing.Size(230, 18);
             this._vehicleLabel.TabIndex = 4;
-            this._vehicleLabel.Text = "Biển số: --";
+            this._vehicleLabel.Text = "Biá»ƒn sá»‘: --";
             // 
             // tripGroup
             // 
@@ -287,7 +290,7 @@ namespace Presentation.Screens.PassengerScreen
             this.tripGroup.Size = new System.Drawing.Size(244, 90);
             this.tripGroup.TabIndex = 0;
             this.tripGroup.TabStop = false;
-            this.tripGroup.Text = "Chuyến đi";
+            this.tripGroup.Text = "Chuyáº¿n Ä‘i";
             // 
             // _fareLabel
             // 
@@ -297,7 +300,7 @@ namespace Presentation.Screens.PassengerScreen
             this._fareLabel.Name = "_fareLabel";
             this._fareLabel.Size = new System.Drawing.Size(236, 18);
             this._fareLabel.TabIndex = 2;
-            this._fareLabel.Text = "Giá: --";
+            this._fareLabel.Text = "GiÃ¡: --";
             // 
             // _destLabel
             // 
@@ -307,7 +310,7 @@ namespace Presentation.Screens.PassengerScreen
             this._destLabel.Name = "_destLabel";
             this._destLabel.Size = new System.Drawing.Size(236, 18);
             this._destLabel.TabIndex = 1;
-            this._destLabel.Text = "Điểm đến: --";
+            this._destLabel.Text = "Äiá»ƒm Ä‘áº¿n: --";
             // 
             // _pickupLabel
             // 
@@ -317,7 +320,7 @@ namespace Presentation.Screens.PassengerScreen
             this._pickupLabel.Name = "_pickupLabel";
             this._pickupLabel.Size = new System.Drawing.Size(236, 18);
             this._pickupLabel.TabIndex = 0;
-            this._pickupLabel.Text = "Điểm đón: --";
+            this._pickupLabel.Text = "Äiá»ƒm Ä‘Ã³n: --";
             // 
             // _statusBanner
             // 
@@ -395,3 +398,4 @@ namespace Presentation.Screens.PassengerScreen
         private System.Windows.Forms.Label _statusBannerLabel;
     }
 }
+

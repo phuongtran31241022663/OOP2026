@@ -81,14 +81,14 @@ namespace Application.Services
         public async Task CreateFareRuleAsync(FareRule rule)
         {
             if (rule == null) throw new ArgumentNullException(nameof(rule));
-            _fareRuleRepository.Add(rule);
+            await _fareRuleRepository.AddAsync(rule);
             await _fareRuleRepository.SaveChangesAsync();
         }
 
         public async Task UpdateFareRuleAsync(FareRule rule)
         {
             if (rule == null) throw new ArgumentNullException(nameof(rule));
-            _fareRuleRepository.Update(rule);
+            await _fareRuleRepository.UpdateAsync(rule);
             await _fareRuleRepository.SaveChangesAsync();
         }
 
@@ -107,13 +107,13 @@ namespace Application.Services
             }
             if (existingRule == null)
             {
-                existingRule = new FareRule(vehicleType, baseFare, pricePerKm, commissionRate);
-                _fareRuleRepository.Add(existingRule);
+                existingRule = new FareRule(vehicleType, baseFare, pricePerKm, (decimal)commissionRate);
+                await _fareRuleRepository.AddAsync(existingRule);
             }
             else
             {
-                existingRule.UpdateFare(baseFare, pricePerKm, commissionRate);
-                _fareRuleRepository.Update(existingRule);
+                existingRule.UpdateRule(baseFare, pricePerKm, (decimal)commissionRate);
+                await _fareRuleRepository.UpdateAsync(existingRule);
             }
             await _fareRuleRepository.SaveChangesAsync();
         }

@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 namespace Presentation.Components
 {
     partial class StatusPanel : BaseUserControl
@@ -62,7 +65,7 @@ namespace Presentation.Components
             this._statusLabel.Name = "_statusLabel";
             this._statusLabel.Size = new System.Drawing.Size(65, 15);
             this._statusLabel.TabIndex = 0;
-            this._statusLabel.Text = "● Sẵn sàng";
+            this._statusLabel.Text = "â— Sáºµn sÃ ng";
             // 
             // _errorCountLabel
             // 
@@ -73,7 +76,7 @@ namespace Presentation.Components
             this._errorCountLabel.Name = "_errorCountLabel";
             this._errorCountLabel.Size = new System.Drawing.Size(98, 15);
             this._errorCountLabel.TabIndex = 1;
-            this._errorCountLabel.Text = "Lỗi: 0 | Cảnh báo: 0";
+            this._errorCountLabel.Text = "Lá»—i: 0 | Cáº£nh bÃ¡o: 0";
             // 
             // _clearButton
             // 
@@ -84,7 +87,7 @@ namespace Presentation.Components
             this._clearButton.Name = "_clearButton";
             this._clearButton.Size = new System.Drawing.Size(75, 24);
             this._clearButton.TabIndex = 2;
-            this._clearButton.Text = "Xóa log";
+            this._clearButton.Text = "XÃ³a log";
             this._clearButton.UseVisualStyleBackColor = true;
             // 
             // _viewLogButton
@@ -96,7 +99,7 @@ namespace Presentation.Components
             this._viewLogButton.Name = "_viewLogButton";
             this._viewLogButton.Size = new System.Drawing.Size(90, 24);
             this._viewLogButton.TabIndex = 3;
-            this._viewLogButton.Text = "Mở file log";
+            this._viewLogButton.Text = "Má»Ÿ file log";
             this._viewLogButton.UseVisualStyleBackColor = true;
             // 
             // _logTextBox
@@ -131,3 +134,4 @@ namespace Presentation.Components
         }
     }
 }
+

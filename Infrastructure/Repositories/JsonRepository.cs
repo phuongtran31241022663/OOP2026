@@ -1,4 +1,5 @@
-﻿using Domain.Repositories;
+﻿// Infrastructure/Repositories/JsonRepository.cs
+using Domain.Repositories;
 using Domain.SharedKernel;
 using Newtonsoft.Json;
 using System;
@@ -13,7 +14,7 @@ namespace Infrastructure.Repositories
     {
         protected readonly string _filePath;
         private static readonly Mutex _fileMutex = new Mutex(false, "Global\\RideGo_JsonRepo_" + typeof(T).Name);
-        private List<T> _items;
+        protected List<T> _items;
 
         public JsonRepository(string fileName)
         {
@@ -109,12 +110,7 @@ namespace Infrastructure.Repositories
             _fileMutex.WaitOne();
             try
             {
-                List<T> result = new List<T>();
-                for (int i = 0; i < _items.Count; i++)
-                {
-                    result.Add(_items[i]);
-                }
-                return result;
+                return new List<T>(_items);
             }
             finally
             {

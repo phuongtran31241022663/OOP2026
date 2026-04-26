@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 using Presentation;
 
-namespace Presentation.Screens.AdminScreen
+namespace Presentation.Screens.AdminScreenScreen
 {
     public partial class FareRulesForm : BaseForm
     {

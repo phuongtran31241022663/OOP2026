@@ -1,4 +1,7 @@
-﻿using System.Windows.Forms;
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
+using System.Windows.Forms;
 
 namespace Presentation.Components
 {
@@ -169,3 +172,4 @@ namespace Presentation.Components
         private System.Windows.Forms.Label _lblDistance;
     }
 }
+

@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 namespace Presentation.Components
 {
     partial class LocationCard
@@ -41,7 +44,7 @@ namespace Presentation.Components
             };
             var iconLabel = new System.Windows.Forms.Label
             {
-                Text = "📍",
+                Text = "ðŸ“",
                 Font = new System.Drawing.Font("Segoe UI", 16),
                 TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
                 Dock = System.Windows.Forms.DockStyle.Fill
@@ -57,7 +60,7 @@ namespace Presentation.Components
                 Location = new System.Drawing.Point(60, 10),
                 Width = 200,
                 Height = 20,
-                Text = "Tên địa điểm"
+                Text = "TÃªn Ä‘á»‹a Ä‘iá»ƒm"
             };
 
             // Address label
@@ -69,7 +72,7 @@ namespace Presentation.Components
                 Location = new System.Drawing.Point(60, 32),
                 Width = 280,
                 Height = 16,
-                Text = "Địa chỉ chi tiết"
+                Text = "Äá»‹a chá»‰ chi tiáº¿t"
             };
 
             // Coordinates label
@@ -99,3 +102,4 @@ namespace Presentation.Components
         #endregion
     }
 }
+

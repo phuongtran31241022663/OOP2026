@@ -1,8 +1,8 @@
-﻿using Domain.Users.Passengers;
-using System;
-using System.Collections.Generic;
+﻿// Infrastructure/Repositories/PassengerRepository.cs
+using Domain.Entities.Users;
 using System.Linq;
 using System.Threading.Tasks;
+using Domain.Repositories;
 
 namespace Infrastructure.Repositories
 {
@@ -20,26 +20,6 @@ namespace Infrastructure.Repositories
         {
             await Task.CompletedTask;
             return _items.Any(p => p.Phone == phone);
-        }
-
-        public async Task AddAsync(Passenger passenger)
-        {
-            Add(passenger);
-            await Task.CompletedTask;
-        }
-
-        public async Task UpdateAsync(Passenger passenger)
-        {
-            Update(passenger);
-            await Task.CompletedTask;
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            var entity = await GetByIdAsync(id);
-            if (entity != null)
-                Delete(entity);
-            await Task.CompletedTask;
         }
     }
 }

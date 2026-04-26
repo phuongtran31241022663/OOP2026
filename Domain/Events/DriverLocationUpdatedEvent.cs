@@ -1,6 +1,6 @@
-using System;
 using Domain.SharedKernel;
 using Domain.ValueObjects;
+using System;
 
 namespace Domain.Events
 {

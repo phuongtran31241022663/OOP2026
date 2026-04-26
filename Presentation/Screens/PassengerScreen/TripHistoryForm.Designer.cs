@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 using System.Windows.Forms;
 
 namespace Presentation.Screens.PassengerScreen
@@ -79,7 +82,7 @@ namespace Presentation.Screens.PassengerScreen
             this._refreshBtn.Name = "_refreshBtn";
             this._refreshBtn.Size = new System.Drawing.Size(80, 40);
             this._refreshBtn.TabIndex = 1;
-            this._refreshBtn.Text = "Làm mới";
+            this._refreshBtn.Text = "LÃ m má»›i";
             this._refreshBtn.UseVisualStyleBackColor = true;
             this._refreshBtn.Click += new System.EventHandler(this.OnRefreshClicked);
             // 
@@ -91,7 +94,7 @@ namespace Presentation.Screens.PassengerScreen
             this._titleLabel.Name = "_titleLabel";
             this._titleLabel.Size = new System.Drawing.Size(220, 40);
             this._titleLabel.TabIndex = 0;
-            this._titleLabel.Text = "Lịch sử chuyến đi";
+            this._titleLabel.Text = "Lá»‹ch sá»­ chuyáº¿n Ä‘i";
             this._titleLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // _summaryBar
@@ -131,7 +134,7 @@ namespace Presentation.Screens.PassengerScreen
             this._totalLabel.Name = "_totalLabel";
             this._totalLabel.Size = new System.Drawing.Size(250, 40);
             this._totalLabel.TabIndex = 0;
-            this._totalLabel.Text = "Tổng chuyến: 0";
+            this._totalLabel.Text = "Tá»•ng chuyáº¿n: 0";
             this._totalLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // _spentLabel
@@ -142,7 +145,7 @@ namespace Presentation.Screens.PassengerScreen
             this._spentLabel.Name = "_spentLabel";
             this._spentLabel.Size = new System.Drawing.Size(250, 40);
             this._spentLabel.TabIndex = 1;
-            this._spentLabel.Text = "Tổng chi tiêu: 0 đ";
+            this._spentLabel.Text = "Tá»•ng chi tiÃªu: 0 Ä‘";
             this._spentLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // _completedLabel
@@ -153,7 +156,7 @@ namespace Presentation.Screens.PassengerScreen
             this._completedLabel.Name = "_completedLabel";
             this._completedLabel.Size = new System.Drawing.Size(250, 40);
             this._completedLabel.TabIndex = 2;
-            this._completedLabel.Text = "Hoàn thành: 0";
+            this._completedLabel.Text = "HoÃ n thÃ nh: 0";
             this._completedLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // _cancelledLabel
@@ -164,7 +167,7 @@ namespace Presentation.Screens.PassengerScreen
             this._cancelledLabel.Name = "_cancelledLabel";
             this._cancelledLabel.Size = new System.Drawing.Size(250, 40);
             this._cancelledLabel.TabIndex = 3;
-            this._cancelledLabel.Text = "Đã hủy: 0";
+            this._cancelledLabel.Text = "ÄÃ£ há»§y: 0";
             this._cancelledLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // _statusBar
@@ -233,7 +236,7 @@ namespace Presentation.Screens.PassengerScreen
             // colPickup
             // 
             this.colPickup.FillWeight = 2F;
-            this.colPickup.HeaderText = "Điểm đón";
+            this.colPickup.HeaderText = "Äiá»ƒm Ä‘Ã³n";
             this.colPickup.MinimumWidth = 6;
             this.colPickup.Name = "Pickup";
             this.colPickup.ReadOnly = true;
@@ -241,7 +244,7 @@ namespace Presentation.Screens.PassengerScreen
             // colDestination
             // 
             this.colDestination.FillWeight = 2F;
-            this.colDestination.HeaderText = "Điểm đến";
+            this.colDestination.HeaderText = "Äiá»ƒm Ä‘áº¿n";
             this.colDestination.MinimumWidth = 6;
             this.colDestination.Name = "Destination";
             this.colDestination.ReadOnly = true;
@@ -249,7 +252,7 @@ namespace Presentation.Screens.PassengerScreen
             // colDistance
             // 
             this.colDistance.FillWeight = 1F;
-            this.colDistance.HeaderText = "Khoảng cách";
+            this.colDistance.HeaderText = "Khoáº£ng cÃ¡ch";
             this.colDistance.MinimumWidth = 6;
             this.colDistance.Name = "Distance";
             this.colDistance.ReadOnly = true;
@@ -257,7 +260,7 @@ namespace Presentation.Screens.PassengerScreen
             // colFare
             // 
             this.colFare.FillWeight = 1F;
-            this.colFare.HeaderText = "Giá tiền";
+            this.colFare.HeaderText = "GiÃ¡ tiá»n";
             this.colFare.MinimumWidth = 6;
             this.colFare.Name = "Fare";
             this.colFare.ReadOnly = true;
@@ -265,7 +268,7 @@ namespace Presentation.Screens.PassengerScreen
             // colStatus
             // 
             this.colStatus.FillWeight = 1F;
-            this.colStatus.HeaderText = "Trạng thái";
+            this.colStatus.HeaderText = "Tráº¡ng thÃ¡i";
             this.colStatus.MinimumWidth = 6;
             this.colStatus.Name = "Status";
             this.colStatus.ReadOnly = true;
@@ -273,7 +276,7 @@ namespace Presentation.Screens.PassengerScreen
             // colDate
             // 
             this.colDate.FillWeight = 1.1F;
-            this.colDate.HeaderText = "Thời gian";
+            this.colDate.HeaderText = "Thá»i gian";
             this.colDate.MinimumWidth = 6;
             this.colDate.Name = "Date";
             this.colDate.ReadOnly = true;
@@ -287,7 +290,7 @@ namespace Presentation.Screens.PassengerScreen
             this._emptyLabel.Name = "_emptyLabel";
             this._emptyLabel.Size = new System.Drawing.Size(1024, 538);
             this._emptyLabel.TabIndex = 3;
-            this._emptyLabel.Text = "Chưa có chuyến đi nào";
+            this._emptyLabel.Text = "ChÆ°a cÃ³ chuyáº¿n Ä‘i nÃ o";
             this._emptyLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this._emptyLabel.Visible = false;
             // 
@@ -342,3 +345,4 @@ namespace Presentation.Screens.PassengerScreen
         private System.Windows.Forms.DataGridViewTextBoxColumn colDate;
     }
 }
+

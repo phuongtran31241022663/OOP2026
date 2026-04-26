@@ -1,3 +1,5 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
 using Application.Events;
 using Application.Interfaces;
 using Domain.Enums;
@@ -46,9 +48,9 @@ namespace Presentation.Screens.DriverScreen
 
         private void OnTripStatusChanged(object sender, TripStatusChangedEventArgs e)
         {
-            // Cần kiểm tra xem trip mới này có dành cho driver hiện tại không
-            // Có thể lấy trip từ service và kiểm tra DriverId (nếu đã matched)
-            // Hoặc dựa vào logic nghiệp vụ: nếu driver chưa có trip active thì tìm trip Searching
+            // Cáº§n kiá»ƒm tra xem trip má»›i nÃ y cÃ³ dÃ nh cho driver hiá»‡n táº¡i khÃ´ng
+            // CÃ³ thá»ƒ láº¥y trip tá»« service vÃ  kiá»ƒm tra DriverId (náº¿u Ä‘Ã£ matched)
+            // Hoáº·c dá»±a vÃ o logic nghiá»‡p vá»¥: náº¿u driver chÆ°a cÃ³ trip active thÃ¬ tÃ¬m trip Searching
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => RefreshAsync()));
@@ -64,7 +66,7 @@ namespace Presentation.Screens.DriverScreen
             if (_isLoading) return;
 
             _isLoading = true;
-            AddLog("Đang đồng bộ...");
+            AddLog("Äang Ä‘á»“ng bá»™...");
 
             try
             {
@@ -79,7 +81,7 @@ namespace Presentation.Screens.DriverScreen
                 // Step 2: Check offline
                 if (_shell.Driver.Status == DriverStatus.Offline)
                 {
-                    ShowEmpty("Tài xế offline");
+                    ShowEmpty("TÃ i xáº¿ offline");
                     UpdateStats();
                     return;
                 }
@@ -88,7 +90,7 @@ namespace Presentation.Screens.DriverScreen
                 if (_shell.Driver.Status == DriverStatus.OnTrip && _shell.CurrentTrip == null)
                 {
                     await _userService.ForceRecoverDriverStatus(_shell.Driver.Id);
-                    AddLog("Khôi phục trạng thái tài xế");
+                    AddLog("KhÃ´i phá»¥c tráº¡ng thÃ¡i tÃ i xáº¿");
                 }
 
                 // Step 4: Sync current trip
@@ -112,12 +114,12 @@ namespace Presentation.Screens.DriverScreen
                         _notifiedIds.Add(newTrip.Id);
                         ShowRequestCard(newTrip);
                         PlayNotificationSound();
-                        AddLog("Có chuyến mới!");
+                        AddLog("CÃ³ chuyáº¿n má»›i!");
                     }
                 }
                 else if (_shell.CurrentTrip == null)
                 {
-                    ShowEmpty("Không có chuyến nào");
+                    ShowEmpty("KhÃ´ng cÃ³ chuyáº¿n nÃ o");
                 }
                 else
                 {
@@ -128,8 +130,8 @@ namespace Presentation.Screens.DriverScreen
             }
             catch (Exception ex)
             {
-                AddLog($"Lỗi đồng bộ: {ex.Message}");
-                ShowEmpty("Lỗi kết nối");
+                AddLog($"Lá»—i Ä‘á»“ng bá»™: {ex.Message}");
+                ShowEmpty("Lá»—i káº¿t ná»‘i");
             }
             finally
             {
@@ -147,9 +149,9 @@ namespace Presentation.Screens.DriverScreen
 
         private void ShowRequestCard(Trip trip)
         {
-            _requestInfoLabel.Text = $"{trip.Pickup?.Address ?? "Unknown"} → {trip.Destination?.Address ?? "Unknown"}\n" +
-                                   $"Giá: {trip.Fare:N0} đ\n" +
-                                   $"Thời gian: {trip.CreatedAt:dd/MM HH:mm}";
+            _requestInfoLabel.Text = $"{trip.Pickup?.Address ?? "Unknown"} â†’ {trip.Destination?.Address ?? "Unknown"}\n" +
+                                   $"GiÃ¡: {trip.Fare:N0} Ä‘\n" +
+                                   $"Thá»i gian: {trip.CreatedAt:dd/MM HH:mm}";
 
             _emptyPanel.Visible = false;
             _requestPanel.Visible = true;
@@ -161,8 +163,8 @@ namespace Presentation.Screens.DriverScreen
             if (_shell.CurrentTrip == null) return;
 
             var trip = _shell.CurrentTrip;
-            _routeInfoLabel.Text = $"{trip.Pickup?.Address ?? "Unknown"} → {trip.Destination?.Address ?? "Unknown"}\n" +
-                                 $"Giá: {trip.Fare:N0} đ";
+            _routeInfoLabel.Text = $"{trip.Pickup?.Address ?? "Unknown"} â†’ {trip.Destination?.Address ?? "Unknown"}\n" +
+                                 $"GiÃ¡: {trip.Fare:N0} Ä‘";
 
             UpdateStepBar(trip.Status);
 
@@ -217,23 +219,23 @@ namespace Presentation.Screens.DriverScreen
             switch (status)
             {
                 case TripStatus.Matched:
-                    _actionButton.Text = "Đã đến điểm đón";
+                    _actionButton.Text = "ÄÃ£ Ä‘áº¿n Ä‘iá»ƒm Ä‘Ã³n";
                     _actionButton.Enabled = true;
                     break;
                 case TripStatus.Arrived:
-                    _actionButton.Text = "Bắt đầu chuyến";
+                    _actionButton.Text = "Báº¯t Ä‘áº§u chuyáº¿n";
                     _actionButton.Enabled = true;
                     break;
                 case TripStatus.Started:
-                    _actionButton.Text = "Hoàn thành chuyến";
+                    _actionButton.Text = "HoÃ n thÃ nh chuyáº¿n";
                     _actionButton.Enabled = true;
                     break;
                 case TripStatus.Completed:
-                    _actionButton.Text = "Hoàn thành";
+                    _actionButton.Text = "HoÃ n thÃ nh";
                     _actionButton.Enabled = false;
                     break;
                 default:
-                    _actionButton.Text = "Chờ...";
+                    _actionButton.Text = "Chá»...";
                     _actionButton.Enabled = false;
                     break;
             }
@@ -256,12 +258,12 @@ namespace Presentation.Screens.DriverScreen
                 _pendingTrip = null;
 
                 ShowActiveTrip();
-                AddLog("Chấp nhận chuyến thành công");
+                AddLog("Cháº¥p nháº­n chuyáº¿n thÃ nh cÃ´ng");
             }
             catch (Exception ex)
             {
-                AddLog($"Lỗi chấp nhận: {ex.Message}");
-                MessageBox.Show($"Không thể chấp nhận chuyến: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                AddLog($"Lá»—i cháº¥p nháº­n: {ex.Message}");
+                MessageBox.Show($"KhÃ´ng thá»ƒ cháº¥p nháº­n chuyáº¿n: {ex.Message}", "Lá»—i", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -273,13 +275,13 @@ namespace Presentation.Screens.DriverScreen
             {
                 // TODO: await _tripService.RejectTripAsync(_pendingTrip.Id, _shell.Driver.Id);
                 _pendingTrip = null;
-                AddLog("Từ chối chuyến");
+                AddLog("Tá»« chá»‘i chuyáº¿n");
                 await Task.Delay(500); // Small delay
                 RefreshAsync();
             }
             catch (Exception ex)
             {
-                AddLog($"Lỗi từ chối: {ex.Message}");
+                AddLog($"Lá»—i tá»« chá»‘i: {ex.Message}");
             }
         }
 
@@ -294,16 +296,16 @@ namespace Presentation.Screens.DriverScreen
                 {
                     case TripStatus.Arrived:
                         // TODO: await _tripService.MarkArrivedAsync(trip.Id);
-                        AddLog("Đã đến điểm đón");
+                        AddLog("ÄÃ£ Ä‘áº¿n Ä‘iá»ƒm Ä‘Ã³n");
                         break;
                     case TripStatus.Matched:
                         // TODO: await _tripService.StartTripAsync(trip.Id);
-                        AddLog("Bắt đầu chuyến");
+                        AddLog("Báº¯t Ä‘áº§u chuyáº¿n");
                         break;
                     case TripStatus.Started:
                         // TODO: await _tripService.CompleteTripAsync(trip.Id);
                         _shell.OnTripEnded();
-                        AddLog("Hoàn thành chuyến");
+                        AddLog("HoÃ n thÃ nh chuyáº¿n");
                         break;
                 }
 
@@ -311,7 +313,7 @@ namespace Presentation.Screens.DriverScreen
             }
             catch (Exception ex)
             {
-                AddLog($"Lỗi hành động: {ex.Message}");
+                AddLog($"Lá»—i hÃ nh Ä‘á»™ng: {ex.Message}");
             }
         }
 
@@ -327,9 +329,9 @@ namespace Presentation.Screens.DriverScreen
 
             _ReviewLabel.Text = $"Review: {driver.Review.ToString("F1")}";
             _totalTripsLabel.Text = $"Trips: {0}"; // TODO: Calculate from trip history
-            _incomeLabel.Text = $"Income: {0:N0} đ"; // TODO: Calculate total earnings
-            _walletLabel.Text = $"Wallet: {driver.WalletAmount:N0} đ";
-            _revenueTodayLabel.Text = $"Today: {0:N0} đ"; // TODO: Calculate today's revenue
+            _incomeLabel.Text = $"Income: {0:N0} Ä‘"; // TODO: Calculate total earnings
+            _walletLabel.Text = $"Wallet: {driver.WalletAmount:N0} Ä‘";
+            _revenueTodayLabel.Text = $"Today: {0:N0} Ä‘"; // TODO: Calculate today's revenue
         }
 
         private void AddLog(string message)
@@ -368,8 +370,9 @@ namespace Presentation.Screens.DriverScreen
 
         public void OnTripEnded()
         {
-            ShowEmpty("Chuyến đã kết thúc");
+            ShowEmpty("Chuyáº¿n Ä‘Ã£ káº¿t thÃºc");
         }
     }
  
 }
+

@@ -1,3 +1,6 @@
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
 namespace Presentation.Screens.Auth
 {
     partial class RegisterForm
@@ -47,7 +50,7 @@ namespace Presentation.Screens.Auth
             this.lblType.Name = "lblType";
             this.lblType.Size = new System.Drawing.Size(39, 16);
             this.lblType.TabIndex = 0;
-            this.lblType.Text = "Loại:";
+            this.lblType.Text = "Loáº¡i:";
             // 
             // cmbType
             // 
@@ -68,7 +71,7 @@ namespace Presentation.Screens.Auth
             this.lblName.Name = "lblName";
             this.lblName.Size = new System.Drawing.Size(34, 16);
             this.lblName.TabIndex = 2;
-            this.lblName.Text = "Tên:";
+            this.lblName.Text = "TÃªn:";
             // 
             // txtName
             // 
@@ -84,7 +87,7 @@ namespace Presentation.Screens.Auth
             this.lblPhone.Name = "lblPhone";
             this.lblPhone.Size = new System.Drawing.Size(95, 16);
             this.lblPhone.TabIndex = 4;
-            this.lblPhone.Text = "Số điện thoại:";
+            this.lblPhone.Text = "Sá»‘ Ä‘iá»‡n thoáº¡i:";
             // 
             // txtPhone
             // 
@@ -100,7 +103,7 @@ namespace Presentation.Screens.Auth
             this.lblPassword.Name = "lblPassword";
             this.lblPassword.Size = new System.Drawing.Size(66, 16);
             this.lblPassword.TabIndex = 6;
-            this.lblPassword.Text = "Mật khẩu:";
+            this.lblPassword.Text = "Máº­t kháº©u:";
             // 
             // txtPassword
             // 
@@ -119,7 +122,7 @@ namespace Presentation.Screens.Auth
             this.lblType.Name = "lblType";
             this.lblType.Size = new System.Drawing.Size(39, 16);
             this.lblType.TabIndex = 0;
-            this.lblType.Text = "Loại:";
+            this.lblType.Text = "Loáº¡i:";
             //
             // cmbType
             //
@@ -140,7 +143,7 @@ namespace Presentation.Screens.Auth
             this.lblName.Name = "lblName";
             this.lblName.Size = new System.Drawing.Size(34, 16);
             this.lblName.TabIndex = 2;
-            this.lblName.Text = "Tên:";
+            this.lblName.Text = "TÃªn:";
             //
             // txtName
             //
@@ -156,7 +159,7 @@ namespace Presentation.Screens.Auth
             this.lblPhone.Name = "lblPhone";
             this.lblPhone.Size = new System.Drawing.Size(95, 16);
             this.lblPhone.TabIndex = 4;
-            this.lblPhone.Text = "Số điện thoại:";
+            this.lblPhone.Text = "Sá»‘ Ä‘iá»‡n thoáº¡i:";
             //
             // txtPhone
             //
@@ -172,7 +175,7 @@ namespace Presentation.Screens.Auth
             this.lblPassword.Name = "lblPassword";
             this.lblPassword.Size = new System.Drawing.Size(66, 16);
             this.lblPassword.TabIndex = 6;
-            this.lblPassword.Text = "Mật khẩu:";
+            this.lblPassword.Text = "Máº­t kháº©u:";
             //
             // txtPassword
             //
@@ -189,7 +192,7 @@ namespace Presentation.Screens.Auth
             this.btnRegister.Name = "btnRegister";
             this.btnRegister.Size = new System.Drawing.Size(80, 28);
             this.btnRegister.TabIndex = 8;
-            this.btnRegister.Text = "Đăng ký";
+            this.btnRegister.Text = "ÄÄƒng kÃ½";
             this.btnRegister.UseVisualStyleBackColor = true;
             this.btnRegister.Click += new System.EventHandler(this.btnRegister_Click);
             //
@@ -199,7 +202,7 @@ namespace Presentation.Screens.Auth
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(80, 28);
             this.btnCancel.TabIndex = 9;
-            this.btnCancel.Text = "Hủy";
+            this.btnCancel.Text = "Há»§y";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             //
@@ -222,7 +225,7 @@ namespace Presentation.Screens.Auth
             this.MinimizeBox = false;
             this.Name = "RegisterForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Đăng ký";
+            this.Text = "ÄÄƒng kÃ½";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -243,3 +246,4 @@ namespace Presentation.Screens.Auth
         private System.Windows.Forms.Button btnCancel;
     }
 }
+

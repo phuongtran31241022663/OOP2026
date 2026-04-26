@@ -1,8 +1,10 @@
-﻿using Domain.Reviews;
+﻿// Infrastructure/Repositories/ReviewRepository.cs
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Domain.Repositories;
 
 namespace Infrastructure.Repositories
 {
@@ -10,36 +12,16 @@ namespace Infrastructure.Repositories
     {
         public ReviewRepository() : base("reviews.json") { }
 
-        public async Task<IEnumerable<Review>> GetByDriverIdAsync(Guid driverId)
+        public async Task<List<Review>> GetByDriverIdAsync(Guid driverId)
         {
             await Task.CompletedTask;
-            return _items.Where(r => r.DriverId == driverId);
+            return _items.Where(r => r.DriverId == driverId).ToList();
         }
 
-        public async Task<IEnumerable<Review>> GetByTripIdAsync(Guid tripId)
+        public async Task<List<Review>> GetByTripIdAsync(Guid tripId)
         {
             await Task.CompletedTask;
-            return _items.Where(r => r.TripId == tripId);
-        }
-
-        public async Task AddAsync(Review review)
-        {
-            Add(review);
-            await Task.CompletedTask;
-        }
-
-        public async Task UpdateAsync(Review review)
-        {
-            Update(review);
-            await Task.CompletedTask;
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            var entity = await GetByIdAsync(id);
-            if (entity != null)
-                Delete(entity);
-            await Task.CompletedTask;
+            return _items.Where(r => r.TripId == tripId).ToList();
         }
     }
 }
