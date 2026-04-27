@@ -184,7 +184,6 @@ namespace Presentation.UserControls
             this.txtSearchUsers.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtSearchUsers.Location = new System.Drawing.Point(8, 8);
             this.txtSearchUsers.Name = "txtSearchUsers";
-            this.txtSearchUsers.PlaceholderText = "Tim kiem...";
             this.txtSearchUsers.Size = new System.Drawing.Size(300, 30);
             this.txtSearchUsers.TabIndex = 0;
             // 
@@ -257,7 +256,6 @@ namespace Presentation.UserControls
             this.txtSearchTrips.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtSearchTrips.Location = new System.Drawing.Point(8, 8);
             this.txtSearchTrips.Name = "txtSearchTrips";
-            this.txtSearchTrips.PlaceholderText = "Tim kiem chuyen...";
             this.txtSearchTrips.Size = new System.Drawing.Size(300, 30);
             this.txtSearchTrips.TabIndex = 0;
             // 
@@ -417,4 +415,90 @@ namespace Presentation.UserControls
             this.lblTotalTrips.TabIndex = 1;
             this.lblTotalTrips.Text = "Tong chuyen: 0";
             this.lblTotalTrips.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblGMV
+            // 
+            this.lblGMV.AutoSize = true;
+            this.lblGMV.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblGMV.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
+            this.lblGMV.Location = new System.Drawing.Point(3, 444);
+            this.lblGMV.Name = "lblGMV";
+            this.lblGMV.Size = new System.Drawing.Size(566, 224);
+            this.lblGMV.TabIndex = 0;
+            this.lblGMV.Text = "GMV: 0 VND";
+            this.lblGMV.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // pnlTop
+            // 
+            this.pnlTop.Controls.Add(this.btnLogout);
+            this.pnlTop.Controls.Add(this.btnRefresh);
+            this.pnlTop.Controls.Add(this.lblAdminTitle);
+            this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlTop.Location = new System.Drawing.Point(0, 0);
+            this.pnlTop.Name = "pnlTop";
+            this.pnlTop.Size = new System.Drawing.Size(1200, 48);
+            this.pnlTop.TabIndex = 1;
+            // 
+            // btnLogout
+            // 
+            this.btnLogout.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnLogout.Location = new System.Drawing.Point(1104, 8);
+            this.btnLogout.Name = "btnLogout";
+            this.btnLogout.Size = new System.Drawing.Size(88, 32);
+            this.btnLogout.TabIndex = 2;
+            this.btnLogout.Text = "Dang xuat";
+            this.btnLogout.UseVisualStyleBackColor = true;
+            // 
+            // btnRefresh
+            // 
+            this.btnRefresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRefresh.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRefresh.Location = new System.Drawing.Point(1008, 8);
+            this.btnRefresh.Name = "btnRefresh";
+            this.btnRefresh.Size = new System.Drawing.Size(88, 32);
+            this.btnRefresh.TabIndex = 1;
+            this.btnRefresh.Text = "Lam moi";
+            this.btnRefresh.UseVisualStyleBackColor = true;
+            // 
+            // lblAdminTitle
+            // 
+            this.lblAdminTitle.AutoSize = true;
+            this.lblAdminTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.lblAdminTitle.Location = new System.Drawing.Point(12, 12);
+            this.lblAdminTitle.Name = "lblAdminTitle";
+            this.lblAdminTitle.Size = new System.Drawing.Size(189, 28);
+            this.lblAdminTitle.TabIndex = 0;
+            this.lblAdminTitle.Text = "Quan tri RideGo";
+            // 
+            // UcAdmin
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.tabControlAdmin);
+            this.Controls.Add(this.pnlTop);
+            this.Name = "UcAdmin";
+            this.Size = new System.Drawing.Size(1200, 800);
+            this.tabControlAdmin.ResumeLayout(false);
+            this.tabUsers.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).EndInit();
+            this.pnlUsersToolbar.ResumeLayout(false);
+            this.pnlUsersToolbar.PerformLayout();
+            this.tabTrips.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvTrips)).EndInit();
+            this.pnlTripsToolbar.ResumeLayout(false);
+            this.pnlTripsToolbar.PerformLayout();
+            this.tabFareRules.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvFareRules)).EndInit();
+            this.pnlFareToolbar.ResumeLayout(false);
+            this.tabStats.ResumeLayout(false);
+            this.tblStats.ResumeLayout(false);
+            this.tblStats.PerformLayout();
+            this.pnlTop.ResumeLayout(false);
+            this.pnlTop.PerformLayout();
+            this.ResumeLayout(false);
+
+        }
+    }
+}
 

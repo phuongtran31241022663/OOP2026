@@ -3,12 +3,8 @@ using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.Enums;
 using Domain.ValueObjects;
-using Presentation.Components;
 using Presentation.Shells;
 using System;
-using System.Drawing;
-using System.Net.Http;
-using System.Windows.Forms;
 
 namespace Presentation.UserControls
 {
@@ -173,7 +169,7 @@ namespace Presentation.UserControls
                 else
                 {
                     var total = _selectedVehicle == VehicleType.Car ? 25000m + (decimal)(route.Distance * 12000) : 12000m + (decimal)(route.Distance * 4000);
-                    fare = new Fare(new Money(total, "VND"), new Money(total * 0.2m, "VND"), new Money(total * 0.8m, "VND"));
+                    fare = new Fare(new Money(total, "VND"), new Money(total * 0.2m, "VND"));
                 }
 
                 _currentTrip = await _tripService.CreateTripAsync(_passenger.Id, route, fare, _selectedVehicle);
@@ -186,7 +182,7 @@ namespace Presentation.UserControls
                     bool matched = await _matchingService.MatchDriverToTripAsync(_currentTrip.Id, Guid.Empty);
                     if (!matched)
                     {
-                        ShowToast("Khong tim thay tai xe phu hop. Vui long thu lai.");
+ShowWarning("Khong tim thay tai xe phu hop. Vui long thu lai.");
                         ShowStage(TripStage.Idle);
                     }
                 }

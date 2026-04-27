@@ -167,7 +167,6 @@ namespace Presentation.UserControls
             this.txtTopUpAmount.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtTopUpAmount.Location = new System.Drawing.Point(0, 0);
             this.txtTopUpAmount.Name = "txtTopUpAmount";
-            this.txtTopUpAmount.PlaceholderText = "So tien";
             this.txtTopUpAmount.Size = new System.Drawing.Size(184, 30);
             this.txtTopUpAmount.TabIndex = 0;
 

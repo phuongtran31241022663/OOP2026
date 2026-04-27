@@ -147,7 +147,6 @@ namespace Presentation.UserControls
             this.txtLoginPassword.Location = new System.Drawing.Point(20, 140);
             this.txtLoginPassword.Name = "txtLoginPassword";
             this.txtLoginPassword.PasswordChar = '*';
-            this.txtLoginPassword.PlaceholderText = "Mat khau";
             this.txtLoginPassword.Size = new System.Drawing.Size(360, 30);
             this.txtLoginPassword.TabIndex = 2;
             // 
@@ -156,7 +155,6 @@ namespace Presentation.UserControls
             this.txtLoginPhone.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtLoginPhone.Location = new System.Drawing.Point(20, 80);
             this.txtLoginPhone.Name = "txtLoginPhone";
-            this.txtLoginPhone.PlaceholderText = "So dien thoai";
             this.txtLoginPhone.Size = new System.Drawing.Size(360, 30);
             this.txtLoginPhone.TabIndex = 1;
             // 
@@ -227,7 +225,6 @@ namespace Presentation.UserControls
             this.txtRegPassword.Location = new System.Drawing.Point(20, 140);
             this.txtRegPassword.Name = "txtRegPassword";
             this.txtRegPassword.PasswordChar = '*';
-            this.txtRegPassword.PlaceholderText = "Mat khau";
             this.txtRegPassword.Size = new System.Drawing.Size(360, 30);
             this.txtRegPassword.TabIndex = 3;
             // 
@@ -236,7 +233,6 @@ namespace Presentation.UserControls
             this.txtRegPhone.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtRegPhone.Location = new System.Drawing.Point(20, 95);
             this.txtRegPhone.Name = "txtRegPhone";
-            this.txtRegPhone.PlaceholderText = "So dien thoai";
             this.txtRegPhone.Size = new System.Drawing.Size(360, 30);
             this.txtRegPhone.TabIndex = 2;
             // 
@@ -245,7 +241,6 @@ namespace Presentation.UserControls
             this.txtRegName.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtRegName.Location = new System.Drawing.Point(20, 50);
             this.txtRegName.Name = "txtRegName";
-            this.txtRegName.PlaceholderText = "Ho ten";
             this.txtRegName.Size = new System.Drawing.Size(360, 30);
             this.txtRegName.TabIndex = 1;
             // 
