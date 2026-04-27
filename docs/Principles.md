@@ -1,79 +1,155 @@
+# Nguyên tắc lập trình (Principles)
+
+## 1. Nguyên lý SOLID
+
+### S — Single Responsibility Principle (SRP)
+
+> Một lớp chỉ nên có **một trách nhiệm duy nhất**.
+
+Nếu lớp thay đổi vì nhiều lý do khác nhau → vi phạm SRP. Tách thành nhiều lớp nhỏ, mỗi lớp một nhiệm vụ.
+
+### O — Open/Closed Principle (OCP)
+
+> **Mở rộng** tính năng bằng cách thêm mới; **không sửa đổi** code hiện hữu.
+
+Dùng `abstract class`, `interface`, kế thừa và Strategy Pattern để mở rộng mà không phá vỡ code cũ.
+
+### L — Liskov Substitution Principle (LSP)
+
+> Lớp con có thể **thay thế lớp cha** mà không làm hỏng hệ thống.
+
+Vi phạm điển hình: `Square : Rectangle` ghi đè `SetWidth/SetHeight` ép cả hai cạnh bằng nhau → hành vi bất ngờ khi code dùng kiểu `Rectangle`.
+
+### I — Interface Segregation Principle (ISP)
+
+> Chia nhỏ interface; không ép buộc lớp triển khai **các phương thức không dùng**.
+
+Tránh "fat interface". Tạo nhiều interface nhỏ, chuyên biệt thay vì một interface lớn chứa tất cả.
+
+### D — Dependency Inversion Principle (DIP)
+
+> **Phụ thuộc vào abstraction (interface)**, không phụ thuộc vào lớp cụ thể (concrete class).
+
+```csharp
+// Vi phạm DIP
+public class OrderService
+{
+    private readonly SqlOrderRepository _repo = new SqlOrderRepository(); // phụ thuộc concrete
+}
+
+// Tuân thủ DIP
+public class OrderService
+{
+    private readonly IOrderRepository _repo; // phụ thuộc abstraction
+
+    public OrderService(IOrderRepository repo) => _repo = repo; // inject từ bên ngoài
+}
+```
+
 ---
 
-## 4. Principles.md
+## 2. Nguyên tắc phổ biến khác
 
-```markdown
-# Nguyên tắc lập trình
+### DRY — Don't Repeat Yourself
 
-Nguyên tắc lập trình là tập hợp các quy tắc, hướng dẫn giúp tối ưu hóa quá trình viết code, nâng cao chất lượng, khả năng bảo trì và mở rộng phần mềm. Các nguyên tắc cốt lõi bao gồm SOLID, DRY, KISS, YAGNI, giúp giảm thiểu lỗi, tăng tính tái sử dụng và đảm bảo code sáng sủa, dễ hiểu cho lập trình viên khác.
+> Không lặp lại code. Nếu một đoạn code được dùng lại, hãy đóng gói nó vào hàm hoặc lớp riêng.
 
-## Các nguyên tắc lập trình cơ bản và phổ biến
+```csharp
+// Vi phạm DRY — copy paste
+if (string.IsNullOrWhiteSpace(textBoxName.Text)) { ... }
+if (string.IsNullOrWhiteSpace(textBoxEmail.Text)) { ... }
 
-### SOLID (5 Nguyên tắc Hướng đối tượng)
+// Tuân thủ DRY
+bool IsFilled(TextBox txt, string fieldName) => !string.IsNullOrWhiteSpace(txt.Text);
+```
 
-- **Single Responsibility Principle (SRP)**: Lớp chỉ nên có 1 trách nhiệm duy nhất.
-- **Open/Closed Principle (OCP)**: Mở rộng tính năng bằng cách thêm mới, không sửa đổi code hiện hữu.
-- **Liskov Substitution Principle (LSP)**: Lớp con có thể thay thế lớp cha mà không làm hỏng hệ thống.
-- **Interface Segregation Principle (ISP)**: Chia nhỏ interface, không ép buộc lớp triển khai các phương thức không dùng.
-- **Dependency Inversion Principle (DIP)**: Phụ thuộc vào interface, không phụ thuộc vào lớp cụ thể.
+### KISS — Keep It Simple, Stupid
 
-### Các nguyên tắc khác
+> Giữ cho code **đơn giản nhất có thể**. Code phức tạp khó bảo trì và sửa lỗi.
 
-- **DRY (Don't Repeat Yourself)**: Không lặp lại code; nếu một đoạn code được dùng lại, hãy đóng gói nó vào hàm hoặc lớp riêng.
-- **KISS (Keep It Simple, Stupid)**: Giữ cho code đơn giản nhất có thể; code phức tạp khó bảo trì và sửa lỗi.
-- **YAGNI (You Ain't Gonna Need It)**: Không viết chức năng khi chưa cần thiết; tập trung vào yêu cầu hiện tại.
-- **LoD (Law of Demeter)**: Một đối tượng chỉ nên giao tiếp với các đối tượng gần gũi, không nên can thiệp quá sâu vào đối tượng khác.
+Đừng dùng Design Pattern chỉ vì muốn "trông chuyên nghiệp" khi giải pháp đơn giản đã đủ.
 
-## Nguyên lý lập trình Hướng đối tượng (OOP)
+### YAGNI — You Ain't Gonna Need It
 
-- **Đóng gói (Encapsulation)**: Che giấu dữ liệu bên trong lớp, chỉ cho phép tương tác qua phương thức.
-- **Kế thừa (Inheritance)**: Cho phép lớp con sử dụng lại các thuộc tính/phương thức của lớp cha.
-- **Đa hình (Polymorphism)**: Một tên phương thức có thể thể hiện các hành vi khác nhau ở các đối tượng khác nhau.
-- **Trừu tượng (Abstraction)**: Tập trung vào các đặc điểm chung, bỏ qua chi tiết triển khai cụ thể.
+> Không viết chức năng khi **chưa cần thiết**. Tập trung vào yêu cầu hiện tại.
 
-## Nguyên tắc đặt tên trong lập trình (Naming Conventions)
+Tránh over-engineering — không tạo `IPaymentGateway`, `PaymentFactory`, `PaymentProxy` khi hệ thống chỉ cần thanh toán tiền mặt.
 
-Nguyên tắc đặt tên yêu cầu tên phải rõ ràng, nhất quán, có ý nghĩa và sử dụng tiếng Anh. Sử dụng các quy tắc như camelCase (biến/hàm), PascalCase (lớp), hoặc SCREAMING_SNAKE_CASE (hằng số) giúp mã nguồn dễ đọc, dễ bảo trì. Tên không chứa ký tự đặc biệt, không dùng từ khóa, bắt đầu bằng chữ cái hoặc dấu gạch dưới.
+### LoD — Law of Demeter (Nguyên lý tối thiểu tri thức)
 
-### Các phong cách đặt tên (Naming Styles)
+> Một đối tượng chỉ nên giao tiếp với **các đối tượng gần gũi**, không can thiệp quá sâu.
 
-| Phong cách               | Mô tả                                                                                           | Ví dụ                      |
-| ------------------------ | ----------------------------------------------------------------------------------------------- | -------------------------- |
-| **camelCase**            | Chữ cái đầu tiên viết thường, các từ tiếp theo viết hoa chữ cái đầu. Thường dùng cho biến, hàm. | `firstName`, `getUserInfo` |
-| **PascalCase**           | Viết hoa chữ cái đầu của mỗi từ. Thường dùng cho tên lớp, giao diện (Class, Interface).         | `CustomerController`       |
-| **snake_case**           | Các từ phân cách bởi dấu gạch dưới `_`. Thường dùng trong Python, C, C++.                       | `user_name`                |
-| **SCREAMING_SNAKE_CASE** | Viết hoa toàn bộ, phân cách bởi dấu gạch dưới. Thường dùng cho hằng số (Constants).             | `MAX_SIZE`, `API_KEY`      |
+```csharp
+// Vi phạm LoD
+decimal price = order.GetCustomer().GetWallet().GetBalance();
+
+// Tuân thủ LoD
+decimal price = order.GetCustomerBalance();
+```
+
+---
+
+## 3. Nguyên lý OOP (4 trụ cột)
+
+| Nguyên lý | Mô tả |
+|---|---|
+| **Đóng gói** (Encapsulation) | Che giấu dữ liệu bên trong lớp, chỉ cho phép tương tác qua phương thức/property |
+| **Kế thừa** (Inheritance) | Cho phép lớp con sử dụng lại thuộc tính/phương thức của lớp cha |
+| **Đa hình** (Polymorphism) | Một tên phương thức có thể thể hiện các hành vi khác nhau ở các đối tượng khác nhau |
+| **Trừu tượng** (Abstraction) | Tập trung vào đặc điểm chung, bỏ qua chi tiết triển khai cụ thể |
+
+---
+
+## 4. Quy ước đặt tên trong C# (Naming Conventions)
+
+### Nguyên tắc chung (Clean Code)
+
+- **Ý nghĩa rõ ràng**: Tránh `a`, `b`, `data`, `temp`. Tên phải mô tả đúng mục đích.
+- **Dùng tiếng Anh**: Ngôn ngữ chuẩn trong lập trình.
+- **Nhất quán**: Chọn một phong cách và tuân thủ trong toàn bộ dự án.
+- **Danh từ/động từ**: Lớp/đối tượng nên là danh từ (`UserManager`); phương thức nên là động từ (`CalculateTotal`).
+
+### Phong cách đặt tên trong C#
+
+| Phong cách | Áp dụng cho | Ví dụ |
+|---|---|---|
+| `PascalCase` | Class, Struct, Enum, Interface, Method, Property, Namespace | `CustomerManager`, `CalculateTotal()`, `IsActive` |
+| `camelCase` | Biến cục bộ, tham số | `userName`, `totalAmount`, `userId` |
+| `_camelCase` | Private field | `_customerId`, `_balance` |
+| `I` + `PascalCase` | Interface | `IRepository`, `IUserService` |
+| `PascalCase` hoặc `SCREAMING_SNAKE_CASE` | Hằng số | `MaxValue`, `MAX_SIZE` |
+| `Is`, `Has`, `Can` + `PascalCase` | Boolean property | `IsValid`, `HasError`, `CanExecute` |
 
 ### Quy tắc cú pháp
 
 - Tên không được có dấu cách.
-- Tên bắt đầu bằng chữ cái hoặc dấu gạch dưới `_`, không bắt đầu bằng số.
-- Không được dùng từ khóa của ngôn ngữ lập trình (như `if`, `else`, `class`, `const`).
+- Tên bắt đầu bằng chữ cái hoặc dấu `_`, không bắt đầu bằng số.
+- Không dùng từ khóa của C# (`class`, `int`, `void`, `if`, ...).
+- Không dùng tiếng Việt có dấu hoặc ký tự đặc biệt.
 
-## Quy ước đặt tên trong C#
+### Ví dụ tổng hợp
 
-Trong lập trình C#, nguyên tắc đặt tên (naming conventions) tuân thủ nghiêm ngặt chuẩn .NET để đảm bảo mã nguồn dễ đọc và nhất quán. Các quy tắc chính bao gồm sử dụng PascalCase cho lớp, phương thức, namespace; camelCase cho biến, tham số; và danh từ/cụm danh từ có ý nghĩa. Không dùng tiếng Việt có dấu, khoảng trắng, hoặc ký tự đặc biệt.
+```csharp
+namespace Company.Product.Module         // PascalCase namespace
+{
+    public interface IUserRepository { } // I + PascalCase
 
-### Các quy ước đặt tên chi tiết trong C#
+    public class UserService             // PascalCase class
+    {
+        private readonly IUserRepository _userRepo; // _camelCase field
 
-**PascalCase (Viết hoa chữ cái đầu mỗi từ):**
+        public UserService(IUserRepository userRepo) // camelCase param
+        {
+            _userRepo = userRepo;
+        }
 
-- Class, Struct, Enum, Interface, Delegate: Ví dụ: `CustomerManager`, `OrderInfo`, `IUserRepository`.
-- Method (Phương thức): Ví dụ: `CalculateTotal()`, `GetName()`.
-- Property (Thuộc tính): Ví dụ: `FirstName`, `IsActive`.
-- Namespace: Ví dụ: `Company.Product.Module`.
-- Enum values: Ví dụ: `Monday`, `Tuesday`.
+        public bool IsActive { get; private set; } // PascalCase, Is prefix
 
-**camelCase (Chữ đầu viết thường, sau đó viết hoa chữ đầu từ):**
-
-- Variable (Biến cục bộ): Ví dụ: `userName`, `totalAmount`.
-- Method Arguments (Tham số): Ví dụ: `userId`, `customerName`.
-- Private Field (Trường nội bộ): Thường sử dụng gạch dưới trước camelCase: `_customerId`.
-
-**Các quy tắc khác:**
-
-- Interface: Bắt đầu bằng chữ 'I' (ví dụ: `IRepository`).
-- Constant (Hằng số): Sử dụng PascalCase hoặc chữ in hoa toàn bộ (ví dụ: `MAX_VALUE` hoặc `MaxValue`).
-- Boolean: Thường bắt đầu bằng các động từ như `Is`, `Has`, `Can` (ví dụ: `isValid`, `hasError`).
-- Tránh dùng từ khóa: Không đặt tên trùng với từ khóa của C# (như `class`, `int`, `void`, ...).
+        public string GetFullName(string firstName, string lastName) // PascalCase method, camelCase params
+        {
+            string fullName = firstName + " " + lastName; // camelCase local var
+            return fullName;
+        }
+    }
+}
 ```

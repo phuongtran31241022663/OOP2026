@@ -76,7 +76,7 @@ Domain/
 
 **Constructors:** Business (hash password), persistence, ORM.
 
-### `Passenger` (sealed : User)
+### `Passenger` (: User)
 
 | Type | Name | Description |
 |------|------|-------------|
@@ -118,7 +118,7 @@ Domain/
 
 | Type | Name | Description |
 |------|------|-------------|
-| 🔵 Property | `TripStatus Status` | Current trip status |
+| 🔵 Property | `string Status` | Current trip status (derived from ITripState) |
 | 🔵 Property | `Guid PassengerId` | Booking passenger |
 | 🔵 Property | `Guid? DriverId` | Assigned driver |
 | 🔵 Property | `VehicleType TripVehicleType` | Requested vehicle type |
@@ -135,7 +135,8 @@ Domain/
 | 🟢 State | `ConfirmPayment()` | Emits TripPaidEvent |
 | 🟢 State | `Cancel(string reason)` | Status → Cancelled, emits TripCancelledEvent |
 | 🟢 State | `MarkTimeout()` | Status → Timeout, emits TripTimeoutEvent |
-| 🔒 Private | `SetStatus(newStatus)` | Internal setter |
+| 🟢 Method | `IsSearching(), IsMatched(), IsArrived(), IsStarted(), IsCompleted(), IsCancelled(), IsTimeout()` | State check helpers |
+| 🟢 Method | `IsTerminal()` | Terminal state check |
 
 **Constructors:** Business (Requested + events), ORM.
 
@@ -143,10 +144,7 @@ Domain/
 
 | Type | Name | Description |
 |------|------|-------------|
-| 🟢 Abstract | `GetVehicleType()` | Returns VehicleType |
-| 🟢 Abstract | `IsCar()` | Boolean check |
-| 🟢 Abstract | `GetMinSpeed()`, `GetMaxSpeed()` | Speed range |
-| 🟢 Abstract | `GetMaxPickupDistance()` | Search radius |
+| 🟢 Abstract | `GetAvgSpeed()` | Average speed |
 
 ### `Car` (: Vehicle)
 
@@ -154,7 +152,6 @@ Domain/
 |------|------|-------------|
 | 🔵 Property | `Type = Car` | Fixed |
 | 🔵 Property | `AvgSpeed = 60km/h` | - |
-| 🔵 Property | `MaxPickupDistance = 7km` | - |
 
 ### `Motorbike` (: Vehicle)
 
@@ -162,7 +159,6 @@ Domain/
 |------|------|-------------|
 | 🔵 Property | `Type = Motorbike` | Fixed |
 | 🔵 Property | `AvgSpeed = 40km/h` | - |
-| 🔵 Property | `MaxPickupDistance = 5km` | - |
 
 ### `FareRule` (: Entity)
 
@@ -203,19 +199,19 @@ Domain/
 
 | Type | Name | Description |
 |------|------|-------------|
-| 🔵 Property | `double Latitude` | - |
-| 🔵 Property | `double Longitude` | - |
+| 🔵 Property | `double Latitude` | Vĩ độ |
+| 🔵 Property | `double Longitude` | Kinh độ|
 
 ### `Address`
 
 | Type | Name | Description |
 |------|------|-------------|
 | 🔵 Property | `Name` | Place name |
-| 🔵 Property | `Street` | Street name |
+| 🔵 Property | `Street` | Tên đường |
 | 🔵 Property | `District` | District/Quận |
 | 🔵 Property | `City` | City/Thành phố |
-| 🔵 Property | `Country` | - |
-| 🔵 Property | `HouseNumber` | - |
+| 🔵 Property | `Country` | Quốc gia|
+| 🔵 Property | `HouseNumber` | Số nhà |
 | 🔵 Property | `Osm_Value` | OSM tag |
 | 🔵 Property | `Locality` | Phường |
 
@@ -243,9 +239,11 @@ Domain/
 
 | Enum | Values |
 |------|--------|
-| `TripStatus` | Requested(0), Searching(1), Matched(2), Arrived(3), Started(4), Completed(5), Cancelled(6), Timeout(7) |
+| `TripStatus` | *(deprecated — use ITripState and `IsXxx()` helpers)* |
 | `DriverStatus` | Offline(0), Available(1), OnTrip(2) |
 | `VehicleType` | Unknown(0), Motorbike(1), Car(2) |
+
+> **Note:** `TripStatus` enum is kept for persistence/serialization backward compatibility only. Business logic queries status via `trip.Status` (string) and `trip.IsXxx()` helpers, which derive from the active `ITripState`.
 
 ---
 
@@ -284,7 +282,9 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 
 ## 7. State Machines
 
-### DriverStateMachine (static class)
+### Driver State Machine
+
+> The `DriverStateMachine` is a **state machine** (transition validation via static dictionary) used only for `Driver` status transitions.
 
 ```csharp
 public static class DriverStateMachine
@@ -304,7 +304,7 @@ OnTrip → Available
 
 ### Trip State Pattern
 
-`Trip` delegates state behavior to `ITripState` implementations:
+> `Trip` uses the **State Pattern** (not a state machine). It delegates behavior to `ITripState` implementations that manage the lifecycle:
 
 | State Class | Valid Next States |
 |-------------|-------------------|
@@ -322,6 +322,8 @@ Each state validates transition before calling `trip.TransitionTo(...)`.
 ---
 
 ## 8. Repository Interfaces
+
+> **Note:** `IRepository<T>` and its specific interfaces define **data access contracts**, not a GoF Design Pattern. The implementation (`JsonRepository<T>`) is infrastructure-specific.
 
 ### Base Interface
 
@@ -375,4 +377,4 @@ public interface IRepository<T> where T : Entity
 
 ---
 
-*Document version: 2.0 — Consolidated from Domain_Model.md and domain_class_library.md.*
+*Document version: 3.0 — Updated: removed sealed from Passenger, removed GetMaxPickupDistance, clarified State Pattern vs State Machine, updated Repository notes.*

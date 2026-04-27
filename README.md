@@ -2,12 +2,12 @@
 
 ## 1. Tổng quan
 
-Hệ thống gọi xe mô phỏng (ride-hailing simulation) xây dựng bằng C# WinForms, áp dụng OOP và 5-Layer Architecture. Hệ thống mô phỏng toàn bộ workflow chuyến đi: đặt xe, tìm tài xế, di chuyển, thanh toán và đánh giá.
+Hệ thống gọi xe mô phỏng (ride-hailing simulation) xây dựng bằng C# WinForms, áp dụng OOP. Hệ thống mô phỏng toàn bộ workflow chuyến đi: đặt xe, tìm tài xế, di chuyển, thanh toán và đánh giá.
 
 **Mục tiêu:**
 - Xây dựng logic nghiệp vụ (business logic)
 - Áp dụng OOP: kế thừa, đa hình, encapsulation, domain events
-- Tổ chức 5-Layer Architecture: Common → Domain → Application → Infrastructure → Presentation
+- Tổ chức 5-Layer: Common → Domain → Application → Infrastructure → Presentation
 - Mô phỏng workflow chuyến đi với dữ liệu ảo
 
 **Công nghệ:**
@@ -18,7 +18,7 @@ Hệ thống gọi xe mô phỏng (ride-hailing simulation) xây dựng bằng C
 
 ---
 
-## 1.1 Tóm tắt Kiến trúc và Điểm nổi bật
+## 1.1 Kiến trúc và Điểm nổi bật
 
 ### 1. Kiến Trúc Hệ Thống
 
@@ -30,14 +30,14 @@ Hệ thống được tổ chức theo mô hình 5 lớp:
 - **Infrastructure Layer**: Technical implementations — JSON persistence (JsonRepository, JsonStorage), external APIs (MapService — Photon + OSRM), `GMapProviders` (Routing/Geocoding API calls — chỉ cần `GMap.NET.Core`).
 - **Presentation Layer**: WinForms UI — Shells, Screens, Components (`GMapControl` — UI widget, cài `GMap.NET.WinForms`), ViewModels, manual composition root.
 
-**Lưu ý:** Presentation tham chiếu trực tiếp Domain và Infrastructure (vi phạm Clean Architecture). Cần refactor để Presentation chỉ phụ thuộc vào Application.
+**Lưu ý:** Presentation tham chiếu trực tiếp Domain và Infrastructure (vi phạm Clean Architecture do tạm thời chưa triển khai Data Transfer Objects (DTOs)). Cần refactor sau để Presentation chỉ phụ thuộc vào Application.
 
 ### 2. Luồng Xử Lý Chính (Core Workflows)
 
 Hệ thống giải quyết được các bài toán chính:
 
-- **Quản lý trạng thái Trip**: Trip sử dụng State Pattern (`ITripState`) đảm bảo chỉ chuyển trạng thái hợp lệ. Flow: Requested → Searching → Matched → Arrived → Started → Completed/Cancelled/Timeout.
-- **Ghép tài xế (Matching)**: MatchingService lọc driver theo: `Status == Available` + `VehicleType` match. (Lọc thô theo địa chỉ hành chính, khoảng cách < `MaxPickupDistance`, số dư `Wallet` đủ — chưa hoàn chỉnh.)
+- **Quản lý trạng thái Trip**: Trip sử dụng **State Pattern** (`ITripState`) đảm bảo chỉ chuyển trạng thái hợp lệ. Flow: Requested → Searching → Matched → Arrived → Started → Completed/Cancelled/Timeout. **Driver** sử dụng **State Machine** (`DriverStateMachine`) — phân biệt rõ 2 cách quản lý trạng thái.
+- **Ghép tài xế (Matching)**: MatchingService lọc driver theo: `Status == Available` + `VehicleType` match + `Wallet` đủ trả hoa hồng (Commission). Có `SemaphoreSlim` để tránh race condition khi 2 tài xế cùng nhận 1 chuyến.
 - **Cơ chế Event-Driven**: `ITripService.TripStatusChanged` event (`EventHandler<TripStatusChangedEventArgs>`) để UI real-time update.
 
 ### 3. Các Thực Thể Chính (Entities & Aggregates)
@@ -47,7 +47,7 @@ Hệ thống giải quyết được các bài toán chính:
 | **Trip** | Aggregate Root | Quản lý vòng đời chuyến đi; chứa Route, Fare |
 | **User** (abstract) | Aggregate Root | Base class Passenger, Driver, Admin |
 | **Driver** | Entity | Vị trí, xe, ví, thu nhập, trạng thái |
-| **Passenger** | Entity (sealed) | Số chuyến đã đi |
+| **Passenger** | Entity | Số chuyến đã đi |
 | **Admin** | Entity | Quản lý hệ thống |
 | **FareRule** | Entity | Quy định giá cước theo xe |
 | **Vehicle** (abstract) | Entity | Thông tin xe (Car, Motorbike) |
@@ -82,11 +82,10 @@ Trip State Pattern (8 states via `ITripState`), DriverStateMachine (3 states).
 ## 3. Key Services & Interfaces
 
 **Application Services** (`Application.Interfaces` + `Application.Services`):
-- `ITripService` / `TripService` — trip lifecycle
+- `ITripService` / `TripService` — trip lifecycle (async, có SemaphoreSlim lock trong MatchDriverAsync)
 - `IUserService` / `UserService` — registration, auth, profile
 - `IFareService` / `FareService` — fare calculation
-- `ISimulationService` / `SimulationService` — stub
-- `IDriverSimulationService` — missing interface (stub)
+- `ISimulationService` / `SimulationService` — có System.Threading.Timer, async CreateDefaultAsync()
 - `IReviewService` / `ReviewService` — rating (in `Services` namespace)
 
 **Domain Services:**
@@ -99,11 +98,12 @@ Trip State Pattern (8 states via `ITripState`), DriverStateMachine (3 states).
 **Note on interfaces:**
 - `IRouteService` was previously referenced but has been replaced by `IMapService` in current DI registration.
 - `TripTimeoutWorker` + `TripMatchingWorker` — implemented in `Infrastructure/BackgroundJobs/`.
-- `IDriverSimulationService` — stub interface referenced in DI but not fully implemented.
 
 ---
 
 ## 4. Repository & Persistence
+
+> **Note:** `IRepository<T>` định nghĩa **data access contract** ở Domain layer, được triển khai bởi `JsonRepository<T>` ở Infrastructure. Đây là **Architectural Abstraction**, không phải GoF Design Pattern.
 
 **Domain Repository Interfaces** (`Domain/Repositories`):
 - `IRepository<T>` (base), `IReadRepository<T>`
@@ -120,51 +120,55 @@ Trip State Pattern (8 states via `ITripState`), DriverStateMachine (3 states).
 
 ## 5. State Validation
 
-**Trip State Pattern** — 8 states via `ITripState` implementations:
+**Trip — State Pattern** — 8 states via `ITripState` implementations:
 Requested → Searching → Matched → Arrived → Started → Completed (terminal)
 ↘︎ Cancelled (terminal), Timeout (terminal) có thể xảy ra từ Searching/Matched/Arrived/Started.
 
-**DriverStateMachine** — 3 states:
+> Trip dùng **State Pattern** (behavior delegation), không phải State Machine.
+
+**Driver — State Machine** — 3 states:
 Offline ↔ Available ↔ OnTrip (vòng lặp).
+
+> Driver dùng **State Machine** (static dictionary transitions).
 
 Transition rules enforced via `DriverStateMachine.CanTransition(from, to)` static method and `ITripState` state classes.
 
 ---
 
-## 6. Design Patterns
+## 6. Patterns & Abstractions
 
-| Pattern | Usage |
+| Pattern / Abstraction | Usage |
 |---|---|
-| Repository | `IRepository<T>` → `JsonRepository<T>` |
-| State Pattern | `ITripState` + state classes for Trip lifecycle; `DriverStateMachine` for Driver |
+| Repository (Data Access Contract) | `IRepository<T>` → `JsonRepository<T>` — *không phải GoF Pattern* |
+| State Pattern | `ITripState` + state classes cho Trip lifecycle |
+| State Machine | `DriverStateMachine` cho Driver status transitions |
 | Domain Events | Aggregates emit events (9 Trip events, 2 Driver events, 1 Review event) |
 | Value Object | Immutable VOs with operator overloading |
-| Observer | `ITripService.TripStatusChanged` event (`EventHandler<TripStatusChangedEventArgs>`) — UI subscribes |
-  | Manual Service Composition | Khởi tạo services bằng `new` trong `Presentation/Program.cs` |
+| Observer | `ITripService.TripStatusChanged` event — UI subscribes |
+| Manual Service Composition | Khởi tạo services bằng `new` trong `Presentation/Program.cs` |
 
 ---
 
 ## 7. Known Issues & Gaps
 
-1. **Resolved / Implemented** (previously listed as missing):
-   - `TripTimeoutWorker` + `TripMatchingWorker` — implemented in `Infrastructure/BackgroundJobs/`.
-   - `AdminService` — fully implemented with user/trip/fare rule management and statistics.
-   - `MatchingService` — now checks `VehicleType` in addition to `Status == Available`.
+1. **Đã hoàn thành**:
+   - `MatchingService` — đã thêm kiểm tra `Wallet >= Commission` và `SemaphoreSlim` để tránh race condition.
+   - `SimulationService` — đã implement `System.Threading.Timer` với `StartSimulation/StopSimulation`.
+   - `MapControl` — đã thêm `DecodePolyline` và `DrawRoute` với route points.
+   - `Trip` — đã chuyển từ `TripStatus` enum sang `Status` string + `IsXxx()` helpers từ `ITripState`.
+   - `Passenger` — đã bỏ `sealed`.
+   - `Vehicle` — đã bỏ `GetMaxPickupDistance()`.
 
 2. **Architecture Violations**:
    - Presentation directly references Domain and Infrastructure (violates Clean Architecture).
    - Infrastructure references Domain (acceptable per layered architecture, but Domain should not depend on Infrastructure).
 
 3. **Incomplete Implementations**:
-   - Driver matching algorithm — chưa lọc theo địa chỉ hành chính, khoảng cách < `MaxPickupDistance`, số dư `Wallet`.
-   - Race condition handling — chưa có `SemaphoreSlim` trong `MatchDriverAsync` (cần thêm để tránh hai tài xế cùng nhận một chuyến).
-   - Simulation service — stub, không có timer.
-   - Polyline decoding / map route rendering — chưa hoàn chỉnh.
+   - Driver matching algorithm — chưa lọc theo địa chỉ hành chính, khoảng cách Haversine.
+   - Simulation service — có timer nhưng logic simulation chưa hoàn chỉnh (chỉ stub Tick/SimulateTripProgress).
+   - Polyline decoding / map route rendering — DecodePolyline đã thêm nhưng chưa test tích hợp đầy đủ.
 
-4. **Inconsistent Async**:
-   - `ITripService` uses async signatures, but `TripService` mixes sync and async (`.Result` usage) in some call chains.
-
-5. **Namespace Notes**:
+4. **Namespace Notes**:
    - `ReviewService` is in `Application.Services` namespace ✅.
    - `MatchingService` is in `Application.Services` namespace ✅.
 

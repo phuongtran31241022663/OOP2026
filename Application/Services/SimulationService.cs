@@ -2,22 +2,43 @@ using Application.Interfaces;
 using Domain.Repositories;
 using Infrastructure.Repositories;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Services
 {
     public class SimulationService : ISimulationService
     {
+        private Timer _timer;
+
         public SimulationService()
         {
         }
 
-        public void StartSimulation() { }
-        public void StopSimulation() { }
+        public void StartSimulation()
+        {
+            _timer = new Timer(async _ => await Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(2));
+        }
+
+        public void StopSimulation()
+        {
+            _timer?.Change(Timeout.Infinite, Timeout.Infinite);
+            _timer?.Dispose();
+            _timer = null;
+        }
+
         public void StartTripSimulation(Guid tripId) { }
         public bool IsTripSimulating(Guid tripId) => false;
-        public Task Tick() => Task.CompletedTask;
-        public Task SimulateTripProgress(Guid tripId) => Task.CompletedTask;
+
+        public async Task Tick()
+        {
+            await Task.CompletedTask;
+        }
+
+        public async Task SimulateTripProgress(Guid tripId)
+        {
+            await Task.CompletedTask;
+        }
     }
 
     public sealed class AppServiceBundle
@@ -27,23 +48,23 @@ namespace Application.Services
         public IFareService FareService { get; private set; }
         public ISimulationService SimulationService { get; private set; }
 
-        public static AppServiceBundle CreateDefault()
+        public static async Task<AppServiceBundle> CreateDefaultAsync()
         {
             IDriverRepository driverRepository = new DriverRepository();
             IPassengerRepository passengerRepository = new PassengerRepository();
             ITripRepository tripRepository = new TripRepository();
             IFareRuleRepository fareRuleRepository = new FareRuleRepository();
 
-            driverRepository.InitializeAsync().GetAwaiter().GetResult();
-            passengerRepository.InitializeAsync().GetAwaiter().GetResult();
-            tripRepository.InitializeAsync().GetAwaiter().GetResult();
-            fareRuleRepository.InitializeAsync().GetAwaiter().GetResult();
-            fareRuleRepository.EnsureSeededAsync().GetAwaiter().GetResult();
+            await driverRepository.InitializeAsync();
+            await passengerRepository.InitializeAsync();
+            await tripRepository.InitializeAsync();
+            await fareRuleRepository.InitializeAsync();
+            await fareRuleRepository.EnsureSeededAsync();
 
             IUserService userService = new UserService(driverRepository, passengerRepository);
             ITripService tripService = new TripService(tripRepository, driverRepository, passengerRepository);
             FareService fareService = new FareService(fareRuleRepository);
-            fareService.SeedDefaultFareRulesAsync().GetAwaiter().GetResult();
+            await fareService.SeedDefaultFareRulesAsync();
 
             return new AppServiceBundle
             {

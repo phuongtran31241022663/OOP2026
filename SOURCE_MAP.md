@@ -102,6 +102,7 @@
 #### `TripStatus`
 - **File**: `Domain/Enums/TripStatus.cs`
 - **Values**: Requested(0) → Searching(1) → Matched(2) → Arrived(3) → Started(4) → Completed(5) → Cancelled(6) → Timeout(7)
+- **Note**: Deprecated cho business logic; chỉ dùng cho persistence backward compatibility. Dùng `trip.Status` (string) hoặc `trip.IsXxx()` helpers.
 
 #### `DriverStatus`
 - **File**: `Domain/Enums/DriverStatus.cs`
@@ -147,7 +148,7 @@
 - **File**: `Domain/Entities/Trip.cs`
 - **Mục đích**: Quản lý lifecycle chuyến đi (State Pattern)
 - **Thuộc tính**:
-  - `TripStatus Status` {get; private set}
+  - `string Status` {get} - Derived từ ITripState (Requested, Searching, Matched, Arrived, Started, Completed, Cancelled, Timeout)
   - `Guid PassengerId` {get}
   - `Guid? DriverId` {get; private set}
   - `VehicleType TripVehicleType` {get}
@@ -166,7 +167,9 @@
   - `Cancel(string reason) : void` - Transition to CancelledState
   - `MarkTimeout() : void` - Transition to TimeoutState
   - `ConfirmPayment() : void` - Mark paid, throw nếu đã paid
-- **Internal helpers**: TransitionTo(ITripState), SetStatusInternal(TripStatus), SetDriverId(Guid)
+  - `IsSearching() : bool`, `IsMatched() : bool`, `IsArrived() : bool`, `IsStarted() : bool`, `IsCompleted() : bool`, `IsCancelled() : bool`, `IsTimeout() : bool` - State check helpers
+  - `IsTerminal() : bool` - True nếu Completed, Cancelled, hoặc Timeout
+- **Internal helpers**: TransitionTo(ITripState), SetDriverId(Guid)
 - **Sự kiện**: TripRequestedEvent, TripSearchingEvent, TripMatchedEvent, TripArrivedEvent, TripStartedEvent, TripCompletedEvent, TripCancelledEvent, TripPaidEvent, TripTimeoutEvent
 - **Phụ thuộc**: ITripState, Route, Fare, VehicleType
 - **Ràng buộc nghiệp vụ**:
@@ -174,7 +177,7 @@
   - Route/Fare không null
   - VehicleType != 0
   - Không thể ConfirmPayment 2 lần
-  - State machine enforce: cannot Start before Arrived, etc.
+  - State pattern enforce: cannot Start before Arrived, etc.
 
 #### `User` (Abstract Entity)
 - **File**: `Domain/Entities/User.cs`
@@ -221,7 +224,6 @@
 - **Thuộc tính**: PlateNumber, Brand, Model, Color, Capacity, Type
 - **Phương thức** (abstract):
   - `GetAvgSpeed() : double`
-  - `GetMaxPickupDistance() : double`
 
 ### 2.5 Namespace: `Domain.Entities.Users`
 
@@ -266,8 +268,8 @@
 #### `Motorbike` / `Car`
 - **Files**: `Domain/Entities/Vehicles/Motorbike.cs`, `Car.cs`
 - **Mục đích**: Concrete vehicle types
-- **Motorbike**: Capacity=2, AvgSpeed=40km/h, MaxPickupDistance=5km
-- **Car**: Capacity variable, AvgSpeed=60km/h, MaxPickupDistance=7km
+- **Motorbike**: Capacity=2, AvgSpeed=40km/h
+- **Car**: Capacity variable, AvgSpeed=60km/h
 
 ### 2.7 Namespace: `Domain.States`
 
@@ -287,13 +289,13 @@
 | CancelledState | `Domain/States/CancelledState.cs` | Không cho phép gì (final) |
 | TimeoutState | `Domain/States/TimeoutState.cs` | Không cho phép gì (final) |
 
-**Pattern**: Mỗi state gọi `trip.TransitionTo(new XxxState())` + `trip.SetStatusInternal()` + `trip.AddEvent()` nếu hợp lệ; throw `InvalidOperationException` nếu transition không hợp lệ.
+**Pattern**: Mỗi state gọi `trip.TransitionTo(new XxxState())` + `trip.AddEvent()` nếu hợp lệ; throw `InvalidOperationException` nếu transition không hợp lệ. **Trip dùng State Pattern, không phải State Machine.**
 
 ### 2.8 Namespace: `Domain.StateMachines`
 
 #### `DriverStateMachine`
 - **File**: `Domain/StateMachines/DriverStateMachine.cs`
-- **Mục đích**: Validate DriverStatus transitions
+- **Mục đích**: Validate DriverStatus transitions (State Machine — chỉ dùng cho Driver)
 - **Phương thức**:
   - `CanTransition(DriverStatus from, DriverStatus to) : bool` - Static
 - **Valid transitions**: Offline→Available, Available→OnTrip/Offline, OnTrip→Available
@@ -314,7 +316,7 @@
 | DriverStatusChangedEvent | `DriverStatusChangedEvent.cs` | DriverId, OldStatus, NewStatus |
 | DriverLocationUpdatedEvent | `DriverLocationUpdatedEvent.cs` | DriverId, NewLocation |
 | ReviewCreatedEvent | `ReviewCreatedEvent.cs` | ReviewId, DriverId, RiderId, Rating, Comment |
-| TripStatusChangedEventArgs | `TripStatusChangedEventArgs.cs` | TripId, NewStatus, DriverId? |
+| TripStatusChangedEventArgs | `TripStatusChangedEventArgs.cs` | TripId, NewStatus (string), DriverId? |
 
 ### 2.10 Namespace: `Domain.Repositories`
 
@@ -345,7 +347,7 @@
 - **Sự kiện**: `TripStatusChanged : EventHandler<TripStatusChangedEventArgs>` (Observer pattern)
 - **Phương thức**:
   - `CreateTripAsync(Guid, Route, Fare, VehicleType) : Task<Trip>` - Tạo chuyến
-  - `MatchDriverAsync(Guid, Guid) : Task` - Ghép tài xế
+  - `MatchDriverAsync(Guid, Guid) : Task` - Ghép tài xế (có SemaphoreSlim lock + wallet check)
   - `MarkAsArrivedAsync(Guid) : Task`
   - `StartTripAsync(Guid) : Task`
   - `CompleteTripAsync(Guid) : Task`
@@ -378,7 +380,7 @@
 
 #### `IAdminService`
 - **File**: `Application/Interfaces/IAdminService.cs`
-- **Phương thức**: GetAllUsersAsync, GetAllDriversAsync, GetAllPassengersAsync, GetAllTripsAsync, GetTripsByStatusAsync, GetFareRulesAsync, CreateFareRuleAsync, UpdateFareRuleAsync, GetTotalGMVAsync, GetTotalNTRAsync, GetCompletionRateAsync, GetAverageSatisfactionAsync
+- **Phương thức**: GetAllUsersAsync, GetAllDriversAsync, GetAllPassengersAsync, GetAllTripsAsync, GetTripsByStatusAsync(string status), GetFareRulesAsync, CreateFareRuleAsync, UpdateFareRuleAsync, GetTotalGMVAsync, GetTotalNTRAsync, GetCompletionRateAsync, GetAverageSatisfactionAsync
 
 #### `IFareService`
 - **File**: `Application/Interfaces/IFareService.cs`
@@ -390,7 +392,7 @@
 
 #### `IMatchingService`
 - **File**: `Application/Interfaces/IMatchingService.cs`
-- **Phương thức**: `MatchDriverToTripAsync(Guid, Guid) : Task<bool>` - Validate + match
+- **Phương thức**: `MatchDriverToTripAsync(Guid, Guid) : Task<bool>` - Validate + match (có SemaphoreSlim + wallet check)
 
 #### `IReviewService`
 - **File**: `Application/Interfaces/IReviewService.cs`
@@ -410,6 +412,7 @@
 - **File**: `Application/Services/TripService.cs`
 - **Phụ thuộc**: ITripRepository, IDriverRepository, IPassengerRepository
 - **Phương thức**: Implement ITripService - orchestrate trip workflow + publish TripStatusChanged events
+- **Thread safety**: SemaphoreSlim `_matchLock` trong `MatchDriverAsync` để tránh 2 tài xế cùng nhận 1 chuyến
 
 #### `DriverService`
 - **File**: `Application/Services/DriverService.cs`
@@ -442,7 +445,8 @@
 #### `MatchingService`
 - **File**: `Application/Services/MatchingService.cs`
 - **Phụ thuộc**: ITripRepository, IDriverRepository, IVehicleRepository
-- **Flow MatchDriverToTripAsync**: Validate trip (Searching) → Validate driver (Available) → Validate vehicle type → trip.MatchDriver + driver.SetOnTrip → Save both
+- **Flow MatchDriverToTripAsync**: Validate trip (Searching) → Validate driver (Available) → Validate vehicle type → Validate wallet ≥ commission → trip.MatchDriver + driver.SetOnTrip → Save both
+- **Thread safety**: SemaphoreSlim `_matchLock` để tránh race condition
 
 #### `ReviewService`
 - **File**: `Application/Services/ReviewService.cs`
@@ -451,12 +455,13 @@
 
 #### `SimulationService`
 - **File**: `Application/Services/SimulationService.cs`
-- **Mục đích**: Placeholder (no-op implementation)
+- **Mục đích**: Trip simulation với System.Threading.Timer
+- **Phương thức**: StartSimulation (khởi động timer), StopSimulation, StartTripSimulation, IsTripSimulating, Tick, SimulateTripProgress
 
 #### `AppServiceBundle`
 - **File**: `Application/Services/SimulationService.cs`
 - **Mục đích**: Service locator / DI container
-- **Phương thức**: `CreateDefault() : AppServiceBundle` - Wire-up tất cả services với JSON repos
+- **Phương thức**: `CreateDefaultAsync() : Task<AppServiceBundle>` - Wire-up tất cả services với JSON repos (async)
 - **Phụ thuộc**: All repositories + services
 
 ---
@@ -604,178 +609,4 @@
 - **Features**: Cell formatting (Completed=green, Cancelled=red)
 
 #### `RatingForm`
-- **File**: `Presentation/Screens/PassengerScreen/RatingForm.cs`
-- **Phụ thuộc**: IReviewService, ITripService, Guid (userId)
-- **Mục đích**: Đánh giá tài xế (star rating 1-5)
-- **Features**: Star buttons, score display
-
-### 5.5 Namespace: `Presentation.Screens.DriverScreen`
-
-#### `DriverDashboardForm`
-- **File**: `Presentation/Screens/DriverScreen/DriverDashboardForm.cs`
-- **Phụ thuộc**: DriverShell, ITripService, IUserService, ISimulationService, IFareService
-- **Mục đích**: Dashboard chính (trip info, payment panel)
-
-#### `TripNavigationForm`
-- **File**: `Presentation/Screens/DriverScreen/TripNavigationForm.cs`
-- **Phụ thuộc**: DriverShell, ITripService, IUserService, ISimulationService
-- **Flow**: OnAcceptClicked → SetCurrentTrip → OnTripAccepted
-- **Flow**: OnActionClicked → OnTripEnded
-
-#### `EarningsForm`
-- **File**: `Presentation/Screens/DriverScreen/EarningsForm.cs`
-- **Mục đích**: Hiển thị thu nhập (placeholder)
-
-### 5.6 Namespace: `Presentation.Screens.AdminScreen`
-
-#### `AdminDashboardForm`
-- **File**: `Presentation/Screens/AdminScreen/AdminDashboardForm.cs`
-- **Phụ thuộc**: Admin, IAdminService
-
-#### `UserManagementForm`, `FareRulesForm`, `ReportForm`
-- **Files**: `Presentation/Screens/AdminScreen/*.cs`
-- **Mục đích**: Placeholder forms (minimal implementation)
-
-### 5.7 Namespace: `Presentation.Components`
-
-#### `MapControl`
-- **File**: `Presentation/Components/MapControl.cs`
-- **Phụ thuộc**: GMap.NET, Domain Location/Coordinate/Address/Driver
-- **Overlays**: static (pickup/destination), route, dynamic (drivers)
-- **Events**: `MapClicked(MapControl, Location)`
-- **Phương thức**: SetPickup, SetDestination, AddDriverMarker, DrawRoute, SetCamera, ClearMarkers
-
-#### `LocationPickerControl`
-- **File**: `Presentation/Components/LocationPickerControl.cs`
-- **Events**: PickupClicked, DestinationClicked, LocationSelected(LocationPickerControl, Location)
-- **Features**: Custom paint A/B locations
-
-#### `DriverCardControl`
-- **File**: `Presentation/Components/DriverCardControl.cs`
-- **Events**: Clicked
-- **Phương thức**: SetDriver(Driver, vehicleDisplayText, distanceKm)
-- **Features**: Status indicator, hover effect
-
-#### `FarePanel`
-- **File**: `Presentation/Components/FarePanel.cs`
-- **Phương thức**: SetFareFromTrip(Trip), SetFareDetails, SetFare, ClearFare
-
-#### `LocationCard`
-- **File**: `Presentation/Components/LocationCard.cs`
-- **Events**: Clicked
-- **Phương thức**: SetLocation(name, address, lat, lng), SetIcon
-
-#### `TripCard`
-- **File**: `Presentation/Components/TripCard.cs`
-- **Events**: Clicked
-- **Phương thức**: SetTrip(status, route, info, time, statusColor)
-
-#### `TripStatusPanel`
-- **File**: `Presentation/Components/TripStatusPanel.cs`
-- **Phương thức**: UpdateTripStatus(TripStatus) - Update progress bar + label
-
-#### `StatusPanel`
-- **File**: `Presentation/Components/StatusPanel.cs`
-- **Mục đích**: Log viewer real-time
-- **Features**: ConcurrentQueue<LogEntry>, error/warning counting, RichTextBox coloring
-
-### 5.8 Namespace: `Presentation.Helpers`
-
-#### `UIHelper`
-- **File**: `Presentation/Helpers/UIHelper.cs`
-- **Phương thức**: InvokeIfRequired, ShowMessage, ShowError, Confirm
-
-#### `EventHelper`
-- **File**: `Presentation/Helpers/EventHelper.cs`
-- **Phương thức**: SubscribeToTripEvents(ITripService, Action<string>) - Subscribe TripStatusChanged
-
-#### `DataMapper`
-- **File**: `Presentation/Helpers/DataMapper.cs`
-- **Phương thức**: ToTrip, ToDriver, ToPassenger (mock/stub)
-
-#### `AlertHelper`, `MapHelper`, `UiDispatcher`
-- **Files**: `Presentation/Helpers/*.cs`
-- **Mục đích**: Placeholder classes (empty)
-
-### 5.9 Namespace: `Presentation.ViewModels`
-
-#### `AdminViewModel`
-- **File**: `Presentation/Shells/AdminShell.cs` (nested class)
-- **Phụ thuộc**: Admin, IAdminService
-- **Properties**: TotalUsers, ActiveDrivers, OnTripDrivers, OngoingTrips, TotalTrips, TotalRevenue, AllUsers, AllDrivers, AllPassengers
-- **Phương thức**: LoadDataAsync, GetFilteredTrips, GetTripReport
-
----
-
-## Luồng gọi chính (Call Flow)
-
-### 1. Đặt chuyến (Book Trip)
-```
-BookTripForm.OnRequestClicked
-  → PassengerService.RequestTripAsync(passengerId, pickup, destination, vehicleType)
-    → MapService.GetRouteAsync → Route
-    → FareService.CalculateFare → Fare
-    → TripService.CreateTripAsync → Trip (State: Requested → Searching)
-      → TripRepository.AddAsync + SaveChangesAsync
-    → TripStatusChanged event fired
-```
-
-### 2. Ghép tài xế (Match Driver)
-```
-MatchingService.MatchDriverToTripAsync(tripId, driverId)
-  → Validate trip.Status=Searching, driver.Status=Available, vehicle.Type matches
-  → trip.MatchDriver(driverId) → State: Matched
-  → driver.SetOnTrip() → State: OnTrip
-  → TripRepository.UpdateAsync + DriverRepository.UpdateAsync
-  → SaveChangesAsync (both)
-```
-
-### 3. Hoàn thành chuyến (Complete Trip)
-```
-TripService.CompleteTripAsync(tripId)
-  → trip.CompleteTrip() → State: Completed
-  → trip.ConfirmPayment() → IsPaid=true
-  → driver.SetAvailable() + driver.AddTrip()
-  → passenger.AddTrip()
-  → Update all repositories + SaveChanges
-  → TripStatusChanged event fired
-```
-
-### 4. Đăng nhập (Login)
-```
-LoginForm.btnLogin_Click
-  → UserService.LoginAsync(phone, password)
-    → DriverRepository.GetByPhoneAsync → VerifyPassword
-    → PassengerRepository.GetByPhoneAsync → VerifyPassword
-  → Return User (Driver or Passenger)
-```
-
----
-
-## Phụ thuộc giữa các Layer (Dependency Direction)
-
-```
-Presentation ──depends──► Application (Interfaces)
-Application  ──depends──► Domain (Entities, Repositories interfaces)
-Infrastructure ──implements──► Domain Repositories
-Infrastructure ──depends──► Domain
-Common ──shared──► All layers
-```
-
-### Service Wiring (AppServiceBundle)
-```
-JsonRepository<T> (Infrastructure)
-  ├── DriverRepository → IDriverRepository
-  ├── PassengerRepository → IPassengerRepository
-  ├── TripRepository → ITripRepository
-  └── FareRuleRepository → IFareRuleRepository
-
-UserService(IDriver, IPassenger) → IUserService
-TripService(ITrip, IDriver, IPassenger) → ITripService
-FareService(IFareRule) → IFareService
-MapService(IGMap) → IMapService (via GMapService)
-MatchingService(ITrip, IDriver, IVehicle) → IMatchingService
-ReviewService(IReview, IDriver, ITrip) → IReviewService
-AdminService(IDriver, IPassenger, ITrip, IFareRule, IReview) → IAdminService
-```
-
+- **File**: `Presentation

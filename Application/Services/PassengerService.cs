@@ -95,7 +95,7 @@ namespace Application.Services
             if (trip.PassengerId != passengerId)
                 throw new Exception("Bạn không phải hành khách của chuyến này.");
 
-            if (trip.Status != TripStatus.Completed)
+if (!trip.IsCompleted())
                 throw new Exception("Chỉ có thể đánh giá sau khi chuyến hoàn thành.");
 
             if (!trip.DriverId.HasValue)

@@ -24,6 +24,5 @@ namespace Domain.Entities
             Capacity = capacity;
         }
         public abstract double GetAvgSpeed();
-        public abstract double GetMaxPickupDistance();
     }
 }

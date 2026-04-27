@@ -61,7 +61,7 @@ namespace Application.Services
             return await _tripRepository.GetAllAsync();
         }
 
-        public async Task<List<Trip>> GetTripsByStatusAsync(TripStatus status)
+        public async Task<List<Trip>> GetTripsByStatusAsync(string status)
         {
             List<Trip> allTrips = await _tripRepository.GetAllAsync();
             List<Trip> result = new List<Trip>();
@@ -94,7 +94,6 @@ namespace Application.Services
 
         public async Task UpdateFareRuleAsync(VehicleType vehicleType, Money baseFare, Money pricePerKm, double commissionRate)
         {
-            // Tìm rule theo vehicleType
             List<FareRule> allRules = await _fareRuleRepository.GetAllAsync();
             FareRule existingRule = null;
             for (int i = 0; i < allRules.Count; i++)
@@ -125,7 +124,7 @@ namespace Application.Services
             for (int i = 0; i < allTrips.Count; i++)
             {
                 Trip trip = allTrips[i];
-                if (trip.Status == TripStatus.Completed && trip.TripFare != null)
+                if (trip.IsCompleted() && trip.TripFare != null)
                 {
                     total += trip.TripFare.TotalAmount.Amount;
                 }
@@ -140,7 +139,7 @@ namespace Application.Services
             for (int i = 0; i < allTrips.Count; i++)
             {
                 Trip trip = allTrips[i];
-                if (trip.Status == TripStatus.Completed && trip.TripFare != null)
+                if (trip.IsCompleted() && trip.TripFare != null)
                 {
                     total += trip.TripFare.Commission.Amount;
                 }
@@ -152,16 +151,16 @@ namespace Application.Services
         {
             List<Trip> allTrips = await _tripRepository.GetAllAsync();
             int completed = 0;
-            int terminal = 0; // Completed + Cancelled + Timeout
+            int terminal = 0;
             for (int i = 0; i < allTrips.Count; i++)
             {
-                TripStatus status = allTrips[i].Status;
-                if (status == TripStatus.Completed)
+                Trip trip = allTrips[i];
+                if (trip.IsCompleted())
                 {
                     completed++;
                     terminal++;
                 }
-                else if (status == TripStatus.Cancelled || status == TripStatus.Timeout)
+                else if (trip.IsCancelled() || trip.IsTimeout())
                 {
                     terminal++;
                 }

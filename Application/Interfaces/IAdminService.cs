@@ -9,25 +9,21 @@ namespace Application.Interfaces
 {
     public interface IAdminService
     {
-        // User management
         Task<List<User>> GetAllUsersAsync();
         Task<List<Driver>> GetAllDriversAsync();
         Task<List<Passenger>> GetAllPassengersAsync();
 
-        // Trip management
         Task<List<Trip>> GetAllTripsAsync();
-        Task<List<Trip>> GetTripsByStatusAsync(TripStatus status);
+        Task<List<Trip>> GetTripsByStatusAsync(string status);
 
-        // Fare rules
         Task<List<FareRule>> GetFareRulesAsync();
         Task CreateFareRuleAsync(FareRule rule);
         Task UpdateFareRuleAsync(FareRule rule);
         Task UpdateFareRuleAsync(VehicleType vehicleType, Money baseFare, Money pricePerKm, double commissionRate);
 
-        // Statistics
-        Task<decimal> GetTotalGMVAsync();          // Gross Merchandise Value
-        Task<decimal> GetTotalNTRAsync();          // Net Retained Revenue
-        Task<double> GetCompletionRateAsync();     // Completion rate percentage
-        Task<double> GetAverageSatisfactionAsync(); // Average rating
+        Task<decimal> GetTotalGMVAsync();
+        Task<decimal> GetTotalNTRAsync();
+        Task<double> GetCompletionRateAsync();
+        Task<double> GetAverageSatisfactionAsync();
     }
 }
