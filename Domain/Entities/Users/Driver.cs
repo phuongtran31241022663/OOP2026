@@ -2,14 +2,16 @@ using System;
 using Domain.Enums;
 using Domain.ValueObjects;
 using Domain.Events;
-using Domain.StateMachines;
+using Domain.States;
+using Domain.States.Drivers;
+using Newtonsoft.Json;
 
 namespace Domain.Entities.Users
 {
     public class Driver : User
     {
         #region Fields
-        private DriverStatus _status;
+        private IDriverState _currentState;
         private readonly string _licenseNumber;
         private Location _position;
         private readonly Guid _vehicleId;
@@ -19,10 +21,49 @@ namespace Domain.Entities.Users
         private int _ratingSum;
         private int _totalReviews;
         #endregion
+
+        #region JSON Backward Compatibility
+        [JsonProperty("Status")]
+        private DriverStatus SerializedStatus
+        {
+            get
+            {
+                if (_currentState is DriverAvailableState) return DriverStatus.Available;
+                if (_currentState is DriverOnTripState) return DriverStatus.OnTrip;
+                return DriverStatus.Offline;
+            }
+            set
+            {
+                switch (value)
+                {
+                    case DriverStatus.Available: _currentState = new DriverAvailableState(); break;
+                    case DriverStatus.OnTrip: _currentState = new DriverOnTripState(); break;
+                    default: _currentState = new DriverOfflineState(); break;
+                }
+            }
+        }
+        #endregion
+
         #region Properties
+        [JsonIgnore]
+        public string Status
+        {
+            get
+            {
+                if (_currentState == null)
+                    return "Unknown";
+                string name = _currentState.GetType().Name;
+                if (name.EndsWith("State"))
+                    name = name.Substring(0, name.Length - 5);
+                return name;
+            }
+        }
+
+        public bool IsAvailable() => _currentState is DriverAvailableState;
+        public bool IsOnTrip() => _currentState is DriverOnTripState;
+        public bool IsOffline() => _currentState is DriverOfflineState;
+
         public decimal AverageRating => TotalReviews == 0 ? 0 : (decimal)RatingSum / TotalReviews;
-        public DriverStatus Status { get => _status; private set => _status = value; }
-      
         public Location Position { get => _position; set => _position = value; }
         public Guid VehicleId => _vehicleId;
         public Money Wallet { get => _wallet; private set => _wallet = value; }
@@ -32,8 +73,8 @@ namespace Domain.Entities.Users
         public int TotalReviews { get => _totalReviews; private set => _totalReviews = value; }
         public string LicenseNumber => _licenseNumber;
         #endregion
-        #region Constructors
 
+        #region Constructors
         public Driver(
             string name,
             string phone,
@@ -46,13 +87,12 @@ namespace Domain.Entities.Users
             _licenseNumber = licenseNumber;
             Position = position;
             _vehicleId = vehicleId;
-            Status = DriverStatus.Offline;
+            _currentState = new DriverOfflineState();
             Wallet = new Money(0);
             Income = new Money(0);
             TotalTrips = 0;
         }
 
-        // Constructor cho persistence
         public Driver(
             Guid id,
             string name,
@@ -66,65 +106,24 @@ namespace Domain.Entities.Users
             _licenseNumber = licenseNumber;
             Position = position;
             _vehicleId = vehicleId;
-            Status = DriverStatus.Offline;
+            _currentState = new DriverOfflineState();
             Wallet = new Money(0);
             Income = new Money(0);
             TotalTrips = 0;
         }
-
-        #endregion
-        #region Trạng thái làm việc
-        public void SetAvailable()
-        {
-            if (Status == DriverStatus.Available)
-                return;
-
-            if (!DriverStateMachine.CanTransition(Status, DriverStatus.Available))
-            {
-                throw new InvalidOperationException(
-                    $"Quy tắc nghiệp vụ: Không thể chuyển từ '{Status}' sang 'Available'.");
-            }
-
-            DriverStatus oldStatus = Status;
-            Status = DriverStatus.Available;
-
-            AddEvent(new DriverStatusChangedEvent(Id, oldStatus, Status));
-        }
-
-        public void SetOnTrip()
-        {
-            if (!DriverStateMachine.CanTransition(Status, DriverStatus.OnTrip))
-                throw new InvalidOperationException(
-                    $"Không thể chuyển từ '{Status}' sang 'OnTrip'.");
-
-            DriverStatus oldStatus = Status;
-            Status = DriverStatus.OnTrip;
-            AddEvent(new DriverStatusChangedEvent(Id, oldStatus, Status));
-        }
-
-        public void SetOffline()
-        {
-            if (Status == DriverStatus.Offline)
-                return;
-
-            if (Status == DriverStatus.OnTrip)
-                throw new InvalidOperationException(
-                    "Quy tắc nghiệp vụ: Không thể ngắt kết nối khi đang chạy chuyến.");
-
-            if (!DriverStateMachine.CanTransition(Status, DriverStatus.Offline))
-                throw new InvalidOperationException(
-                    $"Không thể chuyển từ trạng thái '{Status}' sang 'Offline'.");
-
-            DriverStatus oldStatus = Status;
-            Status = DriverStatus.Offline;
-
-            AddEvent(new DriverStatusChangedEvent(Id, oldStatus, Status));
-        }
-
         #endregion
 
+        #region State Pattern helpers (internal)
+        internal void TransitionTo(IDriverState newState) => _currentState = newState;
+        #endregion
 
-        // -- Chuy?n di -------------------------------------------------------
+        #region Public behavior (delegated to state)
+        public void SetAvailable() => _currentState.SetAvailable(this);
+        public void SetOnTrip() => _currentState.SetOnTrip(this);
+        public void SetOffline() => _currentState.SetOffline(this);
+        #endregion
+
+        // -- Chuyến đi -------------------------------------------------------
         public void UpdatePosition(Location newPosition)
         {
             if (newPosition == null)
@@ -142,11 +141,11 @@ namespace Domain.Entities.Users
             TotalReviews++;
             RatingSum += rating;
         }
-        // -- T�i ch�nh -------------------------------------------------------
+        // -- Tài chính -------------------------------------------------------
         public void DepositToWallet(Money amount)
         {
             if (amount.Amount <= 0)
-                throw new ArgumentException("S? ti?n n?p ph?i l?n hon 0.", nameof(amount));
+                throw new ArgumentException("Số tiền nạp phải lớn hơn 0.", nameof(amount));
 
             Wallet += amount;
         }
@@ -159,16 +158,16 @@ namespace Domain.Entities.Users
             Wallet -= fare.Commission;
             Income += fare.DriverIncome;
         }
-        public static string GetDisplayString(DriverStatus status)
+        public static string GetDisplayString(string status)
         {
             switch (status)
             {
-                case DriverStatus.Available: return "Hoạt động";
-                case DriverStatus.OnTrip: return "Đang trong chuyến";
-                case DriverStatus.Offline: return "Nghỉ";
+                case "Available": return "Hoạt động";
+                case "OnTrip": return "Đang trong chuyến";
+                case "Offline": return "Nghỉ";
                 default: return "Không xác định";
             }
         }
-
     }
 }
+

@@ -1,6 +1,5 @@
-﻿// Infrastructure/Repositories/DriverRepository.cs
+﻿﻿// Infrastructure/Repositories/DriverRepository.cs
 using Domain.Entities.Users;
-using Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +21,7 @@ namespace Infrastructure.Repositories
         public async Task<List<Driver>> GetAvailableDriversAsync()
         {
             await Task.CompletedTask;
-            return _items.Where(d => d.Status == DriverStatus.Available).ToList();
+            return _items.Where(d => d.IsAvailable()).ToList();
         }
 
         public async Task<bool> ExistsByPhoneAsync(string phone)

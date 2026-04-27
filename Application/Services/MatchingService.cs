@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+﻿﻿using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.Repositories;
@@ -46,7 +46,7 @@ namespace Application.Services
                     return false;
                 }
 
-                if (driver.Status != DriverStatus.Available)
+                if (!driver.IsAvailable())
                 {
                     return false;
                 }

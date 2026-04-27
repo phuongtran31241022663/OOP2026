@@ -165,6 +165,8 @@ public abstract class StateBase { }
 | UI Navigation / Wizard | Các bước đăng ký, thanh toán |
 | Game | Trạng thái nhân vật: Idle, Running, Attacking, Dead |
 | C# `async/await` compiler | `IAsyncStateMachine` — State Pattern được dùng trong ngôn ngữ |
+| **Đời sống chuyến đi (Trip)** | Requested → Searching → Matched → Arrived → Started → Completed / Cancelled / Timeout |
+| **Trạng thái tài xế (Driver)** | Offline → Available → OnTrip → Offline/Available |
 
 ---
 

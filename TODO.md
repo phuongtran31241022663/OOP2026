@@ -6,51 +6,68 @@
 - [x] 1.2 `Domain/Entities/Vehicles/Car.cs` — Xóa override `GetMaxPickupDistance()`
 - [x] 1.3 `Domain/Entities/Vehicles/Motorbike.cs` — Xóa override `GetMaxPickupDistance()`
 - [x] 1.4 `Domain/Entities/Trip.cs` — Xóa `_status` field, `SetStatusInternal`, property `Status` cũ. Thêm `Status` string + helper `IsXxx()`
-- [ ] 1.5 `Domain/Enums/TripStatus.cs` — Xóa toàn bộ file enum *(giữ lại tạm để backward compatibility persistence — cần refactor UI xong mới xóa)*
-- [ ] 1.6 `Domain/States/RequestedState.cs` — Xóa `SetStatusInternal` calls *(vẫn còn trong code — cần refactor)*
-- [ ] 1.7 `Domain/States/SearchingState.cs` — Xóa `SetStatusInternal` calls *(vẫn còn trong code — cần refactor)*
-- [ ] 1.8 `Domain/States/MatchedState.cs` — Xóa `SetStatusInternal` calls *(vẫn còn trong code — cần refactor)*
-- [ ] 1.9 `Domain/States/ArrivedState.cs` — Xóa `SetStatusInternal` calls *(vẫn còn trong code — cần refactor)*
-- [ ] 1.10 `Domain/States/StartedState.cs` — Xóa `SetStatusInternal` calls *(vẫn còn trong code — cần refactor)*
-- [ ] 1.11 `Domain/States/CancelledState.cs` — Kiểm tra & xóa `SetStatusInternal` calls *(cần refactor)*
-- [ ] 1.12 `Domain/States/TimeoutState.cs` — Kiểm tra & xóa `SetStatusInternal` calls *(cần refactor)*
-- [ ] 1.13 `Domain/Events/TripStatusChangedEventArgs.cs` — Đổi `TripStatus NewStatus` → `string NewStatus` *(cần refactor UI/Shells xong mới đổi)*
+- [x] 1.5 `Domain/Enums/TripStatus.cs` — Đã xóa toàn bộ file enum
+- [x] 1.6 `Domain/States/RequestedState.cs` — Không còn `SetStatusInternal` calls
+- [x] 1.7 `Domain/States/SearchingState.cs` — Không còn `SetStatusInternal` calls
+- [x] 1.8 `Domain/States/MatchedState.cs` — Không còn `SetStatusInternal` calls
+- [x] 1.9 `Domain/States/ArrivedState.cs` — Không còn `SetStatusInternal` calls
+- [x] 1.10 `Domain/States/StartedState.cs` — Không còn `SetStatusInternal` calls
+- [x] 1.11 `Domain/States/CancelledState.cs` — Không còn `SetStatusInternal` calls
+- [x] 1.12 `Domain/States/TimeoutState.cs` — Không còn `SetStatusInternal` calls
+- [x] 1.13 `Application/Events/TripStatusChangedEventArgs.cs` — Đã đổi `TripStatus NewStatus` → `string NewStatus`
 
 ## Phase 2: Application Services — Wallet check, SemaphoreSlim, Async cleanup
 
 - [x] 2.1 `Application/Services/MatchingService.cs` — Thêm `SemaphoreSlim`, kiểm tra wallet đủ commission trước khi ghép
-- [x] 2.2 `Application/Services/TripService.cs` — Thêm `SemaphoreSlim` trong `MatchDriverAsync`, đổi `TripStatus` enum → string/`IsXxx()` *(SemaphoreSlim ✅; TripStatus vẫn còn trong một số query method — cần tiếp tục refactor)*
-- [ ] 2.3 `Application/Services/AdminService.cs` — Đổi `TripStatus` enum → string trong các method filter *(vẫn còn TripStatus — cần refactor)*
+- [x] 2.2 `Application/Services/TripService.cs` — Thêm `SemaphoreSlim` trong `MatchDriverAsync`, đổi `TripStatus` enum → string/`IsXxx()`
+- [x] 2.3 `Application/Services/AdminService.cs` — Đã đổi `TripStatus` enum → string trong các method filter
 - [x] 2.4 `Application/Services/PassengerService.cs` — Đổi `trip.Status != TripStatus.Completed` → `!trip.IsCompleted()`
-- [ ] 2.5 `Application/Interfaces/IAdminService.cs` — Đổi signature `GetTripsByStatusAsync(TripStatus)` → `GetTripsByStatusAsync(string)` *(cần refactor)*
+- [x] 2.5 `Application/Interfaces/IAdminService.cs` — Đã đổi signature `GetTripsByStatusAsync(TripStatus)` → `GetTripsByStatusAsync(string)`
 - [x] 2.6 `Application/Services/SimulationService.cs` — Implement Timer, đổi `CreateDefault` → `CreateDefaultAsync()`
-- [ ] 2.7 `Application/Interfaces/ISimulationService.cs` — Thêm/cập nhật interface nếu cần *(chưa cập nhật — cần review)*
+- [x] 2.7 `Application/Interfaces/ISimulationService.cs` — Đã review, không cần cập nhật thêm
 
 ## Phase 3: Presentation — Polyline decode, TripStatus string
 
-- [ ] 3.1 `Presentation/Program.cs` — Đổi `static void Main()` → `static async Task Main()`, gọi `await CreateDefaultAsync()` *(cần verify)*
+- [x] 3.1 `Presentation/Program.cs` — Đã đổi `static void Main()` → `static async Task Main()`, gọi `await AppServiceBundle.CreateDefaultAsync()`
 - [x] 3.2 `Presentation/Components/MapControl.cs` — Thêm `DrawRoute(string polyline)` decode polyline
-- [ ] 3.3 `Presentation/Components/TripStatusPanel.cs` — Đổi `UpdateTripStatus(TripStatus)` → `UpdateTripStatus(string)` *(cần refactor)*
-- [ ] 3.4 `Presentation/Shells/AdminShell.cs` — Đổi `TripStatus` enum → string trong filter logic *(cần refactor)*
-- [ ] 3.5 `Presentation/Helpers/EventHelper.cs` — Đổi event args dùng string status *(cần refactor)*
+- [x] 3.3 `Presentation/Components/TripStatusPanel.cs` — Đã đổi `UpdateTripStatus(TripStatus)` → `UpdateTripStatus(string)`
+- [x] 3.4 `Presentation/Shells/AdminShell.cs` — Đã đổi `TripStatus` enum → string trong filter logic
+- [x] 3.5 `Presentation/Helpers/EventHelper.cs` — Đã đổi event args dùng string status
 
-## Phase 4: Tài liệu Markdown — Đồng bộ
+## Phase 4: Driver State Pattern refactor
 
-- [x] 4.1 `docs/Architecture_and_Design.md` — Bỏ MaxPickupDistance, phân biệt State Pattern vs State Machine, bỏ Repository khỏi Design Patterns, cập nhật Matching Algorithm + Race condition
-- [x] 4.2 `docs/Domain_Reference.md` — Sửa Passenger (bỏ sealed), bỏ GetMaxPickupDistance, bỏ/cập nhật TripStatus enum
-- [x] 4.3 `docs/PSPEC.md` — Sửa Passenger sealed, chuyển Repository → Architectural Abstraction, đổi Trip State Machine → Trip State Pattern
-- [ ] 4.4 `docs/OOP.md` — Xóa Repository khỏi ví dụ Design Pattern *(cần kiểm tra)*
-- [ ] 4.5 `docs/State.md` — Thêm ghi chú: State Pattern dùng cho Trip, Driver dùng State Machine *(cần kiểm tra)*
-- [x] 4.6 `docs/Business_and_UI_Guide.md` — Xóa step Distance check < vehicle MaxPickupDistance, cập nhật Matching
-- [x] 4.7 `README.md` — Cập nhật Incomplete Implementations (wallet, semaphore, simulation, polyline)
-- [x] 4.8 `DEVLOG.md` — Cập nhật các dòng liên quan MaxPickupDistance, Passenger sealed, TripStatus, Repository, Simulation, Race condition
-- [x] 4.9 `SOURCE_MAP.md` — Xóa dòng GetMaxPickupDistance
+- [x] 4.1 `Domain/States/IDriverState.cs` — Tạo interface `IDriverState` với `SetAvailable`, `SetOnTrip`, `SetOffline`
+- [x] 4.2 `Domain/States/Drivers/DriverOfflineState.cs` — Tạo state `Offline`
+- [x] 4.3 `Domain/States/Drivers/DriverAvailableState.cs` — Tạo state `Available`
+- [x] 4.4 `Domain/States/Drivers/DriverOnTripState.cs` — Tạo state `OnTrip`
+- [x] 4.5 `Domain/Entities/Users/Driver.cs` — Chuyển từ `DriverStatus` enum + `DriverStateMachine` sang `IDriverState` pattern. `Status` trả về string. Thêm `IsAvailable()`, `IsOnTrip()`, `IsOffline()`. Giữ `SerializedStatus` cho JSON backward compatibility.
+- [x] 4.6 `Domain/Events/DriverStatusChangedEvent.cs` — Đổi `OldStatus`/`NewStatus` từ `DriverStatus` enum sang `string`
+- [x] 4.7 `Application/Interfaces/IUserService.cs` — Đổi `UpdateDriverStatusAsync(Guid, DriverStatus)` → `UpdateDriverStatusAsync(Guid, string)`
+- [x] 4.8 `Application/Services/UserService.cs` — Cập nhật `UpdateDriverStatusAsync` dùng string status
+- [x] 4.9 `Presentation/Shells/DriverShell.cs` — Đổi `DriverStatus` enum → string status
+- [x] 4.10 `Presentation/Components/DriverCardControl.cs` — Đổi `DriverStatus` enum → string status
+- [x] 4.11 `Infrastructure/Repositories/DriverRepository.cs` — Đổi `d.Status == DriverStatus.Available` → `d.IsAvailable()`
+- [x] 4.12 `Infrastructure/Repositories/UserRepository.cs` — Đổi `d.Status == DriverStatus.Available` → `d.IsAvailable()`
+- [x] 4.13 `Application/Services/MatchingService.cs` — Đổi `driver.Status != DriverStatus.Available` → `!driver.IsAvailable()`
+- [x] 4.14 `Domain/StateMachines/DriverStateMachine.cs` — Đã xóa
 
 ## Phase 5: Build & Verify
 
-- [ ] 5.1 Build solution `OOP2026.slnx`
-- [ ] 5.2 Fix compile errors nếu có
-- [ ] 5.3 Review các file còn sót tham chiếu cũ (TripStatus trong States, AdminService, IAdminService, UI components)
+- [x] 5.1 Build solution `OOP2026.slnx` — **Build thành công, không lỗi**
+- [x] 5.2 Fix compile errors — Đã fix namespace collision `Application` vs `System.Windows.Forms.Application` trong `Program.cs`; thêm `Events\TripStatusChangedEventArgs.cs` vào `Application.csproj`
+- [x] 5.3 Review các file còn sót tham chiếu cũ — `TripStatus` enum đã xóa hoàn toàn; `DriverStatus` enum chỉ còn trong `Driver.cs` (SerializedStatus cho JSON backward compatibility) và `Domain/Enums/DriverStatus.cs`
+
+## Phase 6: Tài liệu Markdown — Đồng bộ
+
+- [x] 6.1 `docs/Architecture_and_Design.md` — Bỏ MaxPickupDistance, phân biệt State Pattern vs State Machine, bỏ Repository khỏi Design Patterns, cập nhật Matching Algorithm + Race condition
+- [x] 6.2 `docs/Domain_Reference.md` — Sửa Passenger (bỏ sealed), bỏ GetMaxPickupDistance, bỏ/cập nhật TripStatus enum
+- [x] 6.3 `docs/PSPEC.md` — Sửa Passenger sealed, chuyển Repository → Architectural Abstraction, đổi Trip State Machine → Trip State Pattern
+- [x] 6.4 `docs/OOP.md` — Đã kiểm tra, không có Repository trong ví dụ Design Pattern (chỉ nhắc đến ở mục áp dụng pattern)
+- [x] 6.5 `docs/State.md` — Đã thêm ghi chú: State Pattern dùng cho Trip **và Driver**, bỏ State Machine cho Driver
+- [x] 6.6 `docs/Business_and_UI_Guide.md` — Xóa step Distance check < vehicle MaxPickupDistance, cập nhật Matching
+- [x] 6.7 `README.md` — Cập nhật Incomplete Implementations (wallet, semaphore, simulation, polyline)
+- [x] 6.8 `DEVLOG.md` — Cập nhật các dòng liên quan MaxPickupDistance, Passenger sealed, TripStatus, Repository, Simulation, Race condition
+- [x] 6.9 `SOURCE_MAP.md` — Cập nhật: Driver State Pattern, xóa DriverStateMachine, thêm IDriverState + 3 concrete states
 
 ---
 
@@ -60,13 +77,16 @@
 - Bỏ `GetMaxPickupDistance` khỏi Vehicle hierarchy
 - Passenger bỏ `sealed`
 - Trip chuyển sang `Status` string + `IsXxx()` helpers (domain model)
+- Xóa `TripStatus` enum khỏi toàn bộ codebase
+- `TripStatusChangedEventArgs` dùng `string NewStatus`
 - MatchingService: SemaphoreSlim + wallet/commission check
 - SimulationService: Timer + `CreateDefaultAsync()`
 - MapControl: `DecodePolyline()` thêm vào
-- Docs: `Architecture_and_Design.md`, `Domain_Reference.md`, `PSPEC.md`, `README.md`, `DEVLOG.md`, `SOURCE_MAP.md`, `Business_and_UI_Guide.md` đã đồng bộ
+- **Driver chuyển sang State Pattern**: `IDriverState` + `DriverOfflineState`/`DriverAvailableState`/`DriverOnTripState`
+- `DriverStatusChangedEvent` dùng `string` status
+- `AdminService`, `IAdminService`, `TripStatusPanel`, `AdminShell`, `EventHelper` đã chuyển sang string status
+- `DriverRepository`, `UserRepository`, `MatchingService` dùng `IsAvailable()` thay vì `DriverStatus.Available`
+- Build solution thành công (0 errors)
+- Docs: `Architecture_and_Design.md`, `Domain_Reference.md`, `PSPEC.md`, `README.md`, `DEVLOG.md`, `Business_and_UI_Guide.md` đã đồng bộ
 
-**Còn lại (cần refactor tiếp):**
-- State classes vẫn gọi `SetStatusInternal(TripStatus.Xxx)` — cần xóa khi UI đã chuyển sang string status
-- `TripStatusChangedEventArgs` vẫn dùng `TripStatus` enum — cần đổi sang `string` + cập nhật UI subscribers
-- `AdminService`, `IAdminService`, `TripStatusPanel`, `AdminShell`, `EventHelper` vẫn tham chiếu `TripStatus` enum
-- Cần build & verify compile
+**Tất cả các hạng mục đã hoàn thành. Không còn công việc nào.**

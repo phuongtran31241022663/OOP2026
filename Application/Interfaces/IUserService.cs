@@ -1,6 +1,5 @@
-﻿using Domain.Entities; 
+﻿﻿using Domain.Entities; 
 using Domain.Entities.Users;
-using Domain.Enums;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -16,7 +15,7 @@ namespace Application.Interfaces
         Task RegisterPassengerAsync(string name, string phone, string password);
         Task<Driver> GetDriverByIdAsync(Guid driverId); // trả về Driver entity
         Task<Passenger> GetPassengerByIdAsync(Guid passengerId);
-        Task UpdateDriverStatusAsync(Guid driverId, DriverStatus newStatus);
+        Task UpdateDriverStatusAsync(Guid driverId, string newStatus);
         Task UpdateDriverLocationAsync(Guid driverId, Location location);
         Task<List<Driver>> GetAvailableDriversAsync(); 
         Task<bool> DriverExistsAsync(Guid driverId);

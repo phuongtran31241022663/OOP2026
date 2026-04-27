@@ -1,4 +1,4 @@
-﻿// Infrastructure/Repositories/UserRepository.cs
+﻿﻿// Infrastructure/Repositories/UserRepository.cs
 using Domain.Entities;
 using Domain.Entities.Users;
 using System;
@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain.Repositories;
-using Domain.Enums;
 
 namespace Infrastructure.Repositories
 {
@@ -47,7 +46,7 @@ namespace Infrastructure.Repositories
         public async Task<List<Driver>> GetAvailableDriversAsync()
         {
             await Task.CompletedTask;
-            return _items.OfType<Driver>().Where(d => d.Status == DriverStatus.Available).ToList();
+            return _items.OfType<Driver>().Where(d => d.IsAvailable()).ToList();
         }
     }
 }

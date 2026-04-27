@@ -1,7 +1,6 @@
-﻿using Domain.ValueObjects;
+﻿﻿using Domain.ValueObjects;
 using System;
 using System.Drawing;
-using Domain.Enums;
 using Domain.Entities.Users;
 using Domain.Entities;
 
@@ -66,21 +65,21 @@ namespace Presentation.Components
             }
         }
 
-        private void UpdateStatus(DriverStatus status)
+        private void UpdateStatus(string status)
         {
             switch (status)
             {
-                case DriverStatus.Available:
+                case "Available":
                     _lblStatus.Text = "Có sẵn";
                     _lblStatus.ForeColor = Color.Green;
                     _statusIndicator.BackColor = Color.Green;
                     break;
-                case DriverStatus.OnTrip:
+                case "OnTrip":
                     _lblStatus.Text = "Đang chạy";
                     _lblStatus.ForeColor = Color.Blue;
                     _statusIndicator.BackColor = Color.Blue;
                     break;
-                case DriverStatus.Offline:
+                case "Offline":
                     _lblStatus.Text = "Offline";
                     _lblStatus.ForeColor = Color.Gray;
                     _statusIndicator.BackColor = Color.Gray;
@@ -109,4 +108,5 @@ namespace Presentation.Components
         }
     }
 }
+
 

@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Domain.Repositories;
+using Infrastructure.ExternalServices;
 using Infrastructure.Repositories;
 using System;
 using System.Threading;
@@ -47,6 +48,10 @@ namespace Application.Services
         public ITripService TripService { get; private set; }
         public IFareService FareService { get; private set; }
         public ISimulationService SimulationService { get; private set; }
+        public IAdminService AdminService { get; private set; }
+        public IMatchingService MatchingService { get; private set; }
+        public IReviewService ReviewService { get; private set; }
+        public IMapService MapService { get; private set; }
 
         public static async Task<AppServiceBundle> CreateDefaultAsync()
         {
@@ -54,12 +59,16 @@ namespace Application.Services
             IPassengerRepository passengerRepository = new PassengerRepository();
             ITripRepository tripRepository = new TripRepository();
             IFareRuleRepository fareRuleRepository = new FareRuleRepository();
+            IReviewRepository reviewRepository = new ReviewRepository();
+            IVehicleRepository vehicleRepository = new VehicleRepository();
 
             await driverRepository.InitializeAsync();
             await passengerRepository.InitializeAsync();
             await tripRepository.InitializeAsync();
             await fareRuleRepository.InitializeAsync();
             await fareRuleRepository.EnsureSeededAsync();
+            await reviewRepository.InitializeAsync();
+            await vehicleRepository.InitializeAsync();
 
             IUserService userService = new UserService(driverRepository, passengerRepository);
             ITripService tripService = new TripService(tripRepository, driverRepository, passengerRepository);
@@ -71,7 +80,11 @@ namespace Application.Services
                 UserService = userService,
                 TripService = tripService,
                 FareService = fareService,
-                SimulationService = new SimulationService()
+                SimulationService = new SimulationService(),
+                AdminService = new AdminService(driverRepository, passengerRepository, tripRepository, fareRuleRepository, reviewRepository),
+                MatchingService = new MatchingService(tripRepository, driverRepository, vehicleRepository),
+                ReviewService = new ReviewService(reviewRepository, driverRepository, tripRepository),
+                MapService = new MapService(null) // GMapService wrapper stub
             };
         }
     }

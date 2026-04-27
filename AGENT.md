@@ -138,6 +138,87 @@ Thư mục `docs/` chứa hai loại tài liệu:
 - Nếu có, Agent sẽ đề xuất cập nhật các file tương ứng (loại trừ các file kiến thức đã liệt kê ở trên).
 - Các cập nhật này cũng phải được người dùng duyệt trước khi ghi vào file.
 
+### 5.4 Sử dụng Source Map (ưu tiên cho đọc hiểu cấu trúc)
+
+#### 5.4.1 Khái niệm
+
+- Source Map là tài liệu trung gian (dạng Markdown) mô tả cấu trúc:
+  - namespace
+  - class
+  - thuộc tính
+  - phương thức (chữ ký + mô tả + lời gọi)
+  - sự kiện
+  - phụ thuộc
+  - ràng buộc nghiệp vụ
+- File tên "SOURCE_MAP.md" nằm trong thư mục gốc của dự án.
+
+#### 5.4.2 Thứ tự ưu tiên khi cần hiểu một module/class
+
+1. Ưu tiên đọc Source Map (nếu tồn tại và được cập nhật)
+   - Giúp nắm nhanh:
+     - path
+     - namespace
+     - public contracts
+     - dependencies
+     - business rules
+   - Không cần đọc code gốc.
+
+2. Chỉ đọc code thực tế khi:
+   - Không có source map cho module đó
+   - Source map thiếu thông tin cần thiết
+     (ví dụ: implementation của method cụ thể, dòng code lỗi)
+   - Nghi ngờ source map lỗi thời hoặc không khớp với code
+
+3. Sau khi đọc code (do thiếu hoặc sai):
+   - Báo cáo:
+     «Source map có thể không chính xác tại [vị trí]. Đề xuất cập nhật source map.»
+   - Nếu được phép:
+     - Sửa source map song song với code
+     - Theo quy trình Plan-then-Execute
+
+#### 5.4.3 Cập nhật Source Map
+
+- Khi thực hiện Modification request làm thay đổi:
+  - tên class
+  - thuộc tính
+  - chữ ký method
+  - sự kiện
+  - dependencies
+  - business rules
+
+→ Agent phải:
+
+- Cập nhật file source map tương ứng
+
+- Đề xuất cập nhật trong kế hoạch và chờ duyệt
+
+- Nếu chỉ thay đổi implementation nội bộ (không ảnh hưởng public contract):
+  - Không bắt buộc cập nhật source map
+  - Trừ khi người dùng yêu cầu đồng bộ
+
+#### 5.4.4 Xác minh chéo (Optional)
+
+Trước khi bắt đầu Modification request:
+
+- Kiểm tra sơ bộ độ khớp giữa source map và code:
+  - Chọn ngẫu nhiên 1–2 class quan trọng
+  - So sánh:
+    - "key_properties"
+    - "key_methods"
+
+- Nếu có khác biệt lớn:
+  - Cảnh báo người dùng
+  - Đề xuất cập nhật source map trước khi tiếp tục
+
+#### 5.4.5 Trường hợp không có source map
+
+- Nếu không tồn tại source map:
+  - Làm việc theo quy trình cũ (đọc code trực tiếp)
+
+- Có thể đề nghị:
+  - Tạo source map cho các module quan trọng
+  - Nhằm tăng hiệu quả phân tích và bảo trì
+
 ---
 
 ## 6. Định dạng trả lời (Output Format)

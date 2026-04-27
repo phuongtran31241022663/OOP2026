@@ -1,5 +1,4 @@
 using System;
-using Domain.Enums;
 using Domain.SharedKernel;
 
 namespace Domain.Events
@@ -7,10 +6,10 @@ namespace Domain.Events
     public class DriverStatusChangedEvent : DomainEvent
     {
         public Guid DriverId { get; }
-        public DriverStatus OldStatus { get; }
-        public DriverStatus NewStatus { get; }
+        public string OldStatus { get; }
+        public string NewStatus { get; }
 
-        public DriverStatusChangedEvent(Guid driverId, DriverStatus oldStatus, DriverStatus newStatus)
+        public DriverStatusChangedEvent(Guid driverId, string oldStatus, string newStatus)
         {
             DriverId = driverId;
             OldStatus = oldStatus;

@@ -260,6 +260,66 @@
     <Compile Include="Shells\PassengerShell.Designer.cs">
       <DependentUpon>PassengerShell.cs</DependentUpon>
     </Compile>
+    <Compile Include="Shells\FrmMainShell.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Shells\FrmMainShell.Designer.cs">
+      <DependentUpon>FrmMainShell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Shells\FrmModal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Shells\FrmModal.Designer.cs">
+      <DependentUpon>FrmModal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Shells\FrmToast.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Shells\FrmToast.Designer.cs">
+      <DependentUpon>FrmToast.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\UcAuth.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcAuth.Designer.cs">
+      <DependentUpon>UcAuth.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\UcPassenger.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcPassenger.Designer.cs">
+      <DependentUpon>UcPassenger.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\UcDriver.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcDriver.Designer.cs">
+      <DependentUpon>UcDriver.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\UcAdmin.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcAdmin.Designer.cs">
+      <DependentUpon>UcAdmin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\UcRating.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcRating.Designer.cs">
+      <DependentUpon>UcRating.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\UcProfile.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcProfile.Designer.cs">
+      <DependentUpon>UcProfile.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\UcTripDetail.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcTripDetail.Designer.cs">
+      <DependentUpon>UcTripDetail.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="BaseShell.resx">
       <DependentUpon>BaseShell.cs</DependentUpon>
     </EmbeddedResource>
