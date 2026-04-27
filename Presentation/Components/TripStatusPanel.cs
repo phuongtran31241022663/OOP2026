@@ -1,5 +1,4 @@
-﻿using System.Windows.Forms;
-using Domain.Enums;
+﻿﻿using System.Windows.Forms;
 
 namespace Presentation.Components
 {
@@ -10,36 +9,36 @@ namespace Presentation.Components
             InitializeComponent();
         }
 
-        public void UpdateTripStatus(TripStatus status)
+        public void UpdateTripStatus(string status)
         {
             switch (status)
             {
-                case TripStatus.Requested:
+                case "Requested":
                     _statusLabel.Text = "Đã yêu cầu";
                     _progressBar.Value = 20;
                     _stepLabel.Text = "Đang tìm tài xế...";
                     break;
-                case TripStatus.Matched:
+                case "Matched":
                     _statusLabel.Text = "Đã ghép đôi";
                     _progressBar.Value = 40;
                     _stepLabel.Text = "Tài xế đang đến...";
                     break;
-                case TripStatus.Arrived:
+                case "Arrived":
                     _statusLabel.Text = "Tài xế đã đến";
                     _progressBar.Value = 60;
                     _stepLabel.Text = "Sẵn sàng khởi hành";
                     break;
-                case TripStatus.Started:
+                case "Started":
                     _statusLabel.Text = "Đang chạy";
                     _progressBar.Value = 80;
                     _stepLabel.Text = "Đến điểm đích...";
                     break;
-                case TripStatus.Completed:
+                case "Completed":
                     _statusLabel.Text = "Hoàn thành";
                     _progressBar.Value = 100;
                     _stepLabel.Text = "Cảm ơn đã sử dụng";
                     break;
-                case TripStatus.Cancelled:
+                case "Cancelled":
                     _statusLabel.Text = "Đã hủy";
                     _progressBar.Value = 0;
                     _stepLabel.Text = "Chuyến đi đã hủy";

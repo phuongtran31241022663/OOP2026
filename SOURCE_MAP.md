@@ -99,11 +99,6 @@
 
 ### 2.2 Namespace: `Domain.Enums`
 
-#### `TripStatus`
-- **File**: `Domain/Enums/TripStatus.cs`
-- **Values**: Requested(0) → Searching(1) → Matched(2) → Arrived(3) → Started(4) → Completed(5) → Cancelled(6) → Timeout(7)
-- **Note**: Deprecated cho business logic; chỉ dùng cho persistence backward compatibility. Dùng `trip.Status` (string) hoặc `trip.IsXxx()` helpers.
-
 #### `DriverStatus`
 - **File**: `Domain/Enums/DriverStatus.cs`
 - **Values**: Offline(0) → Available(1) → OnTrip(2)
@@ -229,9 +224,10 @@
 
 #### `Driver`
 - **File**: `Domain/Entities/Users/Driver.cs`
-- **Mục đích**: Tài xế với state machine + financial tracking
+- **Mục đích**: Tài xế với state pattern + financial tracking
 - **Thuộc tính**:
-  - `DriverStatus Status` {get; private set}
+  - `string Status` {get} - Derived từ IDriverState (Offline, Available, OnTrip)
+  - `DriverStatus SerializedStatus` {get; private set} - Chỉ dùng cho JSON backward compatibility
   - `Location Position` {get; set}
   - `string LicenseNumber` {get}
   - `Guid VehicleId` {get}
@@ -242,16 +238,19 @@
   - `int TotalReviews` {get; private set}
   - `decimal AverageRating` {get} - computed
 - **Phương thức**:
-  - `SetAvailable() : void` - Validate transition via DriverStateMachine
-  - `SetOnTrip() : void`
-  - `SetOffline() : void` - Không thể nếu đang OnTrip
+  - `SetAvailable() : void` - Transition to DriverAvailableState
+  - `SetOnTrip() : void` - Transition to DriverOnTripState
+  - `SetOffline() : void` - Transition to DriverOfflineState; Không thể nếu đang OnTrip
+  - `IsAvailable() : bool`
+  - `IsOnTrip() : bool`
+  - `IsOffline() : bool`
   - `UpdatePosition(Location) : void`
   - `AddTrip() : void`
   - `UpdateReviews(int) : void` - Rating 1-5
   - `DepositToWallet(Money) : void`
   - `PayCommission(Fare) : void` - Trừ wallet, cộng income
 - **Sự kiện**: DriverStatusChangedEvent, DriverLocationUpdatedEvent
-- **Phụ thuộc**: DriverStateMachine, Money, VehicleId
+- **Phụ thuộc**: IDriverState, Money, VehicleId
 - **Ràng buộc nghiệp vụ**: Không thể Offline khi OnTrip; Wallet ≥ Commission để PayCommission
 
 #### `Passenger`
@@ -289,16 +288,22 @@
 | CancelledState | `Domain/States/CancelledState.cs` | Không cho phép gì (final) |
 | TimeoutState | `Domain/States/TimeoutState.cs` | Không cho phép gì (final) |
 
-**Pattern**: Mỗi state gọi `trip.TransitionTo(new XxxState())` + `trip.AddEvent()` nếu hợp lệ; throw `InvalidOperationException` nếu transition không hợp lệ. **Trip dùng State Pattern, không phải State Machine.**
+#### `IDriverState`
+- **File**: `Domain/States/IDriverState.cs`
+- **Interface**: 3 methods: SetAvailable, SetOnTrip, SetOffline
+
+#### Driver Concrete States (3 classes)
+| Class | File | Mô tả |
+|-------|------|-------|
+| DriverOfflineState | `Domain/States/Drivers/DriverOfflineState.cs` | Cho phép: SetAvailable |
+| DriverAvailableState | `Domain/States/Drivers/DriverAvailableState.cs` | Cho phép: SetOnTrip, SetOffline |
+| DriverOnTripState | `Domain/States/Drivers/DriverOnTripState.cs` | Cho phép: SetAvailable |
+
+**Pattern**: Mỗi state gọi `driver.TransitionTo(new XxxState())` + `driver.AddEvent()` nếu hợp lệ; throw `InvalidOperationException` nếu transition không hợp lệ. **Trip và Driver đều dùng State Pattern.**
 
 ### 2.8 Namespace: `Domain.StateMachines`
 
-#### `DriverStateMachine`
-- **File**: `Domain/StateMachines/DriverStateMachine.cs`
-- **Mục đích**: Validate DriverStatus transitions (State Machine — chỉ dùng cho Driver)
-- **Phương thức**:
-  - `CanTransition(DriverStatus from, DriverStatus to) : bool` - Static
-- **Valid transitions**: Offline→Available, Available→OnTrip/Offline, OnTrip→Available
+> **Đã xóa.** `DriverStateMachine` đã được thay thế bằng State Pattern trong `Domain.States` (IDriverState + 3 concrete states).
 
 ### 2.9 Namespace: `Domain.Events`
 

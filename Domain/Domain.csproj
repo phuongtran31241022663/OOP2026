@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -61,7 +64,6 @@
     <Compile Include="Entities\Vehicles\Car.cs" />
     <Compile Include="Entities\Vehicles\Motorbike.cs" />
     <Compile Include="Enums\DriverStatus.cs" />
-    <Compile Include="Enums\TripStatus.cs" />
     <Compile Include="Enums\VehicleType.cs" />
     <Compile Include="Events\DriverLocationUpdatedEvent.cs" />
     <Compile Include="Events\DriverStatusChangedEvent.cs" />
@@ -74,7 +76,6 @@
     <Compile Include="Events\TripRequestedEvent.cs" />
     <Compile Include="Events\TripSearchingEvent.cs" />
     <Compile Include="Events\TripStartedEvent.cs" />
-    <Compile Include="Events\TripStatusChangedEventArgs.cs" />
     <Compile Include="Events\TripTimeoutEvent.cs" />
     <Compile Include="Repositories\IDriverRepository.cs" />
     <Compile Include="Repositories\IFareRuleRepository.cs" />
@@ -87,7 +88,10 @@
     <Compile Include="SharedKernel\DomainEvent.cs" />
     <Compile Include="SharedKernel\Entity.cs" />
     <Compile Include="SharedKernel\ValueObject.cs" />
-    <Compile Include="StateMachines\DriverStateMachine.cs" />
+    <Compile Include="States\IDriverState.cs" />
+    <Compile Include="States\Drivers\DriverOfflineState.cs" />
+    <Compile Include="States\Drivers\DriverAvailableState.cs" />
+    <Compile Include="States\Drivers\DriverOnTripState.cs" />
     <Compile Include="States\ArrivedState.cs" />
     <Compile Include="States\CancelledState.cs" />
     <Compile Include="States\CompletedState.cs" />

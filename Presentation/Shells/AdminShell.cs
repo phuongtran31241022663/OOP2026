@@ -1,4 +1,4 @@
-﻿using Domain.ValueObjects;
+﻿﻿using Domain.ValueObjects;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Domain.Entities.Users;
 using Application.Interfaces;
-using Domain.Enums;
 
 namespace Presentation.Shells
 {
@@ -162,8 +161,8 @@ namespace Presentation.Shells
             for (int i = 0; i < AllDrivers.Count; i++)
             {
                 Driver driver = AllDrivers[i];
-                if (driver.Status == DriverStatus.Available) ActiveDrivers++;
-                if (driver.Status == DriverStatus.OnTrip) OnTripDrivers++;
+                if (driver.IsAvailable()) ActiveDrivers++;
+                if (driver.IsOnTrip()) OnTripDrivers++;
             }
 
             for (int i = 0; i < _allTrips.Count; i++)

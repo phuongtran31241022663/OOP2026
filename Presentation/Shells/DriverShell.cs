@@ -1,7 +1,6 @@
-using Application.Interfaces;
+﻿using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
-using Domain.Enums;
 using Presentation.Screens.DriverScreen;
 using System;
 using System.Windows.Forms;
@@ -90,14 +89,12 @@ namespace Presentation.Shells
                 return;
             }
 
-            DriverStatus newStatus = _driver.Status == DriverStatus.Offline
-                ? DriverStatus.Available
-                : DriverStatus.Offline;
+            string newStatus = _driver.IsOffline() ? "Available" : "Offline";
 
             try
             {
                 await _userService.UpdateDriverStatusAsync(_driver.Id, newStatus);
-                if (newStatus == DriverStatus.Available)
+                if (newStatus == "Available")
                 {
                     _driver.SetAvailable();
                 }
@@ -123,7 +120,7 @@ namespace Presentation.Shells
             }
 
             lblDriverName.Text = _driver.Name;
-            btnToggleStatus.Text = _driver.Status == DriverStatus.Offline ? "Go Online" : "Go Offline";
+            btnToggleStatus.Text = _driver.IsOffline() ? "Go Online" : "Go Offline";
         }
 
         public void OnTripAccepted(Trip trip)

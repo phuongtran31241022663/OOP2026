@@ -73,19 +73,19 @@ namespace Application.Services
             return passenger;
         }
 
-        public async Task UpdateDriverStatusAsync(Guid driverId, DriverStatus newStatus)
+        public async Task UpdateDriverStatusAsync(Guid driverId, string newStatus)
         {
             Driver driver = await _driverRepository.GetByIdAsync(driverId);
             if (driver == null) throw new Exception("Driver not found.");
             switch (newStatus)
             {
-                case DriverStatus.Available:
+                case "Available":
                     driver.SetAvailable();
                     break;
-                case DriverStatus.Offline:
+                case "Offline":
                     driver.SetOffline();
                     break;
-                case DriverStatus.OnTrip:
+                case "OnTrip":
                     driver.SetOnTrip();
                     break;
             }
