@@ -4,6 +4,7 @@ using Presentation.UserControls;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using Domain.Entities;
 
 namespace Presentation.Shells
 {

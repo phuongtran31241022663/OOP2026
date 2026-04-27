@@ -1,7 +1,6 @@
 using Application.Interfaces;
-using Domain.Entities.Users;
+using Domain.Entities;
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace Presentation.UserControls
@@ -115,24 +114,20 @@ namespace Presentation.UserControls
             IsLoading = true;
             try
             {
-                User user;
                 if (role == "Driver")
                 {
                     var defaultLocation = new Domain.ValueObjects.Location(
                         new Domain.ValueObjects.Coordinate(10.7769, 106.7009),
                         new Domain.ValueObjects.Address("District 1", "", "District 1", "Ho Chi Minh", "Vietnam"));
-                    user = await _userService.RegisterDriverAsync(name, phone, password, "GPLX-" + Guid.NewGuid().ToString().Substring(0, 8), Guid.NewGuid(), defaultLocation);
+                    await _userService.RegisterDriverAsync(name, phone, password, "GPLX-" + Guid.NewGuid().ToString().Substring(0, 8), Guid.NewGuid(), defaultLocation);
                 }
                 else
                 {
-                    user = await _userService.RegisterPassengerAsync(name, phone, password);
+                    await _userService.RegisterPassengerAsync(name, phone, password);
                 }
 
-                if (user != null)
-                {
-                    ShowInfo("Dang ky thanh cong!");
-                    RegisterSucceeded?.Invoke(this, user);
-                }
+                ShowInfo("Dang ky thanh cong!");
+                RegisterSucceeded?.Invoke(this, null);
             }
             catch (Exception ex)
             {

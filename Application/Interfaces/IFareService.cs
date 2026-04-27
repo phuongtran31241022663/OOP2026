@@ -6,6 +6,6 @@ namespace Application.Interfaces
 {
     public interface IFareService
     {
-        Task<Fare> CalculateFare(VehicleType vehicleType, double distanceKM);
+        Task<Fare> CalculateFareAsync(VehicleType vehicleType, double distanceKM);
     }
 }

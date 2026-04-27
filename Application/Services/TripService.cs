@@ -178,6 +178,19 @@ namespace Application.Services
             OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
         }
 
+        public async Task ConfirmPaymentAsync(Guid tripId)
+        {
+            Trip trip = await _tripRepository.GetByIdAsync(tripId);
+            if (trip == null)
+            {
+                throw new Exception("Không tìm thấy chuyến.");
+            }
+            trip.ConfirmPayment();
+            await _tripRepository.UpdateAsync(trip);
+            await _tripRepository.SaveChangesAsync();
+            OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
+        }
+
         // ----- Queries (async) -----
         public async Task<Trip> GetTripAsync(Guid tripId)
         {

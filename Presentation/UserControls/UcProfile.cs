@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Domain.Entities.Users;
+using Domain.Entities;
 using System;
 using System.Windows.Forms;
 

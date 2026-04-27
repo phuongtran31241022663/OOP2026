@@ -45,7 +45,7 @@ namespace Application.Services
                 throw new Exception("Không thể tính đường đi.");
 
             // Tính giá cước
-            Fare fare = await _fareService.CalculateFare(vehicleType, route.Distance);
+            Fare fare = await _fareService.CalculateFareAsync(vehicleType, route.Distance);
 
             // Tạo chuyến
             Trip trip = await _tripService.CreateTripAsync(passengerId, route, fare, vehicleType);
@@ -95,7 +95,7 @@ namespace Application.Services
             if (trip.PassengerId != passengerId)
                 throw new Exception("Bạn không phải hành khách của chuyến này.");
 
-if (!trip.IsCompleted())
+            if (!trip.IsCompleted())
                 throw new Exception("Chỉ có thể đánh giá sau khi chuyến hoàn thành.");
 
             if (!trip.DriverId.HasValue)

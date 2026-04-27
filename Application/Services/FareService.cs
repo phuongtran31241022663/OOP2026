@@ -22,7 +22,7 @@ namespace Application.Services
             await _fareRuleRepo.EnsureSeededAsync();
         }
 
-        public async Task<Fare> CalculateFare(VehicleType vehicleType, double distanceKm)
+        public async Task<Fare> CalculateFareAsync(VehicleType vehicleType, double distanceKm)
         {
             FareRule rule = await _fareRuleRepo.GetByVehicleTypeAsync(vehicleType);
             if (rule == null)

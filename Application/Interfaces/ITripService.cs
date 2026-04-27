@@ -29,5 +29,6 @@ namespace Application.Interfaces
         Task<List<Trip>> GetTripsByDriverAsync(Guid driverId);
         Task<List<Trip>> GetTripsByPassengerAsync(Guid passengerId);
         Task<bool> CanTripBeCancelledAsync(Guid tripId);
+        Task ConfirmPaymentAsync(Guid tripId);
     }
 }

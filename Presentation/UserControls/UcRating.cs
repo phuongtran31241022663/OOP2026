@@ -63,7 +63,7 @@ namespace Presentation.UserControls
             {
                 if (_reviewService != null && _trip != null)
                 {
-                    await _reviewService.AddReviewAsync(_trip.Id, _trip.PassengerId, _trip.DriverId ?? Guid.Empty, _selectedRating, txtComment.Text);
+                    await _reviewService.AddReviewAsync(_trip.DriverId ?? Guid.Empty, _trip.PassengerId, _trip.Id, _selectedRating, txtComment.Text);
                 }
                 ShowInfo("Danh gia thanh cong!");
                 var parent = this.ParentForm;

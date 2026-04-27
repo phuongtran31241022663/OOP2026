@@ -109,7 +109,6 @@ namespace Presentation.UserControls
             this.txtComment.Location = new System.Drawing.Point(16, 136);
             this.txtComment.Multiline = true;
             this.txtComment.Name = "txtComment";
-            this.txtComment.PlaceholderText = "Nhan xet cua ban...";
             this.txtComment.Size = new System.Drawing.Size(528, 120);
             this.txtComment.TabIndex = 2;
 
