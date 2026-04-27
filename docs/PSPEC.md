@@ -15,7 +15,6 @@
   - Real-time GPS (dùng mô phỏng vị trí)
   - Push notification thực
   - Cơ sở dữ liệu quan hệ (SQL Server / PostgreSQL)
-  - Đa luồng phức tạp (chưa có SemaphoreSlim trong matching)
   - LINQ và Lambda (ràng buộc giáo khoa — dùng foreach + if-else)
 - **Actors:**
   - **Passenger** — đặt xe, theo dõi trạng thái, thanh toán, đánh giá
@@ -42,7 +41,7 @@
 **Driver:**
 - Đăng ký / đăng nhập, cập nhật thông tin xe, bằng lái
 - Bật / tắt trạng thái (Offline ↔ Available)
-- Nhận request chuyến phù hợp (VehicleType match + Available)
+- Nhận request chuyến phù hợp (VehicleType match + Available + Wallet đủ hoa hồng)
 - Cập nhật trạng thái chuyến: Arrived → Started → Completed
 - Xem thu nhập (Wallet, Income), lịch sử chuyến, điểm đánh giá
 - Nạp tiền ví
@@ -63,7 +62,7 @@
 - **Ngôn ngữ / Runtime:** C# .NET Framework 4.8, Windows Forms
 - **Không dùng:** LINQ, Lambda, `var` (ràng buộc giáo khoa — static typing, explicit loop)
 - **Persistence:** JSON file (Newtonsoft.Json), `TypeNameHandling.All` cho đa hình (List\<User\> chứa Driver + Passenger)
-- **Thread-safety:** `ReaderWriterLockSlim` trong JsonStorage (cần xác minh đầy đủ)
+- **Thread-safety:** `ReaderWriterLockSlim` trong JsonStorage (cần xác minh đầy đủ); `SemaphoreSlim` trong MatchingService và TripService để tránh race condition khi ghép tài xế
 - **Serialization:** Newtonsoft.Json 13.x — `JsonConvert.SerializeObject` / `DeserializeObject<List<T>>`
 - **UI update:** Event-driven — `ITripService.TripStatusChanged` (`EventHandler<TripStatusChangedEventArgs>`) — UI subscribe không polling
 - **Bảo mật mật khẩu:** `PasswordHasher` trong `Common/Utilities/`
@@ -99,9 +98,9 @@ Common → Domain → Application → Infrastructure → Presentation
 - **Pattern:**
   | Pattern | Áp dụng |
   |---|---|
-  | Repository | `IRepository<T>` → `JsonRepository<T>` (generic base) |
+  | Repository (data access contract) | `IRepository<T>` → `JsonRepository<T>` (generic base) |
   | State Pattern | `ITripState` + 8 state classes cho Trip lifecycle |
-  | State Machine | `DriverStateMachine` (static, dictionary-defined transitions) |
+  | State Machine | `DriverStateMachine` (static, dictionary-defined transitions) — **chỉ dùng cho Driver** |
   | Domain Events | Aggregate emit events (9 Trip + 2 Driver + 1 Review) |
   | Observer | `ITripService.TripStatusChanged` — UI subscribe |
   | Manual Service Composition | Khởi tạo services bằng `new` trong `Program.cs` |
@@ -119,7 +118,7 @@ Common → Domain → Application → Infrastructure → Presentation
 | UC2 | Đăng ký tài xế | Driver | Tạo Driver + Vehicle → `UserService.RegisterDriver()` | ✅ |
 | UC3 | Đăng ký hành khách | Passenger | Tạo Passenger → `UserService.RegisterPassenger()` | ✅ |
 | UC4 | Đặt chuyến | Passenger | Nhập pickup/dest/vehicleType → `TripService.RequestTrip()` (sync) | ✅ |
-| UC5 | Ghép tài xế | System | Lọc driver Available + VehicleType match → `MatchingService.MatchDriverToTripAsync()` | ⚠️ Chưa lọc đầy đủ |
+| UC5 | Ghép tài xế | System | Lọc driver Available + VehicleType match + Wallet đủ hoa hồng → `MatchingService.MatchDriverToTripAsync()` | ✅ |
 | UC6 | Đến điểm đón | Driver | → `TripService.ArriveAtPickup()` | ✅ |
 | UC7 | Bắt đầu chuyến | Driver | → `TripService.StartTrip()` | ✅ |
 | UC8 | Hoàn thành chuyến | Driver | → `TripService.CompleteTrip()` + payment inline | ✅ |
@@ -151,7 +150,7 @@ Common → Domain → Application → Infrastructure → Presentation
 | `Trip` | Aggregate Root | Vòng đời chuyến đi; chứa Route, Fare; emit 9 domain events |
 | `User` (abstract) | Aggregate Root | Base class: Passenger, Driver, Admin |
 | `Driver` | Entity | Trạng thái, vị trí, xe, ví, thu nhập, đánh giá |
-| `Passenger` | Entity (sealed) | TotalTrips |
+| `Passenger` | Entity | TotalTrips |
 | `Admin` | Entity | Quản trị hệ thống |
 | `FareRule` | Entity | Quy định giá cước theo VehicleType; `CalculateFare(double distanceKm)` |
 | `Vehicle` (abstract) | Entity | Car, Motorbike — PlateNumber, Brand, Model, Color, Type |
@@ -176,13 +175,15 @@ Common → Domain → Application → Infrastructure → Presentation
 `IRepository<T>`, `IUserRepository`, `IDriverRepository`, `IPassengerRepository`, `ITripRepository`, `IVehicleRepository`, `IReviewRepository`, `IFareRuleRepository`
 
 **Enums:**
-- `TripStatus`: Requested(0), Searching(1), Matched(2), Arrived(3), Started(4), Completed(5), Cancelled(6), Timeout(7)
+- `TripStatus`: Requested(0), Searching(1), Matched(2), Arrived(3), Started(4), Completed(5), Cancelled(6), Timeout(7) — *(deprecated, dùng ITripState)*
 - `DriverStatus`: Offline, Available, OnTrip
 - `VehicleType`: Car, Motorbike
 
 ### 5.2 UML (State Transitions)
 
-**Trip State Machine:**
+**Trip State Pattern:**
+> Trip sử dụng State Pattern (ITripState), không phải State Machine.
+
 ```
 Requested → Searching
 Searching → Matched | Cancelled | Timeout
@@ -195,6 +196,8 @@ Timeout   → (terminal)
 ```
 
 **Driver State Machine:**
+> Driver sử dụng State Machine (static dictionary transitions).
+
 ```
 Offline   → Available
 Available → OnTrip | Offline
@@ -204,7 +207,7 @@ OnTrip    → Available
 **User Inheritance:**
 ```
 User (abstract)
-├── Passenger (sealed)
+├── Passenger
 ├── Driver
 └── Admin
 
@@ -226,9 +229,9 @@ Vehicle (abstract)
         → TripRepository.AddAsync(trip)
         → return trip
 
-[System - TripMatchingWorker] Poll trips có Status == Searching
+[System - TripMatchingWorker] Poll trips đang Searching (dùng trip.IsSearching())
     → MatchingService.MatchDriverToTripAsync(tripId, driverId)
-        → lọc driver: Status == Available AND VehicleType match
+        → lọc driver: Status == Available AND VehicleType match AND Wallet >= Commission
         → trip.MatchDriver(driverId)                       // emit TripMatchedEvent
         → driver.SetOnTrip()                               // emit DriverStatusChangedEvent
         → save Trip + Driver
@@ -260,7 +263,7 @@ Vehicle (abstract)
 
 ### Timeout Flow
 ```
-[System - TripTimeoutWorker] Poll trips Status == Searching (sau X giây)
+[System - TripTimeoutWorker] Poll trips đang Searching (dùng trip.IsSearching())
     → trip.MarkTimeout()                                   // emit TripTimeoutEvent
     → save Trip
 ```
@@ -279,7 +282,7 @@ FareRule.CalculateFare(distanceKm):
 | ID | Mô tả | Kết quả mong đợi | Trạng thái |
 |----|-------|------------------|------------|
 | T01 | Đặt chuyến với pickup/dest hợp lệ | Trip tạo thành công, Status = Searching | ⬜ Chưa test |
-| T02 | Ghép tài xế có Status = Available + VehicleType match | Trip → Matched, Driver → OnTrip | ⬜ Chưa test |
+| T02 | Ghép tài xế có Status = Available + VehicleType match + Wallet đủ | Trip → Matched, Driver → OnTrip | ⬜ Chưa test |
 | T03 | Ghép tài xế khi không có driver phù hợp | Trip giữ Searching đến Timeout | ⬜ Chưa test |
 | T04 | Trip không tìm được tài xế sau X giây | Status → Timeout, driver không bị lock | ⬜ Chưa test |
 | T05 | Hoàn thành chuyến | Status → Completed, Fare tính đúng, Driver income cập nhật | ⬜ Chưa test |

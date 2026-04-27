@@ -5,6 +5,7 @@ using Domain.ValueObjects;
 using Presentation.Screens.Auth;
 using Presentation.Shells;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Presentation
@@ -12,12 +13,12 @@ namespace Presentation
     internal static class Program
     {
         [STAThread]
-        private static void Main()
+        private static async Task Main()
         {
-            System.Windows.Forms.Application.EnableVisualStyles();
-            System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
 
-            AppServiceBundle services = AppServiceBundle.CreateDefault();
+            AppServiceBundle services = await SimulationService.CreateDefaultAsync();
             IUserService userService = services.UserService;
             ITripService tripService = services.TripService;
             IFareService fareService = services.FareService;
@@ -35,7 +36,7 @@ namespace Presentation
                     CreateDemoDriver()),
                 userService);
 
-            System.Windows.Forms.Application.Run(shell);
+            Application.Run(shell);
         }
 
         private static Driver CreateDemoDriver()

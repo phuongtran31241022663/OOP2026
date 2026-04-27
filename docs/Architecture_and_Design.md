@@ -150,7 +150,7 @@ RideGo2026/
 │                         # MatchingService, PassengerService, ReviewService,
 │                         # SimulationService (stub), TripService, UserService
 ├── Domain/
-│   ├── Enums/            # DriverStatus, TripStatus, VehicleType
+│   ├── Enums/            # DriverStatus, TripStatus, VehicleType.  **TripStatus sẽ bị xóa trong vòng đời sau này, chỉ dùng state pattern từ `ITripState`.**
 │   ├── Entities/         # FareRule, Review, Trip, User (abstract),
 │   │                     # Users/Admin, Driver, Passenger; Vehicles/Car, Motorbike, Vehicle
 │   ├── Events/           # 9 Trip events, 2 Driver events, ReviewCreatedEvent
@@ -210,10 +210,10 @@ Entity (Domain.SharedKernel, abstract)
 | `Passenger` | `TotalTrips` | `AddTrip()` |
 | `Driver` | `Status`, `Position`, `VehicleId`, `Wallet`, `Income`, `TotalTrips`, `AverageRating`, `RatingSum`, `TotalReviews`, `LicenseNumber` | `SetAvailable()`, `SetOnTrip()`, `SetOffline()`, `UpdatePosition()`, `AddTrip()`, `PayCommission()`, `DepositToWallet()`, `UpdateReviews(int rating)` |
 | `Admin` | (inherits User) | User management, system configuration |
-| `Vehicle` (abstract) | `PlateNumber`, `Brand`, `Model`, `Color`, `Capacity`, `Type` | `GetAvgSpeed()`, `GetMaxPickupDistance()` (abstract) |
-| `Car` | `Type = Car` | `AvgSpeed = 60km/h`, `MaxPickupDistance = 7km` |
-| `Motorbike` | `Type = Motorbike` | `AvgSpeed = 40km/h`, `MaxPickupDistance = 5km` |
-| `Trip` | `Status`, `PassengerId`, `DriverId?`, `VehicleType`, `Route`, `Fare`, `IsPaid`, `RequestAt` | State transitions: `SetSearching()`, `MatchDriver()`, `MarkAsArrived()`, `StartTrip()`, `CompleteTrip()`, `Cancel()`, `MarkTimeout()` |
+| `Vehicle` (abstract) | `PlateNumber`, `Brand`, `Model`, `Color`, `Capacity`, `Type` | `GetAvgSpeed()` (abstract) |
+| `Car` | `Type = Car` | `AvgSpeed = 60km/h` |
+| `Motorbike` | `Type = Motorbike` | `AvgSpeed = 40km/h` |
+| `Trip` | `Status` (string từ `ITripState`), `PassengerId`, `DriverId?`, `VehicleType`, `Route`, `Fare`, `IsPaid`, `RequestAt` | State transitions: `SetSearching()`, `MatchDriver()`, `MarkAsArrived()`, `StartTrip()`, `CompleteTrip()`, `Cancel()`, `MarkTimeout()` |
 | `FareRule` | `VehicleType`, `BaseFare`, `PricePerKm`, `CommissionRate` | `CalculateFare(distanceKm)` → `Fare` |
 | `Review` | `DriverId`, `PassengerId`, `TripId`, `Rating`, `Comment`, `CreatedAt` | `UpdateReview()` |
 
@@ -238,32 +238,22 @@ Entity (Domain.SharedKernel, abstract)
 
 ## 6. State Machines
 
-### Trip State Flow
+### Trip — State Pattern (not State Machine)
 
-```
-Requested → Searching → Matched → Arrived → Started → Completed
-                ↓         ↓         ↓         ↓
-              Cancelled / Timeout (terminal states)
-```
+`Trip` delegates state behavior to `ITripState` implementations. **State pattern** encapsulates each behavior; state machine hiện chỉ dùng cho `Driver` (`DriverStateMachine`).
 
-**Valid transitions:**
+| State Class | Valid Next States |
+|-------------|-------------------|
+| `RequestedState` | Searching |
+| `SearchingState` | Matched, Cancelled, Timeout |
+| `MatchedState` | Arrived, Cancelled, Searching |
+| `ArrivedState` | Started, Cancelled |
+| `StartedState` | Completed, Cancelled |
+| `CompletedState` | (terminal) |
+| `CancelledState` | (terminal) |
+| `TimeoutState` | (terminal) |
 
-| From | To | Condition |
-|------|-----|-----------|
-| Requested | Searching | Trip created |
-| Searching | Matched | Driver accepts |
-| Searching | Cancelled | Passenger cancels |
-| Searching | Timeout | Search timeout |
-| Matched | Arrived | Driver arrives at pickup |
-| Matched | Cancelled | Cancel before boarding |
-| Arrived | Started | Passenger on board |
-| Arrived | Cancelled | Passenger doesn't board |
-| Started | Completed | Arrive at destination, pay |
-| Started | Cancelled | Cancel mid-trip |
-
-`ITripState` implementations validate transitions before delegating to `Trip.TransitionTo(...)`.
-
-### Driver State Flow
+### Driver — State Machine
 
 ```
 Offline → Available → OnTrip → Available
@@ -292,11 +282,13 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 
 | Pattern | Implementation |
 |---------|---------------|
-| **Repository** | `IRepository<T>` (Domain) → `JsonRepository<T>` (Infrastructure) → Concrete repos. No LINQ, uses list iteration. |
-| **State Machine** | `ITripState` implementations validate Trip lifecycle; `DriverStateMachine` validates Driver transitions. |
+| **State Pattern** | `ITripState` implementations validate Trip lifecycle. |
+| **State Machine** | `DriverStateMachine` validates Driver transitions. |
 | **Domain Events & Observer** | Aggregates emit events; `TripService.TripStatusChanged` for UI real-time updates. |
 | **Value Object** | `Money`, `Location`, `Route`, `Fare` — immutable, value equality. |
 | **Manual Service Composition** | All services instantiated with `new` in `Program.cs`. |
+
+> **Repository** là Data Access Abstraction (không phải GoF Design Pattern). Được khai báo `IRepository<T>` ở tầng Domain, triển khai bởi `JsonRepository<T>` ở Infrastructure. Không LINQ, dùng list iteration thuần.
 
 ---
 
@@ -311,7 +303,7 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 - `UpdateDriverStatus()`, `UpdateDriverLocation()`, `TopUpDriverWallet()`
 
 **MatchingService:**
-- `MatchDriverToTripAsync()` — matches driver to trip with status + VehicleType check
+- `MatchDriverToTripAsync()` — matches driver to trip with status + VehicleType check + wallet sufficient for commission + `SemaphoreSlim` lock for thread safety
 
 **FareService:**
 - `CalculateFare(VehicleType, double distanceKm)`
@@ -322,7 +314,7 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 **AdminService:**
 - User/trip/fare rule management, statistics (GMV, NTR, completion rate, satisfaction)
 
-**SimulationService:** Stub — no background tick.
+**SimulationService:** Stub — implemented with `System.Threading.Timer`, auto tick driven.
 
 ---
 
@@ -344,172 +336,4 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 - `GetDistanceAsync()`, `GetRouteAsync()`, `SearchLocation()`, `ReverseGeocodeAsync()`
 - Integrations: Photon Geocoding API + OSRM Routing API
 
-**GMap.NET Separation:**
-
-| Component | Layer | Package |
-|-----------|-------|---------|
-| `GMapControl` (UI widget) | **Presentation** | `GMap.NET.WinForms` |
-| `GMapProviders` (Routing, Geocoding) | **Infrastructure** | `GMap.NET.Core` |
-
----
-
-## 12. Manual Service Composition
-
-Example from `Presentation/Program.cs`:
-
-```csharp
-// Storage
-JsonStorage<User> userStorage = new JsonStorage<User>("data/users.json");
-JsonStorage<Trip> tripStorage = new JsonStorage<Trip>("data/trips.json");
-
-// Repositories
-IUserRepository userRepo = new UserRepository(userStorage);
-ITripRepository tripRepo = new TripRepository(tripStorage);
-
-// External services
-IMapService mapService = new MapService();
-
-// Application Services
-IUserService userService = new UserService(userRepo, ...);
-ITripService tripService = new TripService(tripRepo, driverRepo, passengerRepo, mapService);
-
-// Background workers
-TripTimeoutWorker timeoutWorker = new TripTimeoutWorker(tripRepo);
-TripMatchingWorker matchingWorker = new TripMatchingWorker(tripRepo, driverRepo, matchingService);
-
-// Launch UI
-Application.Run(new MainShell(userService, tripService, ...));
-```
-
----
-
-## 13. Use Cases
-
-| ID | Use Case | Actor | Status |
-|----|----------|-------|--------|
-| UC1 | Login | User | ✅ |
-| UC2 | Register Driver | Driver | ✅ |
-| UC3 | Register Passenger | Passenger | ✅ |
-| UC4 | Book Trip | Passenger | ✅ |
-| UC5 | Match Driver | System | ⚠️ (basic check only) |
-| UC6 | Arrive at Pickup | Driver | ✅ |
-| UC7 | Start Trip | Driver | ✅ |
-| UC8 | Complete Trip | Driver | ✅ |
-| UC9 | Rate Trip | Passenger | ✅ |
-| UC10 | Cancel Trip | Passenger/Driver | ✅ |
-| UC11 | Trip History | Passenger/Driver | ✅ |
-| UC12 | Matched Driver Info | Passenger | ✅ |
-| UC13 | Work Status Toggle | Driver | ✅ |
-| UC14 | Receive Trip Info | Driver | ✅ |
-| UC15 | Accept/Reject Trip | Driver | ⚠️ (partial) |
-| UC16 | Admin Real-time Monitor | Admin | ⚠️ (basic UI) |
-| UC17 | Fare Rule Config | Admin | ✅ |
-| UC18 | Driver Radar | Passenger | ❌ |
-| UC19 | Driver Earnings | Driver | ✅ (entity ready, UI partial) |
-| UC20 | Admin Reports | Admin | ✅ |
-| UC21 | Navigation | Driver | ⚠️ (map display only) |
-| UC22 | Edit Profile | User | ⚠️ (service ready, UI partial) |
-
----
-
-## 14. Business Logic
-
-### Fare Calculation
-
-```
-TotalFare = BaseFare + Distance × PricePerKm
-Commission = TotalFare × CommissionRate
-DriverIncome = TotalFare − Commission
-```
-
-### Matching Algorithm
-
-1. Filter by vehicle type match
-2. Exclude Offline / OnTrip drivers
-3. Filter by administrative address (phường → quận → thành phố)
-4. Check distance < MaxPickupDistance
-5. Check wallet balance sufficient for commission
-6. Send requests sequentially with timeout
-7. Retry / fallback to Timeout
-
-### Race Condition Handling
-
-`SemaphoreSlim(1, 1)` lock around `MatchDriverAsync` to prevent double-assignment.
-
----
-
-## 15. Naming Conventions
-
-```
-// Service interfaces — start with I
-ITripService            ✅
-TripServiceInterface    ❌
-
-// Service implementations — no I prefix
-TripService             ✅
-TripServiceImpl         ❌
-
-// Domain Events — past tense, clear
-TripMatchedEvent        ✅
-OnTripMatched           ❌ (On = JS style)
-
-// Repository interfaces — start with I
-ITripRepository         ✅
-TripRepo                ❌
-
-// Enums — PascalCase
-TripStatus              ✅
-tripStatus              ❌
-
-// Value Objects — immutable, sealed
-Money                   ✅
-MoneyVO                 ❌
-
-// Methods — Verb + Noun
-RequestTrip()           ✅
-TripRequest()           ❌
-```
-
----
-
-## 16. Coding Rules
-
-| Rule | Educational Purpose | Implementation |
-|------|---------------------|----------------|
-| **No LINQ** | Master data structures & algorithms | Use `foreach` + `if-else` instead of `Where`, `FirstOrDefault` |
-| **No `var`** | Static typing mindset | `Passenger p = new Passenger();` |
-| **No Lambda** | Understand Delegate & Method | Explicit method declarations |
-| **Newtonsoft.Json** | Persistence & Data Stream | `JsonConvert.SerializeObject` / `DeserializeObject` |
-
----
-
-## 17. Checklist for New Files
-
-| Question | If Yes → Place At |
-|----------|-------------------|
-| Business rule? | Domain / Entity or State Machine |
-| Business logic not belonging to any Entity? | Domain Service (static class if simple) |
-| Use case / flow orchestration? | Application / Service |
-| Input validation? | Application / Service method |
-| UI cross-cutting? | Presentation / Helper |
-| Interface implementation? | Infrastructure / Repository or ExternalService |
-| Primitive type / pure function? | Common / Constants, Extensions, Helpers |
-
----
-
-## 18. Known Gaps
-
-| Missing Item | Impact |
-|-------------|--------|
-| `IRouteService` / `RouteService` | Compile error — referenced but not found |
-| `IDriverSimulationService` | Compile error — interface undefined |
-| SimulationService is stub | No timer, no auto-movement |
-| Polyline decoding incomplete | Route not displaying on MapControl |
-| Driver Radar (UC18) | No proximity search |
-| `Common/Exceptions/` folder | No custom exception base class |
-| `Policies/` (Eligibility, Assignment) | Not present; logic inline in MatchingService |
-| `InMemoryDriverCache` | Not present |
-
----
-
-*Document version: 3.0 — Consolidated from RideGo_Architecture.md, CleanArchitecture_Final.md, Technical_Architecture.md. Updated for .NET Framework 4.8 WinForms constraints.*
+**

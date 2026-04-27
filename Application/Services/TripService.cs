@@ -1,4 +1,4 @@
-﻿using Application.Events;
+﻿﻿using Application.Events;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
@@ -7,6 +7,7 @@ using Domain.Repositories;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -14,6 +15,8 @@ namespace Application.Services
     public class TripService : ITripService
     {
         public event EventHandler<TripStatusChangedEventArgs> TripStatusChanged;
+
+        private static readonly SemaphoreSlim _matchLock = new SemaphoreSlim(1, 1);
 
         private readonly ITripRepository _tripRepository;
         private readonly IDriverRepository _driverRepository;
@@ -51,28 +54,40 @@ namespace Application.Services
 
         public async Task MatchDriverAsync(Guid tripId, Guid driverId)
         {
-            Trip trip = await _tripRepository.GetByIdAsync(tripId);
-            if (trip == null)
+            await _matchLock.WaitAsync();
+            try
             {
-                throw new Exception("Không tìm thấy chuyến.");
-            }
+                Trip trip = await _tripRepository.GetByIdAsync(tripId);
+                if (trip == null)
+                {
+                    throw new Exception("Không tìm thấy chuyến.");
+                }
 
-            Driver driver = await _driverRepository.GetByIdAsync(driverId);
-            if (driver == null)
+                Driver driver = await _driverRepository.GetByIdAsync(driverId);
+                if (driver == null)
+                {
+                    throw new Exception("Không tìm thấy tài xế.");
+                }
+
+                // Kiểm tra ví tài xế có đủ tiền trả hoa hồng không
+                if (driver.Wallet.Amount < trip.TripFare.Commission.Amount)
+                {
+                    throw new InvalidOperationException("Số dư ví không đủ để trả hoa hồng.");
+                }
+
+                trip.MatchDriver(driverId);
+                driver.SetOnTrip();
+
+                await _tripRepository.UpdateAsync(trip);
+                await _driverRepository.UpdateAsync(driver);
+                await _tripRepository.SaveChangesAsync();
+                await _driverRepository.SaveChangesAsync();
+                OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, driverId));
+            }
+            finally
             {
-                throw new Exception("Không tìm thấy tài xế.");
+                _matchLock.Release();
             }
-
-            trip.MatchDriver(driverId);
-            driver.SetOnTrip();
-
-            await _tripRepository.UpdateAsync(trip);
-            await _driverRepository.UpdateAsync(driver);
-            // Lưu ý: cần UnitOfWork để đảm bảo cả hai repository cùng lưu thành công.
-            // Tạm thời dùng SaveChanges của từng repository (có thể không đồng nhất)
-            await _tripRepository.SaveChangesAsync();
-            await _driverRepository.SaveChangesAsync();
-            OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, driverId));
         }
 
         public async Task MarkAsArrivedAsync(Guid tripId)
@@ -163,7 +178,7 @@ namespace Application.Services
             OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
         }
 
-        // ----- Queries (async) trả về Task<List<Trip>> hoặc Task<Trip> -----
+        // ----- Queries (async) -----
         public async Task<Trip> GetTripAsync(Guid tripId)
         {
             return await _tripRepository.GetByIdAsync(tripId);
@@ -177,7 +192,7 @@ namespace Application.Services
                 Trip trip = allTrips[i];
                 if (trip.DriverId == driverId)
                 {
-                    if (trip.Status != TripStatus.Completed && trip.Status != TripStatus.Cancelled && trip.Status != TripStatus.Timeout)
+                    if (!trip.IsTerminal())
                     {
                         return trip;
                     }
@@ -194,7 +209,7 @@ namespace Application.Services
                 Trip trip = allTrips[i];
                 if (trip.PassengerId == passengerId)
                 {
-                    if (trip.Status != TripStatus.Completed && trip.Status != TripStatus.Cancelled && trip.Status != TripStatus.Timeout)
+                    if (!trip.IsTerminal())
                     {
                         return trip;
                     }
@@ -210,7 +225,7 @@ namespace Application.Services
             for (int i = 0; i < allTrips.Count; i++)
             {
                 Trip trip = allTrips[i];
-                if (trip.Status == TripStatus.Searching)
+                if (trip.IsSearching())
                 {
                     pending.Add(trip);
                 }
@@ -220,7 +235,6 @@ namespace Application.Services
 
         public async Task<List<Trip>> GetTripsByDriverAsync(Guid driverId)
         {
-            // Tận dụng method có sẵn trong ITripRepository
             return await _tripRepository.GetByDriverIdAsync(driverId);
         }
 
@@ -236,7 +250,7 @@ namespace Application.Services
             {
                 return false;
             }
-            return (trip.Status == TripStatus.Searching || trip.Status == TripStatus.Matched);
+            return (trip.IsSearching() || trip.IsMatched());
         }
     }
 }

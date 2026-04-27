@@ -11,27 +11,19 @@ using Domain.Entities.Users;
 using Application.Interfaces;
 using Domain.Enums;
 
-using Presentation;
-
 namespace Presentation.Shells
 {
     public partial class AdminShell : BaseShell
     {
-        // Dependencies
         private readonly Admin _admin;
         private readonly IAdminService _adminService;
-
-        // ViewModel
         private AdminViewModel _viewModel;
-
-        // UI components
         private Dictionary<int, Panel> _panels = new Dictionary<int, Panel>();
 
         public AdminShell(Admin admin, IAdminService adminService)
         {
             _admin = admin ?? throw new ArgumentNullException(nameof(admin));
             _adminService = adminService ?? throw new ArgumentNullException(nameof(adminService));
-
             InitializeComponent();
         }
 
@@ -42,31 +34,18 @@ namespace Presentation.Shells
 
         private async Task InitializeShell()
         {
-            // Initialize view model
             _viewModel = new AdminViewModel(_admin, _adminService);
-
-            // Load data via view model
             await _viewModel.LoadDataAsync();
-
-            // Populate panels
             PopulatePanels();
-
-            // Update stats bar
             UpdateStatsBar();
-
-            // Show default section (Users)
             ShowSection(0);
         }
 
         private void ShowSection(int index)
         {
-            // Hide all panels
             foreach (var panel in _panels.Values)
-            {
                 panel.Visible = false;
-            }
 
-            // Show selected panel
             if (_panels.ContainsKey(index))
             {
                 _panels[index].Visible = true;
@@ -86,23 +65,18 @@ namespace Presentation.Shells
                 5 => "Reports",
                 _ => "Admin Dashboard"
             };
-            // TODO: Update header title
         }
 
         private void UpdateStatsBar()
         {
-            // Stats from ViewModel
             int totalUsers = _viewModel.TotalUsers;
             int activeDrivers = _viewModel.ActiveDrivers;
             int onTripDrivers = _viewModel.OnTripDrivers;
             int ongoingTrips = _viewModel.OngoingTrips;
-
-            // TODO: Update stats bar UI elements
         }
 
         private void PopulatePanels()
         {
-            // Create panels for each section
             _panels[0] = new Panel() { Name = "UsersPanel", Dock = DockStyle.Fill, BackColor = Color.LightBlue };
             _panels[1] = new Panel() { Name = "DriversPanel", Dock = DockStyle.Fill, BackColor = Color.LightGreen };
             _panels[2] = new Panel() { Name = "PassengersPanel", Dock = DockStyle.Fill, BackColor = Color.LightYellow };
@@ -110,114 +84,33 @@ namespace Presentation.Shells
             _panels[4] = new Panel() { Name = "FareRulesPanel", Dock = DockStyle.Fill, BackColor = Color.LightCyan };
             _panels[5] = new Panel() { Name = "ReportsPanel", Dock = DockStyle.Fill, BackColor = Color.LightGray };
 
-            // Add to form
             foreach (var panel in _panels.Values)
-            {
                 this.Controls.Add(panel);
-            }
         }
 
-        // Users Panel
-        private void PopulateUsersPanel()
-        {
-            // TODO: Populate DataGridView with _allUsers
-            // Columns: Name, Phone, Role, Status, Actions
-        }
-
-        private void FilterUsers(string searchTerm)
-        {
-            // Filter users by name or phone
-            var filtered = _viewModel.AllUsers.Where(u =>
-                u.Name.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                u.Phone.Contains(searchTerm)
-            ).ToList();
-            // TODO: Update DataGridView with filtered list
-        }
-
-        private async void ToggleUserActive(Guid userId)
-        {
-            try
-            {
-                MessageBox.Show(
-                    "Toggle active/inactive is not implemented in current admin service.",
-                    "Info",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-
-                // Refresh data
-                await _viewModel.LoadDataAsync();
-                PopulateUsersPanel();
-                UpdateStatsBar();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error toggling user status: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // Drivers Panel
-        private void PopulateDriversPanel()
-        {
-            // Drivers from ViewModel
-            var drivers = _viewModel.AllDrivers;
-
-            // TODO: Populate DataGridView with drivers
-            // Columns: Name, Phone, Status, Review, Trips Count, Vehicle, Actions
-        }
-
-        // Passengers Panel
-        private void PopulatePassengersPanel()
-        {
-            // Passengers from ViewModel
-            var passengers = _viewModel.AllPassengers;
-
-            // TODO: Populate DataGridView with passengers
-            // Columns: Name, Phone, Status, Trips Count, Actions
-        }
-
-        // Trips Panel
-        private void PopulateTripsPanel()
-        {
-            // Get trips with passenger/driver names from ViewModel
-            var trips = _viewModel.GetFilteredTrips("");
-
-            // TODO: Populate DataGridView with trips
-            // The Trip already contains PassengerName, DriverName, Pickup, Destination, Status, Fare, CreatedAt
-        }
+        private void PopulateUsersPanel() { }
+        private void FilterUsers(string searchTerm) { }
+        private async void ToggleUserActive(Guid userId) { }
+        private void PopulateDriversPanel() { }
+        private void PopulatePassengersPanel() { }
+        private void PopulateTripsPanel() { }
 
         private void FilterTrips(string searchTerm)
         {
-            // Get filtered trips from ViewModel
             var filtered = _viewModel.GetFilteredTrips(searchTerm);
-            // TODO: Update DataGridView with filtered list
         }
 
-        private void GenerateTripReport()
+        private void PopulateTripsPanelLogic()
         {
-            var report = _viewModel.GetTripReport();
-
-            // TODO: Display report in UI
-            // Total trips, revenue, driver income, commission
+            foreach (var trip in _viewModel.GetFilteredTrips(""))
+            {
+                // Các điều kiện lọc status đã chuyển sang string
+                bool isOngoing = trip.Status == "Searching" ||
+                                 trip.Status == "Matched" ||
+                                 trip.Status == "Arrived" ||
+                                 trip.Status == "Started";
+            }
         }
-
-        // Fare Rules Panel
-        private void PopulateFareRulesPanel()
-        {
-            // TODO: Load and display fare rules
-            // TODO: Add CRUD operations
-        }
-
-        // Reports Panel
-        private void PopulateReportsPanel()
-        {
-            // Summary stats from ViewModel
-            int totalTrips = _viewModel.TotalTrips;
-            decimal totalRevenue = _viewModel.TotalRevenue;
-
-            // TODO: Display in UI
-        }
-
-        // TODO: Implement panel-specific methods
     }
 
     internal class AdminViewModel
@@ -258,10 +151,7 @@ namespace Presentation.Shells
             AllPassengers = passengers ?? new List<Passenger>();
 
             _allTrips.Clear();
-            if (trips != null)
-            {
-                _allTrips.AddRange(trips);
-            }
+            if (trips != null) _allTrips.AddRange(trips);
 
             TotalUsers = AllUsers.Count;
             TotalTrips = _allTrips.Count;
@@ -272,23 +162,17 @@ namespace Presentation.Shells
             for (int i = 0; i < AllDrivers.Count; i++)
             {
                 Driver driver = AllDrivers[i];
-                if (driver.Status == DriverStatus.Available)
-                {
-                    ActiveDrivers++;
-                }
-                if (driver.Status == DriverStatus.OnTrip)
-                {
-                    OnTripDrivers++;
-                }
+                if (driver.Status == DriverStatus.Available) ActiveDrivers++;
+                if (driver.Status == DriverStatus.OnTrip) OnTripDrivers++;
             }
 
             for (int i = 0; i < _allTrips.Count; i++)
             {
                 Trip trip = _allTrips[i];
-                if (trip.Status == TripStatus.Searching ||
-                    trip.Status == TripStatus.Matched ||
-                    trip.Status == TripStatus.Arrived ||
-                    trip.Status == TripStatus.Started)
+                if (trip.Status == "Searching" ||
+                    trip.Status == "Matched" ||
+                    trip.Status == "Arrived" ||
+                    trip.Status == "Started")
                 {
                     OngoingTrips++;
                 }
@@ -313,7 +197,7 @@ namespace Presentation.Shells
             {
                 Trip trip = _allTrips[i];
                 if (trip.Id.ToString().IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    trip.Status.ToString().IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0)
+                    trip.Status.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     result.Add(trip);
                 }
@@ -333,4 +217,3 @@ namespace Presentation.Shells
         }
     }
 }
-

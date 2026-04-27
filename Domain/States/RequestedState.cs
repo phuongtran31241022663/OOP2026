@@ -1,6 +1,5 @@
 ﻿using System;
 using Domain.Entities;
-using Domain.Enums;
 using Domain.Events;
 
 namespace Domain.States
@@ -10,7 +9,6 @@ namespace Domain.States
         public void SetSearching(Trip trip)
         {
             trip.TransitionTo(new SearchingState());
-            trip.SetStatusInternal(TripStatus.Searching);
             trip.AddEvent(new TripSearchingEvent(trip.Id, 1));
         }
 
@@ -37,7 +35,6 @@ namespace Domain.States
         public void Cancel(Trip trip, string reason)
         {
             trip.TransitionTo(new CancelledState());
-            trip.SetStatusInternal(TripStatus.Cancelled);
             trip.AddEvent(new TripCancelledEvent(trip.Id, reason));
         }
 

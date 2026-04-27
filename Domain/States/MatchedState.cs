@@ -1,6 +1,5 @@
 ﻿using System;
 using Domain.Entities;
-using Domain.Enums;
 using Domain.Events;
 
 namespace Domain.States
@@ -12,7 +11,6 @@ namespace Domain.States
             // Có thể cho phép quay lại Searching? Trong Transition có Searching.
             // Nếu không muốn thì throw. Ở đây làm theo yêu cầu: có thể.
             trip.TransitionTo(new SearchingState());
-            trip.SetStatusInternal(TripStatus.Searching);
             // Có thể thêm event?
         }
 
@@ -24,7 +22,6 @@ namespace Domain.States
         public void MarkAsArrived(Trip trip)
         {
             trip.TransitionTo(new ArrivedState());
-            trip.SetStatusInternal(TripStatus.Arrived);
             trip.AddEvent(new TripArrivedEvent(trip.Id));
         }
 
@@ -41,7 +38,6 @@ namespace Domain.States
         public void Cancel(Trip trip, string reason)
         {
             trip.TransitionTo(new CancelledState());
-            trip.SetStatusInternal(TripStatus.Cancelled);
             trip.AddEvent(new TripCancelledEvent(trip.Id, reason));
         }
 

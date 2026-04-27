@@ -15,9 +15,6 @@ namespace Domain.Entities.Vehicles
             return 40;
         }
 
-        public override double GetMaxPickupDistance()
-        {
-            return 5;
-        }
+
     }
 }

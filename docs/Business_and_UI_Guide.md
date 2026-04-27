@@ -135,11 +135,10 @@ System iterates `foreach` over all drivers from `DriverRepository` (no LINQ).
 1. **Vehicle type match:** Driver's `VehicleType` matches request (`Car` / `Motorbike`)
 2. **Availability:** Exclude `Offline` and `OnTrip` drivers
 3. **Administrative address filter** (see 5.1.1) — avoid route API for all drivers
-4. **Distance check:** Driver to pickup distance < vehicle's `MaxPickupDistance`
-5. **Wallet check:** Driver `Wallet` balance covers expected commission
-6. **Sequential request:** Send to each driver in priority order with timeout
-7. **Retry logic:** If rejected or timeout, try next driver
-8. **Fallback:** If no drivers → `Trip.MarkTimeout()`
+4. **Wallet check:** Driver `Wallet` balance covers expected commission (hoa hồng)
+5. **Sequential request:** Send to each driver in priority order with timeout
+6. **Retry logic:** If rejected or timeout, try next driver
+7. **Fallback:** If no drivers → `Trip.MarkTimeout()`
 
 #### 5.1.1 Administrative Address Filter
 
@@ -180,7 +179,7 @@ public async Task MatchDriverAsync(Guid tripId, Guid driverId)
         Trip trip = await _tripRepository.GetByIdAsync(tripId);
         Driver driver = await _driverRepository.GetByIdAsync(driverId);
 
-        if (trip.Status != TripStatus.Searching)
+        if (!trip.IsSearching())
             throw new InvalidOperationException("Trip already assigned.");
         if (driver.Status != DriverStatus.Available)
             throw new InvalidOperationException("Driver no longer available.");
@@ -229,7 +228,7 @@ DriverIncome = TotalFare − Commission
 
 **Driver Assignment Flow:**
 1. Driver UI → `ITripService.MatchDriverAsync(tripId, driverId)`
-2. Check `trip.Status == Searching` + `driver.Status == Available`
+2. Check `trip.IsSearching()` + `driver.Status == Available`
 3. `trip.MatchDriver(driverId)` + `driver.SetOnTrip()`
 4. Update repositories → Save changes → Emit `TripMatchedEvent`
 
@@ -497,4 +496,4 @@ Thread-safe static utility using PBKDF2 with SHA-256:
 
 ---
 
-*Document version: 2.0 — Consolidated from Business_Logic_and_Workflows.md, Presentation_and_UI.md, Common_Project_Documentation.md.*
+*Document version: 2.1 — Updated: removed MaxPickupDistance, trip.Status uses IsSearching(), clarified State Pattern vs State Machine.*
