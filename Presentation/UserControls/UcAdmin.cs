@@ -75,9 +75,17 @@ namespace Presentation.UserControls
                 _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<Domain.Entities.FareRule>();
                 await OnTabChanged();
             }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Tai du lieu quan tri");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Tai du lieu quan tri");
+            }
             catch (Exception ex)
             {
-                ShowError("Tai du lieu that bai: " + ex.Message);
+                ShowFriendlyException(ex, "Tai du lieu quan tri");
             }
             finally
             {
@@ -115,8 +123,29 @@ namespace Presentation.UserControls
         private async Task ToggleUserLock(bool lockUser)
         {
             if (dgvUsers.SelectedRows.Count == 0) return;
-            // Implementation placeholder
-            ShowInfo(lockUser ? "Da khoa tai khoan." : "Da mo khoa tai khoan.");
+
+            IsLoading = true;
+            try
+            {
+                await Task.CompletedTask; // TODO: goi service khoa/mo khoa user
+                ShowInfo(lockUser ? "Da khoa tai khoan." : "Da mo khoa tai khoan.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Cap nhat trang thai tai khoan");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Cap nhat trang thai tai khoan");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Cap nhat trang thai tai khoan");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         // --- Trips Tab ---
@@ -133,15 +162,44 @@ namespace Presentation.UserControls
         {
             if (dgvTrips.SelectedRows.Count == 0) return;
             if (!Confirm("Huy chuyen da chon?")) return;
-            ShowInfo("Da huy chuyen.");
+
+            IsLoading = true;
+            try
+            {
+                await Task.CompletedTask; // TODO: goi service huy chuyen
+                ShowInfo("Da huy chuyen.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Huy chuyen di");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Huy chuyen di");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Huy chuyen di");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private void ShowTripDetail()
         {
-            if (dgvTrips.SelectedRows.Count == 0) return;
-            var trip = _allTrips[dgvTrips.SelectedRows[0].Index];
-            var ucDetail = new UcTripDetail(trip);
-            FrmModal.ShowModal(this, ucDetail, "Chi tiet chuyen");
+            ExecuteWithHandling("Mo chi tiet chuyen di", () =>
+            {
+                if (dgvTrips.SelectedRows.Count == 0)
+                {
+                    throw new InvalidOperationException("Vui long chon chuyen di can xem.");
+                }
+
+                var trip = _allTrips[dgvTrips.SelectedRows[0].Index];
+                var ucDetail = new UcTripDetail(trip);
+                FrmModal.ShowModal(this, ucDetail, "Chi tiet chuyen");
+            });
         }
 
         // --- FareRules Tab ---
@@ -169,12 +227,35 @@ namespace Presentation.UserControls
         {
             if (dgvFareRules.SelectedRows.Count == 0) return;
             if (!Confirm("Xoa quy tac gia da chon?")) return;
-            ShowInfo("Da xoa quy tac gia.");
+
+            IsLoading = true;
+            try
+            {
+                await Task.CompletedTask; // TODO: goi service xoa quy tac gia
+                ShowInfo("Da xoa quy tac gia.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Xoa quy tac gia");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Xoa quy tac gia");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Xoa quy tac gia");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         // --- Stats Tab ---
         private async void UpdateStats()
         {
+            IsLoading = true;
             try
             {
                 lblGMV.Text = (await _adminService.GetTotalGMVAsync()).ToString("N0") + "d";
@@ -183,7 +264,22 @@ namespace Presentation.UserControls
                 lblAvgRating.Text = (await _adminService.GetAverageSatisfactionAsync()).ToString("F1");
                 lblCompletionRate.Text = (await _adminService.GetCompletionRateAsync() * 100).ToString("F0") + "%";
             }
-            catch { }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Cap nhat thong ke");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Cap nhat thong ke");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Cap nhat thong ke");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
     }
 }

@@ -63,6 +63,7 @@ namespace Presentation.UserControls
             btnRejectRequest.Click += (s, e) => OnRejectRequestClicked();
 
             _tripService.TripStatusChanged += OnTripStatusChanged;
+            Disposed += (s, e) => _tripService.TripStatusChanged -= OnTripStatusChanged;
         }
 
         private void OnTripStatusChanged(object sender, Application.Events.TripStatusChangedEventArgs e)
@@ -95,6 +96,7 @@ namespace Presentation.UserControls
 
             string newStatus = _driver.IsOffline() ? "Available" : "Offline";
 
+            IsLoading = true;
             try
             {
                 await _userService.UpdateDriverStatusAsync(_driver.Id, newStatus);
@@ -104,9 +106,21 @@ namespace Presentation.UserControls
                     _driver.SetOffline();
                 UpdateHeaderStatus();
             }
-            catch
+            catch (InvalidOperationException ex)
             {
-                ShowError("Khong the cap nhat trang thai tai xe.");
+                ShowFriendlyException(ex, "Cap nhat trang thai tai xe");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Cap nhat trang thai tai xe");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Cap nhat trang thai tai xe");
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
@@ -145,6 +159,7 @@ namespace Presentation.UserControls
                 return;
             }
 
+            IsLoading = true;
             try
             {
                 var trips = await _tripService.GetPendingTripsAsync();
@@ -157,9 +172,21 @@ namespace Presentation.UserControls
                     UpdateTripPanel();
                 }
             }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Chap nhan chuyen");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Chap nhan chuyen");
+            }
             catch (Exception ex)
             {
-                ShowError("Chap nhan chuyen that bai: " + ex.Message);
+                ShowFriendlyException(ex, "Chap nhan chuyen");
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
@@ -171,26 +198,89 @@ namespace Presentation.UserControls
         private async System.Threading.Tasks.Task OnArrivedClicked()
         {
             if (_currentTrip == null) return;
-            await _tripService.MarkAsArrivedAsync(_currentTrip.Id);
-            UpdateTripPanel();
+
+            IsLoading = true;
+            try
+            {
+                await _tripService.MarkAsArrivedAsync(_currentTrip.Id);
+                UpdateTripPanel();
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Cap nhat trang thai chuyen di");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Cap nhat trang thai chuyen di");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Cap nhat trang thai chuyen di");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private async System.Threading.Tasks.Task OnStartTripClicked()
         {
             if (_currentTrip == null) return;
-            await _tripService.StartTripAsync(_currentTrip.Id);
-            UpdateTripPanel();
+
+            IsLoading = true;
+            try
+            {
+                await _tripService.StartTripAsync(_currentTrip.Id);
+                UpdateTripPanel();
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Bat dau chuyen di");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Bat dau chuyen di");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Bat dau chuyen di");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private async System.Threading.Tasks.Task OnCompleteTripClicked()
         {
             if (_currentTrip == null) return;
-            await _tripService.CompleteTripAsync(_currentTrip.Id);
-            _driver.SetAvailable();
-            _driver.AddTrip();
-            _currentTrip = null;
-            UpdateHeaderStatus();
-            UpdateTripPanel();
+
+            IsLoading = true;
+            try
+            {
+                await _tripService.CompleteTripAsync(_currentTrip.Id);
+                _driver.SetAvailable();
+                _driver.AddTrip();
+                _currentTrip = null;
+                UpdateHeaderStatus();
+                UpdateTripPanel();
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Hoan thanh chuyen di");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Hoan thanh chuyen di");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Hoan thanh chuyen di");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private async System.Threading.Tasks.Task OnCancelTripClicked()
@@ -198,11 +288,31 @@ namespace Presentation.UserControls
             if (_currentTrip == null) return;
             if (!Confirm("Ban co chac muon huy chuyen?")) return;
 
-            await _tripService.CancelTripAsync(_currentTrip.Id, "Tai xe huy");
-            _driver.SetAvailable();
-            _currentTrip = null;
-            UpdateHeaderStatus();
-            UpdateTripPanel();
+            IsLoading = true;
+            try
+            {
+                await _tripService.CancelTripAsync(_currentTrip.Id, "Tai xe huy");
+                _driver.SetAvailable();
+                _currentTrip = null;
+                UpdateHeaderStatus();
+                UpdateTripPanel();
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Huy chuyen di");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Huy chuyen di");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Huy chuyen di");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
     }
 }

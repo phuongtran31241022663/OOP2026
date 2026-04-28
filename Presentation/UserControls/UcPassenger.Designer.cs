@@ -3,7 +3,7 @@ namespace Presentation.UserControls
     partial class UcPassenger
     {
         private System.ComponentModel.IContainer components = null;
-
+        private System.Windows.Forms.ErrorProvider errorProvider;
         private System.Windows.Forms.SplitContainer splitMain;
         private Presentation.Components.MapControl mapControl;
 
@@ -48,6 +48,12 @@ namespace Presentation.UserControls
             {
                 components.Dispose();
             }
+
+            if (disposing && (errorProvider != null))
+            {
+                errorProvider.Dispose();
+            }
+
             base.Dispose(disposing);
         }
 
@@ -55,34 +61,16 @@ namespace Presentation.UserControls
 
         private void InitializeComponent()
         {
+            this.errorProvider = new System.Windows.Forms.ErrorProvider();
             this.splitMain = new System.Windows.Forms.SplitContainer();
             this.mapControl = new Presentation.Components.MapControl();
             this.tblRight = new System.Windows.Forms.TableLayoutPanel();
             this.pnlHeader = new System.Windows.Forms.Panel();
-            this.btnLogout = new System.Windows.Forms.Button();
-            this.btnProfile = new System.Windows.Forms.Button();
-            this.btnHistory = new System.Windows.Forms.Button();
             this.lblPassengerName = new System.Windows.Forms.Label();
+            this.btnHistory = new System.Windows.Forms.Button();
+            this.btnProfile = new System.Windows.Forms.Button();
+            this.btnLogout = new System.Windows.Forms.Button();
             this.pnlActionStage = new System.Windows.Forms.Panel();
-            this.pnlBooking = new System.Windows.Forms.Panel();
-            this.btnBook = new System.Windows.Forms.Button();
-            this.cmbVehicleType = new System.Windows.Forms.ComboBox();
-            this.destinationPicker = new Presentation.Components.LocationPickerControl();
-            this.pickupPicker = new Presentation.Components.LocationPickerControl();
-            this.pnlSearching = new System.Windows.Forms.Panel();
-            this.btnCancelSearch = new System.Windows.Forms.Button();
-            this.lblSearching = new System.Windows.Forms.Label();
-            this.progressSearching = new System.Windows.Forms.ProgressBar();
-            this.pnlTracking = new System.Windows.Forms.Panel();
-            this.btnCancelTrip = new System.Windows.Forms.Button();
-            this.driverCard = new Presentation.Components.DriverCardControl();
-            this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
-            this.pnlPayment = new System.Windows.Forms.Panel();
-            this.btnRateDriver = new System.Windows.Forms.Button();
-            this.btnConfirmPayment = new System.Windows.Forms.Button();
-            this.lblTotalAmount = new System.Windows.Forms.Label();
-            this.pnlHistory = new System.Windows.Forms.Panel();
-            this.dgvHistory = new System.Windows.Forms.DataGridView();
             this.lblStatus = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();

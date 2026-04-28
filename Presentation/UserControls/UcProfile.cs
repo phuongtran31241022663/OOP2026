@@ -49,7 +49,8 @@ namespace Presentation.UserControls
 
         private async System.Threading.Tasks.Task OnSaveClicked()
         {
-            try
+            IsLoading = true;
+            await ExecuteWithHandlingAsync("Cap nhat ho so ca nhan", async () =>
             {
                 if (!string.IsNullOrWhiteSpace(txtName.Text) && txtName.Text != _user.Name)
                 {
@@ -60,43 +61,40 @@ namespace Presentation.UserControls
                 {
                     if (txtNewPassword.Text != txtConfirmPassword.Text)
                     {
-                        ShowWarning("Mat khau xac nhan khong khop.");
-                        return;
+                        throw new FormatException("Mat khau xac nhan khong khop.");
                     }
                     _user.ChangePassword(txtCurrentPassword.Text, txtNewPassword.Text);
                 }
 
                 ShowInfo("Cap nhat ho so thanh cong!");
-                var parent = this.ParentForm;
-                if (parent != null) parent.DialogResult = DialogResult.OK;
-            }
-            catch (Exception ex)
-            {
-                ShowError("Cap nhat that bai: " + ex.Message);
-            }
+                var parent = ParentForm;
+                if (parent != null)
+                {
+                    parent.DialogResult = DialogResult.OK;
+                }
+
+                await System.Threading.Tasks.Task.CompletedTask;
+            }, () => IsLoading = false);
         }
 
         private async System.Threading.Tasks.Task OnTopUpClicked()
         {
             if (_user is Driver driver)
             {
-                try
+                IsLoading = true;
+                await ExecuteWithHandlingAsync("Nap tien vao vi", async () =>
                 {
                     decimal amount;
                     if (!decimal.TryParse(txtTopUpAmount.Text, out amount) || amount <= 0)
                     {
-                        ShowWarning("So tien khong hop le.");
-                        return;
+                        throw new FormatException("So tien nap khong hop le.");
                     }
 
                     driver.DepositToWallet(new Domain.ValueObjects.Money(amount, "VND"));
                     lblWallet.Text = "Vi: " + driver.Wallet.Amount.ToString("N0") + "d";
                     ShowInfo("Nap tien thanh cong!");
-                }
-                catch (Exception ex)
-                {
-                    ShowError("Nap tien that bai: " + ex.Message);
-                }
+                    await System.Threading.Tasks.Task.CompletedTask;
+                }, () => IsLoading = false);
             }
         }
     }

@@ -1,10 +1,7 @@
 using System;
-using Domain.Enums;
 using Domain.ValueObjects;
-using Domain.Events;
 using Domain.States;
 using Domain.States.Drivers;
-using Newtonsoft.Json;
 
 namespace Domain.Entities.Users
 {
@@ -22,30 +19,7 @@ namespace Domain.Entities.Users
         private int _totalReviews;
         #endregion
 
-        #region JSON Backward Compatibility
-        [JsonProperty("Status")]
-        private DriverStatus SerializedStatus
-        {
-            get
-            {
-                if (_currentState is DriverAvailableState) return DriverStatus.Available;
-                if (_currentState is DriverOnTripState) return DriverStatus.OnTrip;
-                return DriverStatus.Offline;
-            }
-            set
-            {
-                switch (value)
-                {
-                    case DriverStatus.Available: _currentState = new DriverAvailableState(); break;
-                    case DriverStatus.OnTrip: _currentState = new DriverOnTripState(); break;
-                    default: _currentState = new DriverOfflineState(); break;
-                }
-            }
-        }
-        #endregion
-
         #region Properties
-        [JsonIgnore]
         public string Status
         {
             get
@@ -75,7 +49,14 @@ namespace Domain.Entities.Users
         #endregion
 
         #region Constructors
+        // Constructor dành cho JSON deserialization
+        private Driver()
+        {
+        }
+
+
         public Driver(
+
             string name,
             string phone,
             string password,
@@ -97,11 +78,11 @@ namespace Domain.Entities.Users
             Guid id,
             string name,
             string phone,
-            string password,
+            string hashedPassword,
             string licenseNumber,
             Guid vehicleId,
             Location position)
-            : base(id, name, phone, password)
+            : base(id, name, phone, hashedPassword)
         {
             _licenseNumber = licenseNumber;
             Position = position;
@@ -170,4 +151,3 @@ namespace Domain.Entities.Users
         }
     }
 }
-

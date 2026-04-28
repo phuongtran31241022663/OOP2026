@@ -8,6 +8,20 @@ using System;
 
 namespace Presentation.UserControls
 {
+    using Application.Interfaces;
+    using Application.Events;
+    using Domain.Entities;
+    using Domain.Entities.Users;
+    using Domain.Enums;
+    using Domain.ValueObjects;
+    using Presentation.Components;
+    using Presentation.Constants;
+    using Presentation.Shells;
+    using System;
+    using System.Drawing;
+    using System.Text.RegularExpressions;
+    using System.Windows.Forms;
+
     /// <summary>
     /// Vong doi dat xe: Dat -> Theo doi -> Thanh toan.
     /// SplitContainer: Ban do trai, bang dieu khien dong phai.
@@ -53,6 +67,9 @@ namespace Presentation.UserControls
             InitializeComponent();
             SetupEvents();
             ShowStage(TripStage.Idle);
+            
+            // Initialize location pickers with passenger data for recent locations
+            InitializeLocationPickers();
         }
 
         private void SetupEvents()
@@ -71,12 +88,235 @@ namespace Presentation.UserControls
             {
                 _selectedVehicle = cmbVehicleType.SelectedIndex == 1 ? VehicleType.Car : VehicleType.Motorbike;
                 UpdateFareEstimate();
+                ValidateBooking(); // Re-validate when vehicle type changes
             };
 
+            // Location picker events
+            pickupPicker.SelectedIndexChanged += (s, e) => OnPickupSelected();
+            destinationPicker.SelectedIndexChanged += (s, e) => OnDestinationSelected();
+
             _tripService.TripStatusChanged += OnTripStatusChanged;
+            Disposed += (s, e) => _tripService.TripStatusChanged -= OnTripStatusChanged;
+
+            // Keyboard support
+            KeyDown += UcPassenger_KeyDown;
+
+            // Setup hover effects for buttons
+            SetupButtonHoverEffects();
         }
 
-        private void OnTripStatusChanged(object sender, Application.Events.TripStatusChangedEventArgs e)
+        #region Location Picker Handlers
+
+        private void OnPickupSelected()
+        {
+            // Use the public SelectedLocation property from LocationPickerControl
+            _pickup = pickupPicker.SelectedLocation;
+            if (_pickup != null)
+            {
+                // Update display text
+                pickupPicker.Text = $"A: {FormatLocationForDisplay(_pickup)}";
+                ValidateBooking();
+            }
+        }
+
+        private void OnDestinationSelected()
+        {
+            // Use the public SelectedLocation property from LocationPickerControl
+            _destination = destinationPicker.SelectedLocation;
+            if (_destination != null)
+            {
+                // Update display text
+                destinationPicker.Text = $"B: {FormatLocationForDisplay(_destination)}";
+                
+                // Check for duplicate locations
+                CheckForDuplicateLocations();
+                
+                ValidateBooking();
+            }
+        }
+
+        private void CheckForDuplicateLocations()
+        {
+            if (_pickup == null || _destination == null)
+                return;
+
+            // Check if coordinates are too close (duplicate)
+            bool isDuplicate = Math.Abs(_pickup.Coordinate.Latitude - _destination.Coordinate.Latitude) < LocationPickerControl.CoordinateTolerance &&
+                              Math.Abs(_pickup.Coordinate.Longitude - _destination.Coordinate.Longitude) < LocationPickerControl.CoordinateTolerance;
+
+            if (isDuplicate)
+            {
+                _validationErrorProvider.SetError(destinationPicker, "Điểm đến không được trùng điểm đón");
+                btnBook.Enabled = false;
+            }
+            else
+            {
+                _validationErrorProvider.SetError(destinationPicker, string.Empty);
+                // Don't set enabled here - let ValidateBooking decide based on all validations
+            }
+        }
+
+        #endregion
+
+        #region Validation Methods
+
+        private void ValidateBooking()
+        {
+            bool pickupValid = _pickup != null;
+            bool destinationValid = _destination != null;
+            bool vehicleValid = cmbVehicleType.SelectedIndex >= 0;
+            bool noDuplicate = true;
+
+            // Check for duplicate locations
+            if (_pickup != null && _destination != null)
+            {
+                bool isDuplicate = Math.Abs(_pickup.Coordinate.Latitude - _destination.Coordinate.Latitude) < LocationPickerControl.CoordinateTolerance &&
+                                  Math.Abs(_pickup.Coordinate.Longitude - _destination.Coordinate.Longitude) < LocationPickerControl.CoordinateTolerance;
+                noDuplicate = !isDuplicate;
+            }
+
+            bool isValid = pickupValid && destinationValid && vehicleValid && noDuplicate;
+
+            // Set error messages via ErrorProvider from BaseUserControl
+            if (pickupValid)
+                _validationErrorProvider.SetError(pickupPicker, string.Empty);
+            else
+                _validationErrorProvider.SetError(pickupPicker, "Vui lòng chọn điểm đón");
+
+            if (destinationValid && noDuplicate)
+                _validationErrorProvider.SetError(destinationPicker, string.Empty);
+            else
+                _validationErrorProvider.SetError(destinationPicker, noDuplicate ? "Vui lòng chọn điểm đến" : "Điểm đến không được trùng điểm đón");
+
+            if (vehicleValid)
+                _validationErrorProvider.SetError(cmbVehicleType, string.Empty);
+            else
+                _validationErrorProvider.SetError(cmbVehicleType, "Vui lòng chọn loại xe");
+
+            btnBook.Enabled = isValid;
+        }
+
+        #endregion
+
+        #region Keyboard Support
+
+        private void UcPassenger_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true; // Prevent beep
+
+                // If focus is on a ComboBox, let the default behavior happen (open dropdown)
+                if (ActiveControl is ComboBox)
+                    return;
+
+                // If booking button is enabled, click it
+                if (btnBook.Enabled)
+                {
+                    btnBook.PerformClick();
+                    return;
+                }
+
+                // Otherwise, try to move focus to next control
+                SelectNextControl(ActiveControl, true, true, true, true);
+            }
+        }
+
+        #endregion
+
+        #region Hover Effects
+
+        private void SetupButtonHoverEffects()
+        {
+            // Book button hover effects
+            btnBook.MouseEnter += (s, e) => 
+            {
+                btnBook.BackColor = UiConstants.PrimaryHover;
+            };
+            btnBook.MouseLeave += (s, e) => 
+            {
+                btnBook.BackColor = UiConstants.PrimaryNormal;
+            };
+
+            // Cancel search button hover effects
+            btnCancelSearch.MouseEnter += (s, e) => 
+            {
+                btnCancelSearch.BackColor = UiConstants.DangerHover;
+            };
+            btnCancelSearch.MouseLeave += (s, e) => 
+            {
+                btnCancelSearch.BackColor = UiConstants.DangerNormal;
+            };
+
+            // Cancel trip button hover effects
+            btnCancelTrip.MouseEnter += (s, e) => 
+            {
+                btnCancelTrip.BackColor = UiConstants.DangerHover;
+            };
+            btnCancelTrip.MouseLeave += (s, e) => 
+            {
+                btnCancelTrip.BackColor = UiConstants.DangerNormal;
+            };
+
+            // Confirm payment button hover effects
+            btnConfirmPayment.MouseEnter += (s, e) => 
+            {
+                btnConfirmPayment.BackColor = UiConstants.SuccessHover;
+            };
+            btnConfirmPayment.MouseLeave += (s, e) => 
+            {
+                btnConfirmPayment.BackColor = UiConstants.SuccessNormal;
+            };
+
+            // Rate driver button hover effects
+            btnRateDriver.MouseEnter += (s, e) => 
+            {
+                btnRateDriver.BackColor = UiConstants.PrimaryHover;
+            };
+            btnRateDriver.MouseLeave += (s, e) => 
+            {
+                btnRateDriver.BackColor = UiConstants.PrimaryNormal;
+            };
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        private string FormatLocationForDisplay(Location location)
+        {
+            if (location == null || location.Address == null)
+                return string.Empty;
+
+            var address = location.Address;
+            // Format: District, City
+            if (!string.IsNullOrWhiteSpace(address.District) && !string.IsNullOrWhiteSpace(address.City))
+                return $"{address.District}, {address.City}";
+            else if (!string.IsNullOrWhiteSpace(address.City))
+                return address.City;
+            else if (!string.IsNullOrWhiteSpace(address.District))
+                return address.District;
+            else
+                return string.Empty;
+        }
+
+        private void InitializeLocationPickers()
+        {
+            // Set up the labels for pickup and destination (these would typically be external labels)
+            // For now, we'll just initialize the pickers with empty state
+            pickupPicker.SelectedLocation = null;
+            destinationPicker.SelectedLocation = null;
+            
+            // Populate dropdowns with recent locations based on passenger ID
+            string userIdentifier = _passenger?.Id.ToString();
+            pickupPicker.PopulateDropdown(userIdentifier);
+            destinationPicker.PopulateDropdown(userIdentifier);
+        }
+
+        #endregion
+
+        private void OnTripStatusChanged(object sender, TripStatusChangedEventArgs e)
         {
             RunOnUI(() =>
             {
@@ -147,6 +387,7 @@ namespace Presentation.UserControls
             }
 
             ShowStage(TripStage.Searching);
+            IsLoading = true;
 
             try
             {
@@ -182,25 +423,60 @@ namespace Presentation.UserControls
                     bool matched = await _matchingService.MatchDriverToTripAsync(_currentTrip.Id, Guid.Empty);
                     if (!matched)
                     {
-ShowWarning("Khong tim thay tai xe phu hop. Vui long thu lai.");
+                        ShowWarning("Khong tim thay tai xe phu hop. Vui long thu lai.");
                         ShowStage(TripStage.Idle);
                     }
                 }
             }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Dat chuyen di");
+                ShowStage(TripStage.Idle);
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Dat chuyen di");
+                ShowStage(TripStage.Idle);
+            }
             catch (Exception ex)
             {
-                ShowError("Dat xe that bai: " + ex.Message);
+                ShowFriendlyException(ex, "Dat chuyen di");
                 ShowStage(TripStage.Idle);
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
         private async System.Threading.Tasks.Task OnCancelSearchClicked()
         {
-            if (_currentTrip != null)
+            IsLoading = true;
+            try
             {
-                await _tripService.CancelTripAsync(_currentTrip.Id, "Hanh khach huy tim kiem");
-                _currentTrip = null;
+                if (_currentTrip != null)
+                {
+                    await _tripService.CancelTripAsync(_currentTrip.Id, "Hanh khach huy tim kiem");
+                    _currentTrip = null;
+                }
             }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Huy tim kiem tai xe");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Huy tim kiem tai xe");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Huy tim kiem tai xe");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+
             ShowStage(TripStage.Idle);
         }
 
@@ -208,34 +484,99 @@ ShowWarning("Khong tim thay tai xe phu hop. Vui long thu lai.");
         {
             if (_currentTrip == null) return;
 
-            bool canCancel = await _tripService.CanTripBeCancelledAsync(_currentTrip.Id);
-            if (!canCancel)
+            IsLoading = true;
+            try
             {
-                ShowWarning("Khong the huy chuyen o trang thai nay.");
-                return;
-            }
+                bool canCancel = await _tripService.CanTripBeCancelledAsync(_currentTrip.Id);
+                if (!canCancel)
+                {
+                    ShowWarning("Khong the huy chuyen o trang thai nay.");
+                    return;
+                }
 
-            if (Confirm("Ban co chac muon huy chuyen?"))
+                if (Confirm("Ban co chac muon huy chuyen?"))
+                {
+                    await _tripService.CancelTripAsync(_currentTrip.Id, "Hanh khach huy");
+                    _currentTrip = null;
+                    ShowStage(TripStage.Idle);
+                }
+            }
+            catch (InvalidOperationException ex)
             {
-                await _tripService.CancelTripAsync(_currentTrip.Id, "Hanh khach huy");
-                _currentTrip = null;
-                ShowStage(TripStage.Idle);
+                ShowFriendlyException(ex, "Huy chuyen di");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Huy chuyen di");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Huy chuyen di");
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
         private async System.Threading.Tasks.Task OnConfirmPaymentClicked()
         {
             if (_currentTrip == null) return;
-            await _tripService.ConfirmPaymentAsync(_currentTrip.Id);
-            ShowInfo("Thanh toan thanh cong!");
-            ShowStage(TripStage.Idle);
+
+            IsLoading = true;
+            try
+            {
+                await _tripService.ConfirmPaymentAsync(_currentTrip.Id);
+                ShowInfo("Thanh toan thanh cong!");
+                ShowStage(TripStage.Idle);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Xac nhan thanh toan");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Xac nhan thanh toan");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Xac nhan thanh toan");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private void OnRateDriverClicked()
         {
-            if (_currentTrip == null) return;
-            var ucRating = new UcRating(_reviewService, _currentTrip);
-            FrmModal.ShowModal(this, ucRating, "Danh gia tai xe");
+            if (_currentTrip == null)
+            {
+                return;
+            }
+
+            try
+            {
+                if (_reviewService == null)
+                {
+                    throw new InvalidOperationException("Dich vu danh gia chua duoc khoi tao.");
+                }
+
+                var ucRating = new UcRating(_reviewService, _currentTrip);
+                FrmModal.ShowModal(this, ucRating, "Danh gia tai xe");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Mo man hinh danh gia tai xe");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Mo man hinh danh gia tai xe");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Mo man hinh danh gia tai xe");
+            }
         }
 
         private async void LoadHistory()
@@ -254,9 +595,17 @@ ShowWarning("Khong tim thay tai xe phu hop. Vui long thu lai.");
                         trip.RequestAt.ToString("dd/MM HH:mm"));
                 }
             }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, "Tai lich su chuyen di");
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, "Tai lich su chuyen di");
+            }
             catch (Exception ex)
             {
-                ShowError("Tai lich su that bai: " + ex.Message);
+                ShowFriendlyException(ex, "Tai lich su chuyen di");
             }
             finally
             {

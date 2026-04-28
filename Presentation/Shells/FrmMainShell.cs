@@ -1,5 +1,7 @@
 using Application.Interfaces;
 using Domain.Entities.Users;
+using Domain.Repositories;
+using Presentation.Helpers;
 using Presentation.UserControls;
 using System;
 using System.Drawing;
@@ -23,6 +25,7 @@ namespace Presentation.Shells
         private readonly IAdminService _adminService;
         private readonly IMatchingService _matchingService;
         private readonly IReviewService _reviewService;
+        private readonly IVehicleRepository _vehicleRepository;
 
         private User _currentUser;
         private UcAuth _ucAuth;
@@ -38,7 +41,8 @@ namespace Presentation.Shells
             ISimulationService simulationService,
             IAdminService adminService,
             IMatchingService matchingService,
-            IReviewService reviewService)
+            IReviewService reviewService,
+            IVehicleRepository vehicleRepository)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _tripService = tripService ?? throw new ArgumentNullException(nameof(tripService));
@@ -48,6 +52,7 @@ namespace Presentation.Shells
             _adminService = adminService ?? throw new ArgumentNullException(nameof(adminService));
             _matchingService = matchingService ?? throw new ArgumentNullException(nameof(matchingService));
             _reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
+            _vehicleRepository = vehicleRepository ?? throw new ArgumentNullException(nameof(vehicleRepository));
 
             InitializeComponent();
             SetupShell();
@@ -66,96 +71,121 @@ namespace Presentation.Shells
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            ShowAuthScreen();
+            ExecuteWithHandling("Mo man hinh dang nhap", ShowAuthScreen);
         }
 
         // --- Navigation ----------------------------------------------------
 
         public void ShowAuthScreen()
         {
-            _currentUser = null;
-            if (_ucAuth == null)
+            ExecuteWithHandling("Tai man hinh dang nhap", () =>
             {
-                _ucAuth = new UcAuth(_userService);
-                _ucAuth.LoginSucceeded += OnLoginSucceeded;
-                _ucAuth.RegisterSucceeded += OnRegisterSucceeded;
-            }
-            ShowUserControl(_ucAuth);
+                _currentUser = null;
+                if (_ucAuth == null)
+                {
+                    _ucAuth = new UcAuth(_userService, _vehicleRepository);
+                    _ucAuth.LoginSucceeded += OnLoginSucceeded;
+                    _ucAuth.RegisterSucceeded += OnRegisterSucceeded;
+                }
+                ShowUserControl(_ucAuth);
+            });
         }
 
         public void ShowPassengerScreen(Passenger passenger)
         {
-            _currentUser = passenger;
-            if (_ucPassenger == null)
+            ExecuteWithHandling("Mo man hinh hanh khach", () =>
             {
-                _ucPassenger = new UcPassenger(
-                    passenger,
-                    _tripService,
-                    _userService,
-                    _mapService,
-                    _fareService,
-                    _simulationService,
-                    _matchingService,
-                    _reviewService);
-                _ucPassenger.RequestLogout += OnRequestLogout;
-                _ucPassenger.RequestShowProfile += OnRequestShowProfile;
-            }
-            ShowUserControl(_ucPassenger);
+                _currentUser = passenger;
+                if (_ucPassenger == null)
+                {
+                    _ucPassenger = new UcPassenger(
+                        passenger,
+                        _tripService,
+                        _userService,
+                        _mapService,
+                        _fareService,
+                        _simulationService,
+                        _matchingService,
+                        _reviewService);
+                    _ucPassenger.RequestLogout += OnRequestLogout;
+                    _ucPassenger.RequestShowProfile += OnRequestShowProfile;
+                }
+                ShowUserControl(_ucPassenger);
+            });
         }
 
         public void ShowDriverScreen(Driver driver)
         {
-            _currentUser = driver;
-            if (_ucDriver == null)
+            ExecuteWithHandling("Mo man hinh tai xe", () =>
             {
-                _ucDriver = new UcDriver(
-                    driver,
-                    _tripService,
-                    _userService,
-                    _simulationService,
-                    _fareService,
-                    _matchingService);
-                _ucDriver.RequestLogout += OnRequestLogout;
-                _ucDriver.RequestShowProfile += OnRequestShowProfile;
-            }
-            ShowUserControl(_ucDriver);
+                _currentUser = driver;
+                if (_ucDriver == null)
+                {
+                    _ucDriver = new UcDriver(
+                        driver,
+                        _tripService,
+                        _userService,
+                        _simulationService,
+                        _fareService,
+                        _matchingService);
+                    _ucDriver.RequestLogout += OnRequestLogout;
+                    _ucDriver.RequestShowProfile += OnRequestShowProfile;
+                }
+                ShowUserControl(_ucDriver);
+            });
         }
 
         public void ShowAdminScreen(Admin admin)
         {
-            _currentUser = admin;
-            if (_ucAdmin == null)
+            ExecuteWithHandling("Mo man hinh quan tri", () =>
             {
-                _ucAdmin = new UcAdmin(admin, _adminService);
-                _ucAdmin.RequestLogout += OnRequestLogout;
-            }
-            ShowUserControl(_ucAdmin);
+                _currentUser = admin;
+                if (_ucAdmin == null)
+                {
+                    _ucAdmin = new UcAdmin(admin, _adminService);
+                    _ucAdmin.RequestLogout += OnRequestLogout;
+                }
+                ShowUserControl(_ucAdmin);
+            });
         }
 
         private void ShowUserControl(UserControl uc)
         {
-            pnlContent.Controls.Clear();
-            uc.Dock = DockStyle.Fill;
-            pnlContent.Controls.Add(uc);
-            uc.Focus();
+            ExecuteWithHandling("Hien thi noi dung man hinh", () =>
+            {
+                if (uc == null)
+                {
+                    throw new InvalidOperationException("Noi dung man hinh khong hop le.");
+                }
+
+                pnlContent.Controls.Clear();
+                uc.Dock = DockStyle.Fill;
+                pnlContent.Controls.Add(uc);
+                uc.Focus();
+            });
         }
 
         // --- Event Handlers ------------------------------------------------
 
         private void OnLoginSucceeded(object sender, User user)
         {
-            switch (user)
+            ExecuteWithHandling("Dieu huong sau dang nhap", () =>
             {
-                case Passenger passenger:
-                    ShowPassengerScreen(passenger);
-                    break;
-                case Driver driver:
-                    ShowDriverScreen(driver);
-                    break;
-                case Admin admin:
-                    ShowAdminScreen(admin);
-                    break;
-            }
+                switch (user)
+                {
+                    case Passenger passenger:
+                        ShowPassengerScreen(passenger);
+                        break;
+                    case Driver driver:
+                        ShowDriverScreen(driver);
+                        break;
+                    case Admin admin:
+                        ShowAdminScreen(admin);
+                        break;
+                    default:
+                        throw new InvalidOperationException("Vai tro nguoi dung khong duoc ho tro.");
+                }
+            });
         }
 
         private void OnRegisterSucceeded(object sender, User user)
@@ -165,19 +195,27 @@ namespace Presentation.Shells
 
         private void OnRequestLogout(object sender, EventArgs e)
         {
-            _ucPassenger?.Dispose();
-            _ucPassenger = null;
-            _ucDriver?.Dispose();
-            _ucDriver = null;
-            _ucAdmin?.Dispose();
-            _ucAdmin = null;
-            ShowAuthScreen();
+            ExecuteWithHandling("Dang xuat", () =>
+            {
+                _ucPassenger?.Dispose();
+                _ucDriver?.Dispose();
+                _ucAdmin?.Dispose();
+            }, () =>
+            {
+                _ucPassenger = null;
+                _ucDriver = null;
+                _ucAdmin = null;
+                ShowAuthScreen();
+            });
         }
 
         private void OnRequestShowProfile(object sender, User user)
         {
-            var ucProfile = new UcProfile(user, _userService);
-            FrmModal.ShowModal(this, ucProfile, "Ho so ca nhan");
+            ExecuteWithHandling("Mo ho so ca nhan", () =>
+            {
+                var ucProfile = new UcProfile(user, _userService);
+                FrmModal.ShowModal(this, ucProfile, "Ho so ca nhan");
+            });
         }
 
         // --- Modal & Toast Helpers -----------------------------------------
@@ -189,7 +227,31 @@ namespace Presentation.Shells
 
         public void ShowToast(string message, int durationMs = 3000)
         {
-            FrmToast.Show(this, message, durationMs);
+            ExecuteWithHandling("Hien thi thong bao", () => FrmToast.Show(this, message, durationMs));
+        }
+
+        private void ExecuteWithHandling(string actionName, Action action, Action finallyAction = null)
+        {
+            try
+            {
+                action?.Invoke();
+            }
+            catch (InvalidOperationException ex)
+            {
+                AlertHelper.ShowFriendlyException(this, ex, actionName);
+            }
+            catch (FormatException ex)
+            {
+                AlertHelper.ShowFriendlyException(this, ex, actionName);
+            }
+            catch (Exception ex)
+            {
+                AlertHelper.ShowFriendlyException(this, ex, actionName);
+            }
+            finally
+            {
+                finallyAction?.Invoke();
+            }
         }
     }
 }

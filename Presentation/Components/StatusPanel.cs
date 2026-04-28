@@ -155,9 +155,17 @@ namespace Presentation.Components
                     MessageBox.Show("File log không tồn tại: " + logPath, "Không tìm thấy", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show("Khong the mo tep nhat ky luc nay.\nChi tiet: " + ex.Message, "Loi thao tac", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (FormatException ex)
+            {
+                MessageBox.Show("Duong dan tep nhat ky khong dung dinh dang.\nChi tiet: " + ex.Message, "Loi dinh dang", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             catch (Exception ex)
             {
-                MessageBox.Show($"Không thể mở file log:\n{ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Khong the mo tep nhat ky.\nChi tiet: " + ex.Message, "Loi he thong", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -215,3 +223,4 @@ namespace Presentation.Components
         Debug
     }
 }
+
