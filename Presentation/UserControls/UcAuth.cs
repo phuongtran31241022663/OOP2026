@@ -155,7 +155,6 @@ namespace Presentation.UserControls
             pnlLogin.Visible = true;
             pnlRegister.Visible = false;
             txtLoginPhone.Focus();
-            _validationErrorProvider?.Clear();
         }
 
         private void ShowRegisterPanel()
@@ -165,7 +164,7 @@ namespace Presentation.UserControls
             cmbRole.SelectedIndex = 0;
             OnRoleChanged();
             txtRegName.Focus();
-            _validationErrorProvider?.Clear();
+
         }
 
         private void ToggleLoginPassword()
@@ -235,17 +234,13 @@ namespace Presentation.UserControls
             }
             catch (InvalidOperationException ex)
             {
-                ShowFriendlyException(ex, "Dang nhap");
+                ShowError(ex.Message);
                 txtLoginPassword.Clear();
                 txtLoginPassword.Focus();
             }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Dang nhap");
-            }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Dang nhap");
+                ShowError("Co loi xay ra khi dang nhap: " + ex.Message);
             }
             finally
             {
@@ -263,21 +258,6 @@ namespace Presentation.UserControls
                 string password = GetText(txtRegPassword, PlaceholderPassword);
                 bool isDriver = cmbRole.SelectedIndex == 1;
 
-                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(phone) || string.IsNullOrWhiteSpace(password))
-                {
-                    throw new FormatException("Vui long nhap day du thong tin dang ky.");
-                }
-
-                if (!Regex.IsMatch(phone, "^[0-9]{9,11}$"))
-                {
-                    throw new FormatException("So dien thoai khong hop le.");
-                }
-
-                if (password.Length < 6)
-                {
-                    throw new FormatException("Mat khau phai co it nhat 6 ky tu.");
-                }
-
                 if (isDriver)
                 {
                     string plate = txtPlate.Text.Trim();
@@ -286,27 +266,22 @@ namespace Presentation.UserControls
                     string color = txtColor.Text.Trim();
                     int capacity = (int)numCapacity.Value;
 
-                    if (string.IsNullOrWhiteSpace(plate))
+                    // Khai báo vehicle trước
+                    Vehicle vehicle = null;
+
+                    try
                     {
-                        throw new FormatException("Bien so xe khong duoc de trong.");
+                        vehicle = cmbVehicleType.SelectedIndex == 0
+                            ? (Vehicle)new Motorbike(null, plate, brand, model, color)
+                            : new Car(null, plate, brand, model, color, capacity);
                     }
-                    if (string.IsNullOrWhiteSpace(brand))
+                    catch (Exception ex)
                     {
-                        throw new FormatException("Hang xe khong duoc de trong.");
-                    }
-                    if (string.IsNullOrWhiteSpace(model))
-                    {
-                        throw new FormatException("Mau xe khong duoc de trong.");
-                    }
-                    if (string.IsNullOrWhiteSpace(color))
-                    {
-                        throw new FormatException("Mau xe khong duoc de trong.");
+                        // Bắt tất cả ngoại lệ từ constructor (vd: ArgumentException, FormatException...)
+                        throw new FormatException("Thông tin xe không hợp lệ: " + ex.Message);
                     }
 
-                    Vehicle vehicle = cmbVehicleType.SelectedIndex == 0
-                        ? (Vehicle)new Motorbike(null, plate, brand, model, color)
-                        : new Car(null, plate, brand, model, color, capacity);
-
+                    // Bây giờ vehicle đã được gán thành công
                     await _vehicleRepository.AddAsync(vehicle);
                     await _vehicleRepository.SaveChangesAsync();
 
@@ -338,15 +313,15 @@ namespace Presentation.UserControls
             }
             catch (InvalidOperationException ex)
             {
-                ShowFriendlyException(ex, "Dang ky");
+                ShowError(ex.Message);
             }
             catch (FormatException ex)
             {
-                ShowFriendlyException(ex, "Dang ky");
+                ShowError(ex.Message);
             }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Dang ky");
+                ShowError("Co loi xay ra khi dang ky: " + ex.Message);
             }
             finally
             {
