@@ -25,7 +25,7 @@ namespace Domain.Entities.Users
 
         public override string GetInfo()
         {
-            return "T�I KHO?N QU?N TR? VI�N\n" + base.GetInfo();
+            return "TÀI KHOẢN QUẢN TRỊ VIÊN\n" + base.GetInfo();
         }
     }
 }

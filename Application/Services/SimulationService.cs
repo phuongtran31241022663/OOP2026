@@ -52,6 +52,7 @@ namespace Application.Services
         public IMatchingService MatchingService { get; private set; }
         public IReviewService ReviewService { get; private set; }
         public IMapService MapService { get; private set; }
+        public IVehicleRepository VehicleRepository { get; private set; }
 
         public static async Task<AppServiceBundle> CreateDefaultAsync()
         {
@@ -75,6 +76,12 @@ namespace Application.Services
             FareService fareService = new FareService(fareRuleRepository);
             await fareService.SeedDefaultFareRulesAsync();
 
+            await Infrastructure.Data.DataSeeder.SeedAsync(
+                driverRepository,
+                passengerRepository,
+                tripRepository,
+                vehicleRepository);
+
             return new AppServiceBundle
             {
                 UserService = userService,
@@ -84,7 +91,8 @@ namespace Application.Services
                 AdminService = new AdminService(driverRepository, passengerRepository, tripRepository, fareRuleRepository, reviewRepository),
                 MatchingService = new MatchingService(tripRepository, driverRepository, vehicleRepository),
                 ReviewService = new ReviewService(reviewRepository, driverRepository, tripRepository),
-                MapService = new MapService(null) // GMapService wrapper stub
+                MapService = new MapService(null), // GMapService wrapper stub
+                VehicleRepository = vehicleRepository
             };
         }
     }

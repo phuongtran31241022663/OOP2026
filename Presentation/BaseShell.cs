@@ -1,6 +1,7 @@
 ﻿// Presentation/BaseShell.cs
 using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Presentation
@@ -140,6 +141,78 @@ namespace Presentation
         protected bool Confirm(string message, string caption = "Xác nhận")
             => MessageBox.Show(this, message, caption,
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+
+        protected void ShowFriendlyException(InvalidOperationException ex, string actionName)
+        {
+            ShowError(
+                actionName + " khong the thuc hien luc nay. Vui long thu lai.\nChi tiet: " + ex.Message,
+                "Loi thao tac");
+        }
+
+        protected void ShowFriendlyException(FormatException ex, string actionName)
+        {
+            ShowError(
+                "Du lieu nhap vao khong dung dinh dang khi " + actionName.ToLower() + ".\nChi tiet: " + ex.Message,
+                "Loi dinh dang");
+        }
+
+        protected void ShowFriendlyException(Exception ex, string actionName)
+        {
+            ShowError(
+                actionName + " that bai do loi khong mong muon. Vui long thu lai.\nChi tiet: " + ex.Message,
+                "Loi he thong");
+        }
+
+        protected void ExecuteWithHandling(string actionName, Action action, Action finallyAction = null)
+        {
+            try
+            {
+                action?.Invoke();
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            finally
+            {
+                finallyAction?.Invoke();
+            }
+        }
+
+        protected async Task ExecuteWithHandlingAsync(string actionName, Func<Task> action, Action finallyAction = null)
+        {
+            try
+            {
+                if (action != null)
+                {
+                    await action();
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            finally
+            {
+                finallyAction?.Invoke();
+            }
+        }
 
         // ─── Cursor Helpers ────────────────────────────────────────────────────
         protected void ShowWaitCursor()

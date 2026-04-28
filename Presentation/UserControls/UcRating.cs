@@ -59,20 +59,22 @@ namespace Presentation.UserControls
                 return;
             }
 
-            try
+            IsLoading = true;
+            await ExecuteWithHandlingAsync("Gui danh gia tai xe", async () =>
             {
                 if (_reviewService != null && _trip != null)
                 {
                     await _reviewService.AddReviewAsync(_trip.DriverId ?? Guid.Empty, _trip.PassengerId, _trip.Id, _selectedRating, txtComment.Text);
                 }
+                else
+                {
+                    throw new InvalidOperationException("Khong tim thay du lieu chuyen di de danh gia.");
+                }
+
                 ShowInfo("Danh gia thanh cong!");
                 var parent = this.ParentForm;
                 if (parent != null) parent.DialogResult = DialogResult.OK;
-            }
-            catch (Exception ex)
-            {
-                ShowError("Danh gia that bai: " + ex.Message);
-            }
+            }, () => IsLoading = false);
         }
     }
 }

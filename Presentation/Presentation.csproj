@@ -121,7 +121,7 @@
       <DependentUpon>LocationCard.cs</DependentUpon>
     </Compile>
     <Compile Include="Components\LocationPickerControl.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Components\LocationPickerControl.Designer.cs">
       <DependentUpon>LocationPickerControl.cs</DependentUpon>
@@ -150,116 +150,10 @@
     <Compile Include="Components\TripStatusPanel.Designer.cs">
       <DependentUpon>TripStatusPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Constants\UiConstants.cs" />
     <Compile Include="Helpers\AlertHelper.cs" />
-    <Compile Include="Helpers\DataMapper.cs" />
-    <Compile Include="Helpers\EventHelper.cs" />
-    <Compile Include="Helpers\MapHelper.cs" />
-    <Compile Include="Helpers\UiDispatcher.cs" />
-    <Compile Include="Helpers\UIHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Screens\AdminScreen\AdminDashboardForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\AdminScreen\AdminDashboardForm.Designer.cs">
-      <DependentUpon>AdminDashboardForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\AdminScreen\FareRulesForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\AdminScreen\FareRulesForm.Designer.cs">
-      <DependentUpon>FareRulesForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\AdminScreen\ReportForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\AdminScreen\ReportForm.Designer.cs">
-      <DependentUpon>ReportForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\AdminScreen\UserManagementForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\AdminScreen\UserManagementForm.Designer.cs">
-      <DependentUpon>UserManagementForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\Auth\LoginForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\Auth\LoginForm.Designer.cs">
-      <DependentUpon>LoginForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\Auth\RegisterForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\Auth\RegisterForm.Designer.cs">
-      <DependentUpon>RegisterForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\DriverScreen\DriverDashboardForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\DriverScreen\DriverDashboardForm.Designer.cs">
-      <DependentUpon>DriverDashboardForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\DriverScreen\EarningsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\DriverScreen\EarningsForm.Designer.cs">
-      <DependentUpon>EarningsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\DriverScreen\TripNavigationForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\DriverScreen\TripNavigationForm.Designer.cs">
-      <DependentUpon>TripNavigationForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\PassengerScreen\BookTripForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\PassengerScreen\BookTripForm.Designer.cs">
-      <DependentUpon>BookTripForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\PassengerScreen\RatingForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\PassengerScreen\RatingForm.Designer.cs">
-      <DependentUpon>RatingForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\PassengerScreen\TripHistoryForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\PassengerScreen\TripHistoryForm.Designer.cs">
-      <DependentUpon>TripHistoryForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Screens\PassengerScreen\TripTrackingForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\PassengerScreen\TripTrackingForm.Designer.cs">
-      <DependentUpon>TripTrackingForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Shells\AdminShell.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Shells\AdminShell.Designer.cs">
-      <DependentUpon>AdminShell.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Shells\DriverShell.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Shells\DriverShell.Designer.cs">
-      <DependentUpon>DriverShell.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Shells\MainShell.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Shells\MainShell.Designer.cs">
-      <DependentUpon>MainShell.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Shells\PassengerShell.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Shells\PassengerShell.Designer.cs">
-      <DependentUpon>PassengerShell.cs</DependentUpon>
-    </Compile>
     <Compile Include="Shells\FrmMainShell.cs">
       <SubType>Form</SubType>
     </Compile>

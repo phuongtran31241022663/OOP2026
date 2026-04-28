@@ -45,7 +45,6 @@
      <Compile Include="Constants\SimulationConstants.cs" />
      <Compile Include="Extensions\DecimalExtensions.cs" />
      <Compile Include="Extensions\StringExtensions.cs" />
-     <Compile Include="Helpers\PasswordHasher.cs" />
      <Compile Include="Utilities\PasswordHasher.cs" />
      <Compile Include="Properties\AssemblyInfo.cs" />
    </ItemGroup>

@@ -1,23 +1,19 @@
-﻿using System;
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Presentation
 {
     /// <summary>
-    /// Base class cho tất cả BaseUserControl tái sử dụng trong ứng dụng (TripCard, DriverCard...).
-    /// Cung cấp: helper methods, invoke helper, loading state chung.
-    /// Phân biệt với BaseTabBaseUserControl: BaseBaseUserControl là component nhúng vào form,
-    /// không có khả năng yêu cầu đóng tab.
+    /// Base class cho cac UserControl tai su dung trong ung dung.
+    /// Cung cap helper methods, loading state va xu ly loi UI thong nhat.
     /// </summary>
     public partial class BaseUserControl : UserControl
     {
-        // ─── State ───────────────────────────────────────────────────────────
         private bool _isLoading;
+        protected ErrorProvider _validationErrorProvider;
 
-        /// <summary>
-        /// True khi control đang trong trạng thái loading.
-        /// Set = true sẽ hiện wait cursor và disable control.
-        /// </summary>
         public bool IsLoading
         {
             get => _isLoading;
@@ -29,51 +25,128 @@ namespace Presentation
             }
         }
 
-        // ─── Constructor ─────────────────────────────────────────────────────
         public BaseUserControl()
         {
             InitializeComponent();
+            _validationErrorProvider = new ErrorProvider(components) { ContainerControl = this };
         }
 
-        // ─── MessageBox Helpers ───────────────────────────────────────────────
-        /// <summary>
-        /// Tìm ParentForm để làm owner cho MessageBox (tránh dialog bị che khuất).
-        /// Nếu không có ParentForm thì show không có owner.
-        /// </summary>
-        protected void ShowInfo(string message, string caption = "Thông báo")
-            => MessageBox.Show(FindForm(), message, caption,
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        protected void ShowInfo(string message, string caption = "Thong bao")
+            => MessageBox.Show(FindForm(), message, caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-        protected void ShowWarning(string message, string caption = "Cảnh báo")
-            => MessageBox.Show(FindForm(), message, caption,
-                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        protected void ShowWarning(string message, string caption = "Canh bao")
+            => MessageBox.Show(FindForm(), message, caption, MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
-        protected void ShowError(string message, string caption = "Lỗi")
-            => MessageBox.Show(FindForm(), message, caption,
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        protected void ShowError(string message, string caption = "Loi")
+            => MessageBox.Show(FindForm(), message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-        protected bool Confirm(string message, string caption = "Xác nhận")
-            => MessageBox.Show(FindForm(), message, caption,
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+        protected bool Confirm(string message, string caption = "Xac nhan")
+            => MessageBox.Show(FindForm(), message, caption, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
 
-        protected bool ConfirmDelete(string itemName = "mục này")
-            => Confirm($"Bạn có chắc chắn muốn xóa {itemName}?", "Xóa");
+        protected bool ConfirmDelete(string itemName = "muc nay")
+            => Confirm("Ban co chac chan muon xoa " + itemName + "?", "Xoa");
 
-        // ─── Invoke Helper ────────────────────────────────────────────────────
-        /// <summary>
-        /// Chạy action trên UI thread. An toàn khi gọi từ background thread hoặc Timer.
-        /// </summary>
+        protected void ShowFriendlyException(InvalidOperationException ex, string actionName)
+        {
+            ShowError(
+                actionName + " khong the thuc hien luc nay. Vui long thu lai.\nChi tiet: " + ex.Message,
+                "Loi thao tac");
+        }
+
+        protected void ShowFriendlyException(FormatException ex, string actionName)
+        {
+            ShowError(
+                "Du lieu nhap vao khong dung dinh dang khi " + actionName.ToLower() + ".\nChi tiet: " + ex.Message,
+                "Loi dinh dang");
+        }
+
+        protected void ShowFriendlyException(Exception ex, string actionName)
+        {
+            ShowError(
+                actionName + " that bai do loi khong mong muon. Vui long thu lai.\nChi tiet: " + ex.Message,
+                "Loi he thong");
+        }
+
+        protected void ExecuteWithHandling(string actionName, Action action, Action finallyAction = null)
+        {
+            try
+            {
+                action?.Invoke();
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            finally
+            {
+                finallyAction?.Invoke();
+            }
+        }
+
+        protected async Task ExecuteWithHandlingAsync(string actionName, Func<Task> action, Action finallyAction = null)
+        {
+            try
+            {
+                if (action != null)
+                {
+                    await action();
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            catch (FormatException ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, actionName);
+            }
+            finally
+            {
+                finallyAction?.Invoke();
+            }
+        }
+
         protected void RunOnUI(Action action)
         {
-            if (InvokeRequired) Invoke(action);
-            else action();
+            if (InvokeRequired)
+            {
+                Invoke(action);
+            }
+            else
+            {
+                action();
+            }
         }
 
-        // ─── Virtual Hooks ────────────────────────────────────────────────────
-        /// <summary>
-        /// Gọi khi control cần load/refresh dữ liệu.
-        /// Override trong subclass để tải dữ liệu từ service.
-        /// </summary>
+        protected void ValidateControl(Control ctrl, bool isValid, string errorMessage)
+        {
+            if (ctrl == null || _validationErrorProvider == null)
+            {
+                return;
+            }
+
+            if (isValid)
+            {
+                _validationErrorProvider.SetError(ctrl, string.Empty);
+            }
+            else
+            {
+                _validationErrorProvider.SetError(ctrl, errorMessage);
+            }
+        }
+
         protected virtual void OnRefreshData() { }
     }
 }

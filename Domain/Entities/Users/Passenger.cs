@@ -6,7 +6,6 @@ namespace Domain.Entities.Users
     {
         #region Fields
         private int _totalTrips;
-        // public int Version { get; set; } = 1;
         #endregion
 
         #region Properties
@@ -15,7 +14,13 @@ namespace Domain.Entities.Users
         #endregion
 
         #region Constructors
+        // Constructor dành cho JSON deserialization
+        private Passenger()
+        {
+        }
+
         public Passenger(string name, string phone, string password) : base(name, phone, password)
+
         {
             TotalTrips = 0;
         }

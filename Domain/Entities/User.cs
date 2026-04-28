@@ -51,19 +51,20 @@ namespace Domain.Entities
         }
 
         // Constructor nghiệp vụ cho persistence (đã có sẵn Id)
-        protected User(Guid id, string name, string phone, string rawPassword) : base(id)
+        protected User(Guid id, string name, string phone, string hashedPassword) : base(id)
         {
             Name = name;
             Phone = phone;
 
             // Password từ DB đã là hash, nên gán trực tiếp
-            _password = rawPassword;
+            _password = hashedPassword;
         }
 
         // Constructor dành cho ORM/JSON serialization
-        private User() : base(default)
+        protected User() : base(default)
         {
         }
+
         #endregion
         #region Methods
 
@@ -99,7 +100,7 @@ namespace Domain.Entities
         }
         public virtual string GetInfo()
         {
-            return $"ID: {Id.ToString().Substring(0, 8)} | T�n: {Name}";
+            return $"ID: {Id.ToString().Substring(0, 8)} | Tên: {Name}";
         }
         #endregion
     }
