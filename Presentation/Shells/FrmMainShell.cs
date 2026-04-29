@@ -1,12 +1,13 @@
 using Application.Interfaces;
 using Domain.Entities.Users;
 using Domain.Repositories;
-using Presentation.Helpers;
 using Presentation.UserControls;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using Domain.Entities;
+using Presentation;
 
 namespace Presentation.Shells
 {
@@ -15,7 +16,7 @@ namespace Presentation.Shells
     /// Chua mot Panel noi dung chinh; hoan doi UserControl de chuyen man hinh.
     /// Quan ly FrmModal va FrmToast.
     /// </summary>
-    public partial class FrmMainShell : Form
+    public partial class FrmMainShell : BaseShell
     {
         private readonly IUserService _userService;
         private readonly ITripService _tripService;
@@ -197,14 +198,29 @@ namespace Presentation.Shells
         {
             ExecuteWithHandling("Dang xuat", () =>
             {
-                _ucPassenger?.Dispose();
-                _ucDriver?.Dispose();
-                _ucAdmin?.Dispose();
+                if (_ucPassenger != null)
+                {
+                    _ucPassenger.RequestLogout -= OnRequestLogout;
+                    _ucPassenger.RequestShowProfile -= OnRequestShowProfile;
+                    _ucPassenger.Dispose();
+                }
+                if (_ucDriver != null)
+                {
+                    _ucDriver.RequestLogout -= OnRequestLogout;
+                    _ucDriver.RequestShowProfile -= OnRequestShowProfile;
+                    _ucDriver.Dispose();
+                }
+                if (_ucAdmin != null)
+                {
+                    _ucAdmin.RequestLogout -= OnRequestLogout;
+                    _ucAdmin.Dispose();
+                }
             }, () =>
             {
                 _ucPassenger = null;
                 _ucDriver = null;
                 _ucAdmin = null;
+                _ucAuth = null; // BUG FIX: force recreate UcAuth
                 ShowAuthScreen();
             });
         }
@@ -220,9 +236,9 @@ namespace Presentation.Shells
 
         // --- Modal & Toast Helpers -----------------------------------------
 
-        public static void ShowModal(UserControl content, string title)
+        public void ShowModal(UserControl content, string title)
         {
-            FrmModal.ShowModal(null, content, title);
+            FrmModal.ShowModal(this, content, title);
         }
 
         public void ShowToast(string message, int durationMs = 3000)
@@ -230,29 +246,5 @@ namespace Presentation.Shells
             ExecuteWithHandling("Hien thi thong bao", () => FrmToast.Show(this, message, durationMs));
         }
 
-        private void ExecuteWithHandling(string actionName, Action action, Action finallyAction = null)
-        {
-            try
-            {
-                action?.Invoke();
-            }
-            catch (InvalidOperationException ex)
-            {
-                AlertHelper.ShowFriendlyException(this, ex, actionName);
-            }
-            catch (FormatException ex)
-            {
-                AlertHelper.ShowFriendlyException(this, ex, actionName);
-            }
-            catch (Exception ex)
-            {
-                AlertHelper.ShowFriendlyException(this, ex, actionName);
-            }
-            finally
-            {
-                finallyAction?.Invoke();
-            }
-        }
     }
 }
-
