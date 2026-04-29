@@ -13,7 +13,7 @@
 4. [Value Objects](#4-value-objects)
 5. [Enums](#5-enums)
 6. [Domain Events](#6-domain-events)
-7. [State Machines](#7-state-machines)
+7. [State Pattern](#7-state-pattern)
 8. [Repository Interfaces](#8-repository-interfaces)
 9. [Relationships & Rules](#9-relationships--rules)
 
@@ -23,7 +23,7 @@
 
 ```
 Domain/
-├── Enums/                    # DriverStatus, TripStatus, VehicleType
+├── Enums/                    # VehicleType
 ├── Entities/                 # Core business entities
 │   ├── FareRule.cs
 │   ├── Review.cs
@@ -36,26 +36,26 @@ Domain/
 │   └── Vehicles/
 │       ├── Car.cs
 │       ├── Motorbike.cs
-│       └── Vehicle.cs
+│       └── Vehicle.cs (abstract)
 ├── Events/                   # 12 domain events
 ├── SharedKernel/             # Entity.cs, ValueObject.cs, DomainEvent.cs
-├── StateMachines/            # DriverStateMachine.cs
-├── States/                   # ITripState + 8 implementations
-├── Repositories/             # Repository interfaces
-└── ValueObjects/             # Money, Location, Route, etc.
+├── States/                   # ITripState + 8 implementations, IDriverState + 3 implementations
+│   └── Drivers/              # DriverAvailableState, DriverOfflineState, DriverOnTripState
+├── Repositories/             # Repository interfaces (async)
+└── ValueObjects/             # Money, Location, Route, Fare, etc.
 ```
 
 ---
 
 ## 2. SharedKernel
 
-### `Entity<Guid>` (abstract)
+### `Entity` (abstract)
 
 | Type | Name | Description |
 |------|------|-------------|
 | 🔵 Property | `Guid Id` | protected set |
-| 🔵 Property | `IReadOnlyCollection<DomainEvent> DomainEvents` | Undispatched events |
-| 🟢 Method | `AddEvent(DomainEvent)` | protected |
+| 🟢 Method | `IReadOnlyList<DomainEvent> GetEvents()` | Undispatched events |
+| 🟢 Method | `AddEvent(DomainEvent)` | protected internal |
 | 🟢 Method | `ClearEvents()` | Clear event list |
 | 🟢 Method | `Equals/GetHashCode` | By Id |
 
@@ -88,7 +88,7 @@ Domain/
 
 | Type | Name | Description |
 |------|------|-------------|
-| 🔵 Property | `DriverStatus Status` | Current work status |
+| 🔵 Property | `string Status` | Current status name (derived from IDriverState) |
 | 🔵 Property | `Location Position` | GPS location |
 | 🔵 Property | `Guid VehicleId` | Reference to vehicle |
 | 🔵 Property | `string LicenseNumber` | Driver license |
@@ -98,15 +98,14 @@ Domain/
 | 🔵 Property | `int TotalReviews` | Review count |
 | 🔵 Property | `int RatingSum` | Sum of all ratings |
 | 🔵 Computed | `decimal AverageRating` | `RatingSum / TotalReviews` |
-| 🟢 State | `SetAvailable()`, `SetOnTrip()`, `SetOffline()` | Validate via DriverStateMachine + emit DriverStatusChangedEvent |
-| 🟢 Method | `UpdatePosition(Location)` | Update GPS |
+| 🟢 State | `SetAvailable()`, `SetOnTrip()`, `SetOffline()` | Delegate to IDriverState |
+| 🟢 Method | `IsAvailable()`, `IsOnTrip()`, `IsOffline()` | State check helpers |
+| 🟢 Method | `UpdatePosition(Location)` | Update GPS (no event emitted) |
 | 🟢 Method | `AddTrip()` | Increment count |
 | 🟢 Method | `UpdateReviews(int rating)` | Add rating to stats |
 | 🟢 Method | `DepositToWallet(Money)` | Add balance |
 | 🟢 Method | `PayCommission(Fare)` | Deduct commission from wallet |
-| 🟢 Static | `GetDisplayString(DriverStatus)` | Status text |
-
-**Event:** `DriverStatusChangedEvent(Id, OldStatus, NewStatus)`
+| 🟢 Static | `GetDisplayString(string status)` | Status text |
 
 ### `Admin` (: User)
 
@@ -138,12 +137,18 @@ Domain/
 | 🟢 Method | `IsSearching(), IsMatched(), IsArrived(), IsStarted(), IsCompleted(), IsCancelled(), IsTimeout()` | State check helpers |
 | 🟢 Method | `IsTerminal()` | Terminal state check |
 
-**Constructors:** Business (Requested + events), ORM.
+**Constructors:** Business (Requested + emits TripRequestedEvent and TripSearchingEvent via SetSearching()), ORM.
 
 ### `Vehicle` (abstract : Entity)
 
 | Type | Name | Description |
 |------|------|-------------|
+| 🔵 Property | `string PlateNumber` | License plate |
+| 🔵 Property | `string Brand` | Vehicle brand |
+| 🔵 Property | `string Model` | Vehicle model |
+| 🔵 Property | `string Color` | Vehicle color |
+| 🔵 Property | `int Capacity` | Passenger capacity |
+| 🔵 Property | `VehicleType Type` | Car/Motorbike |
 | 🟢 Abstract | `GetAvgSpeed()` | Average speed |
 
 ### `Car` (: Vehicle)
@@ -171,9 +176,11 @@ Domain/
 
 | Type | Name | Description |
 |------|------|-------------|
+| 🔵 Property | `Guid RiderId` | Reviewing passenger |
+| 🔵 Property | `Guid DriverId` | Reviewed driver |
 | 🔵 Property | `int Rating` | 1-5 scale |
 | 🔵 Property | `string Comment` | Optional |
-| 🟢 Method | `UpdateReview()` | Modify content |
+| 🟢 Method | `UpdateReview(int rating, string comment)` | Modify content |
 
 ---
 
@@ -183,7 +190,7 @@ Domain/
 
 | Type | Name | Description |
 |------|------|-------------|
-| 🔵 Property | `decimal Amount` | ≥0, rounded 2dp |
+| 🔵 Property | `decimal Amount` | ≥0 (enforced by callers, not constructor) |
 | 🔵 Property | `string Currency` | Default "VND" |
 | ➕ Operator | `+ - < > <= >=` | Same currency only |
 | 🟢 Method | `ToString()` | `"{0:N0} {1}"` format |
@@ -239,11 +246,9 @@ Domain/
 
 | Enum | Values |
 |------|--------|
-| `TripStatus` | *(deprecated — use ITripState and `IsXxx()` helpers)* |
-| `DriverStatus` | Offline(0), Available(1), OnTrip(2) |
 | `VehicleType` | Unknown(0), Motorbike(1), Car(2) |
 
-> **Note:** `TripStatus` enum is kept for persistence/serialization backward compatibility only. Business logic queries status via `trip.Status` (string) and `trip.IsXxx()` helpers, which derive from the active `ITripState`.
+> **Note:** `DriverStatus` and `TripStatus` enums do not exist in the codebase. Driver status is managed via the `IDriverState` pattern (string `Status` property). Trip status is managed via the `ITripState` pattern (string `Status` property with `IsXxx()` helpers).
 
 ---
 
@@ -256,12 +261,12 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 | Event | Emitted By | Parameters |
 |-------|-----------|------------|
 | `TripRequestedEvent` | Constructor | Id, PassengerId, Pickup, Destination, VehicleType |
-| `TripSearchingEvent` | `SetSearching()` | Id |
-| `TripMatchedEvent` | `MatchDriver()` | Id, DriverId, VehicleType |
+| `TripSearchingEvent` | Constructor (via SetSearching()) | Id, AttemptNumber |
+| `TripMatchedEvent` | `MatchDriver()` | Id, DriverId |
 | `TripArrivedEvent` | `MarkAsArrived()` | Id |
 | `TripStartedEvent` | `StartTrip()` | Id |
 | `TripCompletedEvent` | `CompleteTrip()` | Id, PassengerId, DriverId, Fare |
-| `TripPaidEvent` | `ConfirmPayment()` | Id, PassengerId, DriverId, TotalAmount |
+| `TripPaidEvent` | `ConfirmPayment()` | Id, Amount, PaidAt |
 | `TripCancelledEvent` | `Cancel()` | Id, Reason |
 | `TripTimeoutEvent` | `MarkTimeout()` | Id |
 
@@ -269,31 +274,28 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 
 | Event | Emitted By | Parameters |
 |-------|-----------|------------|
-| `DriverStatusChangedEvent` | Status change | Id, OldStatus, NewStatus |
-| `DriverLocationUpdatedEvent` | Position update | Id, OldPosition, NewPosition |
+| `DriverStatusChangedEvent` | *(defined but never emitted by Driver)* | Id, OldStatus(string), NewStatus(string) |
+| `DriverLocationUpdatedEvent` | *(defined but never emitted by Driver)* | Id, NewLocation |
 
 ### Review Event
 
 | Event | Emitted By | Parameters |
 |-------|-----------|------------|
-| `ReviewCreatedEvent` | Review submission | Id, DriverId, PassengerId, TripId, Rating |
+| `ReviewCreatedEvent` | Review submission | Id, RiderId, DriverId, Rating, Comment |
 
 ---
 
-## 7. State Machines
+## 7. State Pattern
 
-### Driver State Machine
+### Driver States (`IDriverState`)
 
-> The `DriverStateMachine` is a **state machine** (transition validation via static dictionary) used only for `Driver` status transitions.
+> `Driver` uses the **State Pattern** with `IDriverState` implementations. It delegates `SetAvailable/SetOnTrip/SetOffline` to the current state.
 
-```csharp
-public static class DriverStateMachine
-{
-    private static readonly Dictionary<DriverStatus, DriverStatus[]> _transitions = ...
-    
-    public static bool CanTransition(DriverStatus from, DriverStatus to)
-}
-```
+| State Class | Description |
+|-------------|-------------|
+| `DriverAvailableState` | Driver is available for matching |
+| `DriverOfflineState` | Driver is offline |
+| `DriverOnTripState` | Driver is currently on a trip |
 
 **Valid transitions:**
 ```
@@ -304,11 +306,11 @@ OnTrip → Available
 
 ### Trip State Pattern
 
-> `Trip` uses the **State Pattern** (not a state machine). It delegates behavior to `ITripState` implementations that manage the lifecycle:
+> `Trip` uses the **State Pattern** with `ITripState` implementations that manage the lifecycle:
 
 | State Class | Valid Next States |
 |-------------|-------------------|
-| `RequestedState` | Searching |
+| `RequestedState` | Searching, Cancelled |
 | `SearchingState` | Matched, Cancelled, Timeout |
 | `MatchedState` | Arrived, Cancelled, Searching |
 | `ArrivedState` | Started, Cancelled |
@@ -328,29 +330,33 @@ Each state validates transition before calling `trip.TransitionTo(...)`.
 ### Base Interface
 
 ```csharp
-public interface IRepository<T> where T : Entity
+public interface IReadRepository<T> where T : class
 {
-    void Add(T entity);
-    void Update(T entity);
-    void Delete(T entity);
-    List<T> GetAll();
-    T GetById(Guid id);
-    Task SaveChangesAsync();
+    Task<T> GetByIdAsync(Guid id);
+    Task<List<T>> GetAllAsync();
+}
+
+public interface IRepository<T> : IReadRepository<T> where T : class
+{
     Task InitializeAsync();
+    Task SaveChangesAsync();
+    Task AddAsync(T entity);
+    Task UpdateAsync(T entity);
+    Task DeleteAsync(Guid id);
 }
 ```
 
 ### Specific Interfaces
 
-| Interface | Extra Methods |
-|-----------|--------------|
-| `IUserRepository` | `GetByPhoneAsync(string)`, `GetDriversAsync()`, `GetAvailableDriversAsync()` |
-| `IDriverRepository` | (inherits IUserRepository pattern) |
-| `IPassengerRepository` | - |
-| `ITripRepository` | `GetByDriverIdAsync(Guid)`, `GetByPassengerIdAsync(Guid)`, `GetPendingTripsAsync()` |
-| `IVehicleRepository` | - |
-| `IReviewRepository` | - |
-| `IFareRuleRepository` | - |
+| Interface | Inherits | Extra Methods |
+|-----------|----------|--------------|
+| `IUserRepository` | *(standalone)* | `GetByPhoneAsync(string)`, `ExistsByPhoneAsync(string)`, `GetDriversAsync()`, `GetPassengersAsync()`, `GetAvailableDriversAsync()`, `GetDriverByIdAsync(Guid)` |
+| `IDriverRepository` | `IRepository<Driver>` | `GetByPhoneAsync(string)`, `GetAvailableDriversAsync()`, `ExistsByPhoneAsync(string)` |
+| `IPassengerRepository` | `IRepository<Passenger>` | `GetByPhoneAsync(string)`, `ExistsByPhoneAsync(string)` |
+| `ITripRepository` | `IRepository<Trip>` | `GetByDriverIdAsync(Guid)`, `GetByPassengerIdAsync(Guid)` |
+| `IVehicleRepository` | *(standalone)* | `GetByTypeAsync(VehicleType)` |
+| `IReviewRepository` | `IRepository<Review>` | `GetByDriverIdAsync(Guid)`, `GetByTripIdAsync(Guid)` |
+| `IFareRuleRepository` | `IRepository<FareRule>` | `GetByVehicleTypeAsync(VehicleType)`, `EnsureSeededAsync()` |
 
 ---
 
@@ -368,8 +374,8 @@ public interface IRepository<T> where T : Entity
 
 ### Business Rules
 
-- State transitions validated by `ITripState` / `DriverStateMachine` — cannot bypass
-- `Money.Amount` must be ≥ 0
+- State transitions validated by `ITripState` / `IDriverState` — cannot bypass
+- `Money.Amount` must be ≥ 0 (enforced by callers, not constructor)
 - `Review.Rating` must be 1-5
 - Driver `Wallet` must cover commission before accepting trip
 - Events accumulated in-memory, cleared post-dispatch
@@ -377,4 +383,4 @@ public interface IRepository<T> where T : Entity
 
 ---
 
-*Document version: 3.0 — Updated: removed sealed from Passenger, removed GetMaxPickupDistance, clarified State Pattern vs State Machine, updated Repository notes.*
+*Document version: 3.1 — Updated: fixed Entity non-generic, Driver State Pattern, Vehicle properties, Event parameters, Repository async interfaces, removed DriverStateMachine references.*

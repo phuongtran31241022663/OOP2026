@@ -1,6 +1,7 @@
-﻿// Presentation/BaseForm.cs
+﻿﻿// Presentation/BaseForm.cs
 using System;
 using System.Drawing;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -39,15 +40,31 @@ namespace Presentation
         // ─── Keyboard Hooks ───────────────────────────────────────────────────
         private void BaseForm_KeyDown(object sender, KeyEventArgs e)
         {
-            switch (e.KeyCode)
+            try
             {
-                case Keys.Escape:
-                    OnEscapePressed(e);
-                    break;
-                case Keys.F1:
-                    ShowHelp();
-                    e.Handled = true;
-                    break;
+                switch (e.KeyCode)
+                {
+                    case Keys.Escape:
+                        OnEscapePressed(e);
+                        break;
+                    case Keys.F1:
+                        ShowHelp();
+                        e.Handled = true;
+                        break;
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                ShowWarning(ex.Message, "Lỗi nhập liệu");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowError(ex.Message, "Lỗi nghiệp vụ");
+            }
+            catch (Exception ex)
+            {
+                ShowError("Có lỗi hệ thống, vui lòng thử lại sau.", "Lỗi");
+                File.AppendAllText("error.log", $"{DateTime.Now}: {ex}\n");
             }
         }
 
@@ -63,7 +80,23 @@ namespace Presentation
         // ─── Lifecycle Hooks ─────────────────────────────────────────────────
         private void BaseForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            OnFormClosingInternal(e);
+            try
+            {
+                OnFormClosingInternal(e);
+            }
+            catch (ArgumentException ex)
+            {
+                ShowWarning(ex.Message, "Lỗi nhập liệu");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowError(ex.Message, "Lỗi nghiệp vụ");
+            }
+            catch (Exception ex)
+            {
+                ShowError("Có lỗi hệ thống, vui lòng thử lại sau.", "Lỗi");
+                File.AppendAllText("error.log", $"{DateTime.Now}: {ex}\n");
+            }
         }
 
         /// <summary>
@@ -115,6 +148,11 @@ namespace Presentation
                 "Loi dinh dang");
         }
 
+        protected void ShowFriendlyException(ArgumentException ex, string actionName)
+        {
+            ShowWarning(ex.Message, "Lỗi nhập liệu");
+        }
+
         protected void ShowFriendlyException(Exception ex, string actionName)
         {
             ShowError(
@@ -127,6 +165,10 @@ namespace Presentation
             try
             {
                 action?.Invoke();
+            }
+            catch (ArgumentException ex)
+            {
+                ShowFriendlyException(ex, actionName);
             }
             catch (InvalidOperationException ex)
             {
@@ -154,6 +196,10 @@ namespace Presentation
                 {
                     await action();
                 }
+            }
+            catch (ArgumentException ex)
+            {
+                ShowFriendlyException(ex, actionName);
             }
             catch (InvalidOperationException ex)
             {

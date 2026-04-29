@@ -5,14 +5,7 @@ namespace Presentation.Shells
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.Label lblMessage;
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        // Dispose handled by base Form class
 
         #region Windows Form Designer generated code
 

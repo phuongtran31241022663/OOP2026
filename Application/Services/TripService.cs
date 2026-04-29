@@ -60,13 +60,13 @@ namespace Application.Services
                 Trip trip = await _tripRepository.GetByIdAsync(tripId);
                 if (trip == null)
                 {
-                    throw new Exception("Không tìm thấy chuyến.");
+                    throw new InvalidOperationException("Không tìm thấy chuyến.");
                 }
 
                 Driver driver = await _driverRepository.GetByIdAsync(driverId);
                 if (driver == null)
                 {
-                    throw new Exception("Không tìm thấy tài xế.");
+                    throw new InvalidOperationException("Không tìm thấy tài xế.");
                 }
 
                 // Kiểm tra ví tài xế có đủ tiền trả hoa hồng không
@@ -95,7 +95,7 @@ namespace Application.Services
             Trip trip = await _tripRepository.GetByIdAsync(tripId);
             if (trip == null)
             {
-                throw new Exception("Không tìm thấy chuyến.");
+                throw new InvalidOperationException("Không tìm thấy chuyến.");
             }
             trip.MarkAsArrived();
             await _tripRepository.UpdateAsync(trip);
@@ -108,7 +108,7 @@ namespace Application.Services
             Trip trip = await _tripRepository.GetByIdAsync(tripId);
             if (trip == null)
             {
-                throw new Exception("Không tìm thấy chuyến.");
+                throw new InvalidOperationException("Không tìm thấy chuyến.");
             }
             trip.StartTrip();
             await _tripRepository.UpdateAsync(trip);
@@ -121,7 +121,7 @@ namespace Application.Services
             Trip trip = await _tripRepository.GetByIdAsync(tripId);
             if (trip == null)
             {
-                throw new Exception("Không tìm thấy chuyến.");
+                throw new InvalidOperationException("Không tìm thấy chuyến.");
             }
 
             trip.CompleteTrip();
@@ -157,7 +157,7 @@ namespace Application.Services
             Trip trip = await _tripRepository.GetByIdAsync(tripId);
             if (trip == null)
             {
-                throw new Exception("Không tìm thấy chuyến.");
+                throw new InvalidOperationException("Không tìm thấy chuyến.");
             }
 
             trip.Cancel(reason);
@@ -183,7 +183,7 @@ namespace Application.Services
             Trip trip = await _tripRepository.GetByIdAsync(tripId);
             if (trip == null)
             {
-                throw new Exception("Không tìm thấy chuyến.");
+                throw new InvalidOperationException("Không tìm thấy chuyến.");
             }
             trip.ConfirmPayment();
             await _tripRepository.UpdateAsync(trip);

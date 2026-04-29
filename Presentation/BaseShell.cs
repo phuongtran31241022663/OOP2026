@@ -1,60 +1,78 @@
-﻿// Presentation/BaseShell.cs
+// Presentation/BaseShell.cs
 using System;
 using System.Drawing;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Presentation
 {
-    /// <summary>
-    /// Base class cho tất cả shell chính của ứng dụng (PassengerShell, DriverShell...).
-    /// Shell = cửa sổ top-level có TabControl, MenuStrip, StatusStrip.
-    /// Phân biệt với BaseForm: BaseShell là khung chứa, BaseForm là nội dung bên trong.
-    /// </summary>
     public partial class BaseShell : Form
     {
-        // ─── Accessor ─────────────────────────────────────────────────────────
-        /// <summary>Expose TabControl để subclass điều hướng tab.</summary>
         public TabControl MainTabControl => tabControlMain;
 
-        // ─── Constructor ─────────────────────────────────────────────────────
         public BaseShell()
         {
             InitializeComponent();
         }
 
-        // ─── Lifecycle ────────────────────────────────────────────────────────
         private void BaseShell_FormClosing(object sender, FormClosingEventArgs e)
         {
-            OnShellClosing(e);
+            try
+            {
+                OnShellClosing(e);
+            }
+            catch (ArgumentException ex)
+            {
+                ShowWarning(ex.Message, "Loi nhap lieu");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowError(ex.Message, "Loi nghiep vu");
+            }
+            catch (Exception ex)
+            {
+                ShowError("Co loi he thong, vui long thu lai sau.", "Loi");
+                File.AppendAllText("error.log", $"{DateTime.Now}: {ex}\n");
+            }
         }
 
-        /// <summary>Override để xử lý logic trước khi shell đóng (confirm, cleanup...).</summary>
         protected virtual void OnShellClosing(FormClosingEventArgs e) { }
 
-        // ─── Keyboard Shortcuts ───────────────────────────────────────────────
         private void BaseShell_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.F1)
+            try
             {
-                ShowShellHelp();
-                e.Handled = true;
-                return;
+                if (e.KeyCode == Keys.F1)
+                {
+                    ShowShellHelp();
+                    e.Handled = true;
+                    return;
+                }
+                if (e.Control && !e.Shift && e.KeyCode == Keys.Tab)
+                {
+                    CycleTab(forward: true);
+                    e.Handled = true;
+                    return;
+                }
+                if (e.Control && e.Shift && e.KeyCode == Keys.Tab)
+                {
+                    CycleTab(forward: false);
+                    e.Handled = true;
+                }
             }
-
-            // Ctrl+Tab: chuyển tab tiếp theo
-            if (e.Control && !e.Shift && e.KeyCode == Keys.Tab)
+            catch (ArgumentException ex)
             {
-                CycleTab(forward: true);
-                e.Handled = true;
-                return;
+                ShowWarning(ex.Message, "Loi nhap lieu");
             }
-
-            // Ctrl+Shift+Tab: chuyển tab trước đó
-            if (e.Control && e.Shift && e.KeyCode == Keys.Tab)
+            catch (InvalidOperationException ex)
             {
-                CycleTab(forward: false);
-                e.Handled = true;
+                ShowError(ex.Message, "Loi nghiep vu");
+            }
+            catch (Exception ex)
+            {
+                ShowError("Co loi he thong, vui long thu lai sau.", "Loi");
+                File.AppendAllText("error.log", $"{DateTime.Now}: {ex}\n");
             }
         }
 
@@ -62,7 +80,6 @@ namespace Presentation
         {
             int count = tabControlMain.TabCount;
             if (count == 0) return;
-
             int current = tabControlMain.SelectedIndex;
             tabControlMain.SelectedIndex = forward
                 ? (current + 1) % count
@@ -72,52 +89,40 @@ namespace Presentation
         protected virtual void ShowShellHelp()
         {
             MessageBox.Show(this,
-                "Phím tắt:\n- Ctrl+Tab: Tab tiếp theo\n- Ctrl+Shift+Tab: Tab trước\n- F1: Trợ giúp",
-                "Trợ giúp",
+                "Phim tat:\n- Ctrl+Tab: Tab tiep theo\n- Ctrl+Shift+Tab: Tab truoc\n- F1: Tro giup",
+                "Tro giup",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
         }
+
         public void AddTab(BaseForm contentForm, string title, bool closeable = true)
         {
             if (contentForm == null) throw new ArgumentNullException(nameof(contentForm));
-
-            // Chuẩn bị form để nhúng
             contentForm.TopLevel = false;
             contentForm.FormBorderStyle = FormBorderStyle.None;
             contentForm.Dock = DockStyle.Fill;
             contentForm.Visible = true;
-
             var tabPage = new TabPage(title);
             tabPage.Controls.Add(contentForm);
             tabControlMain.TabPages.Add(tabPage);
             tabControlMain.SelectedTab = tabPage;
-
-            if (closeable)
-            {
-                // Có thể đăng ký sự kiện đóng tab từ form con (tuỳ chọn)
-                // contentForm.FormClosing += (s, e) => { if (e.CloseReason == CloseReason.UserClosing) CloseTab(tabPage); };
-            }
         }
 
-        /// <summary>Đóng và giải phóng TabPage chỉ định. Trả về false nếu không tìm thấy.</summary>
         public bool CloseTab(TabPage page)
         {
             if (page == null || !tabControlMain.TabPages.Contains(page))
                 return false;
-
             tabControlMain.TabPages.Remove(page);
             page.Dispose();
             return true;
         }
 
-        /// <summary>Đóng tab hiện tại đang được chọn.</summary>
         public void CloseCurrentTab()
         {
             if (tabControlMain.SelectedTab != null)
                 CloseTab(tabControlMain.SelectedTab);
         }
 
-        // ─── Status Bar ────────────────────────────────────────────────────────
         protected void SetStatusText(string text)
             => toolStripStatusLabel.Text = text;
 
@@ -128,39 +133,32 @@ namespace Presentation
                 toolStripProgressBar.Value = Math.Max(0, Math.Min(100, percent));
         }
 
-        // ─── MessageBox Helpers ───────────────────────────────────────────────
-        protected void ShowInfo(string message, string caption = "Thông báo")
+        protected void ShowInfo(string message, string caption = "Thong bao")
             => MessageBox.Show(this, message, caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-        protected void ShowWarning(string message, string caption = "Cảnh báo")
+        protected void ShowWarning(string message, string caption = "Canh bao")
             => MessageBox.Show(this, message, caption, MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
-        protected void ShowError(string message, string caption = "Lỗi")
+        protected void ShowError(string message, string caption = "Loi")
             => MessageBox.Show(this, message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-        protected bool Confirm(string message, string caption = "Xác nhận")
-            => MessageBox.Show(this, message, caption,
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+        protected bool Confirm(string message, string caption = "Xac nhan")
+            => MessageBox.Show(this, message, caption, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+
+        protected void ShowFriendlyException(ArgumentException ex, string actionName)
+        {
+            ShowWarning($"[{actionName}] {ex.Message}", "Loi nhap lieu");
+        }
 
         protected void ShowFriendlyException(InvalidOperationException ex, string actionName)
         {
-            ShowError(
-                actionName + " khong the thuc hien luc nay. Vui long thu lai.\nChi tiet: " + ex.Message,
-                "Loi thao tac");
-        }
-
-        protected void ShowFriendlyException(FormatException ex, string actionName)
-        {
-            ShowError(
-                "Du lieu nhap vao khong dung dinh dang khi " + actionName.ToLower() + ".\nChi tiet: " + ex.Message,
-                "Loi dinh dang");
+            ShowError($"[{actionName}] {ex.Message}", "Loi nghiep vu");
         }
 
         protected void ShowFriendlyException(Exception ex, string actionName)
         {
-            ShowError(
-                actionName + " that bai do loi khong mong muon. Vui long thu lai.\nChi tiet: " + ex.Message,
-                "Loi he thong");
+            File.AppendAllText("error.log", $"{DateTime.Now}: [{actionName}] {ex}\n");
+            ShowError("Co loi he thong, vui long thu lai sau.", "Loi");
         }
 
         protected void ExecuteWithHandling(string actionName, Action action, Action finallyAction = null)
@@ -169,11 +167,11 @@ namespace Presentation
             {
                 action?.Invoke();
             }
-            catch (InvalidOperationException ex)
+            catch (ArgumentException ex)
             {
                 ShowFriendlyException(ex, actionName);
             }
-            catch (FormatException ex)
+            catch (InvalidOperationException ex)
             {
                 ShowFriendlyException(ex, actionName);
             }
@@ -192,15 +190,13 @@ namespace Presentation
             try
             {
                 if (action != null)
-                {
                     await action();
-                }
             }
-            catch (InvalidOperationException ex)
+            catch (ArgumentException ex)
             {
                 ShowFriendlyException(ex, actionName);
             }
-            catch (FormatException ex)
+            catch (InvalidOperationException ex)
             {
                 ShowFriendlyException(ex, actionName);
             }
@@ -214,7 +210,6 @@ namespace Presentation
             }
         }
 
-        // ─── Cursor Helpers ────────────────────────────────────────────────────
         protected void ShowWaitCursor()
         {
             Cursor.Current = Cursors.WaitCursor;
@@ -227,18 +222,15 @@ namespace Presentation
             UseWaitCursor = false;
         }
 
-        // ─── Invoke Helper ────────────────────────────────────────────────────
-        /// <summary>Chạy action trên UI thread. An toàn từ background thread.</summary>
         protected void RunOnUI(Action action)
         {
             if (InvokeRequired) Invoke(action);
             else action();
         }
 
-        // ─── Menu Handlers ────────────────────────────────────────────────────
         private void CloseTabMenuItem_Click(object sender, EventArgs e) => CloseCurrentTab();
         private void ExitMenuItem_Click(object sender, EventArgs e) => Close();
         private void AboutMenuItem_Click(object sender, EventArgs e)
-            => ShowInfo("Ứng dụng Ride-sharing - Phiên bản 1.0", "Giới thiệu");
+            => ShowInfo("Ung dung Ride-sharing - Phien ban 1.0", "Gioi thieu");
     }
 }

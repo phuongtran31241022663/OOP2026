@@ -26,9 +26,10 @@ namespace Domain.ValueObjects
 
         public Location(Coordinate coordinate, Address address)
         {
-            _coordinate = coordinate;
-            _address = address;
+            _coordinate = coordinate ?? throw new ArgumentNullException(nameof(coordinate));
+            _address = address ?? throw new ArgumentNullException(nameof(address));
         }
+
 
         #endregion
 

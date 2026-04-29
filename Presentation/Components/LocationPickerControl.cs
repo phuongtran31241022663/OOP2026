@@ -29,17 +29,19 @@ namespace Presentation.Components
         {
             new Location(
                 new Coordinate(10.7769, 106.7009),
-                new Address("District 1", "", "District 1", "Ho Chi Minh", "Vietnam")
+                new Address("District 1", "N/A", "District 1", "Ho Chi Minh", "Vietnam")
             ),
             new Location(
                 new Coordinate(10.8756, 106.8002),
-                new Address("Thu Duc", "", "Thu Duc", "Ho Chi Minh", "Vietnam")
+                new Address("Thu Duc", "N/A", "Thu Duc", "Ho Chi Minh", "Vietnam")
             ),
             new Location(
                 new Coordinate(10.0167, 105.0833),
-                new Address("Chau Phong", "", "An Giang", "An Giang", "Vietnam")
+                new Address("Chau Phong", "N/A", "An Giang", "An Giang", "Vietnam")
             )
         };
+
+
 
         // Internal item structure for dropdown
         private class DropdownItem
@@ -150,8 +152,11 @@ namespace Presentation.Components
 
         private string FormatLocationForDisplay(Location location)
         {
-            if (location == null || location.Address == null)
+            if (location == null)
                 return string.Empty;
+
+            if (location.Address == null)
+                return $"[{location.Coordinate.Latitude:F5}, {location.Coordinate.Longitude:F5}]";
 
             var address = location.Address;
             // Format: District, City
@@ -162,8 +167,9 @@ namespace Presentation.Components
             else if (!string.IsNullOrWhiteSpace(address.District))
                 return address.District;
             else
-                return string.Empty;
+                return $"[{location.Coordinate.Latitude:F5}, {location.Coordinate.Longitude:F5}]";
         }
+
 
         /// <summary>
         /// Populates the dropdown with headers and locations.

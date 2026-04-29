@@ -1,4 +1,4 @@
-﻿﻿﻿﻿// Infrastructure/Repositories/JsonRepository.cs
+﻿﻿﻿﻿﻿﻿// Infrastructure/Repositories/JsonRepository.cs
 using Domain.Repositories;
 using Domain.SharedKernel;
 using Newtonsoft.Json;
@@ -18,9 +18,12 @@ namespace Infrastructure.Repositories
         private readonly JsonSerializerSettings _serializerSettings;
 
         public JsonRepository(string fileName)
-
         {
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new ArgumentException("Tên file không được để trống.", nameof(fileName));
+
             string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
+
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
             _filePath = Path.Combine(folder, fileName);
@@ -126,7 +129,11 @@ namespace Infrastructure.Repositories
 
         public async Task AddAsync(T entity)
         {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
             await EnsureLoadedAsync();
+
             await _fileLock.WaitAsync();
             try
             {
@@ -143,7 +150,11 @@ namespace Infrastructure.Repositories
 
         public async Task UpdateAsync(T entity)
         {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
             await EnsureLoadedAsync();
+
             await _fileLock.WaitAsync();
             try
             {
@@ -171,7 +182,11 @@ namespace Infrastructure.Repositories
 
         public async Task DeleteAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new ArgumentException("Id không hợp lệ.", nameof(id));
+
             await EnsureLoadedAsync();
+
             await _fileLock.WaitAsync();
             try
             {

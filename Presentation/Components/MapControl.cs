@@ -1,4 +1,4 @@
-﻿using Domain.Entities.Users;
+﻿﻿﻿﻿using Domain.Entities.Users;
 using Domain.Entities;
 using Domain.ValueObjects;
 using GMap.NET;
@@ -13,7 +13,15 @@ using DomainLocation = Domain.ValueObjects.Location;
 
 namespace Presentation.Components
 {
+    public enum MapSlot
+    {
+        None,
+        Pickup,
+        Destination
+    }
+
     public partial class MapControl : BaseUserControl
+
     {
         private GMapOverlay _staticOverlay;
         private GMapOverlay _routeOverlay;
@@ -24,7 +32,13 @@ namespace Presentation.Components
 
         public event Action<MapControl, DomainLocation> MapClicked;
 
+        /// <summary>
+        /// Slot đang active để nhận địa điểm từ map click.
+        /// </summary>
+        public MapSlot ActiveSlot { get; set; } = MapSlot.None;
+
         public MapControl()
+
         {
             InitializeComponent();
             InitializeMap();
@@ -64,8 +78,12 @@ namespace Presentation.Components
             _pickupMarker = new GMarkerGoogle(
                 new PointLatLng(location.Coordinate.Latitude, location.Coordinate.Longitude),
                 GMarkerGoogleType.green_pushpin);
-            _pickupMarker.ToolTipText = $"Điểm đón: {location.Address}";
+            string displayText = location.Address != null && !string.IsNullOrWhiteSpace(location.Address.ToString())
+                ? location.Address.ToString()
+                : $"{location.Coordinate.Latitude:F5}, {location.Coordinate.Longitude:F5}";
+            _pickupMarker.ToolTipText = $"Điểm đón: {displayText}";
             _staticOverlay.Markers.Add(_pickupMarker);
+
         }
 
         public void AddDestinationMarker(DomainLocation location) => SetDestination(location);
@@ -78,8 +96,12 @@ namespace Presentation.Components
             _destinationMarker = new GMarkerGoogle(
                 new PointLatLng(location.Coordinate.Latitude, location.Coordinate.Longitude),
                 GMarkerGoogleType.red_pushpin);
-            _destinationMarker.ToolTipText = $"Điểm đến: {location.Address}";
+            string displayText = location.Address != null && !string.IsNullOrWhiteSpace(location.Address.ToString())
+                ? location.Address.ToString()
+                : $"{location.Coordinate.Latitude:F5}, {location.Coordinate.Longitude:F5}";
+            _destinationMarker.ToolTipText = $"Điểm đến: {displayText}";
             _staticOverlay.Markers.Add(_destinationMarker);
+
         }
 
         public void AddDriverMarker(DomainLocation location) => UpdateDriverLocation(location);
@@ -223,16 +245,44 @@ namespace Presentation.Components
         private void OnMapZoomChanged() { }
         private void OnMarkerClick(GMapMarker item, MouseEventArgs e) { }
 
+        private Address MockReverseGeocode(Coordinate coord)
+        {
+            double lat = coord.Latitude;
+            double lng = coord.Longitude;
+
+            if (lat >= 10.75 && lat <= 10.85 && lng >= 106.65 && lng <= 106.75)
+                return new Address("District 1 area", "Mock Street", "Ben Nghe", "Ho Chi Minh", "Vietnam");
+            else if (lat >= 10.85 && lat <= 10.95 && lng >= 106.75 && lng <= 106.85)
+                return new Address("Thu Duc area", "Mock Ave", "Linh Chieu", "Ho Chi Minh", "Vietnam");
+            else if (lat >= 10.0 && lat <= 10.1 && lng >= 105.0 && lng <= 105.1)
+                return new Address("Chau Doc rural", "Rural Rd", "Chau Phong", "An Giang", "Vietnam");
+            else
+                return new Address("Unknown district", "", "Unknown", "Ho Chi Minh", "Vietnam");
+        }
+
         private void OnMapMouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
                 PointLatLng point = _gMapControl.FromLocalToLatLng(e.X, e.Y);
                 Coordinate coord = new Coordinate(point.Lat, point.Lng);
-                Address addr = new Address("", "", "", "", "", "", "", "");
+                Address addr = MockReverseGeocode(coord);
                 DomainLocation location = new DomainLocation(coord, addr);
+
+                // Tự động đặt marker dựa trên ActiveSlot
+                if (ActiveSlot == MapSlot.Pickup)
+                {
+                    SetPickup(location);
+                }
+                else if (ActiveSlot == MapSlot.Destination)
+                {
+                    SetDestination(location);
+                }
+                // TODO: Integrate reverse geocoding via IMapService for real address
+
                 MapClicked?.Invoke(this, location);
             }
         }
+
     }
 }

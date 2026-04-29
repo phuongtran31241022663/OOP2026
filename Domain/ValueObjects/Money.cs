@@ -24,9 +24,15 @@ namespace Domain.ValueObjects
 
         public Money(decimal amount, string currency)
         {
-           _amount = amount;
-              _currency = currency;
+            if (amount < 0)
+                throw new ArgumentOutOfRangeException(nameof(amount), "Số tiền không thể âm.");
+            if (string.IsNullOrWhiteSpace(currency))
+                throw new ArgumentException("Loại tiền tệ không được để trống.", nameof(currency));
+
+            _amount = amount;
+            _currency = currency;
         }
+
 
         public Money(decimal amount) : this(amount, "VND") { }
 
@@ -112,4 +118,3 @@ namespace Domain.ValueObjects
         }
     }
 }
-

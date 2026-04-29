@@ -1,5 +1,7 @@
-﻿using Domain.SharedKernel;
+﻿﻿﻿using System;
+using Domain.SharedKernel;
 using System.Collections.Generic;
+
 
 namespace Domain.ValueObjects
 {
@@ -31,6 +33,17 @@ namespace Domain.ValueObjects
 
       public Address(string name, string street, string district, string city, string country, string houseNumber = null, string osmValue = null, string locality = null)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Tên địa điểm không được để trống.", nameof(name));
+            if (string.IsNullOrWhiteSpace(street))
+                throw new ArgumentException("Đường không được để trống.", nameof(street));
+            if (string.IsNullOrWhiteSpace(district))
+                throw new ArgumentException("Quận/Huyện không được để trống.", nameof(district));
+            if (string.IsNullOrWhiteSpace(city))
+                throw new ArgumentException("Thành phố không được để trống.", nameof(city));
+            if (string.IsNullOrWhiteSpace(country))
+                throw new ArgumentException("Quốc gia không được để trống.", nameof(country));
+
             _name = name;
             _street = street;
             _district = district;
@@ -40,6 +53,7 @@ namespace Domain.ValueObjects
             _osm_Value = osmValue;
             _locality = locality;
         }
+
         #endregion
         protected override IEnumerable<object> GetEqualityComponents()
         {

@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+﻿﻿using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.ValueObjects;
@@ -26,7 +26,8 @@ namespace Application.Services
         {
             FareRule rule = await _fareRuleRepo.GetByVehicleTypeAsync(vehicleType);
             if (rule == null)
-                throw new Exception($"Chưa có quy tắc giá cho loại xe {vehicleType}.");
+                throw new InvalidOperationException($"Chưa có quy tắc giá cho loại xe {vehicleType}.");
+
             return rule.CalculateFare(distanceKm);
         }
     }

@@ -172,7 +172,7 @@ namespace Presentation.Components
         /// <summary>
         /// Hiển thị thông báo lỗi với chi tiết đầy đủ
         /// </summary>
-        public void ShowError(string title, string message, Exception ex = null)
+        public new void ShowError(string title, string message, Exception ex = null)
         {
             string fullMessage = message;
             if (ex != null)
@@ -193,7 +193,7 @@ namespace Presentation.Components
         /// <summary>
         /// Hiển thị cảnh báo
         /// </summary>
-        public void ShowWarning(string title, string message)
+        public new void ShowWarning(string title, string message)
         {
             AddLog($"{title}: {message}", LogLevel.Warning);
             MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
