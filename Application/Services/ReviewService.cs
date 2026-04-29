@@ -26,12 +26,16 @@ namespace Application.Services
 
         public async Task AddReviewAsync(Guid driverId, Guid passengerId, Guid tripId, int rating, string comment)
         {
-            if (rating < 1 || rating > 5) throw new ArgumentException("Rating must be between 1 and 5");
+            if (rating < 1 || rating > 5) throw new ArgumentException("Đánh giá phải từ 1 đến 5.", nameof(rating));
+
 
             Trip trip = await _tripRepo.GetByIdAsync(tripId);
-            if (trip == null) throw new Exception("Trip not found");
-            if (trip.DriverId != driverId) throw new Exception("Driver does not match trip");
-            if (trip.PassengerId != passengerId) throw new Exception("Passenger does not match trip");
+            if (trip == null) throw new InvalidOperationException("Không tìm thấy chuyến.");
+
+            if (trip.DriverId != driverId) throw new InvalidOperationException("Tài xế không khớp với chuyến đi.");
+
+            if (trip.PassengerId != passengerId) throw new InvalidOperationException("Hành khách không khớp với chuyến đi.");
+
 
             Review review = new Review(driverId, passengerId, tripId, rating, comment);
             await _reviewRepo.AddAsync(review);

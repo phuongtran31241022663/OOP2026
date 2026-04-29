@@ -103,7 +103,7 @@ namespace Presentation.Components
             // _lblBreakdown
             //
             this._lblBreakdown.AutoSize = true;
-            this._lblBreakdown.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+this._lblBreakdown.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this._lblBreakdown.ForeColor = System.Drawing.Color.Gray;
             this._lblBreakdown.Location = new System.Drawing.Point(8, 135);
             this._lblBreakdown.Name = "_lblBreakdown";

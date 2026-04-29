@@ -5,6 +5,7 @@ namespace Presentation.UserControls
         private System.ComponentModel.IContainer components = null;
 
         private System.Windows.Forms.TableLayoutPanel tblMain;
+        private System.Windows.Forms.FlowLayoutPanel flpTopBar;
         private System.Windows.Forms.Panel pnlTopBar;
         private System.Windows.Forms.Button btnToggleStatus;
         private System.Windows.Forms.Label lblWallet;
@@ -43,7 +44,8 @@ namespace Presentation.UserControls
         private void InitializeComponent()
         {
             this.tblMain = new System.Windows.Forms.TableLayoutPanel();
-            this.pnlTopBar = new System.Windows.Forms.Panel();
+this.flpTopBar = new System.Windows.Forms.FlowLayoutPanel();
+this.pnlTopBar = this.flpTopBar;
             this.btnLogout = new System.Windows.Forms.Button();
             this.btnProfile = new System.Windows.Forms.Button();
             this.lblRating = new System.Windows.Forms.Label();
@@ -112,7 +114,7 @@ namespace Presentation.UserControls
             this.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLogout.Location = new System.Drawing.Point(1104, 12);
             this.btnLogout.Name = "btnLogout";
-            this.btnLogout.Size = new System.Drawing.Size(72, 36);
+this.btnLogout.Size = new System.Drawing.Size(90, 36);
             this.btnLogout.TabIndex = 5;
             this.btnLogout.Text = "Thoat";
             this.btnLogout.UseVisualStyleBackColor = true;
@@ -123,7 +125,7 @@ namespace Presentation.UserControls
             this.btnProfile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnProfile.Location = new System.Drawing.Point(1020, 12);
             this.btnProfile.Name = "btnProfile";
-            this.btnProfile.Size = new System.Drawing.Size(72, 36);
+this.btnProfile.Size = new System.Drawing.Size(90, 36);
             this.btnProfile.TabIndex = 4;
             this.btnProfile.Text = "Ho so";
             this.btnProfile.UseVisualStyleBackColor = true;
@@ -142,7 +144,8 @@ namespace Presentation.UserControls
             // 
             this.lblWallet.AutoSize = true;
             this.lblWallet.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.lblWallet.Location = new System.Drawing.Point(360, 18);
+this.lblWallet.Location = new System.Drawing.Point(300, 18);
+this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.lblWallet.Name = "lblWallet";
             this.lblWallet.Size = new System.Drawing.Size(98, 23);
             this.lblWallet.TabIndex = 2;

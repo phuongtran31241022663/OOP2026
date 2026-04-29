@@ -70,8 +70,30 @@ namespace Presentation.UserControls
             this.btnHistory = new System.Windows.Forms.Button();
             this.btnProfile = new System.Windows.Forms.Button();
             this.btnLogout = new System.Windows.Forms.Button();
+
             this.pnlActionStage = new System.Windows.Forms.Panel();
             this.lblStatus = new System.Windows.Forms.Label();
+
+            this.pnlBooking = new System.Windows.Forms.Panel();
+            this.btnBook = new System.Windows.Forms.Button();
+            this.cmbVehicleType = new System.Windows.Forms.ComboBox();
+            this.destinationPicker = new Presentation.Components.LocationPickerControl();
+            this.pickupPicker = new Presentation.Components.LocationPickerControl();
+            this.pnlSearching = new System.Windows.Forms.Panel();
+            this.btnCancelSearch = new System.Windows.Forms.Button();
+            this.lblSearching = new System.Windows.Forms.Label();
+            this.progressSearching = new System.Windows.Forms.ProgressBar();
+            this.pnlTracking = new System.Windows.Forms.Panel();
+            this.btnCancelTrip = new System.Windows.Forms.Button();
+            this.driverCard = new Presentation.Components.DriverCardControl();
+            this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
+            this.pnlPayment = new System.Windows.Forms.Panel();
+            this.btnRateDriver = new System.Windows.Forms.Button();
+            this.btnConfirmPayment = new System.Windows.Forms.Button();
+            this.lblTotalAmount = new System.Windows.Forms.Label();
+            this.pnlHistory = new System.Windows.Forms.Panel();
+            this.dgvHistory = new System.Windows.Forms.DataGridView();
+
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
             this.splitMain.Panel2.SuspendLayout();
@@ -147,7 +169,7 @@ namespace Presentation.UserControls
             this.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLogout.Location = new System.Drawing.Point(296, 8);
             this.btnLogout.Name = "btnLogout";
-            this.btnLogout.Size = new System.Drawing.Size(48, 32);
+this.btnLogout.Size = new System.Drawing.Size(80, 32);
             this.btnLogout.TabIndex = 3;
             this.btnLogout.Text = "Thoat";
             this.btnLogout.UseVisualStyleBackColor = true;
@@ -158,7 +180,7 @@ namespace Presentation.UserControls
             this.btnProfile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnProfile.Location = new System.Drawing.Point(240, 8);
             this.btnProfile.Name = "btnProfile";
-            this.btnProfile.Size = new System.Drawing.Size(48, 32);
+this.btnProfile.Size = new System.Drawing.Size(80, 32);
             this.btnProfile.TabIndex = 2;
             this.btnProfile.Text = "Ho so";
             this.btnProfile.UseVisualStyleBackColor = true;
@@ -169,7 +191,7 @@ namespace Presentation.UserControls
             this.btnHistory.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnHistory.Location = new System.Drawing.Point(184, 8);
             this.btnHistory.Name = "btnHistory";
-            this.btnHistory.Size = new System.Drawing.Size(48, 32);
+this.btnHistory.Size = new System.Drawing.Size(80, 32);
             this.btnHistory.TabIndex = 1;
             this.btnHistory.Text = "Lich su";
             this.btnHistory.UseVisualStyleBackColor = true;
@@ -242,7 +264,7 @@ namespace Presentation.UserControls
             this.destinationPicker.Dock = System.Windows.Forms.DockStyle.Top;
             this.destinationPicker.Location = new System.Drawing.Point(8, 120);
             this.destinationPicker.Name = "destinationPicker";
-            this.destinationPicker.Size = new System.Drawing.Size(334, 112);
+this.destinationPicker.Size = new System.Drawing.Size(334, 60);
             this.destinationPicker.TabIndex = 1;
             // 
             // pickupPicker
@@ -250,7 +272,7 @@ namespace Presentation.UserControls
             this.pickupPicker.Dock = System.Windows.Forms.DockStyle.Top;
             this.pickupPicker.Location = new System.Drawing.Point(8, 8);
             this.pickupPicker.Name = "pickupPicker";
-            this.pickupPicker.Size = new System.Drawing.Size(334, 112);
+this.pickupPicker.Size = new System.Drawing.Size(334, 60);
             this.pickupPicker.TabIndex = 0;
             // 
             // pnlSearching
@@ -416,7 +438,7 @@ namespace Presentation.UserControls
             // lblStatus
             // 
             this.lblStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblStatus.Font = new System.Drawing.Font("Segoe UI", 8F);
+this.lblStatus.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblStatus.ForeColor = System.Drawing.Color.Gray;
             this.lblStatus.Location = new System.Drawing.Point(3, 771);
             this.lblStatus.Name = "lblStatus";
@@ -455,4 +477,3 @@ namespace Presentation.UserControls
         #endregion
     }
 }
-

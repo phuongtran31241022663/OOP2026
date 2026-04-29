@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Interfaces;
@@ -37,12 +37,12 @@ namespace Application.Services
             // Kiểm tra hành khách tồn tại
             Passenger passenger = await _passengerRepository.GetByIdAsync(passengerId);
             if (passenger == null)
-                throw new Exception("Hành khách không tồn tại.");
+                throw new InvalidOperationException("Hành khách không tồn tại.");
 
             // Tính route
             Route route = await _mapService.GetRouteAsync(pickup, destination);
             if (route == null)
-                throw new Exception("Không thể tính đường đi.");
+                throw new InvalidOperationException("Không thể tính đường đi.");
 
             // Tính giá cước
             Fare fare = await _fareService.CalculateFareAsync(vehicleType, route.Distance);
@@ -56,14 +56,14 @@ namespace Application.Services
         {
             Trip trip = await _tripService.GetTripAsync(tripId);
             if (trip == null)
-                throw new Exception("Chuyến không tồn tại.");
+                throw new InvalidOperationException("Chuyến không tồn tại.");
 
             if (trip.PassengerId != passengerId)
-                throw new Exception("Bạn không phải chủ của chuyến này.");
+                throw new UnauthorizedAccessException("Bạn không phải chủ của chuyến này.");
 
             bool canCancel = await _tripService.CanTripBeCancelledAsync(tripId);
             if (!canCancel)
-                throw new Exception("Không thể hủy chuyến ở trạng thái hiện tại.");
+                throw new InvalidOperationException("Không thể hủy chuyến ở trạng thái hiện tại.");
 
             await _tripService.CancelTripAsync(tripId, reason);
         }
@@ -72,7 +72,7 @@ namespace Application.Services
         {
             Passenger passenger = await _passengerRepository.GetByIdAsync(passengerId);
             if (passenger == null)
-                throw new Exception("Hành khách không tồn tại.");
+                throw new InvalidOperationException("Hành khách không tồn tại.");
 
             return await _tripService.GetTripsByPassengerAsync(passengerId);
         }
@@ -81,7 +81,7 @@ namespace Application.Services
         {
             Passenger passenger = await _passengerRepository.GetByIdAsync(passengerId);
             if (passenger == null)
-                throw new Exception("Hành khách không tồn tại.");
+                throw new InvalidOperationException("Hành khách không tồn tại.");
 
             return await _tripService.GetActiveTripForPassengerAsync(passengerId);
         }
@@ -90,16 +90,16 @@ namespace Application.Services
         {
             Trip trip = await _tripService.GetTripAsync(tripId);
             if (trip == null)
-                throw new Exception("Chuyến không tồn tại.");
+                throw new InvalidOperationException("Chuyến không tồn tại.");
 
             if (trip.PassengerId != passengerId)
-                throw new Exception("Bạn không phải hành khách của chuyến này.");
+                throw new UnauthorizedAccessException("Bạn không phải hành khách của chuyến này.");
 
             if (!trip.IsCompleted())
-                throw new Exception("Chỉ có thể đánh giá sau khi chuyến hoàn thành.");
+                throw new InvalidOperationException("Chỉ có thể đánh giá sau khi chuyến hoàn thành.");
 
             if (!trip.DriverId.HasValue)
-                throw new Exception("Chuyến không có tài xế.");
+                throw new InvalidOperationException("Chuyến không có tài xế.");
 
             await _reviewService.AddReviewAsync(trip.DriverId.Value, passengerId, tripId, rating, comment);
         }
@@ -108,7 +108,7 @@ namespace Application.Services
         {
             Passenger passenger = await _passengerRepository.GetByIdAsync(passengerId);
             if (passenger == null)
-                throw new Exception("Hành khách không tồn tại.");
+                throw new InvalidOperationException("Hành khách không tồn tại.");
             return passenger;
         }
     }

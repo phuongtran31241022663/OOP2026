@@ -40,15 +40,15 @@ RideGo is a ride-hailing simulation system built with C# WinForms, simulating th
 
 ### Technology Stack
 
-| Component | Details |
-|-----------|---------|
-| Runtime | .NET Framework 4.8 |
-| UI | Windows Forms |
-| Map | GMap.NET.WinForms 2.1.7 (Google Maps provider) |
-| Serialization | Newtonsoft.Json |
+| Component           | Details                                         |
+| ------------------- | ----------------------------------------------- |
+| Runtime             | .NET Framework 4.8                              |
+| UI                  | Windows Forms                                   |
+| Map                 | GMap.NET.WinForms 2.1.7 (Google Maps provider)  |
+| Serialization       | Newtonsoft.Json                                 |
 | Service Composition | Manual — instantiate with `new` in `Program.cs` |
-| Actors | Passenger, Driver, Admin |
-| Storage | JSON files |
+| Actors              | Passenger, Driver, Admin                        |
+| Storage             | JSON files                                      |
 
 ---
 
@@ -64,13 +64,13 @@ Presentation → Application → Infrastructure → Domain → Common
 
 **Project References (.csproj):**
 
-| Project | References |
-|---------|-----------|
-| Presentation | Application, Common, Domain, Infrastructure *(violation — see below)* |
-| Application | Common, Domain |
-| Infrastructure | Application, Common, Domain |
-| Domain | Common |
-| Common | *(none)* |
+| Project        | References                                                            |
+| -------------- | --------------------------------------------------------------------- |
+| Presentation   | Application, Common, Domain, Infrastructure _(violation — see below)_ |
+| Application    | Common, Domain                                                        |
+| Infrastructure | Application, Common, Domain                                           |
+| Domain         | Common                                                                |
+| Common         | _(none)_                                                              |
 
 **Current violation:** Presentation references Domain and Infrastructure directly. Per Clean Architecture, Presentation should only reference Application (and Common for shared types).
 
@@ -91,6 +91,7 @@ User Action (Button Click / Timer Tick)
 - **Composition Root** at `Program.cs` (Presentation) — initializes entire service graph with `new` directly (manual composition, no DI container).
 
 **Note vs Web API pattern:**
+
 - No HTTP middleware — replaced by WinForms event pipeline
 - No MediatR — UI event handler calls Application Service directly
 - No EF Core — replaced by `JsonRepository<T>` + `FileStorage`
@@ -117,13 +118,13 @@ graph TD
     UI --> Infra
 ```
 
-| Layer | Responsibility | Key Components |
-|-------|---------------|----------------|
-| **Common** | Shared utilities, constants, extension methods | `Common/Utilities`, `Common/Constants`, `Common/Extensions` |
-| **Domain** | Core business rules, no third-party dependencies | Entities, Value Objects, State Machines, Domain Events, Repository Interfaces |
-| **Application** | Use case orchestration, business workflow | Services (`TripService`, `UserService`, `FareService`, `MatchingService`...), Interfaces |
-| **Infrastructure** | External communication, data storage | `JsonRepository<T>`, `FileStorage`, `MapService`, Repository implementations |
-| **Presentation** | User interaction | WinForms Shells, Screens, Components, ViewModels, Helpers, Manual composition root (`Program.cs`) |
+| Layer              | Responsibility                                   | Key Components                                                                                    |
+| ------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| **Common**         | Shared utilities, constants, extension methods   | `Common/Utilities`, `Common/Constants`, `Common/Extensions`                                       |
+| **Domain**         | Core business rules, no third-party dependencies | Entities, Value Objects, State Machines, Domain Events, Repository Interfaces                     |
+| **Application**    | Use case orchestration, business workflow        | Services (`TripService`, `UserService`, `FareService`, `MatchingService`...), Interfaces          |
+| **Infrastructure** | External communication, data storage             | `JsonRepository<T>`, `FileStorage`, `MapService`, Repository implementations                      |
+| **Presentation**   | User interaction                                 | WinForms Shells, Screens, Components, ViewModels, Helpers, Manual composition root (`Program.cs`) |
 
 ### Composition Root
 
@@ -204,29 +205,29 @@ Entity (Domain.SharedKernel, abstract)
 
 ### Entities
 
-| Entity | Key Properties | Key Behaviors |
-|--------|---------------|---------------|
-| `User` (abstract) | `Id`, `Name`, `Phone`, `Password` (hashed), `IsActive` | `UpdateName()`, `ChangePassword()`, `VerifyPassword()` |
-| `Passenger` | `TotalTrips` | `AddTrip()` |
-| `Driver` | `Status`, `Position`, `VehicleId`, `Wallet`, `Income`, `TotalTrips`, `AverageRating`, `RatingSum`, `TotalReviews`, `LicenseNumber` | `SetAvailable()`, `SetOnTrip()`, `SetOffline()`, `UpdatePosition()`, `AddTrip()`, `PayCommission()`, `DepositToWallet()`, `UpdateReviews(int rating)` |
-| `Admin` | (inherits User) | User management, system configuration |
-| `Vehicle` (abstract) | `PlateNumber`, `Brand`, `Model`, `Color`, `Capacity`, `Type` | `GetAvgSpeed()` (abstract) |
-| `Car` | `Type = Car` | `AvgSpeed = 60km/h` |
-| `Motorbike` | `Type = Motorbike` | `AvgSpeed = 40km/h` |
-| `Trip` | `Status` (string từ `ITripState`), `PassengerId`, `DriverId?`, `VehicleType`, `Route`, `Fare`, `IsPaid`, `RequestAt` | State transitions: `SetSearching()`, `MatchDriver()`, `MarkAsArrived()`, `StartTrip()`, `CompleteTrip()`, `Cancel()`, `MarkTimeout()` |
-| `FareRule` | `VehicleType`, `BaseFare`, `PricePerKm`, `CommissionRate` | `CalculateFare(distanceKm)` → `Fare` |
-| `Review` | `DriverId`, `PassengerId`, `TripId`, `Rating`, `Comment`, `CreatedAt` | `UpdateReview()` |
+| Entity               | Key Properties                                                                                                                     | Key Behaviors                                                                                                                                         |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `User` (abstract)    | `Id`, `Name`, `Phone`, `Password` (hashed), `IsActive`                                                                             | `UpdateName()`, `ChangePassword()`, `VerifyPassword()`                                                                                                |
+| `Passenger`          | `TotalTrips`                                                                                                                       | `AddTrip()`                                                                                                                                           |
+| `Driver`             | `Status`, `Position`, `VehicleId`, `Wallet`, `Income`, `TotalTrips`, `AverageRating`, `RatingSum`, `TotalReviews`, `LicenseNumber` | `SetAvailable()`, `SetOnTrip()`, `SetOffline()`, `UpdatePosition()`, `AddTrip()`, `PayCommission()`, `DepositToWallet()`, `UpdateReviews(int rating)` |
+| `Admin`              | (inherits User)                                                                                                                    | User management, system configuration                                                                                                                 |
+| `Vehicle` (abstract) | `PlateNumber`, `Brand`, `Model`, `Color`, `Capacity`, `Type`                                                                       | `GetAvgSpeed()` (abstract)                                                                                                                            |
+| `Car`                | `Type = Car`                                                                                                                       | `AvgSpeed = 60km/h`                                                                                                                                   |
+| `Motorbike`          | `Type = Motorbike`                                                                                                                 | `AvgSpeed = 40km/h`                                                                                                                                   |
+| `Trip`               | `Status` (string từ `ITripState`), `PassengerId`, `DriverId?`, `VehicleType`, `Route`, `Fare`, `IsPaid`, `RequestAt`               | State transitions: `SetSearching()`, `MatchDriver()`, `MarkAsArrived()`, `StartTrip()`, `CompleteTrip()`, `Cancel()`, `MarkTimeout()`                 |
+| `FareRule`           | `VehicleType`, `BaseFare`, `PricePerKm`, `CommissionRate`                                                                          | `CalculateFare(distanceKm)` → `Fare`                                                                                                                  |
+| `Review`             | `DriverId`, `PassengerId`, `TripId`, `Rating`, `Comment`, `CreatedAt`                                                              | `UpdateReview()`                                                                                                                                      |
 
 ### Value Objects
 
-| Value Object | Components | Notes |
-|-------------|-----------|-------|
-| `Money` | `Amount` (decimal, 2dp), `Currency` (default "VND") | Immutable, operators `+`, `-`, `<`, `>`, `<=`, `>=` |
-| `Coordinate` | `Latitude`, `Longitude` (double) | Primitive wrapper |
-| `Address` | `Name`, `Street`, `District`, `City`, `Country`, `HouseNumber`, `Osm_Value`, `Locality` | From Geocoding API |
-| `Location` | `Coordinate` + `Address` | Composite — immutable |
-| `Route` | `Pickup`, `Destination`, `Distance`, `Duration`, `Polyline` (encoded) | Immutable; composition of two `Location` |
-| `Fare` | `TotalAmount`, `Commission`, `DriverIncome` (computed) | Immutable |
+| Value Object | Components                                                                              | Notes                                               |
+| ------------ | --------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `Money`      | `Amount` (decimal, 2dp), `Currency` (default "VND")                                     | Immutable, operators `+`, `-`, `<`, `>`, `<=`, `>=` |
+| `Coordinate` | `Latitude`, `Longitude` (double)                                                        | Primitive wrapper                                   |
+| `Address`    | `Name`, `Street`, `District`, `City`, `Country`, `HouseNumber`, `Osm_Value`, `Locality` | From Geocoding API                                  |
+| `Location`   | `Coordinate` + `Address`                                                                | Composite — immutable                               |
+| `Route`      | `Pickup`, `Destination`, `Distance`, `Duration`, `Polyline` (encoded)                   | Immutable; composition of two `Location`            |
+| `Fare`       | `TotalAmount`, `Commission`, `DriverIncome` (computed)                                  | Immutable                                           |
 
 ### Repository Interfaces (Domain)
 
@@ -242,16 +243,16 @@ Entity (Domain.SharedKernel, abstract)
 
 `Trip` delegates state behavior to `ITripState` implementations. **State pattern** encapsulates each behavior; state machine hiện chỉ dùng cho `Driver` (`DriverStateMachine`).
 
-| State Class | Valid Next States |
-|-------------|-------------------|
-| `RequestedState` | Searching |
-| `SearchingState` | Matched, Cancelled, Timeout |
-| `MatchedState` | Arrived, Cancelled, Searching |
-| `ArrivedState` | Started, Cancelled |
-| `StartedState` | Completed, Cancelled |
-| `CompletedState` | (terminal) |
-| `CancelledState` | (terminal) |
-| `TimeoutState` | (terminal) |
+| State Class      | Valid Next States             |
+| ---------------- | ----------------------------- |
+| `RequestedState` | Searching                     |
+| `SearchingState` | Matched, Cancelled, Timeout   |
+| `MatchedState`   | Arrived, Cancelled, Searching |
+| `ArrivedState`   | Started, Cancelled            |
+| `StartedState`   | Completed, Cancelled          |
+| `CompletedState` | (terminal)                    |
+| `CancelledState` | (terminal)                    |
+| `TimeoutState`   | (terminal)                    |
 
 ### Driver — State Machine
 
@@ -268,25 +269,28 @@ Offline → Available → OnTrip → Available
 All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 
 **Trip Events:**
+
 - `TripRequestedEvent`, `TripSearchingEvent`, `TripMatchedEvent`, `TripArrivedEvent`, `TripStartedEvent`, `TripCompletedEvent`, `TripPaidEvent`, `TripCancelledEvent`, `TripTimeoutEvent`
 
 **Driver Events:**
+
 - `DriverStatusChangedEvent`, `DriverLocationUpdatedEvent`
 
 **Review Event:**
+
 - `ReviewCreatedEvent`
 
 ---
 
 ## 8. Design Patterns
 
-| Pattern | Implementation |
-|---------|---------------|
-| **State Pattern** | `ITripState` implementations validate Trip lifecycle. |
-| **State Machine** | `DriverStateMachine` validates Driver transitions. |
-| **Domain Events & Observer** | Aggregates emit events; `TripService.TripStatusChanged` for UI real-time updates. |
-| **Value Object** | `Money`, `Location`, `Route`, `Fare` — immutable, value equality. |
-| **Manual Service Composition** | All services instantiated with `new` in `Program.cs`. |
+| Pattern                        | Implementation                                                                    |
+| ------------------------------ | --------------------------------------------------------------------------------- |
+| **State Pattern**              | `ITripState` implementations validate Trip lifecycle.                             |
+| **State Machine**              | `DriverStateMachine` validates Driver transitions.                                |
+| **Domain Events & Observer**   | Aggregates emit events; `TripService.TripStatusChanged` for UI real-time updates. |
+| **Value Object**               | `Money`, `Location`, `Route`, `Fare` — immutable, value equality.                 |
+| **Manual Service Composition** | All services instantiated with `new` in `Program.cs`.                             |
 
 > **Repository** là Data Access Abstraction (không phải GoF Design Pattern). Được khai báo `IRepository<T>` ở tầng Domain, triển khai bởi `JsonRepository<T>` ở Infrastructure. Không LINQ, dùng list iteration thuần.
 
@@ -295,23 +299,29 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 ## 9. Application Services
 
 **TripService:**
+
 - `RequestTrip()`, `MatchDriverAsync()`, `ArriveAtPickup()`, `StartTrip()`, `CompleteTrip()`, `CancelTrip()`
 - `TripStatusChanged` event for UI subscription
 
 **UserService:**
+
 - `RegisterPassenger()`, `RegisterDriver()`, `Login()`, profile management
 - `UpdateDriverStatus()`, `UpdateDriverLocation()`, `TopUpDriverWallet()`
 
 **MatchingService:**
+
 - `MatchDriverToTripAsync()` — matches driver to trip with status + VehicleType check + wallet sufficient for commission + `SemaphoreSlim` lock for thread safety
 
 **FareService:**
+
 - `CalculateFare(VehicleType, double distanceKm)`
 
 **ReviewService:**
+
 - `AddReviewAsync()` — creates review + updates driver rating
 
 **AdminService:**
+
 - User/trip/fare rule management, statistics (GMV, NTR, completion rate, satisfaction)
 
 **SimulationService:** Stub — implemented with `System.Threading.Timer`, auto tick driven.
@@ -321,6 +331,7 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 ## 10. Repository & Persistence
 
 **Infrastructure Implementations:**
+
 - `JsonRepository<T>` — generic base using `FileStorage.LoadAsync<T>` / `SaveAsync`
 - Concrete repos inherit `JsonRepository<T>`
 - `FileStorage` — static class with `ReaderWriterLockSlim` for thread-safe JSON I/O
@@ -333,7 +344,8 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 ## 11. External Services
 
 **MapService** (`Infrastructure.ExternalServices`):
+
 - `GetDistanceAsync()`, `GetRouteAsync()`, `SearchLocation()`, `ReverseGeocodeAsync()`
 - Integrations: Photon Geocoding API + OSRM Routing API
 
-**
+\*\*

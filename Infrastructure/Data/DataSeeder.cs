@@ -87,7 +87,17 @@ namespace Infrastructure.Data
             ITripRepository tripRepo,
             IVehicleRepository vehicleRepo)
         {
+            if (driverRepo == null)
+                throw new ArgumentNullException(nameof(driverRepo));
+            if (passengerRepo == null)
+                throw new ArgumentNullException(nameof(passengerRepo));
+            if (tripRepo == null)
+                throw new ArgumentNullException(nameof(tripRepo));
+            if (vehicleRepo == null)
+                throw new ArgumentNullException(nameof(vehicleRepo));
+
             var existingDrivers = await driverRepo.GetAllAsync();
+
             if (existingDrivers.Count > 0) return;
 
             var drivers = new List<Driver>();
@@ -220,7 +230,8 @@ namespace Infrastructure.Data
             double lat = loc.Lat + (rng.NextDouble() - 0.5) * 0.01;
             double lng = loc.Lng + (rng.NextDouble() - 0.5) * 0.01;
             var coordinate = new Coordinate(lat, lng);
-            var address = new Address(loc.District, "", loc.District, "Ho Chi Minh", "Vietnam");
+            var address = new Address(loc.District, "Đường chính", loc.District, "Thành phố Hồ Chí Minh", "Việt Nam");
+
             return new Location(coordinate, address);
         }
     }

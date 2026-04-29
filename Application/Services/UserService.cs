@@ -31,7 +31,7 @@ namespace Application.Services
             if (passenger != null && passenger.VerifyPassword(password))
                 return passenger;
 
-            throw new Exception("Sai số điện thoại hoặc mật khẩu.");
+            throw new UnauthorizedAccessException("Sai số điện thoại hoặc mật khẩu.");
         }
 
         public async Task RegisterDriverAsync(string name, string phone, string password,
@@ -40,7 +40,7 @@ namespace Application.Services
             bool driverExists = await _driverRepository.ExistsByPhoneAsync(phone);
             bool passengerExists = await _passengerRepository.ExistsByPhoneAsync(phone);
             if (driverExists || passengerExists)
-                throw new Exception("Số điện thoại đã được đăng ký.");
+                throw new InvalidOperationException("Số điện thoại đã được đăng ký.");
 
             Driver driver = new Driver(name, phone, password, licenseNumber, vehicleId, initialPosition);
             await _driverRepository.AddAsync(driver);
@@ -52,7 +52,7 @@ namespace Application.Services
             bool driverExists = await _driverRepository.ExistsByPhoneAsync(phone);
             bool passengerExists = await _passengerRepository.ExistsByPhoneAsync(phone);
             if (driverExists || passengerExists)
-                throw new Exception("Số điện thoại đã được đăng ký.");
+                throw new InvalidOperationException("Số điện thoại đã được đăng ký.");
 
             Passenger passenger = new Passenger(name, phone, password);
             await _passengerRepository.AddAsync(passenger);
@@ -62,21 +62,21 @@ namespace Application.Services
         public async Task<Driver> GetDriverByIdAsync(Guid driverId)
         {
             Driver driver = await _driverRepository.GetByIdAsync(driverId);
-            if (driver == null) throw new Exception("Driver not found.");
+            if (driver == null) throw new InvalidOperationException("Không tìm thấy tài xế.");
             return driver;
         }
 
         public async Task<Passenger> GetPassengerByIdAsync(Guid passengerId)
         {
             Passenger passenger = await _passengerRepository.GetByIdAsync(passengerId);
-            if (passenger == null) throw new Exception("Passenger not found.");
+            if (passenger == null) throw new InvalidOperationException("Không tìm thấy hành khách.");
             return passenger;
         }
 
         public async Task UpdateDriverStatusAsync(Guid driverId, string newStatus)
         {
             Driver driver = await _driverRepository.GetByIdAsync(driverId);
-            if (driver == null) throw new Exception("Driver not found.");
+            if (driver == null) throw new InvalidOperationException("Không tìm thấy tài xế.");
             switch (newStatus)
             {
                 case "Available":
@@ -96,7 +96,7 @@ namespace Application.Services
         public async Task UpdateDriverLocationAsync(Guid driverId, Location location)
         {
             Driver driver = await _driverRepository.GetByIdAsync(driverId);
-            if (driver == null) throw new Exception("Driver not found.");
+            if (driver == null) throw new InvalidOperationException("Không tìm thấy tài xế.");
             driver.UpdatePosition(location);
             await _driverRepository.UpdateAsync(driver);
             await _driverRepository.SaveChangesAsync();

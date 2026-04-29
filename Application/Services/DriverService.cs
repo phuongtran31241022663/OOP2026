@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Interfaces;
@@ -20,15 +20,17 @@ namespace Application.Services
         public async Task<Driver> GetDriverAsync(Guid driverId)
         {
             Driver driver = await _driverRepository.GetByIdAsync(driverId);
-            if (driver == null) throw new Exception("Driver not found.");
+            if (driver == null) throw new InvalidOperationException("Không tìm thấy tài xế.");
             return driver;
         }
+
 
         public async Task UpdateLocationAsync(Guid driverId, Location newLocation)
         {
             Driver driver = await _driverRepository.GetByIdAsync(driverId);
-            if (driver == null) throw new Exception("Driver not found.");
+            if (driver == null) throw new InvalidOperationException("Không tìm thấy tài xế.");
             driver.UpdatePosition(newLocation);
+
             await _driverRepository.UpdateAsync(driver);
             await _driverRepository.SaveChangesAsync();
         }
@@ -36,8 +38,9 @@ namespace Application.Services
         public async Task SetAvailableAsync(Guid driverId)
         {
             Driver driver = await _driverRepository.GetByIdAsync(driverId);
-            if (driver == null) throw new Exception("Driver not found.");
+            if (driver == null) throw new InvalidOperationException("Không tìm thấy tài xế.");
             driver.SetAvailable();
+
             await _driverRepository.UpdateAsync(driver);
             await _driverRepository.SaveChangesAsync();
         }
@@ -45,8 +48,9 @@ namespace Application.Services
         public async Task SetOfflineAsync(Guid driverId)
         {
             Driver driver = await _driverRepository.GetByIdAsync(driverId);
-            if (driver == null) throw new Exception("Driver not found.");
+            if (driver == null) throw new InvalidOperationException("Không tìm thấy tài xế.");
             driver.SetOffline();
+
             await _driverRepository.UpdateAsync(driver);
             await _driverRepository.SaveChangesAsync();
         }

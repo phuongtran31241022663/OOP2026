@@ -247,63 +247,40 @@ DriverIncome = TotalFare − Commission
 
 ## 7. UI Structure
 
-### Folder Structure
+### Folder Structure (Updated from Codebase)
 
 ```
 Presentation/
-├── Components/          # Reusable UI controls
-│   ├── MapControl.cs           # GMap.NET map display
-│   ├── FarePanel.cs            # Fare estimate display
-│   ├── DriverCardControl.cs    # Driver info card
-│   ├── LocationPickerControl.cs # Pickup/destination selection
-│   ├── TripStatusPanel.cs      # Real-time status
-│   ├── StatusPanel.cs          # General status
-│   ├── LocationCard.cs         # Location display
-│   └── TripCard.cs             # Trip summary card
-├── Helpers/             # UI utilities
-│   ├── AlertHelper.cs
-│   ├── DataMapper.cs
-│   ├── EventHelper.cs
-│   ├── MapHelper.cs
-│   └── UIHelper.cs
-├── Screens/             # Forms by feature
-│   ├── Auth/
-│   │   ├── LoginForm.cs
-│   │   └── RegisterForm.cs
-│   ├── Passenger/
-│   │   ├── BookTripForm.cs
-│   │   ├── TripTrackingForm.cs
-│   │   ├── TripHistoryForm.cs
-│   │   └── RatingForm.cs
-│   ├── Driver/
-│   │   ├── DriverDashboardForm.cs
-│   │   ├── TripExecutionForm.cs
-│   │   └── EarningsForm.cs
-│   └── Admin/
-│       ├── AdminDashboardForm.cs
-│       ├── UserManagementForm.cs
-│       ├── TripManagementForm.cs
-│       └── FareRuleConfigForm.cs
-├── Shells/              # Container forms
-│   ├── MainShell.cs
-│   ├── PassengerShell.cs
-│   ├── DriverShell.cs
-│   └── AdminShell.cs
-├── ViewModels/          # UI state
-│   ├── PassengerViewModel.cs
-│   ├── DriverViewModel.cs
-│   ├── AdminViewModel.cs
-│   └── TripViewModel.cs
-├── BaseForm.cs, BaseShell.cs, BaseUserControl.cs
-└── Program.cs           # Manual composition root
+├── Components/          # Reusable UserControls
+│   ├── MapControl.cs          # GMap.NET + ActiveSlot/MapClicked/MockReverseGeocode
+│   ├── FarePanel.cs/.resx     # Fare breakdown (fonts polished)
+│   ├── DriverCardControl.cs   # Driver info
+│   ├── LocationPickerControl.cs # Dropdown recent/fixed, partial Address OK
+│   ├── TripStatusPanel.cs     # Status display
+│   ├── StatusPanel.cs         # General alerts
+│   ├── LocationCard.cs
+│   └── TripCard.cs
+├── Shells/              # Forms
+│   ├── FrmMainShell.cs        # Single shell, UC loader, event hub
+│   ├── FrmModal.cs            # Sub-UC host
+│   └── FrmToast.cs            # Notifications
+├── UserControls/        # Main UCs (actual)
+│   ├── UcPassenger.cs         # SplitContainer 70/30 map/dynamic stages
+│   ├── UcDriver.cs            # tblMain topbar + split 35/65
+│   ├── UcAdmin.cs             # TabControl CRUD
+│   ├── UcAuth.cs              # Toggle login/register
+│   ├── UcProfile.cs
+│   ├── UcRating.cs
+│   └── UcTripDetail.cs
+├── BaseShell.cs, BaseUserControl.cs # Exception handling
+└── Program.cs           # Services composition root
 ```
 
-### Shell Navigation
+### Shell Navigation (Implemented)
 
-- **MainShell** → Auth forms → Role-specific Shell (Passenger/Driver/Admin)
-- **PassengerShell:** TabControl (Book Trip, Track Trip, History, Rating)
-- **DriverShell:** Header with status toggle, bottom navigation (Dashboard, Trips, Earnings)
-- **AdminShell:** TabControl (Users, Drivers, Trips, FareRules, Reports)
+- FrmMainShell loads UcAuth → post-auth role UC (UcPassenger/Driver/Admin) dynamically.
+- No separate PassengerShell/DriverShell/AdminShell (uses UCs directly in MainShell).
+- Event-driven: TripStatusChanged → stages/Toast.
 
 ---
 
