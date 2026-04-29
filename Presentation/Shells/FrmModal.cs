@@ -28,11 +28,17 @@ namespace Presentation.Shells
             Size = new Size(560, 480);
         }
 
+        public string ModalTitle
+        {
+            set { lblTitle.Text = value; }
+        }
+
         public static DialogResult ShowModal(IWin32Window owner, UserControl content, string title)
         {
             using (var modal = new FrmModal())
             {
                 modal.Text = title;
+                modal.ModalTitle = title; // BUG FIX
                 modal.pnlModalContent.Controls.Clear();
                 content.Dock = DockStyle.Fill;
                 modal.pnlModalContent.Controls.Add(content);

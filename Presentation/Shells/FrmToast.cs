@@ -70,6 +70,22 @@ namespace Presentation.Shells
             _closeTimer.Start();
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_closeTimer != null)
+                {
+                    _closeTimer.Stop();
+                    _closeTimer.Dispose();
+                    _closeTimer = null;
+                }
+                if (components != null)
+                    components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
         protected override bool ShowWithoutActivation
         {
             get { return true; }
