@@ -115,7 +115,7 @@
       <DependentUpon>LocationCard.cs</DependentUpon>
     </Compile>
     <Compile Include="Components\LocationPickerControl.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Components\LocationPickerControl.Designer.cs">
       <DependentUpon>LocationPickerControl.cs</DependentUpon>

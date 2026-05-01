@@ -121,7 +121,7 @@ graph TD
 | Layer              | Responsibility                                   | Key Components                                                                                    |
 | ------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
 | **Common**         | Shared utilities, constants, extension methods   | `Common/Utilities`, `Common/Constants`, `Common/Extensions`                                       |
-| **Domain**         | Core business rules, no third-party dependencies | Entities, Value Objects, State Machines, Domain Events, Repository Interfaces                     |
+| **Domain**         | Core business rules, no third-party dependencies | Entities, Value Objects, State Pattern, Domain Events, Repository Interfaces                     |
 | **Application**    | Use case orchestration, business workflow        | Services (`TripService`, `UserService`, `FareService`, `MatchingService`...), Interfaces          |
 | **Infrastructure** | External communication, data storage             | `JsonRepository<T>`, `FileStorage`, `MapService`, Repository implementations                      |
 | **Presentation**   | User interaction                                 | WinForms Shells, Screens, Components, ViewModels, Helpers, Manual composition root (`Program.cs`) |
@@ -156,8 +156,7 @@ RideGo2026/
 │   │                     # Users/Admin, Driver, Passenger; Vehicles/Car, Motorbike, Vehicle
 │   ├── Events/           # 9 Trip events, 2 Driver events, ReviewCreatedEvent
 │   ├── SharedKernel/     # Entity.cs, ValueObject.cs, DomainEvent.cs
-│   ├── StateMachines/    # DriverStateMachine.cs (static class)
-│   ├── States/           # ITripState.cs + 8 state implementations
+│   ├── States/           # ITripState + 8 states, IDriverState + 3 states
 │   ├── Repositories/     # IRepository<T>, ITripRepository, IDriverRepository, etc.
 │   └── ValueObjects/     # Address, Coordinate, Fare, Location, Money, Route
 ├── Infrastructure/

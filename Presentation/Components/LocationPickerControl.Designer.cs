@@ -23,14 +23,20 @@ namespace Presentation.Components
             base.Dispose(disposing);
         }
 
-        private void InitializeComponent()
+private void InitializeComponent()
         {
             this.SuspendLayout();
 
             // Create TextBox for search input
+            _txtSearch = new TextBox();
+            _txtSearch.Location = new Point(0, 0);
+            _txtSearch.Size = new Size(334, 28);
+            _txtSearch.Font = new Font("Segoe UI", 10F);
+            _txtSearch.ForeColor = Color.Black;
             _txtSearch.KeyDown += TxtSearch_KeyDown;
             _txtSearch.Enter += TxtSearch_Enter;
             _txtSearch.Leave += TxtSearch_Leave;
+            _txtSearch.TextChanged += TxtSearch_TextChanged;
 
             // Create ListBox for suggestions
             _lstSuggestions = new ListBox();
