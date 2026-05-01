@@ -28,21 +28,12 @@ namespace Domain.Entities.Users
         #endregion
 
         #region Constructors
-        /// <summary>
-        /// Constructor private cho mục đích deserialization.
-        /// </summary>
-        private Passenger()
-        {
-        }
-
+        // Removed parameterless constructor to prevent empty objects
+        
         /// <summary>
         /// Constructor để tạo mới một hành khách.
         /// </summary>
-        /// <param name="name">Tên hành khách.</param>
-        /// <param name="phone">Số điện thoại.</param>
-        /// <param name="password">Mật khẩu (dạng thô).</param>
         public Passenger(string name, string phone, string password) : base(name, phone, password)
-
         {
             TotalTrips = 0;
         }
@@ -50,13 +41,17 @@ namespace Domain.Entities.Users
         /// <summary>
         /// Constructor để tái tạo đối tượng hành khách từ cơ sở dữ liệu.
         /// </summary>
-        /// <param name="id">ID đã tồn tại.</param>
-        /// <param name="name">Tên hành khách.</param>
-        /// <param name="phone">Số điện thoại.</param>
-        /// <param name="hashedPassword">Mật khẩu đã được hash.</param>
-        public Passenger(Guid id, string name, string phone, string hashedPassword) : base(id, name, phone, hashedPassword)
+        [Newtonsoft.Json.JsonConstructor]
+        public Passenger(Guid id, string name, string phone, string password, int totalTrips) 
+            : base(id, name, phone, password)
         {
-            TotalTrips = 0;
+            _totalTrips = totalTrips;
+        }
+
+        // Backward compatibility
+        public Passenger(Guid id, string name, string phone, string password) 
+            : this(id, name, phone, password, 0)
+        {
         }
 
         #endregion

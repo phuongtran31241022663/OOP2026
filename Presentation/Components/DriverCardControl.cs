@@ -1,4 +1,4 @@
-﻿﻿using Domain.ValueObjects;
+using Domain.ValueObjects;
 using System;
 using System.Drawing;
 using Domain.Entities.Users;
@@ -7,20 +7,20 @@ using Domain.Entities;
 namespace Presentation.Components
 {
     /// <summary>
-    /// BaseUserControl hiển thị thông tin tài xế dưới dạng card.
-    /// Sử dụng trong danh sách tài xế có sẵn hoặc tìm kiếm.
+    /// BaseUserControl hi?n th? th�ng tin t�i x? du?i d?ng card.
+    /// S? d?ng trong danh s�ch t�i x? c� s?n ho?c t�m ki?m.
     /// </summary>
     public partial class DriverCardControl : BaseUserControl
     {
 
 
         /// <summary>
-        /// Sự kiện khi người dùng click vào driver card
+        /// S? ki?n khi ngu?i d�ng click v�o driver card
         /// </summary>
         public event Action<DriverCardControl> Clicked;
 
         /// <summary>
-        /// Tài xế được hiển thị
+        /// T�i x? du?c hi?n th?
         /// </summary>
         public Driver Driver { get; private set; }
 
@@ -30,7 +30,7 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Set thông tin tài xế để hiển thị
+        /// Set th�ng tin t�i x? d? hi?n th?
         /// </summary>
         public void SetDriver(Driver driver, string vehicleDisplayText = null, double distanceKm = 0)
         {
@@ -39,7 +39,7 @@ namespace Presentation.Components
 
             _lblName.Text = driver.Name;
             _lblPhone.Text = driver.Phone;
-            _lblReview.Text = $"★ {driver.AverageRating:F1}";
+            _lblReview.Text = $"? {driver.AverageRating:F1}";
 
             UpdateStatus(driver.Status);
 
@@ -70,12 +70,12 @@ namespace Presentation.Components
             switch (status)
             {
                 case "Available":
-                    _lblStatus.Text = "Có sẵn";
+                    _lblStatus.Text = "C� s?n";
                     _lblStatus.ForeColor = Color.Green;
                     _statusIndicator.BackColor = Color.Green;
                     break;
                 case "OnTrip":
-                    _lblStatus.Text = "Đang chạy";
+                    _lblStatus.Text = "�ang ch?y";
                     _lblStatus.ForeColor = Color.Blue;
                     _statusIndicator.BackColor = Color.Blue;
                     break;

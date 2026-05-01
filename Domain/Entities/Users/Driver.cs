@@ -18,8 +18,8 @@ namespace Domain.Entities.Users
     public class Driver : User
     {
         #region Fields
-        private readonly string _licenseNumber;
-        private readonly Guid _vehicleId;
+        private string _licenseNumber;
+        private Guid _vehicleId;
 
         private IDriverState _currentState;
         private Location _position;
@@ -41,11 +41,20 @@ namespace Domain.Entities.Users
             get
             {
                 if (_currentState == null)
-                    return "Unknown";
+                    return "Offline";
                 string name = _currentState.GetType().Name;
                 if (name.EndsWith("State"))
                     name = name.Substring(0, name.Length - 5);
                 return name;
+            }
+            private set
+            {
+                _currentState = value switch
+                {
+                    "Available" => new DriverAvailableState(),
+                    "OnTrip" => new DriverOnTripState(),
+                    _ => new DriverOfflineState()
+                };
             }
         }
 
@@ -65,7 +74,7 @@ namespace Domain.Entities.Users
         /// <summary>
         /// ID của phương tiện mà tài xế đang sử dụng.
         /// </summary>
-        public Guid VehicleId => _vehicleId;
+        public Guid VehicleId { get => _vehicleId; private set => _vehicleId = value; }
 
         /// <summary>
         /// Số dư ví điện tử của tài xế.
@@ -121,18 +130,13 @@ namespace Domain.Entities.Users
         /// <summary>
         /// Số giấy phép lái xe của tài xế.
         /// </summary>
-        public string LicenseNumber => _licenseNumber;
+        public string LicenseNumber { get => _licenseNumber; private set => _licenseNumber = value; }
 
         #endregion
         
         #region Constructors
 
-        /// <summary>
-        /// Constructor private cho mục đích deserialization (ví dụ: từ JSON).
-        /// </summary>
-        private Driver()
-        {
-        }
+        // Removed parameterless constructor to prevent JSON.NET from creating empty objects
 
         /// <summary>
         /// Khởi tạo một tài xế mới với mật khẩu thô (sẽ được băm).
@@ -168,39 +172,40 @@ namespace Domain.Entities.Users
         }
 
         /// <summary>
-        /// Khởi tạo một tài xế từ dữ liệu đã có (ví dụ: từ database) với mật khẩu đã được băm.
+        /// Constructor để tái tạo đối tượng tài xế từ cơ sở dữ liệu.
         /// </summary>
-        /// <param name="id">ID của tài xế.</param>
-        /// <param name="name">Tên của tài xế.</param>
-        /// <param name="phone">Số điện thoại.</param>
-        /// <param name="hashedPassword">Mật khẩu đã được băm.</param>
-        /// <param name="licenseNumber">Số giấy phép lái xe.</param>
-        /// <param name="vehicleId">ID của phương tiện.</param>
-        /// <param name="position">Vị trí ban đầu.</param>
+        [Newtonsoft.Json.JsonConstructor]
         public Driver(
             Guid id,
             string name,
             string phone,
-            string hashedPassword,
+            string password,
             string licenseNumber,
             Guid vehicleId,
-            Location position)
-            : base(id, name, phone, hashedPassword)
+            Location position,
+            string status,
+            Money wallet,
+            Money income,
+            int totalTrips,
+            int ratingSum,
+            int totalReviews)
+            : base(id, name, phone, password)
         {
-            if (string.IsNullOrWhiteSpace(licenseNumber))
-                throw new ArgumentException("Số giấy phép lái xe không được để trống.", nameof(licenseNumber));
-            if (vehicleId == Guid.Empty)
-                throw new ArgumentException("Id phương tiện không hợp lệ.", nameof(vehicleId));
-            if (position == null)
-                throw new ArgumentNullException(nameof(position));
-
             _licenseNumber = licenseNumber;
-            Position = position;
+            _position = position;
             _vehicleId = vehicleId;
-            _currentState = new DriverOfflineState();
-            Wallet = new Money(0);
-            Income = new Money(0);
-            TotalTrips = 0;
+            Status = status;
+            _wallet = wallet ?? new Money(0);
+            _income = income ?? new Money(0);
+            _totalTrips = totalTrips;
+            _ratingSum = ratingSum;
+            _totalReviews = totalReviews;
+        }
+        
+        // Obsolete constructor kept for backward compatibility if needed, but the one above is preferred for JSON
+        public Driver(Guid id, string name, string phone, string password, string licenseNumber, Guid vehicleId, Location position)
+            : this(id, name, phone, password, licenseNumber, vehicleId, position, "Offline", new Money(0), new Money(0), 0, 0, 0)
+        {
         }
 
         #endregion

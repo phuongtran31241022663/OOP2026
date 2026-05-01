@@ -84,22 +84,12 @@ namespace Domain.Entities
         /// <summary>
         /// Constructor để tái tạo đối tượng người dùng từ cơ sở dữ liệu.
         /// </summary>
-        /// <param name="id">Id đã tồn tại của người dùng.</param>
-        /// <param name="name">Tên người dùng.</param>
-        /// <param name="phone">Số điện thoại.</param>
-        /// <param name="hashedPassword">Mật khẩu đã được hash từ CSDL.</param>
-        protected User(Guid id, string name, string phone, string hashedPassword) : base(id)
+        [Newtonsoft.Json.JsonConstructor]
+        protected User(Guid id, string name, string phone, string password) : base(id)
         {
             Name = name;
             Phone = phone;
-            _password = hashedPassword;
-        }
-
-        /// <summary>
-        /// Constructor không tham số cho các công cụ ORM hoặc serialization.
-        /// </summary>
-        protected User() : base(default)
-        {
+            _password = password;
         }
 
         #endregion

@@ -148,7 +148,13 @@ namespace Presentation.UserControls
             if (_allTrips == null) return;
             foreach (var trip in _allTrips)
             {
-                dgvTrips.Rows.Add(trip.Id.ToString().Substring(0, 8), trip.Status, trip.TripVehicleType, trip.TripFare?.TotalAmount.Amount.ToString("N0") + "đ", trip.RequestAt.ToString("dd/MM HH:mm"));
+                int rowIndex = dgvTrips.Rows.Add(
+                    trip.Id.ToString().Substring(0, 8),
+                    trip.Status,
+                    trip.TripVehicleType,
+                    (trip.TripFare?.TotalAmount.Amount.ToString("N0") ?? "N/A") + "đ",
+                    trip.RequestAt.ToString("dd/MM HH:mm"));
+                dgvTrips.Rows[rowIndex].Tag = trip;
             }
         }
         
@@ -172,7 +178,13 @@ namespace Presentation.UserControls
             dgvTrips.Rows.Clear();
             foreach (var trip in filteredTrips)
             {
-                dgvTrips.Rows.Add(trip.Id.ToString().Substring(0, 8), trip.Status, trip.TripVehicleType, trip.TripFare?.TotalAmount.Amount.ToString("N0") + "đ", trip.RequestAt.ToString("dd/MM HH:mm"));
+                int rowIndex = dgvTrips.Rows.Add(
+                    trip.Id.ToString().Substring(0, 8), 
+                    trip.Status, 
+                    trip.TripVehicleType, 
+                    (trip.TripFare?.TotalAmount.Amount.ToString("N0") ?? "N/A") + "đ", 
+                    trip.RequestAt.ToString("dd/MM HH:mm"));
+                dgvTrips.Rows[rowIndex].Tag = trip;
             }
         }
 
@@ -205,11 +217,19 @@ namespace Presentation.UserControls
                 {
                     throw new InvalidOperationException("Vui lòng chọn chuyến đi cần xem.");
                 }
+                
+                var trip = dgvTrips.SelectedRows[0].Tag as Domain.Entities.Trip;
+                if (trip == null)
+                {
+                    throw new InvalidOperationException("Không thể xác định chuyến đi.");
+                }
 
-                var trip = _allTrips[dgvTrips.SelectedRows[0].Index];
                 var ucDetail = new UcTripDetail(trip);
                 Form parentForm = this.FindForm();
-                FrmModal.ShowModal(parentForm, ucDetail, "Chi tiết chuyến đi");
+                // Thay thế FrmModal bằng ShowInfo theo yêu cầu
+                ShowInfo($"Đang hiển thị: Chi tiết chuyến đi (ID: {trip.Id})");
+                // Ghi chú: MessageBox không thể hiển thị UserControl, 
+                // cần giải pháp thay thế cho UcTripDetail nếu muốn xem chi tiết đầy đủ.
             });
         }
 
@@ -220,14 +240,19 @@ namespace Presentation.UserControls
             if (_allFareRules == null) return;
             foreach (var rule in _allFareRules)
             {
-                dgvFareRules.Rows.Add(rule.VehicleType, rule.BaseFare.Amount.ToString("N0"), rule.PricePerKm.Amount.ToString("N0"), (rule.CommissionRate * 100).ToString("F0") + "%");
+                int rowIndex = dgvFareRules.Rows.Add(
+                    rule.VehicleType, 
+                    rule.BaseFare.Amount.ToString("N0"), 
+                    rule.PricePerKm.Amount.ToString("N0"), 
+                    (rule.CommissionRate * 100).ToString("F0") + "%");
+                dgvFareRules.Rows[rowIndex].Tag = rule;
             }
         }
 
         private Domain.Entities.FareRule GetSelectedFareRule()
         {
             if (dgvFareRules.SelectedRows.Count == 0) return null;
-            return _allFareRules[dgvFareRules.SelectedRows[0].Index];
+            return dgvFareRules.SelectedRows[0].Tag as Domain.Entities.FareRule;
         }
 
         private void ShowFareEditDialog(Domain.Entities.FareRule rule)

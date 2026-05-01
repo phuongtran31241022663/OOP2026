@@ -96,17 +96,43 @@ namespace Infrastructure.Data
             if (vehicleRepo == null)
                 throw new ArgumentNullException(nameof(vehicleRepo));
 
-            var existingDrivers = await driverRepo.GetAllAsync();
+            // 1. Luôn đảm bảo có tài khoản test cố định
+            if (!await driverRepo.ExistsByPhoneAsync("0900000000"))
+            {
+                var fixedVehicle = new Car(null, "51A-12345", "Toyota", "Camry", "Trắng", 4);
+                await vehicleRepo.AddAsync(fixedVehicle);
+                var fixedDriver = new Driver("Tài xế Test", "0900000000", "123456", "GPLX-000000", fixedVehicle.Id, GenerateLocation(999));
+                fixedDriver.DepositToWallet(new Money(100000, "VND"));
+                fixedDriver.SetAvailable();
+                await driverRepo.AddAsync(fixedDriver);
+                await driverRepo.SaveChangesAsync();
+                await vehicleRepo.SaveChangesAsync();
+            }
 
-            if (existingDrivers.Count > 0) return;
+            if (!await passengerRepo.ExistsByPhoneAsync("0911111111"))
+            {
+                var fixedPassenger = new Passenger("Hành khách Test", "0911111111", "123456");
+                await passengerRepo.AddAsync(fixedPassenger);
+                await passengerRepo.SaveChangesAsync();
+            }
+
+            // 2. Chỉ seed dữ liệu mẫu ngẫu nhiên nếu chưa có gì
+            var existingDrivers = await driverRepo.GetAllAsync();
+            if (existingDrivers.Count > 1) return; // Đã có dữ liệu (ít nhất là tài khoản test)
 
             var drivers = new List<Driver>();
             var vehicles = new List<Vehicle>();
             var passengers = new List<Passenger>();
 
-            for (int i = 0; i < 50; i++)
+            // Lấy lại driver test để dùng cho việc tạo trip mẫu
+            var driverTest = await driverRepo.GetByPhoneAsync("0900000000");
+            if (driverTest != null) drivers.Add(driverTest);
+            var passengerTest = await passengerRepo.GetByPhoneAsync("0911111111");
+            if (passengerTest != null) passengers.Add(passengerTest);
+
+            for (int i = 0; i < 20; i++) // Giảm số lượng xuống để nhanh hơn
             {
-                bool isCar = i < 16;
+                bool isCar = i < 8;
                 var vehicle = CreateVehicle(i, isCar);
                 vehicles.Add(vehicle);
                 await vehicleRepo.AddAsync(vehicle);
@@ -208,7 +234,7 @@ namespace Infrastructure.Data
 
         private static string GenerateName(int seedOffset)
         {
-            var rng = new Random(_random.Next() + seedOffset);
+            var rng = new Random(2000 + seedOffset);
             string last = LastNames[rng.Next(LastNames.Length)];
             string middle = MiddleNames[rng.Next(MiddleNames.Length)];
             string first = FirstNames[rng.Next(FirstNames.Length)];
@@ -217,15 +243,16 @@ namespace Infrastructure.Data
 
         private static string GeneratePhone(int index)
         {
+            var rng = new Random(1000 + index);
             string[] prefixes = { "090", "091", "093", "094", "095", "096", "097", "098", "099", "089", "088", "087", "086", "085", "084", "083", "082", "081", "080" };
-            string prefix = prefixes[_random.Next(prefixes.Length)];
-            string suffix = _random.Next(10000000).ToString("D7");
+            string prefix = prefixes[rng.Next(prefixes.Length)];
+            string suffix = rng.Next(10000000).ToString("D7");
             return prefix + suffix;
         }
 
         private static Location GenerateLocation(int seedOffset)
         {
-            var rng = new Random(_random.Next() + seedOffset);
+            var rng = new Random(3000 + seedOffset);
             var loc = HcmLocations[rng.Next(HcmLocations.Length)];
             double lat = loc.Lat + (rng.NextDouble() - 0.5) * 0.01;
             double lng = loc.Lng + (rng.NextDouble() - 0.5) * 0.01;

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿// Infrastructure/Repositories/JsonRepository.cs
+﻿﻿﻿﻿﻿// Infrastructure/Repositories/JsonRepository.cs
 using Domain.Repositories;
 using Domain.SharedKernel;
 using Newtonsoft.Json;
@@ -75,11 +75,14 @@ protected static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
             }
         }
 
-protected virtual async Task EnsureLoadedAsync()
+        private bool _hasLoadedOnce = false;
+
+        protected virtual async Task EnsureLoadedAsync()
         {
-            if (_items == null || _items.Count == 0)
+            if (!_hasLoadedOnce)
             {
                 await LoadFromFileAsync();
+                _hasLoadedOnce = true;
             }
         }
 

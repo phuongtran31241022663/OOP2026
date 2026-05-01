@@ -67,8 +67,7 @@ namespace Presentation
             }
             catch (Exception ex)
             {
-                ShowError("Có lỗi hệ thống, vui lòng thử lại sau.", "Lỗi");
-                File.AppendAllText("error.log", $"{DateTime.Now}: {ex}\n");
+                ShowFriendlyException(ex, "FormKeyDown");
             }
         }
 
@@ -88,8 +87,7 @@ namespace Presentation
             }
             catch (Exception ex)
             {
-                ShowError("Có lỗi hệ thống, vui lòng thử lại sau.", "Lỗi");
-                File.AppendAllText("error.log", $"{DateTime.Now}: {ex}\n");
+                ShowFriendlyException(ex, "FormClosing");
             }
         }
 
@@ -169,7 +167,12 @@ namespace Presentation
 
         protected void ShowFriendlyException(Exception ex, string actionName)
         {
-            File.AppendAllText("error.log", $"{DateTime.Now}: [{actionName}] {ex}\n");
+            try
+            {
+                string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error.log");
+                File.AppendAllText(logPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [{actionName}] {ex}{Environment.NewLine}");
+            }
+            catch { /* Ignore logging errors */ }
             ShowError("Có lỗi hệ thống, vui lòng thử lại sau.", "Lỗi");
         }
 

@@ -1,4 +1,4 @@
-﻿﻿using System.Windows.Forms;
+using System.Windows.Forms;
 
 namespace Presentation.Components
 {
@@ -14,39 +14,39 @@ namespace Presentation.Components
             switch (status)
             {
                 case "Requested":
-                    _statusLabel.Text = "Đã yêu cầu";
+                    _statusLabel.Text = "�� y�u c?u";
                     _progressBar.Value = 20;
-                    _stepLabel.Text = "Đang tìm tài xế...";
+                    _stepLabel.Text = "�ang t�m t�i x?...";
                     break;
                 case "Matched":
-                    _statusLabel.Text = "Đã ghép đôi";
+                    _statusLabel.Text = "�� gh�p d�i";
                     _progressBar.Value = 40;
-                    _stepLabel.Text = "Tài xế đang đến...";
+                    _stepLabel.Text = "T�i x? dang d?n...";
                     break;
                 case "Arrived":
-                    _statusLabel.Text = "Tài xế đã đến";
+                    _statusLabel.Text = "T�i x? d� d?n";
                     _progressBar.Value = 60;
-                    _stepLabel.Text = "Sẵn sàng khởi hành";
+                    _stepLabel.Text = "S?n s�ng kh?i h�nh";
                     break;
                 case "Started":
-                    _statusLabel.Text = "Đang chạy";
+                    _statusLabel.Text = "�ang ch?y";
                     _progressBar.Value = 80;
-                    _stepLabel.Text = "Đến điểm đích...";
+                    _stepLabel.Text = "�?n di?m d�ch...";
                     break;
                 case "Completed":
-                    _statusLabel.Text = "Hoàn thành";
+                    _statusLabel.Text = "Ho�n th�nh";
                     _progressBar.Value = 100;
-                    _stepLabel.Text = "Cảm ơn đã sử dụng";
+                    _stepLabel.Text = "C?m on d� s? d?ng";
                     break;
                 case "Cancelled":
-                    _statusLabel.Text = "Đã hủy";
+                    _statusLabel.Text = "�� h?y";
                     _progressBar.Value = 0;
-                    _stepLabel.Text = "Chuyến đi đã hủy";
+                    _stepLabel.Text = "Chuy?n di d� h?y";
                     break;
                 default:
-                    _statusLabel.Text = "Không xác định";
+                    _statusLabel.Text = "Kh�ng x�c d?nh";
                     _progressBar.Value = 0;
-                    _stepLabel.Text = "Trạng thái không rõ";
+                    _stepLabel.Text = "Tr?ng th�i kh�ng r�";
                     break;
             }
         }

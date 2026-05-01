@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using Domain.SharedKernel;
 
@@ -15,15 +15,15 @@ namespace Domain.ValueObjects
         public double Latitude => _latitude;
         #endregion
         #region Constructors
-        public Coordinate() { }
-        public Coordinate(double lat, double lng)
+        [Newtonsoft.Json.JsonConstructor]
+        public Coordinate(double latitude, double longitude)
         {
-            if (lat < -90 || lat > 90)
-                throw new ArgumentOutOfRangeException(nameof(lat), "Vĩ độ phải nằm trong khoảng từ -90 đến 90.");
-            if (lng < -180 || lng > 180)
-                throw new ArgumentOutOfRangeException(nameof(lng), "Kinh độ phải nằm trong khoảng từ -180 đến 180.");
-            _longitude = lng;
-            _latitude = lat;
+            if (latitude < -90 || latitude > 90)
+                throw new ArgumentOutOfRangeException(nameof(latitude), "Vĩ độ phải nằm trong khoảng từ -90 đến 90.");
+            if (longitude < -180 || longitude > 180)
+                throw new ArgumentOutOfRangeException(nameof(longitude), "Kinh độ phải nằm trong khoảng từ -180 đến 180.");
+            _longitude = longitude;
+            _latitude = latitude;
         }
 
         #endregion

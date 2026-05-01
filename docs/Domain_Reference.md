@@ -100,7 +100,7 @@ Domain/
 | 🔵 Computed | `decimal AverageRating` | `RatingSum / TotalReviews` |
 | 🟢 State | `SetAvailable()`, `SetOnTrip()`, `SetOffline()` | Delegate to IDriverState |
 | 🟢 Method | `IsAvailable()`, `IsOnTrip()`, `IsOffline()` | State check helpers |
-| 🟢 Method | `UpdatePosition(Location)` | Update GPS (no event emitted) |
+| 🟢 Method | `UpdatePosition(Location)` | Update GPS (emits `DriverLocationUpdatedEvent`) |
 | 🟢 Method | `AddTrip()` | Increment count |
 | 🟢 Method | `UpdateReviews(int rating)` | Add rating to stats |
 | 🟢 Method | `DepositToWallet(Money)` | Add balance |
@@ -176,7 +176,7 @@ Domain/
 
 | Type | Name | Description |
 |------|------|-------------|
-| 🔵 Property | `Guid RiderId` | Reviewing passenger |
+| 🔵 Property | `Guid PassengerId` | Reviewing passenger |
 | 🔵 Property | `Guid DriverId` | Reviewed driver |
 | 🔵 Property | `int Rating` | 1-5 scale |
 | 🔵 Property | `string Comment` | Optional |
@@ -274,8 +274,8 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 
 | Event | Emitted By | Parameters |
 |-------|-----------|------------|
-| `DriverStatusChangedEvent` | *(defined but never emitted by Driver)* | Id, OldStatus(string), NewStatus(string) |
-| `DriverLocationUpdatedEvent` | *(defined but never emitted by Driver)* | Id, NewLocation |
+| `DriverStatusChangedEvent` | `TransitionTo()` | Id, OldStatus(string), NewStatus(string) |
+| `DriverLocationUpdatedEvent` | `UpdatePosition()` | Id, NewLocation |
 
 ### Review Event
 

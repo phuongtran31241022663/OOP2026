@@ -1,8 +1,9 @@
-﻿using Domain.ValueObjects;
-using Domain.Entities.Users;
-using Domain.Entities;
+
 namespace Presentation.Components
 {
+    using Presentation.Constants;
+    using System.Windows.Forms;
+
     partial class StatusPanel : BaseUserControl
     {
         /// <summary> 
@@ -80,26 +81,34 @@ namespace Presentation.Components
             // 
             // _clearButton
             // 
+            this._clearButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this._clearButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this._clearButton.Font = new System.Drawing.Font("Segoe UI", 8.25F);
             this._clearButton.ForeColor = System.Drawing.Color.White;
-            this._clearButton.Location = new System.Drawing.Point(380, 4);
+            this._clearButton.AutoSize = true;
+            this._clearButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this._clearButton.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this._clearButton.Location = new System.Drawing.Point(220, 4);
             this._clearButton.Name = "_clearButton";
             this._clearButton.Size = new System.Drawing.Size(75, 24);
             this._clearButton.TabIndex = 2;
-            this._clearButton.Text = "XÃ³a log";
+            this._clearButton.Text = "Xóa log";
             this._clearButton.UseVisualStyleBackColor = true;
             // 
             // _viewLogButton
             // 
+            this._viewLogButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this._viewLogButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this._viewLogButton.Font = new System.Drawing.Font("Segoe UI", 8.25F);
             this._viewLogButton.ForeColor = System.Drawing.Color.White;
-            this._viewLogButton.Location = new System.Drawing.Point(455, 4);
+            this._viewLogButton.AutoSize = true;
+            this._viewLogButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this._viewLogButton.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this._viewLogButton.Location = new System.Drawing.Point(300, 4);
             this._viewLogButton.Name = "_viewLogButton";
             this._viewLogButton.Size = new System.Drawing.Size(90, 24);
             this._viewLogButton.TabIndex = 3;
-            this._viewLogButton.Text = "Má»Ÿ file log";
+            this._viewLogButton.Text = "Mở file log";
             this._viewLogButton.UseVisualStyleBackColor = true;
             // 
             // _logTextBox

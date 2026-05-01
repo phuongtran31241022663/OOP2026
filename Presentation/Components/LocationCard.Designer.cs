@@ -1,6 +1,5 @@
-﻿using Domain.ValueObjects;
-using Domain.Entities.Users;
-using Domain.Entities;
+using Presentation.Constants;
+
 namespace Presentation.Components
 {
     partial class LocationCard
@@ -31,70 +30,72 @@ namespace Presentation.Components
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
+            this.components = new System.ComponentModel.Container();
+            this._iconPanel = new System.Windows.Forms.Panel();
+            this._lblName = new System.Windows.Forms.Label();
+            this._lblAddress = new System.Windows.Forms.Label();
+            this._lblCoords = new System.Windows.Forms.Label();
+            this.SuspendLayout();
+            // 
+            // _iconPanel
+            // 
+            this._iconPanel.BackColor = Presentation.Constants.UiConstants.Colors.Success;
+            this._iconPanel.Location = new System.Drawing.Point(12, 12);
+            this._iconPanel.Name = "_iconPanel";
+            this._iconPanel.Size = new System.Drawing.Size(Presentation.Constants.UiConstants.Cards.IconSize, Presentation.Constants.UiConstants.Cards.IconSize);
+            this._iconPanel.TabIndex = 0;
+            // 
+            // _iconLabel
+            // 
+            System.Windows.Forms.Label iconLabel = new System.Windows.Forms.Label();
+            iconLabel.Text = "📍";
+            iconLabel.Font = new System.Drawing.Font("Segoe UI", 16F);
+            iconLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            iconLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._iconPanel.Controls.Add(iconLabel);
+            // 
+            // _lblName
+            // 
+            this._lblName.Font = Presentation.Constants.UiConstants.Cards.Typography.Title;
+            this._lblName.ForeColor = Presentation.Constants.UiConstants.Colors.TextPrimary;
+            this._lblName.Location = new System.Drawing.Point(60, 10);
+            this._lblName.Name = "_lblName";
+            this._lblName.Size = new System.Drawing.Size(200, 22);
+            this._lblName.TabIndex = 1;
+            this._lblName.Text = "Tên địa điểm";
+            // 
+            // _lblAddress
+            // 
+            this._lblAddress.Font = Presentation.Constants.UiConstants.Cards.Typography.Body;
+            this._lblAddress.ForeColor = Presentation.Constants.UiConstants.Colors.TextSecondary;
+            this._lblAddress.Location = new System.Drawing.Point(60, 32);
+            this._lblAddress.Name = "_lblAddress";
+            this._lblAddress.Size = new System.Drawing.Size(280, 16);
+            this._lblAddress.TabIndex = 2;
+            this._lblAddress.Text = "Địa chỉ chi tiết";
+            // 
+            // _lblCoords
+            // 
+            this._lblCoords.Font = Presentation.Constants.UiConstants.Cards.Typography.Info;
+            this._lblCoords.ForeColor = Presentation.Constants.UiConstants.Colors.TextMuted;
+            this._lblCoords.Location = new System.Drawing.Point(60, 50);
+            this._lblCoords.Name = "_lblCoords";
+            this._lblCoords.Size = new System.Drawing.Size(100, 14);
+            this._lblCoords.TabIndex = 3;
+            // 
+            // LocationCard
+            // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-
-            // Icon panel
-            _iconPanel = new System.Windows.Forms.Panel
-            {
-                Width = 40,
-                Height = 40,
-                BackColor = System.Drawing.Color.Green,
-                Location = new System.Drawing.Point(12, 12)
-            };
-            var iconLabel = new System.Windows.Forms.Label
-            {
-                Text = "ðŸ“",
-                Font = new System.Drawing.Font("Segoe UI", 16),
-                TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
-                Dock = System.Windows.Forms.DockStyle.Fill
-            };
-            _iconPanel.Controls.Add(iconLabel);
-
-            // Name label
-            _lblName = new System.Windows.Forms.Label
-            {
-                Font = new System.Drawing.Font("Segoe UI", 10, System.Drawing.FontStyle.Bold),
-                ForeColor = System.Drawing.Color.Black,
-                AutoSize = false,
-                Location = new System.Drawing.Point(60, 10),
-                Width = 200,
-                Height = 20,
-                Text = "TÃªn Ä‘á»‹a Ä‘iá»ƒm"
-            };
-
-            // Address label
-            _lblAddress = new System.Windows.Forms.Label
-            {
-                Font = new System.Drawing.Font("Segoe UI", 9),
-                ForeColor = System.Drawing.Color.Gray,
-                AutoSize = false,
-                Location = new System.Drawing.Point(60, 32),
-                Width = 280,
-                Height = 16,
-                Text = "Äá»‹a chá»‰ chi tiáº¿t"
-            };
-
-            // Coordinates label
-            _lblCoords = new System.Windows.Forms.Label
-            {
-                Font = new System.Drawing.Font("Segoe UI", 8),
-                ForeColor = System.Drawing.Color.DarkGray,
-                AutoSize = false,
-                Location = new System.Drawing.Point(60, 50),
-                Width = 100,
-                Height = 14,
-                Text = ""
-            };
-
-            // Main container
-            this.Size = new System.Drawing.Size(360, 64);
-            this.BackColor = System.Drawing.Color.White;
-            this.Controls.Add(_iconPanel);
-            this.Controls.Add(_lblName);
-            this.Controls.Add(_lblAddress);
-            this.Controls.Add(_lblCoords);
+            this.BackColor = Presentation.Constants.UiConstants.Colors.SurfaceWhite;
+            this.Controls.Add(this._iconPanel);
+            this.Controls.Add(this._lblName);
+            this.Controls.Add(this._lblAddress);
+            this.Controls.Add(this._lblCoords);
+            this.Name = "LocationCard";
+            this.Size = new System.Drawing.Size(Presentation.Constants.UiConstants.Cards.DefaultWidth, Presentation.Constants.UiConstants.Cards.CompactHeight);
+            this.ResumeLayout(false);
         }
+
         private System.Windows.Forms.Label _lblName;
         private System.Windows.Forms.Label _lblAddress;
         private System.Windows.Forms.Label _lblCoords;
@@ -102,4 +103,3 @@ namespace Presentation.Components
         #endregion
     }
 }
-

@@ -1,4 +1,4 @@
-﻿﻿﻿using System;
+﻿﻿using System;
 using Domain.SharedKernel;
 using System.Collections.Generic;
 
@@ -28,21 +28,11 @@ namespace Domain.ValueObjects
         public string Country => _country;
         #endregion
         #region Constructors
-        // Constructor không tham số
-        public Address() { }
-
-      public Address(string name, string street, string district, string city, string country, string houseNumber = null, string osmValue = null, string locality = null)
+        [Newtonsoft.Json.JsonConstructor]
+        public Address(string name, string street, string district, string city, string country, string houseNumber = null, string osm_Value = null, string locality = null)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Tên địa điểm không được để trống.", nameof(name));
-            //if (string.IsNullOrWhiteSpace(street))
-            //    throw new ArgumentException("Đường không được để trống.", nameof(street));
-            //if (string.IsNullOrWhiteSpace(district))
-            //    throw new ArgumentException("Quận/Huyện không được để trống.", nameof(district));
-            //if (string.IsNullOrWhiteSpace(city))
-            //    throw new ArgumentException("Thành phố không được để trống.", nameof(city));
-            //if (string.IsNullOrWhiteSpace(country))
-            //    throw new ArgumentException("Quốc gia không được để trống.", nameof(country));
             
             _name = name;
             _street = street;
@@ -50,7 +40,7 @@ namespace Domain.ValueObjects
             _city = city;
             _country = country;
             _houseNumber = houseNumber;
-            _osm_Value = osmValue;
+            _osm_Value = osm_Value;
             _locality = locality;
         }
 

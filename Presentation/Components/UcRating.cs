@@ -8,7 +8,7 @@ namespace Presentation.UserControls
 {
     /// <summary>
     /// Danh gia 5 sao + comment sau chuyen.
-    /// Mo trong FrmModal.
+    /// Hiển thị thông tin đánh giá.
     /// </summary>
     public partial class UcRating : BaseUserControl
     {
