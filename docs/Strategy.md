@@ -219,6 +219,17 @@ public interface IShippingStrategy
 
 ---
 
-## 8. Kết luận
+## 8. Ánh xạ vào RideGo System
+
+| Thành phần RideGo | Pattern áp dụng | Ghi chú |
+|---|---|---|
+| `FareRule.CalculateFare(double)` | Strategy-like | Mỗi `FareRule` instance cho một `VehicleType` (Car/Motorbike) đóng gói thuật toán tính giá riêng. Tuy nhiên, hiện tại dùng `switch` trong `FareService` để chọn rule thay vì inject strategy. |
+| `ITripService` event handlers | Strategy via Delegate | UI Forms đăng ký handler vào `TripStatusChanged` event — mỗi form có strategy xử lý cập nhật UI khác nhau. |
+
+> **Cơ hội cải tiện:** `IFareCalculationStrategy` với `CarFareStrategy` và `MotorbikeFareStrategy` sẽ loại bỏ `switch` trong `FareService`.
+
+---
+
+## 9. Kết luận
 
 Strategy Pattern trong C# đã phát triển vượt xa mẫu thiết kế nguyên thủy nhờ delegate, generic, dependency injection và record. Sự kết hợp giữa Strategy và các nguyên lý **Composition over Inheritance**, **DI**, **Open/Closed** đã khiến nó trở thành một trong những mẫu linh hoạt nhất trong hệ sinh thái .NET — hiện diện khắp nơi từ sắp xếp, xác thực, thanh toán đến pipeline xử lý HTTP.

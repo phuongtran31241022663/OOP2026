@@ -315,7 +315,7 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 
 - `CalculateFare(VehicleType, double distanceKm)`
 
-**ReviewService:**
+**ReviewService** (`Application.Services`):
 
 - `AddReviewAsync()` — creates review + updates driver rating
 

@@ -130,7 +130,19 @@ Vừa giữ đóng gói, vừa linh hoạt cho kiểm thử mà không phơi bà
 
 ---
 
-## 7. Best Practices
+## 7. Ánh xạ vào RideGo System
+
+| Thành phần RideGo | Pattern áp dụng | Ghi chú |
+|---|---|---|
+| `Money` (VO) | Encapsulation | `Amount` và `Currency` là `readonly`, chỉ truy cập qua properties. Validation trong constructor đảm bảo không âm. |
+| `Trip` entity | Encapsulation | Private fields (`_passengerId`, `_tripFare`), public getters/private setters. State transitions chỉ qua methods (`SetSearching()`, `MatchDriver()`). |
+| `Driver` entity | Encapsulation | `Wallet`, `Income` là `Money` VO. `SetAvailable()`/`SetOnTrip()`/`SetOffline()` đóng gói state transitions, validation trong body. |
+| `User.Password` | Encapsulation | Password hashed, chỉ có thể verify qua `VerifyPassword()`, không thể đọc raw password. |
+| `Vehicle` properties | Encapsulation | `PlateNumber`, `Brand`, `Model` có private setter với validation (không null/empty) trong constructor. |
+
+---
+
+## 8. Best Practices
 
 - **Luôn dùng properties thay vì public fields** — giữ nhất quán và cho phép thêm logic sau.
 - **Không lộ `List<T>` dạng property chỉ đọc reference** — người dùng có thể gọi `.Add()`. Thay vào đó, dùng `IReadOnlyList<T>` hoặc trả về copy.
@@ -138,3 +150,16 @@ Vừa giữ đóng gói, vừa linh hoạt cho kiểm thử mà không phơi bà
 - **`sealed` cho class không được thiết kế để kế thừa** — cải thiện hiệu năng (devirtualization) và bảo vệ đóng gói.
 - **Cẩn thận với `[JsonInclude]` trên private fields** — dễ vô tình phơi bày dữ liệu nhạy cảm.
 - **Tận dụng `required`** (C# 11) — đảm bảo object luôn ở trạng thái hợp lệ ngay sau khởi tạo.
+
+---
+
+## 9. Kết luận
+
+Encapsulation là nền tảng của lập trình hướng đối tượng, đảm bảo tính toàn vẹn dữ liệu và giảm coupling giữa các thành phần. Trong RideGo, encapsulation được áp dụng nghiêm ngặt qua:
+
+- **Domain Entities**: Private fields + public getters + behavior methods
+- **Value Objects**: Immutable properties + validation trong constructor
+- **State Pattern**: State transitions encapsulated trong methods, không thể bypass
+- **Password Security**: Hashing và verification logic ẩn bên trong
+
+Kết hợp với Inheritance và Polymorphism, encapsulation tạo nên kiến trúc bền vững, dễ bảo trì và mở rộng cho hệ thống.
