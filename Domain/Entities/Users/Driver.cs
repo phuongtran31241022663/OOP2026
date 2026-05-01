@@ -2,6 +2,7 @@ using Domain.Events;
 using Domain.States;
 using Domain.States.Drivers;
 using Domain.ValueObjects;
+using Newtonsoft.Json.Linq;
 using System;
 
 namespace Domain.Entities.Users
@@ -17,11 +18,11 @@ namespace Domain.Entities.Users
     public class Driver : User
     {
         #region Fields
+        private readonly string _licenseNumber;
+        private readonly Guid _vehicleId;
 
         private IDriverState _currentState;
-        private readonly string _licenseNumber;
         private Location _position;
-        private readonly Guid _vehicleId;
         private Money _wallet;
         private Money _income;
         private int _totalTrips;
@@ -56,8 +57,11 @@ namespace Domain.Entities.Users
         /// <summary>
         /// Vị trí hiện tại của tài xế trên bản đồ.
         /// </summary>
-        public Location Position { get => _position; set => _position = value; }
-
+        public Location Position
+        {
+            get => _position;
+            private set => _position = value ?? throw new ArgumentNullException(nameof(Position));
+        }
         /// <summary>
         /// ID của phương tiện mà tài xế đang sử dụng.
         /// </summary>
@@ -76,17 +80,43 @@ namespace Domain.Entities.Users
         /// <summary>
         /// Tổng số chuyến đi đã hoàn thành.
         /// </summary>
-        public int TotalTrips { get => _totalTrips; private set => _totalTrips = value; }
-
+        public int TotalTrips
+        {
+            get => _totalTrips;
+            private set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException(nameof(TotalTrips), "Tổng số chuyến không được âm.");
+                _totalTrips = value;
+            }
+        }
         /// <summary>
         /// Tổng điểm đánh giá đã nhận.
         /// </summary>
-        public int RatingSum { get => _ratingSum; private set => _ratingSum = value; }
+        public int RatingSum
+        {
+            get => _ratingSum;
+            private set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException(nameof(RatingSum), "Tổng điểm không được âm.");
+                _ratingSum = value;
+            }
+        }
 
         /// <summary>
         /// Tổng số lượt đánh giá đã nhận.
         /// </summary>
-        public int TotalReviews { get => _totalReviews; private set => _totalReviews = value; }
+        public int TotalReviews
+        {
+            get => _totalReviews;
+            private set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException(nameof(TotalReviews), "Số lượt đánh giá không được âm.");
+                _totalReviews = value;
+            }
+        }
 
         /// <summary>
         /// Số giấy phép lái xe của tài xế.
@@ -122,8 +152,12 @@ namespace Domain.Entities.Users
             Location position)
             : base(name, phone, password)
         {
-            ValidateDriverProperties(licenseNumber, vehicleId, position);
-
+            if (string.IsNullOrWhiteSpace(licenseNumber))
+                throw new ArgumentException("Số giấy phép lái xe không được để trống.", nameof(licenseNumber));
+            if (vehicleId == Guid.Empty)
+                throw new ArgumentException("Id phương tiện không hợp lệ.", nameof(vehicleId));
+            if (position == null)
+                throw new ArgumentNullException(nameof(position));
             _licenseNumber = licenseNumber;
             Position = position;
             _vehicleId = vehicleId;
@@ -153,7 +187,12 @@ namespace Domain.Entities.Users
             Location position)
             : base(id, name, phone, hashedPassword)
         {
-            ValidateDriverProperties(licenseNumber, vehicleId, position);
+            if (string.IsNullOrWhiteSpace(licenseNumber))
+                throw new ArgumentException("Số giấy phép lái xe không được để trống.", nameof(licenseNumber));
+            if (vehicleId == Guid.Empty)
+                throw new ArgumentException("Id phương tiện không hợp lệ.", nameof(vehicleId));
+            if (position == null)
+                throw new ArgumentNullException(nameof(position));
 
             _licenseNumber = licenseNumber;
             Position = position;
@@ -262,23 +301,6 @@ namespace Domain.Entities.Users
             Wallet -= fare.Commission;
             Income += fare.DriverIncome;
         }
-
-        /// <summary>
-        /// Chuyển đổi chuỗi trạng thái kỹ thuật sang chuỗi hiển thị cho người dùng.
-        /// </summary>
-        /// <param name="status">Chuỗi trạng thái (ví dụ: "Available").</param>
-        /// <returns>Chuỗi hiển thị thân thiện (ví dụ: "Hoạt động").</returns>
-        public static string GetDisplayString(string status)
-        {
-            switch (status)
-            {
-                case "Available": return "Hoạt động";
-                case "OnTrip": return "Đang trong chuyến";
-                case "Offline": return "Nghỉ";
-                default: return "Không xác định";
-            }
-        }
-        
         #endregion
 
         #region Private Methods
@@ -292,16 +314,6 @@ namespace Domain.Entities.Users
             var oldStateName = Status;
             _currentState = newState;
             AddEvent(new DriverStatusChangedEvent(Id, oldStateName, Status));
-        }
-
-        private void ValidateDriverProperties(string licenseNumber, Guid vehicleId, Location position)
-        {
-            if (string.IsNullOrWhiteSpace(licenseNumber))
-                throw new ArgumentException("Số giấy phép lái xe không được để trống.", nameof(licenseNumber));
-            if (vehicleId == Guid.Empty)
-                throw new ArgumentException("Id phương tiện không hợp lệ.", nameof(vehicleId));
-            if (position == null)
-                throw new ArgumentNullException(nameof(position));
         }
 
         #endregion

@@ -24,15 +24,15 @@ namespace Presentation.UserControls
         {
             if (_trip == null) return;
 
-            lblTripId.Text = $"Chuyen: {_trip.Id.ToString().Substring(0, 8).ToUpper()}";
-            lblStatus.Text = $"Trang thai: {_trip.Status}";
-            lblPickup.Text = $"Diem don: {FormatLocation(_trip.TripRoute.Pickup)}";
-            lblDestination.Text = $"Diem den: {FormatLocation(_trip.TripRoute.Destination)}";
-            lblVehicleType.Text = $"Loai xe: {_trip.TripVehicleType}";
-            lblFare.Text = $"Cuoc phi: {_trip.TripFare?.TotalAmount.Amount.ToString("N0") + " VND" ?? "N/A"}";
-            lblDriverName.Text = $"Tai xe: {(_trip.DriverId != Guid.Empty ? _trip.DriverId.ToString().Substring(0, 8) : "Chua co")}";
-            lblPassengerName.Text = $"Hanh khach: {_trip.PassengerId.ToString().Substring(0, 8)}";
-            lblRequestTime.Text = $"Thoi gian: {_trip.RequestAt:dd/MM/yyyy HH:mm}";
+            lblTripId.Text = $"Chuyến: {_trip.Id.ToString().Substring(0, 8).ToUpper()}";
+            lblStatus.Text = $"Trạng thái: {_trip.Status}";
+            lblPickup.Text = $"Điểm đón: {FormatLocation(_trip.TripRoute.Pickup)}";
+            lblDestination.Text = $"Điểm đến: {FormatLocation(_trip.TripRoute.Destination)}";
+            lblVehicleType.Text = $"Loại xe: {_trip.TripVehicleType}";
+            lblFare.Text = $"Cước phí: {_trip.TripFare?.TotalAmount.Amount.ToString("N0") + "đ" ?? "Chưa có"}";
+            lblDriverName.Text = $"Tài xế: {(_trip.DriverId != Guid.Empty ? _trip.DriverId.ToString().Substring(0, 8) : "Chưa có")}";
+            lblPassengerName.Text = $"Hành khách: {_trip.PassengerId.ToString().Substring(0, 8)}";
+            lblRequestTime.Text = $"Thời gian: {_trip.RequestAt:dd/MM/yyyy HH:mm}";
         }
 
         private string FormatLocation(Location loc)

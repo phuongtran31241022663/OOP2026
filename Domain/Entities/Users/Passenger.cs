@@ -15,8 +15,16 @@ namespace Domain.Entities.Users
         /// <summary>
         /// Tổng số chuyến đi đã thực hiện.
         /// </summary>
-        public int TotalTrips { get => _totalTrips; private set => _totalTrips = value; }
-
+        public int TotalTrips
+        {
+            get => _totalTrips;
+            private set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException(nameof(TotalTrips), "Tổng số chuyến không được âm.");
+                _totalTrips = value;
+            }
+        }
         #endregion
 
         #region Constructors

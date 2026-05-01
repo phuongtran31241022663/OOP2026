@@ -34,6 +34,7 @@ namespace Presentation.UserControls
         private System.Windows.Forms.Label lblActiveDrivers;
         private System.Windows.Forms.Label lblTotalTrips;
         private System.Windows.Forms.Label lblGMV;
+        private System.Windows.Forms.Label lblPlaceholder;
 
         protected override void Dispose(bool disposing)
         {
@@ -115,7 +116,7 @@ namespace Presentation.UserControls
             this.tabUsers.Padding = new System.Windows.Forms.Padding(8);
             this.tabUsers.Size = new System.Drawing.Size(1192, 716);
             this.tabUsers.TabIndex = 0;
-            this.tabUsers.Text = "Nguoi dung";
+            this.tabUsers.Text = "Người dùng";
             this.tabUsers.UseVisualStyleBackColor = true;
             // 
             // dgvUsers
@@ -155,7 +156,7 @@ namespace Presentation.UserControls
             this.btnUnlockUser.Name = "btnUnlockUser";
             this.btnUnlockUser.Size = new System.Drawing.Size(96, 36);
             this.btnUnlockUser.TabIndex = 3;
-            this.btnUnlockUser.Text = "Mo khoa";
+            this.btnUnlockUser.Text = "Mở khoá";
             this.btnUnlockUser.UseVisualStyleBackColor = true;
             // 
             // btnLockUser
@@ -166,14 +167,14 @@ namespace Presentation.UserControls
             this.btnLockUser.Name = "btnLockUser";
             this.btnLockUser.Size = new System.Drawing.Size(96, 36);
             this.btnLockUser.TabIndex = 2;
-            this.btnLockUser.Text = "Khoa";
+            this.btnLockUser.Text = "Khoá";
             this.btnLockUser.UseVisualStyleBackColor = true;
             // 
             // cmbUserRole
             // 
             this.cmbUserRole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbUserRole.FormattingEnabled = true;
-            this.cmbUserRole.Items.AddRange(new object[] { "Tat ca", "Passenger", "Driver", "Admin" });
+            this.cmbUserRole.Items.AddRange(new object[] { "Tất cả", "Passenger", "Driver", "Admin" });
             this.cmbUserRole.Location = new System.Drawing.Point(320, 8);
             this.cmbUserRole.Name = "cmbUserRole";
             this.cmbUserRole.Size = new System.Drawing.Size(160, 31);
@@ -196,7 +197,7 @@ namespace Presentation.UserControls
             this.tabTrips.Padding = new System.Windows.Forms.Padding(8);
             this.tabTrips.Size = new System.Drawing.Size(1192, 716);
             this.tabTrips.TabIndex = 1;
-            this.tabTrips.Text = "Chuyen di";
+            this.tabTrips.Text = "Chuyến đi";
             this.tabTrips.UseVisualStyleBackColor = true;
             // 
             // dgvTrips
@@ -235,7 +236,7 @@ namespace Presentation.UserControls
             this.btnTripDetail.Name = "btnTripDetail";
             this.btnTripDetail.Size = new System.Drawing.Size(96, 36);
             this.btnTripDetail.TabIndex = 2;
-            this.btnTripDetail.Text = "Chi tiet";
+            this.btnTripDetail.Text = "Chi tiết";
             this.btnTripDetail.UseVisualStyleBackColor = true;
             // 
             // btnCancelTrip
@@ -248,7 +249,7 @@ namespace Presentation.UserControls
             this.btnCancelTrip.Name = "btnCancelTrip";
             this.btnCancelTrip.Size = new System.Drawing.Size(96, 36);
             this.btnCancelTrip.TabIndex = 1;
-            this.btnCancelTrip.Text = "Huy";
+            this.btnCancelTrip.Text = "Huỷ";
             this.btnCancelTrip.UseVisualStyleBackColor = false;
             // 
             // txtSearchTrips
@@ -268,7 +269,7 @@ namespace Presentation.UserControls
             this.tabFareRules.Padding = new System.Windows.Forms.Padding(8);
             this.tabFareRules.Size = new System.Drawing.Size(1192, 716);
             this.tabFareRules.TabIndex = 2;
-            this.tabFareRules.Text = "Gia cuoc";
+            this.tabFareRules.Text = "Giá cước";
             this.tabFareRules.UseVisualStyleBackColor = true;
             // 
             // dgvFareRules
@@ -309,7 +310,7 @@ namespace Presentation.UserControls
             this.btnDeleteFare.Name = "btnDeleteFare";
             this.btnDeleteFare.Size = new System.Drawing.Size(96, 36);
             this.btnDeleteFare.TabIndex = 2;
-            this.btnDeleteFare.Text = "Xoa";
+            this.btnDeleteFare.Text = "Xoá";
             this.btnDeleteFare.UseVisualStyleBackColor = false;
             // 
             // btnEditFare
@@ -320,7 +321,7 @@ namespace Presentation.UserControls
             this.btnEditFare.Name = "btnEditFare";
             this.btnEditFare.Size = new System.Drawing.Size(96, 36);
             this.btnEditFare.TabIndex = 1;
-            this.btnEditFare.Text = "Sua";
+            this.btnEditFare.Text = "Sửa";
             this.btnEditFare.UseVisualStyleBackColor = true;
             // 
             // btnAddFare
@@ -334,7 +335,7 @@ namespace Presentation.UserControls
             this.btnAddFare.Name = "btnAddFare";
             this.btnAddFare.Size = new System.Drawing.Size(96, 36);
             this.btnAddFare.TabIndex = 0;
-            this.btnAddFare.Text = "Them";
+            this.btnAddFare.Text = "Thêm";
             this.btnAddFare.UseVisualStyleBackColor = false;
             // 
             // tabStats
@@ -345,7 +346,7 @@ namespace Presentation.UserControls
             this.tabStats.Padding = new System.Windows.Forms.Padding(24);
             this.tabStats.Size = new System.Drawing.Size(1192, 716);
             this.tabStats.TabIndex = 3;
-            this.tabStats.Text = "Thong ke";
+            this.tabStats.Text = "Thống kê";
             this.tabStats.UseVisualStyleBackColor = true;
             // 
             // tblStats
@@ -353,11 +354,8 @@ namespace Presentation.UserControls
             this.tblStats.ColumnCount = 2;
             this.tblStats.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tblStats.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tblStats.Controls.Add(this.lblCompletionRate, 1, 1);
-            this.tblStats.Controls.Add(this.lblAvgRating, 0, 1);
-            this.tblStats.Controls.Add(this.lblActiveDrivers, 1, 0);
-            this.tblStats.Controls.Add(this.lblTotalTrips, 0, 0);
             this.tblStats.Controls.Add(this.lblGMV, 0, 2);
+            this.tblStats.Controls.Add(this.lblPlaceholder, 1, 2);
             this.tblStats.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tblStats.Location = new System.Drawing.Point(24, 24);
             this.tblStats.Name = "tblStats";
@@ -377,7 +375,7 @@ namespace Presentation.UserControls
             this.lblCompletionRate.Name = "lblCompletionRate";
             this.lblCompletionRate.Size = new System.Drawing.Size(566, 222);
             this.lblCompletionRate.TabIndex = 4;
-            this.lblCompletionRate.Text = "Ty le hoan thanh: 0%";
+            this.lblCompletionRate.Text = "Tỷ lệ hoàn thành: 0%";
             this.lblCompletionRate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblAvgRating
@@ -389,7 +387,7 @@ namespace Presentation.UserControls
             this.lblAvgRating.Name = "lblAvgRating";
             this.lblAvgRating.Size = new System.Drawing.Size(566, 222);
             this.lblAvgRating.TabIndex = 3;
-            this.lblAvgRating.Text = "Diem hai long: 0.0";
+            this.lblAvgRating.Text = "Điểm hài lòng: 0.0";
             this.lblAvgRating.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblActiveDrivers
@@ -401,7 +399,7 @@ namespace Presentation.UserControls
             this.lblActiveDrivers.Name = "lblActiveDrivers";
             this.lblActiveDrivers.Size = new System.Drawing.Size(566, 222);
             this.lblActiveDrivers.TabIndex = 2;
-            this.lblActiveDrivers.Text = "Tai xe hoat dong: 0";
+            this.lblActiveDrivers.Text = "Tài xế hoạt động: 0";
             this.lblActiveDrivers.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblTotalTrips
@@ -413,7 +411,7 @@ namespace Presentation.UserControls
             this.lblTotalTrips.Name = "lblTotalTrips";
             this.lblTotalTrips.Size = new System.Drawing.Size(566, 222);
             this.lblTotalTrips.TabIndex = 1;
-            this.lblTotalTrips.Text = "Tong chuyen: 0";
+            this.lblTotalTrips.Text = "Tổng chuyến: 0";
             this.lblTotalTrips.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblGMV
@@ -427,6 +425,18 @@ namespace Presentation.UserControls
             this.lblGMV.TabIndex = 0;
             this.lblGMV.Text = "GMV: 0 VND";
             this.lblGMV.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblPlaceholder
+            // 
+            this.lblPlaceholder.AutoSize = true;
+            this.lblPlaceholder.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblPlaceholder.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
+            this.lblPlaceholder.Location = new System.Drawing.Point(575, 444);
+            this.lblPlaceholder.Name = "lblPlaceholder";
+            this.lblPlaceholder.Size = new System.Drawing.Size(566, 224);
+            this.lblPlaceholder.TabIndex = 5;
+            this.lblPlaceholder.Text = "";
+            this.lblPlaceholder.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // pnlTop
             // 
@@ -447,7 +457,7 @@ namespace Presentation.UserControls
             this.btnLogout.Name = "btnLogout";
             this.btnLogout.Size = new System.Drawing.Size(88, 32);
             this.btnLogout.TabIndex = 2;
-            this.btnLogout.Text = "Dang xuat";
+            this.btnLogout.Text = "Đăng xuất";
             this.btnLogout.UseVisualStyleBackColor = true;
             // 
             // btnRefresh
@@ -458,7 +468,7 @@ namespace Presentation.UserControls
             this.btnRefresh.Name = "btnRefresh";
             this.btnRefresh.Size = new System.Drawing.Size(88, 32);
             this.btnRefresh.TabIndex = 1;
-            this.btnRefresh.Text = "Lam moi";
+            this.btnRefresh.Text = "Làm mới";
             this.btnRefresh.UseVisualStyleBackColor = true;
             // 
             // lblAdminTitle
@@ -469,7 +479,7 @@ namespace Presentation.UserControls
             this.lblAdminTitle.Name = "lblAdminTitle";
             this.lblAdminTitle.Size = new System.Drawing.Size(189, 28);
             this.lblAdminTitle.TabIndex = 0;
-            this.lblAdminTitle.Text = "Quan tri RideGo";
+            this.lblAdminTitle.Text = "Quản trị RideGo";
             // 
             // UcAdmin
             // 

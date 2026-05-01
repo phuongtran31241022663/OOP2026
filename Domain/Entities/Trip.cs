@@ -21,12 +21,13 @@ namespace Domain.Entities
         #region Fields
 
         private readonly Guid _passengerId;
-        private Guid? _driverId;
         private readonly VehicleType _tripVehicleType;
         private readonly Fare _tripFare;
         private readonly Route _tripRoute;
-        private bool _isPaid;
         private readonly DateTime _requestAt;
+
+        private Guid? _driverId;
+        private bool _isPaid;
         private ITripState _currentState;
 
         #endregion

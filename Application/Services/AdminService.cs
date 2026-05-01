@@ -111,7 +111,7 @@ namespace Application.Services
             }
             else
             {
-                existingRule.UpdateRule(baseFare, pricePerKm, (decimal)commissionRate);
+                existingRule.UpdateRule(vehicleType, baseFare, pricePerKm, (decimal)commissionRate);
                 await _fareRuleRepository.UpdateAsync(existingRule);
             }
             await _fareRuleRepository.SaveChangesAsync();

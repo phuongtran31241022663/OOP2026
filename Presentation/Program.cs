@@ -35,7 +35,7 @@ namespace Presentation
                 IMapService mapService = services.MapService;
                 Domain.Repositories.IVehicleRepository vehicleRepository = services.VehicleRepository;
 
-                FrmMainShell shell = new FrmMainShell(
+                FrmMain shell = new FrmMain(
                     userService,
                     tripService,
                     fareService,

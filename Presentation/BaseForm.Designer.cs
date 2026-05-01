@@ -1,4 +1,7 @@
-﻿// Presentation/BaseForm_Designer.cs
+﻿using Domain.ValueObjects;
+using Domain.Entities.Users;
+using Domain.Entities;
+// Presentation/BaseShell_Designer.cs
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -7,6 +10,10 @@ namespace Presentation
     partial class BaseForm
     {
         private System.ComponentModel.IContainer components = null;
+
+        // Controls
+        private TabControl tabControlMain;
+
         protected override void Dispose(bool disposing)
         {
             if (disposing && components != null)
@@ -17,25 +24,33 @@ namespace Presentation
         #region Windows Form Designer generated code
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.tabControlMain = new System.Windows.Forms.TabControl();
+            this.SuspendLayout();
+            // 
+            // tabControlMain
+            // 
+            this.tabControlMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControlMain.Location = new System.Drawing.Point(0, 28);
+            this.tabControlMain.Name = "tabControlMain";
+            this.tabControlMain.SelectedIndex = 0;
+            this.tabControlMain.Size = new System.Drawing.Size(1184, 720);
+            this.tabControlMain.TabIndex = 0;
+            // 
+            // BaseForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "BaseForm";
+            this.ClientSize = new System.Drawing.Size(1184, 774);
+            this.Controls.Add(this.tabControlMain);
+            this.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.KeyPreview = true;
+            this.MinimumSize = new System.Drawing.Size(900, 600);
+            this.Name = "BaseForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Ứng dụng";
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
-            this.Size = new Size(1024, 768);
-            this.MinimumSize = new Size(800, 600);
-            this.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.MaximizeBox = true;
-            this.MinimizeBox = true;
-            this.KeyPreview = true;   // Cho phép form bắt KeyDown trước controls
-
-            this.FormClosing += BaseForm_FormClosing;
-            this.KeyDown += BaseForm_KeyDown;
         }
         #endregion
     }

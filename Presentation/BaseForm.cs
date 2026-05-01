@@ -1,4 +1,4 @@
-﻿﻿// Presentation/BaseForm.cs
+// Presentation/BaseForm.cs
 using System;
 using System.Drawing;
 using System.IO;
@@ -7,19 +7,11 @@ using System.Windows.Forms;
 
 namespace Presentation
 {
-    /// <summary>
-    /// Base class cho tất cả dialog và screen Form trong ứng dụng.
-    /// Cung cấp: keyboard shortcuts, helper methods, cursor management, loading state.
-    /// KHÔNG dùng cho shell chính (dùng BaseShell thay thế).
-    /// </summary>
     public partial class BaseForm : Form
     {
-        // ─── State ───────────────────────────────────────────────────────────
-        private bool _isLoading;
+        public TabControl MainTabControl => tabControlMain;
 
-        /// <summary>
-        /// True khi form đang trong trạng thái loading (block input).
-        /// </summary>
+        private bool _isLoading;
         public bool IsLoading
         {
             get => _isLoading;
@@ -31,26 +23,38 @@ namespace Presentation
             }
         }
 
-        // ─── Constructor ─────────────────────────────────────────────────────
         public BaseForm()
         {
             InitializeComponent();
         }
 
-        // ─── Keyboard Hooks ───────────────────────────────────────────────────
+        // ─── Event Handlers ──────────────────────────────────────────────────
         private void BaseForm_KeyDown(object sender, KeyEventArgs e)
         {
             try
             {
-                switch (e.KeyCode)
+                if (e.KeyCode == Keys.F1)
                 {
-                    case Keys.Escape:
-                        OnEscapePressed(e);
-                        break;
-                    case Keys.F1:
-                        ShowHelp();
-                        e.Handled = true;
-                        break;
+                    ShowHelp();
+                    e.Handled = true;
+                    return;
+                }
+                if (e.Control && !e.Shift && e.KeyCode == Keys.Tab)
+                {
+                    CycleTab(forward: true);
+                    e.Handled = true;
+                    return;
+                }
+                if (e.Control && e.Shift && e.KeyCode == Keys.Tab)
+                {
+                    CycleTab(forward: false);
+                    e.Handled = true;
+                    return;
+                }
+                if (e.KeyCode == Keys.Escape)
+                {
+                    OnEscapePressed(e);
+                    e.Handled = true;
                 }
             }
             catch (ArgumentException ex)
@@ -68,16 +72,6 @@ namespace Presentation
             }
         }
 
-        /// <summary>
-        /// Hành vi mặc định khi nhấn Escape: đóng form.
-        /// Override để thay đổi hành vi (ví dụ: confirm trước khi đóng).
-        /// </summary>
-        protected virtual void OnEscapePressed(KeyEventArgs e)
-        {
-            Close();
-        }
-
-        // ─── Lifecycle Hooks ─────────────────────────────────────────────────
         private void BaseForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             try
@@ -99,22 +93,55 @@ namespace Presentation
             }
         }
 
-        /// <summary>
-        /// Override để chặn đóng form (ví dụ: xác nhận khi có dữ liệu chưa lưu).
-        /// </summary>
+        // ─── Virtual Methods ─────────────────────────────────────────────────
+        protected virtual void OnEscapePressed(KeyEventArgs e) => Close();
         protected virtual void OnFormClosingInternal(FormClosingEventArgs e) { }
 
-        // ─── Help ─────────────────────────────────────────────────────────────
-        /// <summary>
-        /// Override để cung cấp nội dung trợ giúp riêng cho từng form.
-        /// </summary>
         protected virtual void ShowHelp()
         {
             MessageBox.Show(this,
-                "Chưa có trợ giúp cho form này.",
+                "Phím tắt:\n- Ctrl+Tab: Tab tiếp theo\n- Ctrl+Shift+Tab: Tab trước\n- F1: Trợ giúp\n- Esc: Đóng form",
                 "Trợ giúp",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
+        }
+
+        // ─── Tab Control ──────────────────────────────────────────────────────
+        private void CycleTab(bool forward)
+        {
+            int count = tabControlMain.TabCount;
+            if (count == 0) return;
+            int current = tabControlMain.SelectedIndex;
+            tabControlMain.SelectedIndex = forward
+                ? (current + 1) % count
+                : (current - 1 + count) % count;
+        }
+
+        public void AddTab(BaseForm contentForm, string title, bool closeable = true)
+        {
+            if (contentForm == null) throw new ArgumentNullException(nameof(contentForm));
+            contentForm.TopLevel = false;
+            contentForm.FormBorderStyle = FormBorderStyle.None;
+            contentForm.Dock = DockStyle.Fill;
+            contentForm.Visible = true;
+            var tabPage = new TabPage(title);
+            tabPage.Controls.Add(contentForm);
+            tabControlMain.TabPages.Add(tabPage);
+            tabControlMain.SelectedTab = tabPage;
+        }
+
+        public bool CloseTab(TabPage page)
+        {
+            if (page == null || !tabControlMain.TabPages.Contains(page)) return false;
+            tabControlMain.TabPages.Remove(page);
+            page.Dispose();
+            return true;
+        }
+
+        public void CloseCurrentTab()
+        {
+            if (tabControlMain.SelectedTab != null)
+                CloseTab(tabControlMain.SelectedTab);
         }
 
         // ─── MessageBox Helpers ───────────────────────────────────────────────
@@ -128,95 +155,44 @@ namespace Presentation
             => MessageBox.Show(this, message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
         protected bool Confirm(string message, string caption = "Xác nhận")
-            => MessageBox.Show(this, message, caption,
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+            => MessageBox.Show(this, message, caption, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
 
         protected bool ConfirmDelete(string itemName = "mục này")
             => Confirm($"Bạn có chắc chắn muốn xóa {itemName}?", "Xóa");
 
-        protected void ShowFriendlyException(InvalidOperationException ex, string actionName)
-        {
-            ShowError(
-                actionName + " khong the thuc hien luc nay. Vui long thu lai.\nChi tiet: " + ex.Message,
-                "Loi thao tac");
-        }
-
-        protected void ShowFriendlyException(FormatException ex, string actionName)
-        {
-            ShowError(
-                "Du lieu nhap vao khong dung dinh dang khi " + actionName.ToLower() + ".\nChi tiet: " + ex.Message,
-                "Loi dinh dang");
-        }
-
+        // ─── Exception Helpers ────────────────────────────────────────────────
         protected void ShowFriendlyException(ArgumentException ex, string actionName)
-        {
-            ShowWarning(ex.Message, "Lỗi nhập liệu");
-        }
+            => ShowWarning($"[{actionName}] {ex.Message}", "Lỗi nhập liệu");
+
+        protected void ShowFriendlyException(InvalidOperationException ex, string actionName)
+            => ShowError($"[{actionName}] {ex.Message}", "Lỗi nghiệp vụ");
 
         protected void ShowFriendlyException(Exception ex, string actionName)
         {
-            ShowError(
-                actionName + " that bai do loi khong mong muon. Vui long thu lai.\nChi tiet: " + ex.Message,
-                "Loi he thong");
+            File.AppendAllText("error.log", $"{DateTime.Now}: [{actionName}] {ex}\n");
+            ShowError("Có lỗi hệ thống, vui lòng thử lại sau.", "Lỗi");
         }
 
+        // ─── Safe Execution Wrappers ─────────────────────────────────────────
         protected void ExecuteWithHandling(string actionName, Action action, Action finallyAction = null)
         {
-            try
-            {
-                action?.Invoke();
-            }
-            catch (ArgumentException ex)
-            {
-                ShowFriendlyException(ex, actionName);
-            }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, actionName);
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, actionName);
-            }
-            catch (Exception ex)
-            {
-                ShowFriendlyException(ex, actionName);
-            }
-            finally
-            {
-                finallyAction?.Invoke();
-            }
+            try { action?.Invoke(); }
+            catch (ArgumentException ex) { ShowFriendlyException(ex, actionName); }
+            catch (InvalidOperationException ex) { ShowFriendlyException(ex, actionName); }
+            catch (Exception ex) { ShowFriendlyException(ex, actionName); }
+            finally { finallyAction?.Invoke(); }
         }
 
         protected async Task ExecuteWithHandlingAsync(string actionName, Func<Task> action, Action finallyAction = null)
         {
             try
             {
-                if (action != null)
-                {
-                    await action();
-                }
+                if (action != null) await action();
             }
-            catch (ArgumentException ex)
-            {
-                ShowFriendlyException(ex, actionName);
-            }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, actionName);
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, actionName);
-            }
-            catch (Exception ex)
-            {
-                ShowFriendlyException(ex, actionName);
-            }
-            finally
-            {
-                finallyAction?.Invoke();
-            }
+            catch (ArgumentException ex) { ShowFriendlyException(ex, actionName); }
+            catch (InvalidOperationException ex) { ShowFriendlyException(ex, actionName); }
+            catch (Exception ex) { ShowFriendlyException(ex, actionName); }
+            finally { finallyAction?.Invoke(); }
         }
 
         // ─── Cursor Helpers ────────────────────────────────────────────────────
@@ -232,16 +208,11 @@ namespace Presentation
             UseWaitCursor = false;
         }
 
-        // ─── Invoke Helper ────────────────────────────────────────────────────
-        /// <summary>
-        /// Chạy action trên UI thread. An toàn khi gọi từ background thread.
-        /// </summary>
+        // ─── UI Thread Helper ─────────────────────────────────────────────────
         protected void RunOnUI(Action action)
         {
-            if (InvokeRequired)
-                Invoke(action);
-            else
-                action();
+            if (InvokeRequired) Invoke(action);
+            else action();
         }
     }
 }

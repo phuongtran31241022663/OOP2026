@@ -37,20 +37,20 @@ namespace Presentation.UserControls
 
             if (_user is Driver driver)
             {
-                lblWallet.Text = "Vi: " + (driver.Wallet?.Amount.ToString("N0") ?? "0") + "d";
-                btnTopUp.Visible = true;
+                lblWallet.Text = "Ví: " + (driver.Wallet?.Amount.ToString("N0") ?? "0") + "đ";
+                pnlTopUp.Visible = true;
             }
             else
             {
                 lblWallet.Visible = false;
-                btnTopUp.Visible = false;
+                pnlTopUp.Visible = false;
             }
         }
 
         private async System.Threading.Tasks.Task OnSaveClicked()
         {
             IsLoading = true;
-            await ExecuteWithHandlingAsync("Cap nhat ho so ca nhan", async () =>
+            await ExecuteWithHandlingAsync("Cập nhật hồ sơ cá nhân", async () =>
             {
                 if (!string.IsNullOrWhiteSpace(txtName.Text) && txtName.Text != _user.Name)
                 {
@@ -61,19 +61,19 @@ namespace Presentation.UserControls
                 {
                     if (txtNewPassword.Text != txtConfirmPassword.Text)
                     {
-                        throw new FormatException("Mat khau xac nhan khong khop.");
+                        throw new FormatException("Mật khẩu xác nhận không khớp.");
                     }
                     _user.ChangePassword(txtCurrentPassword.Text, txtNewPassword.Text);
                 }
 
-                ShowInfo("Cap nhat ho so thanh cong!");
+                await _userService.UpdateUserAsync(_user);
+
+                ShowInfo("Cập nhật hồ sơ thành công!");
                 var parent = ParentForm;
                 if (parent != null)
                 {
                     parent.DialogResult = DialogResult.OK;
                 }
-
-                await System.Threading.Tasks.Task.CompletedTask;
             }, () => IsLoading = false);
         }
 
@@ -82,17 +82,17 @@ namespace Presentation.UserControls
             if (_user is Driver driver)
             {
                 IsLoading = true;
-                await ExecuteWithHandlingAsync("Nap tien vao vi", async () =>
+                await ExecuteWithHandlingAsync("Nạp tiền vào ví", async () =>
                 {
                     decimal amount;
                     if (!decimal.TryParse(txtTopUpAmount.Text, out amount) || amount <= 0)
                     {
-                        throw new FormatException("So tien nap khong hop le.");
+                        throw new FormatException("Số tiền nạp không hợp lệ.");
                     }
 
                     driver.DepositToWallet(new Domain.ValueObjects.Money(amount, "VND"));
-                    lblWallet.Text = "Vi: " + driver.Wallet.Amount.ToString("N0") + "d";
-                    ShowInfo("Nap tien thanh cong!");
+                    lblWallet.Text = "Ví: " + driver.Wallet.Amount.ToString("N0") + "đ";
+                    ShowInfo("Nạp tiền thành công!");
                     await System.Threading.Tasks.Task.CompletedTask;
                 }, () => IsLoading = false);
             }

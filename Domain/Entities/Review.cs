@@ -1,3 +1,4 @@
+using Domain.Events;
 using Domain.SharedKernel;
 using System;
 
@@ -97,6 +98,7 @@ namespace Domain.Entities
             Rating = rating;
             Comment = comment;
             _createdAt = DateTime.UtcNow;
+            AddEvent(new ReviewCreatedEvent(Id, _driverId, _passengerId, Rating, Comment));
         }
 
         #endregion

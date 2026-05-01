@@ -5,6 +5,7 @@ using Domain.Entities.Users;
 using Domain.Enums;
 using Domain.Repositories;
 using Domain.ValueObjects;
+
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -21,15 +22,21 @@ namespace Application.Services
         private readonly ITripRepository _tripRepository;
         private readonly IDriverRepository _driverRepository;
         private readonly IPassengerRepository _passengerRepository;
+        private readonly IFareService _fareService;
+        private readonly IMapService _mapService;
 
         public TripService(
             ITripRepository tripRepository,
             IDriverRepository driverRepository,
-            IPassengerRepository passengerRepository)
+            IPassengerRepository passengerRepository,
+            IFareService fareService,
+            IMapService mapService)
         {
             _tripRepository = tripRepository;
             _driverRepository = driverRepository;
             _passengerRepository = passengerRepository;
+            _fareService = fareService;
+            _mapService = mapService;
         }
 
         protected virtual void OnTripStatusChanged(TripStatusChangedEventArgs e)
@@ -42,6 +49,32 @@ namespace Application.Services
         }
 
         // ----- Commands (async) -----
+        public async Task<Trip> RequestTripAsync(Guid passengerId, Location pickupLocation, Location destinationLocation, VehicleType vehicleType)
+        {
+            Passenger passenger = await _passengerRepository.GetByIdAsync(passengerId);
+            if (passenger == null)
+            {
+                throw new InvalidOperationException("Hành khách không tồn tại.");
+            }
+
+            // Lấy thông tin route từ MapService
+            Route route = await _mapService.GetRouteAsync(pickupLocation, destinationLocation);
+            if (route == null)
+            {
+                throw new InvalidOperationException("Không thể tìm thấy đường đi.");
+            }
+
+            // Tính toán Fare
+            Fare fare = await _fareService.CalculateFareAsync(vehicleType, route.Distance);
+
+            Trip trip = new Trip(passengerId, route, fare, vehicleType);
+            trip.SetSearching();
+            await _tripRepository.AddAsync(trip);
+            await _tripRepository.SaveChangesAsync();
+            OnTripStatusChanged(new TripStatusChangedEventArgs(trip.Id, trip.Status, null));
+            return trip;
+        }
+
         public async Task<Trip> CreateTripAsync(Guid passengerId, Route route, Fare fare, VehicleType vehicleType)
         {
             Trip trip = new Trip(passengerId, route, fare, vehicleType);
@@ -195,6 +228,11 @@ namespace Application.Services
         public async Task<Trip> GetTripAsync(Guid tripId)
         {
             return await _tripRepository.GetByIdAsync(tripId);
+        }
+
+        public async Task<Trip> GetTripByIdAsync(Guid id)
+        {
+            return await _tripRepository.GetByIdAsync(id);
         }
 
         public async Task<Trip> GetActiveTripForDriverAsync(Guid driverId)

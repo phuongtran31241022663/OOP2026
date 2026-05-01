@@ -17,6 +17,7 @@ namespace Presentation.UserControls
         private System.Windows.Forms.TextBox txtConfirmPassword;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Panel pnlTopUp;
+        private System.Windows.Forms.Label lblTopUpAmount;
         private System.Windows.Forms.TextBox txtTopUpAmount;
         private System.Windows.Forms.Button btnTopUp;
 
@@ -45,6 +46,7 @@ namespace Presentation.UserControls
             this.pnlTopUp = new System.Windows.Forms.Panel();
             this.btnTopUp = new System.Windows.Forms.Button();
             this.txtTopUpAmount = new System.Windows.Forms.TextBox();
+            this.lblTopUpAmount = new System.Windows.Forms.Label();
             this.pnlTopUp.SuspendLayout();
             this.SuspendLayout();
 
@@ -54,14 +56,14 @@ namespace Presentation.UserControls
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new System.Drawing.Size(528, 40);
             this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "Ho so ca nhan";
+            this.lblTitle.Text = "Hồ sơ cá nhân";
 
             this.lblName.AutoSize = true;
             this.lblName.Location = new System.Drawing.Point(16, 72);
             this.lblName.Name = "lblName";
             this.lblName.Size = new System.Drawing.Size(56, 20);
             this.lblName.TabIndex = 1;
-            this.lblName.Text = "Ho ten";
+            this.lblName.Text = "Họ tên";
 
             this.txtName.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtName.Location = new System.Drawing.Point(16, 96);
@@ -74,7 +76,7 @@ namespace Presentation.UserControls
             this.lblPhone.Name = "lblPhone";
             this.lblPhone.Size = new System.Drawing.Size(82, 20);
             this.lblPhone.TabIndex = 3;
-            this.lblPhone.Text = "Dien thoai";
+            this.lblPhone.Text = "Điện thoại";
 
             this.txtPhone.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtPhone.Location = new System.Drawing.Point(16, 160);
@@ -89,14 +91,14 @@ namespace Presentation.UserControls
             this.lblWallet.Name = "lblWallet";
             this.lblWallet.Size = new System.Drawing.Size(56, 23);
             this.lblWallet.TabIndex = 5;
-            this.lblWallet.Text = "Vi: 0d";
+            this.lblWallet.Text = "Ví: 0đ";
 
             this.lblCurrentPassword.AutoSize = true;
             this.lblCurrentPassword.Location = new System.Drawing.Point(16, 200);
             this.lblCurrentPassword.Name = "lblCurrentPassword";
             this.lblCurrentPassword.Size = new System.Drawing.Size(110, 20);
             this.lblCurrentPassword.TabIndex = 6;
-            this.lblCurrentPassword.Text = "Mat khau hien tai";
+            this.lblCurrentPassword.Text = "Mật khẩu hiện tại";
 
             this.txtCurrentPassword.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtCurrentPassword.Location = new System.Drawing.Point(16, 224);
@@ -110,7 +112,7 @@ namespace Presentation.UserControls
             this.lblNewPassword.Name = "lblNewPassword";
             this.lblNewPassword.Size = new System.Drawing.Size(93, 20);
             this.lblNewPassword.TabIndex = 8;
-            this.lblNewPassword.Text = "Mat khau moi";
+            this.lblNewPassword.Text = "Mật khẩu mới";
 
             this.txtNewPassword.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtNewPassword.Location = new System.Drawing.Point(16, 288);
@@ -124,7 +126,7 @@ namespace Presentation.UserControls
             this.lblConfirmPassword.Name = "lblConfirmPassword";
             this.lblConfirmPassword.Size = new System.Drawing.Size(140, 20);
             this.lblConfirmPassword.TabIndex = 10;
-            this.lblConfirmPassword.Text = "Xac nhan mat khau moi";
+            this.lblConfirmPassword.Text = "Xác nhận mật khẩu mới";
 
             this.txtConfirmPassword.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtConfirmPassword.Location = new System.Drawing.Point(16, 352);
@@ -142,33 +144,41 @@ namespace Presentation.UserControls
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(128, 40);
             this.btnSave.TabIndex = 12;
-            this.btnSave.Text = "Luu";
+            this.btnSave.Text = "Lưu";
             this.btnSave.UseVisualStyleBackColor = false;
 
             this.pnlTopUp.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlTopUp.Controls.Add(this.lblTopUpAmount);
             this.pnlTopUp.Controls.Add(this.btnTopUp);
             this.pnlTopUp.Controls.Add(this.txtTopUpAmount);
             this.pnlTopUp.Location = new System.Drawing.Point(360, 160);
             this.pnlTopUp.Name = "pnlTopUp";
-            this.pnlTopUp.Size = new System.Drawing.Size(184, 96);
+            this.pnlTopUp.Size = new System.Drawing.Size(184, 120);
             this.pnlTopUp.TabIndex = 13;
+
+            this.lblTopUpAmount.AutoSize = true;
+            this.lblTopUpAmount.Location = new System.Drawing.Point(0, 0);
+            this.lblTopUpAmount.Name = "lblTopUpAmount";
+            this.lblTopUpAmount.Size = new System.Drawing.Size(110, 20);
+            this.lblTopUpAmount.TabIndex = 2;
+            this.lblTopUpAmount.Text = "Số tiền cần nạp";
+
+            this.txtTopUpAmount.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.txtTopUpAmount.Location = new System.Drawing.Point(0, 24);
+            this.txtTopUpAmount.Name = "txtTopUpAmount";
+            this.txtTopUpAmount.Size = new System.Drawing.Size(184, 30);
+            this.txtTopUpAmount.TabIndex = 0;
 
             this.btnTopUp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
             this.btnTopUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnTopUp.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnTopUp.ForeColor = System.Drawing.Color.White;
-            this.btnTopUp.Location = new System.Drawing.Point(0, 40);
+            this.btnTopUp.Location = new System.Drawing.Point(0, 60);
             this.btnTopUp.Name = "btnTopUp";
             this.btnTopUp.Size = new System.Drawing.Size(184, 36);
             this.btnTopUp.TabIndex = 1;
-            this.btnTopUp.Text = "Nap tien";
+            this.btnTopUp.Text = "Nạp tiền";
             this.btnTopUp.UseVisualStyleBackColor = false;
-
-            this.txtTopUpAmount.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.txtTopUpAmount.Location = new System.Drawing.Point(0, 0);
-            this.txtTopUpAmount.Name = "txtTopUpAmount";
-            this.txtTopUpAmount.Size = new System.Drawing.Size(184, 30);
-            this.txtTopUpAmount.TabIndex = 0;
 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;

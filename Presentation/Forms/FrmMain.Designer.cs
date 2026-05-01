@@ -1,6 +1,6 @@
 namespace Presentation.Shells
 {
-    partial class FrmMainShell
+    partial class FrmMain
     {
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.Panel pnlContent;

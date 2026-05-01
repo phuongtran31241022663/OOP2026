@@ -20,6 +20,7 @@ namespace Presentation.UserControls
         private System.Windows.Forms.DataGridView dgvRequests;
         private System.Windows.Forms.Button btnAcceptRequest;
         private System.Windows.Forms.Button btnRejectRequest;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTripId;
 
         private System.Windows.Forms.Panel pnlCurrentTrip;
         private System.Windows.Forms.Label lblTripStatus;
@@ -44,8 +45,8 @@ namespace Presentation.UserControls
         private void InitializeComponent()
         {
             this.tblMain = new System.Windows.Forms.TableLayoutPanel();
-this.flpTopBar = new System.Windows.Forms.FlowLayoutPanel();
-this.pnlTopBar = this.flpTopBar;
+            this.flpTopBar = new System.Windows.Forms.FlowLayoutPanel();
+            this.pnlTopBar = this.flpTopBar;
             this.btnLogout = new System.Windows.Forms.Button();
             this.btnProfile = new System.Windows.Forms.Button();
             this.lblRating = new System.Windows.Forms.Label();
@@ -114,9 +115,9 @@ this.pnlTopBar = this.flpTopBar;
             this.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLogout.Location = new System.Drawing.Point(1104, 12);
             this.btnLogout.Name = "btnLogout";
-this.btnLogout.Size = new System.Drawing.Size(90, 36);
+            this.btnLogout.Size = new System.Drawing.Size(90, 36);
             this.btnLogout.TabIndex = 5;
-            this.btnLogout.Text = "Thoat";
+            this.btnLogout.Text = "Thoát";
             this.btnLogout.UseVisualStyleBackColor = true;
             // 
             // btnProfile
@@ -125,9 +126,9 @@ this.btnLogout.Size = new System.Drawing.Size(90, 36);
             this.btnProfile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnProfile.Location = new System.Drawing.Point(1020, 12);
             this.btnProfile.Name = "btnProfile";
-this.btnProfile.Size = new System.Drawing.Size(90, 36);
+            this.btnProfile.Size = new System.Drawing.Size(90, 36);
             this.btnProfile.TabIndex = 4;
-            this.btnProfile.Text = "Ho so";
+            this.btnProfile.Text = "Hồ sơ";
             this.btnProfile.UseVisualStyleBackColor = true;
             // 
             // lblRating
@@ -144,12 +145,12 @@ this.btnProfile.Size = new System.Drawing.Size(90, 36);
             // 
             this.lblWallet.AutoSize = true;
             this.lblWallet.Font = new System.Drawing.Font("Segoe UI", 10F);
-this.lblWallet.Location = new System.Drawing.Point(300, 18);
-this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.lblWallet.Location = new System.Drawing.Point(300, 18);
+            this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.lblWallet.Name = "lblWallet";
             this.lblWallet.Size = new System.Drawing.Size(98, 23);
             this.lblWallet.TabIndex = 2;
-            this.lblWallet.Text = "Vi: 0d";
+            this.lblWallet.Text = "Ví: 0đ";
             // 
             // btnToggleStatus
             // 
@@ -161,7 +162,7 @@ this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.btnToggleStatus.Name = "btnToggleStatus";
             this.btnToggleStatus.Size = new System.Drawing.Size(160, 40);
             this.btnToggleStatus.TabIndex = 1;
-            this.btnToggleStatus.Text = "Bat hoat dong";
+            this.btnToggleStatus.Text = "Bắt đầu hoạt động";
             this.btnToggleStatus.UseVisualStyleBackColor = false;
             // 
             // lblDriverName
@@ -172,7 +173,7 @@ this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.lblDriverName.Name = "lblDriverName";
             this.lblDriverName.Size = new System.Drawing.Size(65, 28);
             this.lblDriverName.TabIndex = 0;
-            this.lblDriverName.Text = "Tai xe";
+            this.lblDriverName.Text = "Tài xế";
             // 
             // splitContent
             // 
@@ -212,7 +213,7 @@ this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.btnRejectRequest.Name = "btnRejectRequest";
             this.btnRejectRequest.Size = new System.Drawing.Size(192, 32);
             this.btnRejectRequest.TabIndex = 3;
-            this.btnRejectRequest.Text = "Tu choi";
+            this.btnRejectRequest.Text = "Từ chối";
             this.btnRejectRequest.UseVisualStyleBackColor = true;
             // 
             // btnAcceptRequest
@@ -227,27 +228,22 @@ this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.btnAcceptRequest.Name = "btnAcceptRequest";
             this.btnAcceptRequest.Size = new System.Drawing.Size(192, 32);
             this.btnAcceptRequest.TabIndex = 2;
-            this.btnAcceptRequest.Text = "Chap nhan";
+            this.btnAcceptRequest.Text = "Chấp nhận";
             this.btnAcceptRequest.UseVisualStyleBackColor = false;
             // 
             // dgvRequests
             // 
             this.dgvRequests.AllowUserToAddRows = false;
             this.dgvRequests.AllowUserToDeleteRows = false;
-            this.dgvRequests.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dgvRequests.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvRequests.BackgroundColor = System.Drawing.Color.White;
-            this.dgvRequests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvRequests.Location = new System.Drawing.Point(8, 40);
-            this.dgvRequests.Name = "dgvRequests";
-            this.dgvRequests.ReadOnly = true;
-            this.dgvRequests.RowHeadersVisible = false;
-            this.dgvRequests.RowTemplate.Height = 24;
-            this.dgvRequests.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvRequests.Size = new System.Drawing.Size(400, 640);
+            this.dgvRequests.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvRequests.TabIndex = 1;
+            // 
+            // colTripId
+            // 
+            this.colTripId.HeaderText = "TripId";
+            this.colTripId.Name = "colTripId";
+            this.colTripId.ReadOnly = true;
+            this.colTripId.Visible = false;
             // 
             // lblRequestsTitle
             // 
@@ -257,7 +253,7 @@ this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.lblRequestsTitle.Name = "lblRequestsTitle";
             this.lblRequestsTitle.Size = new System.Drawing.Size(134, 25);
             this.lblRequestsTitle.TabIndex = 0;
-            this.lblRequestsTitle.Text = "Yeu cau moi";
+            this.lblRequestsTitle.Text = "Yêu cầu mới";
             // 
             // pnlCurrentTrip
             // 
@@ -295,7 +291,7 @@ this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.btnCancelTrip.Name = "btnCancelTrip";
             this.btnCancelTrip.Size = new System.Drawing.Size(740, 48);
             this.btnCancelTrip.TabIndex = 3;
-            this.btnCancelTrip.Text = "Huy chuyen";
+            this.btnCancelTrip.Text = "Huỷ chuyến";
             this.btnCancelTrip.UseVisualStyleBackColor = false;
             // 
             // btnCompleteTrip
@@ -310,7 +306,7 @@ this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.btnCompleteTrip.Name = "btnCompleteTrip";
             this.btnCompleteTrip.Size = new System.Drawing.Size(740, 80);
             this.btnCompleteTrip.TabIndex = 2;
-            this.btnCompleteTrip.Text = "Hoan thanh";
+            this.btnCompleteTrip.Text = "Hoàn thành";
             this.btnCompleteTrip.UseVisualStyleBackColor = false;
             // 
             // btnStartTrip
@@ -325,7 +321,7 @@ this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.btnStartTrip.Name = "btnStartTrip";
             this.btnStartTrip.Size = new System.Drawing.Size(740, 80);
             this.btnStartTrip.TabIndex = 1;
-            this.btnStartTrip.Text = "Bat dau chuyen";
+            this.btnStartTrip.Text = "Bắt đầu chuyến";
             this.btnStartTrip.UseVisualStyleBackColor = false;
             // 
             // btnArrived
@@ -340,7 +336,7 @@ this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.btnArrived.Name = "btnArrived";
             this.btnArrived.Size = new System.Drawing.Size(740, 80);
             this.btnArrived.TabIndex = 0;
-            this.btnArrived.Text = "Da den diem don";
+            this.btnArrived.Text = "Đã đến điểm đón";
             this.btnArrived.UseVisualStyleBackColor = false;
             // 
             // pnlNoTrip
@@ -359,7 +355,7 @@ this.lblWallet.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
             this.lblTripStatus.Name = "lblTripStatus";
             this.lblTripStatus.Size = new System.Drawing.Size(106, 28);
             this.lblTripStatus.TabIndex = 0;
-            this.lblTripStatus.Text = "Dang ranh";
+            this.lblTripStatus.Text = "Đang rảnh";
             // 
             // UcDriver
             // 

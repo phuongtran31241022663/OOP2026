@@ -23,10 +23,6 @@ namespace Presentation.UserControls
         private bool _loginPasswordVisible;
         private bool _regPasswordVisible;
 
-        private const string PlaceholderPhone = "So dien thoai";
-        private const string PlaceholderPassword = "Mat khau";
-        private const string PlaceholderName = "Ho va ten";
-
         public UcAuth(IUserService userService, IVehicleRepository vehicleRepository)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
@@ -34,7 +30,6 @@ namespace Presentation.UserControls
 
             InitializeComponent();
             SetupEvents();
-            SetupPlaceholders();
             ShowLoginPanel();
         }
 
@@ -57,17 +52,6 @@ namespace Presentation.UserControls
             txtRegPhone.KeyDown += OnAuthKeyDown;
             txtRegPassword.KeyDown += OnAuthKeyDown;
 
-            txtLoginPhone.Enter += (s, e) => RemovePlaceholder(txtLoginPhone, PlaceholderPhone, false);
-            txtLoginPhone.Leave += (s, e) => SetPlaceholder(txtLoginPhone, PlaceholderPhone, false);
-            txtLoginPassword.Enter += (s, e) => RemovePlaceholder(txtLoginPassword, PlaceholderPassword, true);
-            txtLoginPassword.Leave += (s, e) => SetPlaceholder(txtLoginPassword, PlaceholderPassword, true);
-            txtRegName.Enter += (s, e) => RemovePlaceholder(txtRegName, PlaceholderName, false);
-            txtRegName.Leave += (s, e) => SetPlaceholder(txtRegName, PlaceholderName, false);
-            txtRegPhone.Enter += (s, e) => RemovePlaceholder(txtRegPhone, PlaceholderPhone, false);
-            txtRegPhone.Leave += (s, e) => SetPlaceholder(txtRegPhone, PlaceholderPhone, false);
-            txtRegPassword.Enter += (s, e) => RemovePlaceholder(txtRegPassword, PlaceholderPassword, true);
-            txtRegPassword.Leave += (s, e) => SetPlaceholder(txtRegPassword, PlaceholderPassword, true);
-
             txtLoginPhone.TextChanged += (s, e) => ValidateLoginFields();
             txtLoginPassword.TextChanged += (s, e) => ValidateLoginFields();
             txtRegName.TextChanged += (s, e) => ValidateRegisterFields();
@@ -82,53 +66,9 @@ namespace Presentation.UserControls
             SetupButtonHoverEffects();
         }
 
-        private void SetupPlaceholders()
+        private static string GetText(TextBox textBox)
         {
-            SetPlaceholder(txtLoginPhone, PlaceholderPhone, false);
-            SetPlaceholder(txtLoginPassword, PlaceholderPassword, true);
-            SetPlaceholder(txtRegName, PlaceholderName, false);
-            SetPlaceholder(txtRegPhone, PlaceholderPhone, false);
-            SetPlaceholder(txtRegPassword, PlaceholderPassword, true);
-        }
-
-        private static void SetPlaceholder(TextBox textBox, string placeholder, bool isPassword)
-        {
-            if (!string.IsNullOrWhiteSpace(textBox.Text))
-            {
-                return;
-            }
-
-            textBox.Text = placeholder;
-            textBox.ForeColor = Color.Gray;
-            if (isPassword)
-            {
-                textBox.PasswordChar = '\0';
-            }
-        }
-
-        private void RemovePlaceholder(TextBox textBox, string placeholder, bool isPassword)
-        {
-            if (textBox.Text != placeholder)
-            {
-                return;
-            }
-
-            textBox.Text = string.Empty;
-            textBox.ForeColor = Color.Black;
-            if (isPassword && !_loginPasswordVisible && textBox == txtLoginPassword)
-            {
-                textBox.PasswordChar = '*';
-            }
-
-            if (isPassword && !_regPasswordVisible && textBox == txtRegPassword)
-            {
-                textBox.PasswordChar = '*';
-            }
-        }
-
-        private static string GetText(TextBox textBox, string placeholder)
-        {
-            return textBox.Text == placeholder ? string.Empty : textBox.Text.Trim();
+            return textBox.Text.Trim();
         }
 
         private void OnAuthKeyDown(object sender, KeyEventArgs e)
@@ -164,21 +104,20 @@ namespace Presentation.UserControls
             cmbRole.SelectedIndex = 0;
             OnRoleChanged();
             txtRegName.Focus();
-
         }
 
         private void ToggleLoginPassword()
         {
             _loginPasswordVisible = !_loginPasswordVisible;
             txtLoginPassword.PasswordChar = _loginPasswordVisible ? '\0' : '*';
-            btnToggleLoginPassword.Text = _loginPasswordVisible ? "An" : "Hien";
+            btnToggleLoginPassword.Text = _loginPasswordVisible ? "Ẩn" : "Hiện";
         }
 
         private void ToggleRegPassword()
         {
             _regPasswordVisible = !_regPasswordVisible;
             txtRegPassword.PasswordChar = _regPasswordVisible ? '\0' : '*';
-            btnToggleRegPassword.Text = _regPasswordVisible ? "An" : "Hien";
+            btnToggleRegPassword.Text = _regPasswordVisible ? "Ẩn" : "Hiện";
         }
 
         private void OnRoleChanged()
@@ -212,12 +151,12 @@ namespace Presentation.UserControls
 
         private async Task OnLoginClicked()
         {
-            string phone = GetText(txtLoginPhone, PlaceholderPhone);
-            string password = GetText(txtLoginPassword, PlaceholderPassword);
+            string phone = GetText(txtLoginPhone);
+            string password = GetText(txtLoginPassword);
 
             if (string.IsNullOrWhiteSpace(phone) || string.IsNullOrWhiteSpace(password))
             {
-                ShowWarning("Vui long nhap so dien thoai va mat khau.");
+                ShowWarning("Vui lòng nhập số điện thoại và mật khẩu.");
                 return;
             }
 
@@ -227,7 +166,7 @@ namespace Presentation.UserControls
                 User user = await _userService.LoginAsync(phone, password);
                 if (user == null)
                 {
-                    throw new InvalidOperationException("So dien thoai hoac mat khau khong dung.");
+                    throw new InvalidOperationException("Số điện thoại hoặc mật khẩu không đúng.");
                 }
 
                 LoginSucceeded?.Invoke(this, user);
@@ -240,7 +179,7 @@ namespace Presentation.UserControls
             }
             catch (Exception ex)
             {
-                ShowError("Co loi xay ra khi dang nhap: " + ex.Message);
+                ShowError("Có lỗi xảy ra khi đăng nhập: " + ex.Message);
             }
             finally
             {
@@ -253,9 +192,9 @@ namespace Presentation.UserControls
             IsLoading = true;
             try
             {
-                string name = GetText(txtRegName, PlaceholderName);
-                string phone = GetText(txtRegPhone, PlaceholderPhone);
-                string password = GetText(txtRegPassword, PlaceholderPassword);
+                string name = GetText(txtRegName);
+                string phone = GetText(txtRegPhone);
+                string password = GetText(txtRegPassword);
                 bool isDriver = cmbRole.SelectedIndex == 1;
 
                 if (isDriver)
@@ -266,7 +205,6 @@ namespace Presentation.UserControls
                     string color = txtColor.Text.Trim();
                     int capacity = (int)numCapacity.Value;
 
-                    // Khai báo vehicle trước
                     Vehicle vehicle = null;
 
                     try
@@ -277,11 +215,9 @@ namespace Presentation.UserControls
                     }
                     catch (Exception ex)
                     {
-                        // Bắt tất cả ngoại lệ từ constructor (vd: ArgumentException, FormatException...)
                         throw new FormatException("Thông tin xe không hợp lệ: " + ex.Message);
                     }
 
-                    // Bây giờ vehicle đã được gán thành công
                     await _vehicleRepository.AddAsync(vehicle);
                     await _vehicleRepository.SaveChangesAsync();
 
@@ -305,10 +241,10 @@ namespace Presentation.UserControls
                 User user = await _userService.LoginAsync(phone, password);
                 if (user == null)
                 {
-                    throw new InvalidOperationException("Khong the tu dong dang nhap sau khi dang ky.");
+                    throw new InvalidOperationException("Không thể tự động đăng nhập sau khi đăng ký.");
                 }
 
-                ShowInfo("Dang ky thanh cong!");
+                ShowInfo("Đăng ký thành công!");
                 RegisterSucceeded?.Invoke(this, user);
             }
             catch (InvalidOperationException ex)
@@ -321,7 +257,7 @@ namespace Presentation.UserControls
             }
             catch (Exception ex)
             {
-                ShowError("Co loi xay ra khi dang ky: " + ex.Message);
+                ShowError("Có lỗi xảy ra khi đăng ký: " + ex.Message);
             }
             finally
             {
@@ -331,23 +267,23 @@ namespace Presentation.UserControls
 
         private void ValidateLoginFields()
         {
-            string phone = GetText(txtLoginPhone, PlaceholderPhone);
-            string password = GetText(txtLoginPassword, PlaceholderPassword);
+            string phone = GetText(txtLoginPhone);
+            string password = GetText(txtLoginPassword);
 
-            ValidateControl(txtLoginPhone, !string.IsNullOrWhiteSpace(phone), "Nhap so dien thoai.");
-            ValidateControl(txtLoginPassword, !string.IsNullOrWhiteSpace(password), "Nhap mat khau.");
+            ValidateControl(txtLoginPhone, !string.IsNullOrWhiteSpace(phone), "Nhập số điện thoại.");
+            ValidateControl(txtLoginPassword, !string.IsNullOrWhiteSpace(password), "Nhập mật khẩu.");
         }
 
         private void ValidateRegisterFields()
         {
-            string name = GetText(txtRegName, PlaceholderName);
-            string phone = GetText(txtRegPhone, PlaceholderPhone);
-            string password = GetText(txtRegPassword, PlaceholderPassword);
+            string name = GetText(txtRegName);
+            string phone = GetText(txtRegPhone);
+            string password = GetText(txtRegPassword);
             bool isDriver = cmbRole.SelectedIndex == 1;
 
-            ValidateControl(txtRegName, !string.IsNullOrWhiteSpace(name), "Nhap ho va ten.");
-            ValidateControl(txtRegPhone, Regex.IsMatch(phone, "^[0-9]{9,11}$"), "So dien thoai khong hop le.");
-            ValidateControl(txtRegPassword, !string.IsNullOrWhiteSpace(password) && password.Length >= 6, "Mat khau toi thieu 6 ky tu.");
+            ValidateControl(txtRegName, !string.IsNullOrWhiteSpace(name), "Nhập họ và tên.");
+            ValidateControl(txtRegPhone, Regex.IsMatch(phone, "^[0-9]{9,11}$"), "Số điện thoại không hợp lệ.");
+            ValidateControl(txtRegPassword, !string.IsNullOrWhiteSpace(password) && password.Length >= 6, "Mật khẩu tối thiểu 6 ký tự.");
 
             if (!isDriver)
             {
@@ -358,10 +294,10 @@ namespace Presentation.UserControls
                 return;
             }
 
-            ValidateControl(txtPlate, !string.IsNullOrWhiteSpace(txtPlate.Text), "Nhap bien so xe.");
-            ValidateControl(txtBrand, !string.IsNullOrWhiteSpace(txtBrand.Text), "Nhap hang xe.");
-            ValidateControl(txtModel, !string.IsNullOrWhiteSpace(txtModel.Text), "Nhap mau xe.");
-            ValidateControl(txtColor, !string.IsNullOrWhiteSpace(txtColor.Text), "Nhap mau xe.");
+            ValidateControl(txtPlate, !string.IsNullOrWhiteSpace(txtPlate.Text), "Nhập biển số xe.");
+            ValidateControl(txtBrand, !string.IsNullOrWhiteSpace(txtBrand.Text), "Nhập hãng xe.");
+            ValidateControl(txtModel, !string.IsNullOrWhiteSpace(txtModel.Text), "Nhập mẫu xe.");
+            ValidateControl(txtColor, !string.IsNullOrWhiteSpace(txtColor.Text), "Nhập màu xe.");
         }
 
         private void SetupButtonHoverEffects()

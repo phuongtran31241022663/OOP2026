@@ -90,12 +90,6 @@
     <Compile Include="BaseForm.Designer.cs">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="BaseShell.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="BaseShell.Designer.cs">
-      <DependentUpon>BaseShell.cs</DependentUpon>
-    </Compile>
     <Compile Include="BaseUserControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -151,25 +145,24 @@
       <DependentUpon>TripStatusPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="Constants\UiConstants.cs" />
-
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Shells\FrmMainShell.cs">
+    <Compile Include="Forms\FrmMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Shells\FrmMainShell.Designer.cs">
-      <DependentUpon>FrmMainShell.cs</DependentUpon>
+    <Compile Include="Forms\FrmMain.Designer.cs">
+      <DependentUpon>FrmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="Shells\FrmModal.cs">
+    <Compile Include="Forms\FrmModal.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Shells\FrmModal.Designer.cs">
+    <Compile Include="Forms\FrmModal.Designer.cs">
       <DependentUpon>FrmModal.cs</DependentUpon>
     </Compile>
-    <Compile Include="Shells\FrmToast.cs">
+    <Compile Include="Forms\FrmToast.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Shells\FrmToast.Designer.cs">
+    <Compile Include="Forms\FrmToast.Designer.cs">
       <DependentUpon>FrmToast.cs</DependentUpon>
     </Compile>
     <Compile Include="UserControls\UcAuth.cs">
@@ -214,8 +207,8 @@
     <Compile Include="UserControls\UcTripDetail.Designer.cs">
       <DependentUpon>UcTripDetail.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="BaseShell.resx">
-      <DependentUpon>BaseShell.cs</DependentUpon>
+    <EmbeddedResource Include="BaseForm.resx">
+      <DependentUpon>BaseForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Components\FarePanel.resx">
       <DependentUpon>FarePanel.cs</DependentUpon>
@@ -232,6 +225,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="UserControls\UcPassenger.resx">
+      <DependentUpon>UcPassenger.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -261,6 +257,10 @@
     <ProjectReference Include="..\Domain\Domain.csproj">
       <Project>{3ac87c44-ecaa-4de9-8b55-7fd2f65911a9}</Project>
       <Name>Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj">
+      <Project>{99f69e98-68f0-44a9-bb36-9b26151904db}</Project>
+      <Name>Infrastructure</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -11,6 +11,7 @@ namespace Presentation.UserControls
         private System.Windows.Forms.Button btnStar4;
         private System.Windows.Forms.Button btnStar5;
         private System.Windows.Forms.TextBox txtComment;
+        private System.Windows.Forms.Label lblComment;
         private System.Windows.Forms.Button btnSubmit;
 
         protected override void Dispose(bool disposing)
@@ -22,6 +23,7 @@ namespace Presentation.UserControls
 
         private void InitializeComponent()
         {
+            this.lblComment = new System.Windows.Forms.Label();
             this.lblTitle = new System.Windows.Forms.Label();
             this.pnlStars = new System.Windows.Forms.Panel();
             this.btnStar5 = new System.Windows.Forms.Button();
@@ -40,7 +42,7 @@ namespace Presentation.UserControls
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new System.Drawing.Size(528, 40);
             this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "Danh gia tai xe";
+            this.lblTitle.Text = "Đánh giá tài xế";
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 
             this.pnlStars.Anchor = System.Windows.Forms.AnchorStyles.Top;
@@ -104,6 +106,13 @@ namespace Presentation.UserControls
             this.btnStar5.Text = "\u2606";
             this.btnStar5.UseVisualStyleBackColor = true;
 
+            this.lblComment.AutoSize = true;
+            this.lblComment.Location = new System.Drawing.Point(16, 112);
+            this.lblComment.Name = "lblComment";
+            this.lblComment.Size = new System.Drawing.Size(78, 20);
+            this.lblComment.TabIndex = 4;
+            this.lblComment.Text = "Bình luận:";
+
             this.txtComment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.txtComment.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtComment.Location = new System.Drawing.Point(16, 136);
@@ -113,20 +122,22 @@ namespace Presentation.UserControls
             this.txtComment.TabIndex = 2;
 
             this.btnSubmit.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSubmit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
+            this.btnSubmit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(150)))), ((int)(((byte)(243))))); // Premium Blue
             this.btnSubmit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSubmit.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            this.btnSubmit.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold);
             this.btnSubmit.ForeColor = System.Drawing.Color.White;
-            this.btnSubmit.Location = new System.Drawing.Point(180, 280);
+            this.btnSubmit.Location = new System.Drawing.Point(180, 275);
             this.btnSubmit.Name = "btnSubmit";
-            this.btnSubmit.Size = new System.Drawing.Size(200, 48);
+            this.btnSubmit.Size = new System.Drawing.Size(200, 50);
             this.btnSubmit.TabIndex = 3;
-            this.btnSubmit.Text = "Gui danh gia";
+            this.btnSubmit.Text = "Gửi đánh giá ngay";
             this.btnSubmit.UseVisualStyleBackColor = false;
+            this.btnSubmit.Cursor = System.Windows.Forms.Cursors.Hand;
 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
+            this.Controls.Add(this.lblComment);
             this.Controls.Add(this.btnSubmit);
             this.Controls.Add(this.txtComment);
             this.Controls.Add(this.pnlStars);

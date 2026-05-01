@@ -24,14 +24,31 @@ namespace Application.Services
         public async Task<User> LoginAsync(string phone, string password)
         {
             Driver driver = await _driverRepository.GetByPhoneAsync(phone);
-            if (driver != null && driver.VerifyPassword(password))
-                return driver;
+            if (driver != null)
+            {
+                // Kiểm tra null _password trong driver
+                if (string.IsNullOrEmpty(driver.Password))
+                    throw new UnauthorizedAccessException("Lỗi dữ liệu: tài xế không có mật khẩu. Vui lòng liên hệ admin.");
+
+                if (driver.VerifyPassword(password))
+                    return driver;
+                else
+                    throw new UnauthorizedAccessException("Sai mật khẩu. (Tài xế)");
+            }
 
             Passenger passenger = await _passengerRepository.GetByPhoneAsync(phone);
-            if (passenger != null && passenger.VerifyPassword(password))
-                return passenger;
+            if (passenger != null)
+            {
+                if (string.IsNullOrEmpty(passenger.Password))
+                    throw new UnauthorizedAccessException("Lỗi dữ liệu: hành khách không có mật khẩu. Vui lòng liên hệ admin.");
 
-            throw new UnauthorizedAccessException("Sai số điện thoại hoặc mật khẩu.");
+                if (passenger.VerifyPassword(password))
+                    return passenger;
+                else
+                    throw new UnauthorizedAccessException("Sai mật khẩu. (Hành khách)");
+            }
+
+            throw new InvalidOperationException("Số điện thoại chưa được đăng ký.");
         }
 
         public async Task RegisterDriverAsync(string name, string phone, string password,
@@ -111,6 +128,24 @@ namespace Application.Services
         {
             Driver driver = await _driverRepository.GetByIdAsync(driverId);
             return driver != null;
+        }
+
+        public async Task UpdateUserAsync(User user)
+        {
+            if (user is Driver driver)
+            {
+                await _driverRepository.UpdateAsync(driver);
+                await _driverRepository.SaveChangesAsync();
+            }
+            else if (user is Passenger passenger)
+            {
+                await _passengerRepository.UpdateAsync(passenger);
+                await _passengerRepository.SaveChangesAsync();
+            }
+            else
+            {
+                throw new ArgumentException("Unknown user type");
+            }
         }
     }
 }
