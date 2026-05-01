@@ -19,5 +19,6 @@ namespace Application.Interfaces
         Task UpdateDriverLocationAsync(Guid driverId, Location location);
         Task<List<Driver>> GetAvailableDriversAsync(); 
         Task<bool> DriverExistsAsync(Guid driverId);
+        Task UpdateUserAsync(User user);
     }
 }

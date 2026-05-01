@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using Domain.ValueObjects;
 
-namespace Infrastructure.Interfaces
+namespace Application.Interfaces
 {
-    public interface IGMapService
+    public interface IMapService
     {
         /// <summary>
         /// Tìm kiếm địa điểm theo chuỗi truy vấn (ví dụ: "Quận 1, TP HCM")

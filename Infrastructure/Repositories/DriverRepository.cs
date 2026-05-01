@@ -1,6 +1,5 @@
 ﻿﻿// Infrastructure/Repositories/DriverRepository.cs
 using Domain.Entities.Users;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,19 +13,19 @@ namespace Infrastructure.Repositories
 
         public async Task<Driver> GetByPhoneAsync(string phone)
         {
-            await Task.CompletedTask;
+            await EnsureLoadedAsync();
             return _items.FirstOrDefault(d => d.Phone == phone);
         }
 
         public async Task<List<Driver>> GetAvailableDriversAsync()
         {
-            await Task.CompletedTask;
+            await EnsureLoadedAsync();
             return _items.Where(d => d.IsAvailable()).ToList();
         }
 
         public async Task<bool> ExistsByPhoneAsync(string phone)
         {
-            await Task.CompletedTask;
+            await EnsureLoadedAsync();
             return _items.Any(d => d.Phone == phone);
         }
     }

@@ -13,7 +13,7 @@ namespace Infrastructure.Repositories
     public class JsonRepository<T> : IRepository<T> where T : Entity
     {
         protected readonly string _filePath;
-        private static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
+protected static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
         protected List<T> _items;
         private readonly JsonSerializerSettings _serializerSettings;
 
@@ -75,7 +75,7 @@ namespace Infrastructure.Repositories
             }
         }
 
-        private async Task EnsureLoadedAsync()
+protected virtual async Task EnsureLoadedAsync()
         {
             if (_items == null || _items.Count == 0)
             {

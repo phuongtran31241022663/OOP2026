@@ -12,13 +12,13 @@ namespace Infrastructure.Repositories
 
         public async Task<Passenger> GetByPhoneAsync(string phone)
         {
-            await Task.CompletedTask;
+            await EnsureLoadedAsync();
             return _items.FirstOrDefault(p => p.Phone == phone);
         }
 
         public async Task<bool> ExistsByPhoneAsync(string phone)
         {
-            await Task.CompletedTask;
+            await EnsureLoadedAsync();
             return _items.Any(p => p.Phone == phone);
         }
     }

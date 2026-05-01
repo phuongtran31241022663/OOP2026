@@ -73,8 +73,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interfaces\IFareRuleRepository.cs" />
-    <Compile Include="Interfaces\IGMapService.cs" />
     <Compile Include="Repositories\FareRuleRepository.cs" />
     <Compile Include="Repositories\JsonRepository.cs" />
     <Compile Include="Repositories\VehicleRepository.cs" />

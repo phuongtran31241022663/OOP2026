@@ -20,9 +20,11 @@ namespace Application.Interfaces
         Task StartTripAsync(Guid tripId);
         Task CompleteTripAsync(Guid tripId);
         Task CancelTripAsync(Guid tripId, string reason);
+        Task<Trip> RequestTripAsync(Guid passengerId, Location pickupLocation, Location destinationLocation, VehicleType vehicleType);
 
         // Queries (async)
         Task<Trip> GetTripAsync(Guid tripId);
+        Task<Trip> GetTripByIdAsync(Guid id);
         Task<Trip> GetActiveTripForDriverAsync(Guid driverId);
         Task<Trip> GetActiveTripForPassengerAsync(Guid passengerId);
         Task<List<Trip>> GetPendingTripsAsync();

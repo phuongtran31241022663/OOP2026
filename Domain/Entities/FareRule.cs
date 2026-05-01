@@ -19,7 +19,7 @@ namespace Domain.Entities
         private Money _baseFare;
         private Money _pricePerKm;
         private decimal _commissionRate;
-        private DateTime _updatedAt;
+        private readonly DateTime _updatedAt;
 
         #endregion
 
@@ -30,20 +30,48 @@ namespace Domain.Entities
         /// </summary>
         public VehicleType VehicleType { get; }
 
-        /// <summary>
+/// <summary>
         /// Giá cước mở cửa (giá cố định ban đầu).
         /// </summary>
-        public Money BaseFare => _baseFare;
+        public Money BaseFare
+        {
+            get => _baseFare;
+            private set
+            {
+                if (value.Amount < 0)
+                    throw new ArgumentOutOfRangeException(nameof(value), "Giá mở cửa phải lớn hơn hoặc bằng 0.");
+                _baseFare = value;
+            }
+        }
 
         /// <summary>
         /// Giá cước cho mỗi kilomet.
         /// </summary>
-        public Money PricePerKm => _pricePerKm;
+        public Money PricePerKm
+        {
+            get => _pricePerKm;
+            private set
+            {
+                if (value.Amount < 0)
+                    throw new ArgumentOutOfRangeException(nameof(value), "Giá mỗi km phải lớn hơn hoặc bằng 0.");
+                _pricePerKm = value;
+            }
+        }
 
         /// <summary>
-        /// Tỉ lệ hoa hồng (ví dụ: 0.2 cho 20%).
+        /// Tỉ lệ hoa hồng
         /// </summary>
-        public decimal CommissionRate => _commissionRate;
+        public decimal CommissionRate
+        {
+            get => _commissionRate;
+            private set
+            {
+                if (value < 0 || value > 1)
+                    throw new ArgumentOutOfRangeException(nameof(CommissionRate),
+                        "Tỉ lệ hoa hồng phải nằm trong khoảng [0, 1].");
+                _commissionRate = value;
+            }
+        }
 
         /// <summary>
         /// Thời điểm quy tắc được cập nhật lần cuối.
@@ -74,7 +102,10 @@ namespace Domain.Entities
         ) : base(Guid.NewGuid())
         {
             VehicleType = vehicleType;
-            SetRule(baseFare, pricePerKm, commissionRate);
+            BaseFare = baseFare;
+            PricePerKm = pricePerKm;
+            CommissionRate = commissionRate;
+            _updatedAt = DateTime.UtcNow;
         }
 
         #endregion
@@ -87,9 +118,9 @@ namespace Domain.Entities
         /// <param name="baseFare">Giá mở cửa mới.</param>
         /// <param name="pricePerKm">Giá mỗi km mới.</param>
         /// <param name="commissionRate">Tỉ lệ hoa hồng mới.</param>
-        public void UpdateRule(Money baseFare, Money pricePerKm, decimal commissionRate)
+        public void UpdateRule(VehicleType vehicleType, Money baseFare, Money pricePerKm, decimal commissionRate)
         {
-            SetRule(baseFare, pricePerKm, commissionRate);
+            FareRule updatedRule = new FareRule(vehicleType, baseFare, pricePerKm, commissionRate);
         }
 
         /// <summary>
@@ -113,36 +144,6 @@ namespace Domain.Entities
             Money commission = new Money(commissionAmount);
 
             return new Fare(total, commission);
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        /// <summary>
-        /// Thiết lập và xác thực các giá trị của quy tắc cước.
-        /// </summary>
-        private void SetRule(Money baseFare, Money pricePerKm, decimal commissionRate)
-        {
-            if (baseFare == null)
-                throw new ArgumentNullException(nameof(baseFare));
-
-            if (pricePerKm == null)
-                throw new ArgumentNullException(nameof(pricePerKm));
-
-            if (baseFare.Amount < 0)
-                throw new ArgumentOutOfRangeException(nameof(baseFare), "Giá mở cửa phải lớn hơn hoặc bằng 0.");
-
-            if (pricePerKm.Amount < 0)
-                throw new ArgumentOutOfRangeException(nameof(pricePerKm), "Giá mỗi km phải lớn hơn hoặc bằng 0.");
-
-            if (commissionRate < 0 || commissionRate > 1)
-                throw new ArgumentOutOfRangeException(nameof(commissionRate), "Tỉ lệ hoa hồng phải nằm trong khoảng [0, 1].");
-
-            _baseFare = baseFare;
-            _pricePerKm = pricePerKm;
-            _commissionRate = commissionRate;
-            _updatedAt = DateTime.UtcNow;
         }
 
         #endregion

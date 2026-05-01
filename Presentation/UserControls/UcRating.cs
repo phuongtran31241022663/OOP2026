@@ -22,6 +22,13 @@ namespace Presentation.UserControls
             _trip = trip;
             InitializeComponent();
             SetupStarButtons();
+            SetupSubmitButtonEffects();
+        }
+
+        private void SetupSubmitButtonEffects()
+        {
+            btnSubmit.MouseEnter += (s, e) => btnSubmit.BackColor = Color.FromArgb(25, 118, 210);
+            btnSubmit.MouseLeave += (s, e) => btnSubmit.BackColor = Color.FromArgb(33, 150, 243);
         }
 
         private void SetupStarButtons()
@@ -31,6 +38,13 @@ namespace Presentation.UserControls
             btnStar3.Click += (s, e) => SetRating(3);
             btnStar4.Click += (s, e) => SetRating(4);
             btnStar5.Click += (s, e) => SetRating(5);
+
+            // Hover effects for stars
+            Button[] stars = { btnStar1, btnStar2, btnStar3, btnStar4, btnStar5 };
+            foreach (var star in stars)
+            {
+                star.MouseEnter += (s, e) => star.Cursor = Cursors.Hand;
+            }
 
             btnSubmit.Click += async (s, e) => await OnSubmitClicked();
         }
@@ -55,12 +69,12 @@ namespace Presentation.UserControls
         {
             if (_selectedRating == 0)
             {
-                ShowWarning("Vui long chon so sao danh gia.");
+                ShowWarning("Vui lòng chọn số sao để đánh giá.");
                 return;
             }
 
             IsLoading = true;
-            await ExecuteWithHandlingAsync("Gui danh gia tai xe", async () =>
+            await ExecuteWithHandlingAsync("Gửi đánh giá tài xế", async () =>
             {
                 if (_reviewService != null && _trip != null)
                 {
@@ -68,10 +82,10 @@ namespace Presentation.UserControls
                 }
                 else
                 {
-                    throw new InvalidOperationException("Khong tim thay du lieu chuyen di de danh gia.");
+                    throw new InvalidOperationException("Không tìm thấy dữ liệu chuyến đi để đánh giá.");
                 }
 
-                ShowInfo("Danh gia thanh cong!");
+                ShowInfo("Đánh giá thành công!");
                 var parent = this.ParentForm;
                 if (parent != null) parent.DialogResult = DialogResult.OK;
             }, () => IsLoading = false);

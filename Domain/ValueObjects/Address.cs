@@ -35,15 +35,15 @@ namespace Domain.ValueObjects
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Tên địa điểm không được để trống.", nameof(name));
-            if (string.IsNullOrWhiteSpace(street))
-                throw new ArgumentException("Đường không được để trống.", nameof(street));
-            if (string.IsNullOrWhiteSpace(district))
-                throw new ArgumentException("Quận/Huyện không được để trống.", nameof(district));
-            if (string.IsNullOrWhiteSpace(city))
-                throw new ArgumentException("Thành phố không được để trống.", nameof(city));
-            if (string.IsNullOrWhiteSpace(country))
-                throw new ArgumentException("Quốc gia không được để trống.", nameof(country));
-
+            //if (string.IsNullOrWhiteSpace(street))
+            //    throw new ArgumentException("Đường không được để trống.", nameof(street));
+            //if (string.IsNullOrWhiteSpace(district))
+            //    throw new ArgumentException("Quận/Huyện không được để trống.", nameof(district));
+            //if (string.IsNullOrWhiteSpace(city))
+            //    throw new ArgumentException("Thành phố không được để trống.", nameof(city));
+            //if (string.IsNullOrWhiteSpace(country))
+            //    throw new ArgumentException("Quốc gia không được để trống.", nameof(country));
+            
             _name = name;
             _street = street;
             _district = district;

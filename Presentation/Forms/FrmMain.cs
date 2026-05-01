@@ -4,10 +4,8 @@ using Domain.Repositories;
 using Presentation.UserControls;
 using System;
 using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
 using Domain.Entities;
-using Presentation;
 
 namespace Presentation.Shells
 {
@@ -16,7 +14,7 @@ namespace Presentation.Shells
     /// Chua mot Panel noi dung chinh; hoan doi UserControl de chuyen man hinh.
     /// Quan ly FrmModal va FrmToast.
     /// </summary>
-    public partial class FrmMainShell : BaseShell
+    public partial class FrmMain : BaseForm
     {
         private readonly IUserService _userService;
         private readonly ITripService _tripService;
@@ -34,7 +32,7 @@ namespace Presentation.Shells
         private UcDriver _ucDriver;
         private UcAdmin _ucAdmin;
 
-        public FrmMainShell(
+        public FrmMain(
             IUserService userService,
             ITripService tripService,
             IFareService fareService,
@@ -59,7 +57,7 @@ namespace Presentation.Shells
             SetupShell();
         }
 
-        private void SetupShell()
+private void SetupShell()
         {
             Text = "RideGo";
             Size = new Size(1200, 800);
@@ -67,9 +65,15 @@ namespace Presentation.Shells
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = Color.White;
             Font = new Font("Segoe UI", 9.5f);
+
+            // Hide inherited TabControl from BaseShell to allow custom content panel
+            if (MainTabControl != null)
+            {
+                MainTabControl.Visible = false;
+            }
         }
 
-        protected override void OnLoad(EventArgs e)
+protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
             ExecuteWithHandling("Mo man hinh dang nhap", ShowAuthScreen);
@@ -77,7 +81,7 @@ namespace Presentation.Shells
 
         // --- Navigation ----------------------------------------------------
 
-        public void ShowAuthScreen()
+public void ShowAuthScreen()
         {
             ExecuteWithHandling("Tai man hinh dang nhap", () =>
             {
@@ -217,10 +221,11 @@ namespace Presentation.Shells
                 }
             }, () =>
             {
+            
                 _ucPassenger = null;
                 _ucDriver = null;
                 _ucAdmin = null;
-                _ucAuth = null; // BUG FIX: force recreate UcAuth
+                _ucAuth = null; 
                 ShowAuthScreen();
             });
         }

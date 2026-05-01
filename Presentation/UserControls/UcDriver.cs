@@ -1,17 +1,12 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
-using Presentation.Shells;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace Presentation.UserControls
 {
-    /// <summary>
-    /// Tram chi huy tai xe: Danh sach yeu cau + Xu ly chuyen hien tai.
-    /// TableLayoutPanel ngoai + SplitContainer trong.
-    /// </summary>
     public partial class UcDriver : BaseUserControl
     {
         private readonly Driver _driver;
@@ -42,12 +37,37 @@ namespace Presentation.UserControls
             _matchingService = matchingService;
 
             InitializeComponent();
-            SetupEvents();
+
+            Label lblIdle = new Label();
+            lblIdle.Text = "Đang rảnh, chờ yêu cầu…";
+            lblIdle.Dock = DockStyle.Fill;
+            lblIdle.TextAlign = ContentAlignment.MiddleCenter;
+            lblIdle.Font = new Font("Segoe UI", 12F);
+            lblIdle.ForeColor = Color.Gray;
+            pnlNoTrip.Controls.Add(lblIdle);
+            pnlNoTrip.Dock = DockStyle.Fill;
+
+            var btnRefresh = new Button
+            {
+                Text = "Làm mới",
+                Dock = DockStyle.Top,
+                BackColor = Color.FromArgb(33, 150, 243),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Height = 40,
+                FlatStyle = FlatStyle.Flat,
+            };
+            btnRefresh.FlatAppearance.BorderSize = 0;
+            pnlRequests.Controls.Add(btnRefresh);
+
+
+            SetupEvents(btnRefresh);
             UpdateHeaderStatus();
             UpdateTripPanel();
+            _ = LoadRequestsAsync();
         }
 
-        private void SetupEvents()
+        private void SetupEvents(Button btnRefresh)
         {
             btnToggleStatus.Click += (s, e) => ToggleActive();
             btnProfile.Click += (s, e) => RequestShowProfile?.Invoke(this, _driver);
@@ -64,7 +84,44 @@ namespace Presentation.UserControls
 
             _tripService.TripStatusChanged += OnTripStatusChanged;
             Disposed += (s, e) => _tripService.TripStatusChanged -= OnTripStatusChanged;
+
+            btnRefresh.Click += async (s, e) => await LoadRequestsAsync();
         }
+
+        private async System.Threading.Tasks.Task LoadRequestsAsync()
+        {
+            if (_driver.IsOffline())
+            {
+                dgvRequests.DataSource = null;
+                return;
+            }
+
+            IsLoading = true;
+            try
+            {
+                var pendingTrips = await _tripService.GetPendingTripsAsync();
+                dgvRequests.Rows.Clear();
+                foreach (var trip in pendingTrips)
+                {
+                    dgvRequests.Rows.Add(
+                        trip.Id,
+                        trip.TripRoute.Pickup,
+                        trip.TripRoute.Destination,
+                        trip.TripRoute.Distance.ToString("F2") + " km",
+                        trip.TripFare.TotalAmount
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Tải danh sách chuyến đi");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
 
         private void OnTripStatusChanged(object sender, Application.Events.TripStatusChangedEventArgs e)
         {
@@ -72,7 +129,7 @@ namespace Presentation.UserControls
             {
                 if (_currentTrip != null && _currentTrip.Id == e.TripId)
                 {
-                    lblTripStatus.Text = "Trang thai: " + e.NewStatus;
+                    lblTripStatus.Text = "Trạng thái: " + e.NewStatus;
                     UpdateActionButtons(e.NewStatus);
                 }
             });
@@ -83,10 +140,10 @@ namespace Presentation.UserControls
             if (_driver == null) return;
 
             lblDriverName.Text = _driver.Name;
-            lblWallet.Text = "Vi: " + (_driver.Wallet?.Amount.ToString("N0") ?? "0") + "d";
+            lblWallet.Text = "Ví: " + (_driver.Wallet?.Amount.ToString("N0") ?? "0") + "đ";
             lblRating.Text = "Sao: " + _driver.AverageRating.ToString("F1") + " *";
 
-            btnToggleStatus.Text = _driver.IsOffline() ? "Bat hoat dong" : "Tat hoat dong";
+            btnToggleStatus.Text = _driver.IsOffline() ? "Bắt đầu hoạt động" : "Tắt hoạt động";
             btnToggleStatus.BackColor = _driver.IsOffline() ? Color.FromArgb(0, 150, 136) : Color.FromArgb(211, 47, 47);
         }
 
@@ -105,18 +162,11 @@ namespace Presentation.UserControls
                 else
                     _driver.SetOffline();
                 UpdateHeaderStatus();
-            }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, "Cap nhat trang thai tai xe");
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Cap nhat trang thai tai xe");
+                _ = LoadRequestsAsync();
             }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Cap nhat trang thai tai xe");
+                ShowFriendlyException(ex, "Cập nhật trạng thái tài xế");
             }
             finally
             {
@@ -130,13 +180,13 @@ namespace Presentation.UserControls
             {
                 pnlNoTrip.Visible = true;
                 pnlTripActions.Visible = false;
-                lblTripStatus.Text = "Dang ranh";
+                lblTripStatus.Text = "Đang rảnh";
             }
             else
             {
                 pnlNoTrip.Visible = false;
                 pnlTripActions.Visible = true;
-                lblTripStatus.Text = "Trang thai: " + _currentTrip.Status;
+                lblTripStatus.Text = "Trạng thái: " + _currentTrip.Status;
                 UpdateActionButtons(_currentTrip.Status);
             }
         }
@@ -152,37 +202,36 @@ namespace Presentation.UserControls
         private async System.Threading.Tasks.Task OnAcceptRequestClicked()
         {
             if (dgvRequests.SelectedRows.Count == 0) return;
-            // Demo: accept a pending trip
+
             if (_currentTrip != null)
             {
-                ShowWarning("Ban dang co chuyen dang xu ly.");
+                ShowWarning("Bạn đang có chuyến đi khác.");
                 return;
             }
 
             IsLoading = true;
             try
             {
-                var trips = await _tripService.GetPendingTripsAsync();
-                if (trips.Count > 0)
+                DataGridViewRow selectedRow = dgvRequests.SelectedRows[0];
+                string tripIdStr = selectedRow.Cells["colTripId"].Value?.ToString();
+
+                if (string.IsNullOrEmpty(tripIdStr))
                 {
-                    _currentTrip = trips[0];
-                    await _tripService.MatchDriverAsync(_currentTrip.Id, _driver.Id);
-                    _driver.SetOnTrip();
-                    UpdateHeaderStatus();
-                    UpdateTripPanel();
+                    ShowWarning("Không thể xác định chuyến đi được chọn.");
+                    return;
                 }
-            }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, "Chap nhan chuyen");
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Chap nhan chuyen");
+
+                Guid tripId = Guid.Parse(tripIdStr);
+
+                await _tripService.MatchDriverAsync(tripId, _driver.Id);
+                _currentTrip = await _tripService.GetTripAsync(tripId);
+                _driver.SetOnTrip();
+                UpdateHeaderStatus();
+                UpdateTripPanel();
             }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Chap nhan chuyen");
+                ShowFriendlyException(ex, "Chấp nhận chuyến đi");
             }
             finally
             {
@@ -203,19 +252,12 @@ namespace Presentation.UserControls
             try
             {
                 await _tripService.MarkAsArrivedAsync(_currentTrip.Id);
+                _currentTrip = await _tripService.GetTripAsync(_currentTrip.Id);
                 UpdateTripPanel();
-            }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, "Cap nhat trang thai chuyen di");
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Cap nhat trang thai chuyen di");
             }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Cap nhat trang thai chuyen di");
+                ShowFriendlyException(ex, "Cập nhật trạng thái chuyến đi");
             }
             finally
             {
@@ -231,19 +273,12 @@ namespace Presentation.UserControls
             try
             {
                 await _tripService.StartTripAsync(_currentTrip.Id);
+                _currentTrip = await _tripService.GetTripAsync(_currentTrip.Id);
                 UpdateTripPanel();
-            }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, "Bat dau chuyen di");
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Bat dau chuyen di");
             }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Bat dau chuyen di");
+                ShowFriendlyException(ex, "Bắt đầu chuyến đi");
             }
             finally
             {
@@ -259,23 +294,16 @@ namespace Presentation.UserControls
             try
             {
                 await _tripService.CompleteTripAsync(_currentTrip.Id);
+                _currentTrip = await _tripService.GetTripAsync(_currentTrip.Id);
                 _driver.SetAvailable();
                 _driver.AddTrip();
                 _currentTrip = null;
                 UpdateHeaderStatus();
                 UpdateTripPanel();
             }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, "Hoan thanh chuyen di");
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Hoan thanh chuyen di");
-            }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Hoan thanh chuyen di");
+                ShowFriendlyException(ex, "Hoàn thành chuyến đi");
             }
             finally
             {
@@ -286,28 +314,21 @@ namespace Presentation.UserControls
         private async System.Threading.Tasks.Task OnCancelTripClicked()
         {
             if (_currentTrip == null) return;
-            if (!Confirm("Ban co chac muon huy chuyen?")) return;
+            if (!Confirm("Bạn có chắc muốn huỷ chuyến đi này?")) return;
 
             IsLoading = true;
             try
             {
-                await _tripService.CancelTripAsync(_currentTrip.Id, "Tai xe huy");
+                await _tripService.CancelTripAsync(_currentTrip.Id, "Tài xế huỷ");
+                _currentTrip = await _tripService.GetTripAsync(_currentTrip.Id);
                 _driver.SetAvailable();
                 _currentTrip = null;
                 UpdateHeaderStatus();
                 UpdateTripPanel();
             }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, "Huy chuyen di");
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Huy chuyen di");
-            }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Huy chuyen di");
+                ShowFriendlyException(ex, "Huỷ chuyến đi");
             }
             finally
             {

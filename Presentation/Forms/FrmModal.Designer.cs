@@ -6,7 +6,7 @@ namespace Presentation.Shells
         private System.Windows.Forms.Panel pnlModalContent;
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.Panel pnlHeader;
-        private System.Windows.Forms.Label lblTitle;
+        internal System.Windows.Forms.Label lblTitle;
 
         protected override void Dispose(bool disposing)
         {

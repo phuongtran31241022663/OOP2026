@@ -3,15 +3,12 @@ using Domain.Entities.Users;
 using Presentation.Shells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Drawing;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Presentation.UserControls
 {
-    /// <summary>
-    /// Trung tam quan tri: Users, Trips, FareRules, Stats.
-    /// TabControl voi 4 tabs, moi tab la mot khong gian lam viec doc lap.
-    /// </summary>
     public partial class UcAdmin : BaseUserControl
     {
         private readonly Admin _admin;
@@ -43,6 +40,7 @@ namespace Presentation.UserControls
             btnUnlockUser.Click += async (s, e) => await ToggleUserLock(false);
 
             // Trips tab
+            txtSearchTrips.TextChanged += (s, e) => FilterTrips(txtSearchTrips.Text);
             btnCancelTrip.Click += async (s, e) => await CancelSelectedTrip();
             btnTripDetail.Click += (s, e) => ShowTripDetail();
 
@@ -61,7 +59,7 @@ namespace Presentation.UserControls
                 case 0: PopulateUsersGrid(); break;
                 case 1: PopulateTripsGrid(); break;
                 case 2: PopulateFareRulesGrid(); break;
-                case 3: UpdateStats(); break;
+                case 3: await UpdateStatsAsync(); break;
             }
         }
 
@@ -75,17 +73,9 @@ namespace Presentation.UserControls
                 _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<Domain.Entities.FareRule>();
                 await OnTabChanged();
             }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, "Tai du lieu quan tri");
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Tai du lieu quan tri");
-            }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Tai du lieu quan tri");
+                ShowFriendlyException(ex, "Tải dữ liệu quản trị");
             }
             finally
             {
@@ -97,10 +87,11 @@ namespace Presentation.UserControls
         private void PopulateUsersGrid()
         {
             dgvUsers.Rows.Clear();
+            if (_allUsers == null) return;
             foreach (var user in _allUsers)
             {
-                string role = user is Driver ? "Driver" : (user is Passenger ? "Passenger" : "Admin");
-                dgvUsers.Rows.Add(user.Id.ToString().Substring(0, 8), user.Name, user.Phone, role, "Active");
+                string role = user is Driver ? "Tài xế" : (user is Passenger ? "Hành khách" : "Quản trị viên");
+                dgvUsers.Rows.Add(user.Id.ToString().Substring(0, 8), user.Name, user.Phone, role, "Hoạt động");
             }
         }
 
@@ -112,11 +103,21 @@ namespace Presentation.UserControls
                 return;
             }
 
-            dgvUsers.Rows.Clear();
-            foreach (var user in _allUsers.Where(u => u.Name.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0 || u.Phone.IndexOf(term) >= 0))
+            var filteredUsers = new List<Domain.Entities.User>();
+            foreach (var u in _allUsers)
             {
-                string role = user is Driver ? "Driver" : (user is Passenger ? "Passenger" : "Admin");
-                dgvUsers.Rows.Add(user.Id.ToString().Substring(0, 8), user.Name, user.Phone, role, "Active");
+                if (u.Name.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    u.Phone.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    filteredUsers.Add(u);
+                }
+            }
+
+            dgvUsers.Rows.Clear();
+            foreach (var user in filteredUsers)
+            {
+                string role = user is Driver ? "Tài xế" : (user is Passenger ? "Hành khách" : "Quản trị viên");
+                dgvUsers.Rows.Add(user.Id.ToString().Substring(0, 8), user.Name, user.Phone, role, "Hoạt động");
             }
         }
 
@@ -128,19 +129,11 @@ namespace Presentation.UserControls
             try
             {
                 await Task.CompletedTask; // TODO: goi service khoa/mo khoa user
-                ShowInfo(lockUser ? "Da khoa tai khoan." : "Da mo khoa tai khoan.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, "Cap nhat trang thai tai khoan");
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Cap nhat trang thai tai khoan");
+                ShowInfo(lockUser ? "Đã khoá tài khoản." : "Đã mở khoá tài khoản.");
             }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Cap nhat trang thai tai khoan");
+                ShowFriendlyException(ex, "Cập nhật trạng thái tài khoản");
             }
             finally
             {
@@ -152,34 +145,51 @@ namespace Presentation.UserControls
         private void PopulateTripsGrid()
         {
             dgvTrips.Rows.Clear();
+            if (_allTrips == null) return;
             foreach (var trip in _allTrips)
             {
-                dgvTrips.Rows.Add(trip.Id.ToString().Substring(0, 8), trip.Status, trip.TripVehicleType, trip.TripFare?.TotalAmount.Amount.ToString("N0") + "d", trip.RequestAt.ToString("dd/MM HH:mm"));
+                dgvTrips.Rows.Add(trip.Id.ToString().Substring(0, 8), trip.Status, trip.TripVehicleType, trip.TripFare?.TotalAmount.Amount.ToString("N0") + "đ", trip.RequestAt.ToString("dd/MM HH:mm"));
+            }
+        }
+        
+        private void FilterTrips(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+            {
+                PopulateTripsGrid();
+                return;
+            }
+            
+            var filteredTrips = new List<Domain.Entities.Trip>();
+            foreach (var t in _allTrips)
+            {
+                if (t.Id.ToString().IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    filteredTrips.Add(t);
+                }
+            }
+                
+            dgvTrips.Rows.Clear();
+            foreach (var trip in filteredTrips)
+            {
+                dgvTrips.Rows.Add(trip.Id.ToString().Substring(0, 8), trip.Status, trip.TripVehicleType, trip.TripFare?.TotalAmount.Amount.ToString("N0") + "đ", trip.RequestAt.ToString("dd/MM HH:mm"));
             }
         }
 
         private async Task CancelSelectedTrip()
         {
             if (dgvTrips.SelectedRows.Count == 0) return;
-            if (!Confirm("Huy chuyen da chon?")) return;
+            if (!Confirm("Huỷ chuyến đi đã chọn?")) return;
 
             IsLoading = true;
             try
             {
                 await Task.CompletedTask; // TODO: goi service huy chuyen
-                ShowInfo("Da huy chuyen.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, "Huy chuyen di");
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Huy chuyen di");
+                ShowInfo("Đã huỷ chuyến đi.");
             }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Huy chuyen di");
+                ShowFriendlyException(ex, "Huỷ chuyến đi");
             }
             finally
             {
@@ -189,16 +199,17 @@ namespace Presentation.UserControls
 
         private void ShowTripDetail()
         {
-            ExecuteWithHandling("Mo chi tiet chuyen di", () =>
+            ExecuteWithHandling("Mở chi tiết chuyến đi", () =>
             {
                 if (dgvTrips.SelectedRows.Count == 0)
                 {
-                    throw new InvalidOperationException("Vui long chon chuyen di can xem.");
+                    throw new InvalidOperationException("Vui lòng chọn chuyến đi cần xem.");
                 }
 
                 var trip = _allTrips[dgvTrips.SelectedRows[0].Index];
                 var ucDetail = new UcTripDetail(trip);
-                FrmModal.ShowModal(this, ucDetail, "Chi tiet chuyen");
+                Form parentForm = this.FindForm();
+                FrmModal.ShowModal(parentForm, ucDetail, "Chi tiết chuyến đi");
             });
         }
 
@@ -206,6 +217,7 @@ namespace Presentation.UserControls
         private void PopulateFareRulesGrid()
         {
             dgvFareRules.Rows.Clear();
+            if (_allFareRules == null) return;
             foreach (var rule in _allFareRules)
             {
                 dgvFareRules.Rows.Add(rule.VehicleType, rule.BaseFare.Amount.ToString("N0"), rule.PricePerKm.Amount.ToString("N0"), (rule.CommissionRate * 100).ToString("F0") + "%");
@@ -220,31 +232,23 @@ namespace Presentation.UserControls
 
         private void ShowFareEditDialog(Domain.Entities.FareRule rule)
         {
-            ShowInfo(rule == null ? "Them moi quy tac gia." : "Sua quy tac gia.");
+            ShowInfo(rule == null ? "Thêm mới quy tắc giá." : "Sửa quy tắc giá.");
         }
 
         private async Task DeleteSelectedFareRule()
         {
             if (dgvFareRules.SelectedRows.Count == 0) return;
-            if (!Confirm("Xoa quy tac gia da chon?")) return;
+            if (!Confirm("Xoá quy tắc giá đã chọn?")) return;
 
             IsLoading = true;
             try
             {
                 await Task.CompletedTask; // TODO: goi service xoa quy tac gia
-                ShowInfo("Da xoa quy tac gia.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, "Xoa quy tac gia");
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Xoa quy tac gia");
+                ShowInfo("Đã xoá quy tắc giá.");
             }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Xoa quy tac gia");
+                ShowFriendlyException(ex, "Xoá quy tắc giá");
             }
             finally
             {
@@ -253,28 +257,28 @@ namespace Presentation.UserControls
         }
 
         // --- Stats Tab ---
-        private async void UpdateStats()
+        private async System.Threading.Tasks.Task UpdateStatsAsync()
         {
             IsLoading = true;
             try
             {
-                lblGMV.Text = (await _adminService.GetTotalGMVAsync()).ToString("N0") + "d";
-                lblTotalTrips.Text = _allTrips.Count.ToString();
-                lblActiveDrivers.Text = _allUsers.Count(u => u is Driver d && d.IsAvailable()).ToString();
-                lblAvgRating.Text = (await _adminService.GetAverageSatisfactionAsync()).ToString("F1");
-                lblCompletionRate.Text = (await _adminService.GetCompletionRateAsync() * 100).ToString("F0") + "%";
-            }
-            catch (InvalidOperationException ex)
-            {
-                ShowFriendlyException(ex, "Cap nhat thong ke");
-            }
-            catch (FormatException ex)
-            {
-                ShowFriendlyException(ex, "Cap nhat thong ke");
+                lblGMV.Text = "Tổng doanh thu: " + (await _adminService.GetTotalGMVAsync()).ToString("N0") + "đ";
+                lblTotalTrips.Text = "Tổng chuyến: " + _allTrips.Count.ToString();
+
+                int activeCount = 0;
+                foreach (Domain.Entities.User u in _allUsers)
+                {
+                    if (u is Driver d && d.IsAvailable())
+                        activeCount++;
+                }
+                lblActiveDrivers.Text = "Tài xế hoạt động: " + activeCount.ToString();
+
+                lblAvgRating.Text = "Điểm hài lòng: " + (await _adminService.GetAverageSatisfactionAsync()).ToString("F1");
+                lblCompletionRate.Text = "Tỷ lệ hoàn thành: " + (await _adminService.GetCompletionRateAsync() * 100).ToString("F0") + "%";
             }
             catch (Exception ex)
             {
-                ShowFriendlyException(ex, "Cap nhat thong ke");
+                ShowFriendlyException(ex, "Cập nhật thống kê");
             }
             finally
             {
