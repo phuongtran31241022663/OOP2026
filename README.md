@@ -91,8 +91,10 @@ Trip & Driver State Pattern (`ITripState`, `IDriverState`).
 - `IReviewService` / `ReviewService` — rating (in `Services` namespace)
 
 **Domain Services:**
-- `DriverStateMachine` — state validation for Driver
-- `FareRule.CalculateFare(double)` — fare calculation logic (no separate `FareCalculationService`)
+- `FareRule.CalculateFare(double)` — inline fare calculation logic per VehicleType (không tách thành FareCalculationService riêng)
+
+**State Pattern (Domain Layer):**
+- Trip và Driver đều dùng State Pattern (`ITripState` + 8 states, `IDriverState` + 3 states) — không còn `DriverStateMachine` static class
 
 **Infrastructure Services:**
 - `IMapService` / `MapService` — geocoding + routing (Photon + OSRM)

@@ -150,7 +150,19 @@ Mọi control đều kế thừa từ `Control`, và thường ghi đè `OnPaint
 
 ---
 
-## 7. Kết luận
+## 7. Ánh xạ vào RideGo System
+
+| Thành phần RideGo | Pattern áp dụng | Ghi chú |
+|---|---|---|
+| `Vehicle.GetAvgSpeed()` | Runtime Polymorphism | `Vehicle` abstract class, `Car` và `Motorbike` override với tốc độ riêng (60km/h vs 40km/h). |
+| `User.GetInfo()` | Runtime Polymorphism | `User` abstract, `Driver`/`Passenger`/`Admin` override để trả về thông tin định dạng riêng. |
+| `Money` operators | Compile-time Polymorphism | Overload `+`, `-`, `<`, `>`, `<=`, `>=` cho phép so sánh và tính toán giữa các `Money` instance. |
+| `ITripState` / `IDriverState` | Interface Polymorphism | 8 trip states và 3 driver states triển khai cùng interface, context gọi phương thức chung nhưng hành vi khác nhau. |
+| `JsonRepository<T>` | Generic Polymorphism | Repository generic xử lý mọi entity type (`Trip`, `Driver`, `Passenger`) với cùng logic serialization. |
+
+---
+
+## 8. Kết luận
 
 Đa hình trong C# là sự tổng hòa của nhiều cơ chế: phương thức ảo, interface, generic, pattern matching. Nó thấm sâu vào mọi ngóc ngách của lập trình .NET:
 

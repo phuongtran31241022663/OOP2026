@@ -261,6 +261,30 @@ subject
 
 ---
 
-## 9. Kết luận
+## 9. Ánh xạ vào RideGo System
+
+| Thành phần RideGo | Pattern áp dụng | Ghi chú |
+|---|---|---|
+| `ITripService.TripStatusChanged` | Observer via Event | `EventHandler<TripStatusChangedEventArgs>` — UI Forms (PassengerShell, DriverShell) subscribe để nhận cập nhật real-time khi trip chuyển trạng thái. |
+| `Trip` Domain Events | Observer (Publish-Subscribe) | `TripRequestedEvent`, `TripMatchedEvent`, etc. — Domain layer phát sự kiện, Infrastructure/BackgroundJobs subscribe xử lý. |
+| `Driver` Status Events | Observer | `DriverStatusChangedEvent`, `DriverLocationUpdatedEvent` — UI cập nhật driver status real-time. |
+
+**Ví dụ thực tế trong codebase:**
+```csharp
+// Application/Interfaces/ITripService.cs
+event EventHandler<TripStatusChangedEventArgs> TripStatusChanged;
+
+// Presentation/Shells/DriverShell.cs — Subscribe trong constructor
+_tripService.TripStatusChanged += OnTripStatusChanged;
+
+private void OnTripStatusChanged(object sender, TripStatusChangedEventArgs e)
+{
+    // Update UI when trip status changes
+}
+```
+
+---
+
+## 10. Kết luận
 
 Observer Pattern trong C# đã được nâng cấp từ mẫu thủ công thành một phần tự nhiên của ngôn ngữ. Với `delegate/event`, gắn kết các thành phần một cách lỏng lẻo và hiệu quả. Khi cần luồng dữ liệu phức tạp, `IObservable<T>` và Reactive Extensions mở rộng mạnh mẽ, cho phép lập trình phản ứng với operators chuẩn hóa và kiểm soát lỗi tinh tế.
