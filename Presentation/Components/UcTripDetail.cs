@@ -29,8 +29,8 @@ namespace Presentation.UserControls
             lblPickup.Text = $"Điểm đón: {FormatLocation(_trip.TripRoute.Pickup)}";
             lblDestination.Text = $"Điểm đến: {FormatLocation(_trip.TripRoute.Destination)}";
             lblVehicleType.Text = $"Loại xe: {_trip.TripVehicleType}";
-            lblFare.Text = $"Cước phí: {_trip.TripFare?.TotalAmount.Amount.ToString("N0") + "đ" ?? "Chưa có"}";
-            lblDriverName.Text = $"Tài xế: {(_trip.DriverId != Guid.Empty ? _trip.DriverId.ToString().Substring(0, 8) : "Chưa có")}";
+            lblFare.Text = $"Cước phí: {(_trip.TripFare?.TotalAmount.Amount.ToString("N0") ?? "Chưa có") + "đ"}";
+            lblDriverName.Text = $"Tài xế: {(_trip.DriverId.HasValue && _trip.DriverId.Value != Guid.Empty ? _trip.DriverId.Value.ToString().Substring(0, 8) : "Chưa có")}";
             lblPassengerName.Text = $"Hành khách: {_trip.PassengerId.ToString().Substring(0, 8)}";
             lblRequestTime.Text = $"Thời gian: {_trip.RequestAt:dd/MM/yyyy HH:mm}";
         }

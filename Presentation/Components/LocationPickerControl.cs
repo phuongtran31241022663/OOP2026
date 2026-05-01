@@ -8,14 +8,29 @@ using System.Windows.Forms;
 
 namespace Presentation.Components
 {
-    public partial class LocationPickerControl : ComboBox
+    /// <summary>
+    /// Location picker control with TextBox + ListBox pattern.
+    /// When clicked, shows a TextBox for keyword input and ListBox for search results.
+    /// </summary>
+    public partial class LocationPickerControl : UserControl
     {
+        private Application.Interfaces.IMapService _mapService;
+        private System.Windows.Forms.Timer _searchTimer;
+        private bool _isSearching = false;
+        private string _lastSearchQuery = string.Empty;
+        
         // Constants
         private const string RecentLocationsFileName = "recent_locations.json";
         private const int MaxRecentLocations = 10;
         public const double CoordinateTolerance = 0.0001;
 
-        // Properties
+        // UI Controls
+        private TextBox _txtSearch;
+        private ListBox _lstSuggestions;
+        private Panel _pnlSuggestions;
+        private Label _lblPlaceholder;
+
+// Properties
         public Location SelectedLocation { get; set; }
         public Location CurrentPickup { get; set; }
         public Location CurrentDestination { get; set; }
@@ -23,131 +38,255 @@ namespace Presentation.Components
 
         // Recent locations storage (in-memory, keyed by user identifier)
         private static readonly Dictionary<string, List<Location>> _recentByUser = new Dictionary<string, List<Location>>();
+        private string _currentUserIdentifier;
+
+        public void SetMapService(Application.Interfaces.IMapService mapService)
+        {
+            _mapService = mapService;
+        }
 
         // Fixed UEH locations
         private static readonly List<Location> _fixedLocations = new List<Location>
         {
             new Location(
-                new Coordinate(10.7769, 106.7009),
-                new Address("District 1", "N/A", "District 1", "Ho Chi Minh", "Vietnam")
+                new Coordinate(10.7826, 106.6954),
+                new Address("UEH Cơ sở A", "59C Nguyễn Đình Chiểu", "Quận 3", "Ho Chi Minh", "Vietnam")
             ),
             new Location(
-                new Coordinate(10.8756, 106.8002),
-                new Address("Thu Duc", "N/A", "Thu Duc", "Ho Chi Minh", "Vietnam")
+                new Coordinate(10.7679, 106.6707),
+                new Address("UEH Cơ sở B", "279 Nguyễn Tri Phương", "Quận 10", "Ho Chi Minh", "Vietnam")
             ),
             new Location(
-                new Coordinate(10.0167, 105.0833),
-                new Address("Chau Phong", "N/A", "An Giang", "An Giang", "Vietnam")
+                new Coordinate(10.7132, 106.6655),
+                new Address("UEH Cơ sở N", "Nguyễn Văn Linh", "Bình Chánh", "Ho Chi Minh", "Vietnam")
             )
         };
 
-
-
-        // Internal item structure for dropdown
-        private class DropdownItem
-        {
-            public bool IsHeader { get; set; }
-            public string HeaderText { get; set; }
-            public Location Location { get; set; }
-        }
-
-        private readonly List<DropdownItem> _dropdownItems = new List<DropdownItem>();
-
         public LocationPickerControl()
         {
-            // Configure ComboBox
-            DropDownStyle = ComboBoxStyle.DropDownList;
-            DrawMode = DrawMode.OwnerDrawFixed;
-            ItemHeight = 28;
-            DropDownWidth = 300;
-            Cursor = Cursors.Hand;
+            InitializeComponent();
+            
+            // Configure control
+            this.Size = new Size(334, 34);
+            this.BackColor = Color.White;
+            this.ForeColor = Color.Black;
 
-            // Event handlers
-            DrawItem += LocationPickerControl_DrawItem;
-            SelectedIndexChanged += LocationPickerControl_SelectedIndexChanged;
-            Click += LocationPickerControl_Click;
+            // Initialize search timer
+            _searchTimer = new System.Windows.Forms.Timer { Interval = 800 }; // 800ms debounce
+            _searchTimer.Tick += SearchTimer_Tick;
+
+            // Load initial data
+            PopulateSuggestions();
         }
 
-        private void LocationPickerControl_Click(object sender, EventArgs e)
+        
+        private void UpdatePlaceholder()
         {
-            // When clicking the control, open dropdown if not already dropped down
-            if (!DroppedDown)
+            if (SelectedLocation != null)
             {
-                DroppedDown = true;
-            }
-        }
-
-        private void LocationPickerControl_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (SelectedIndex < 0 || SelectedIndex >= _dropdownItems.Count)
-            {
-                SelectedLocation = null;
-                return;
-            }
-
-            var item = _dropdownItems[SelectedIndex];
-            if (item.IsHeader)
-            {
-                // If header is selected, clear selection (don't allow header selection)
-                SelectedIndex = -1;
-                SelectedLocation = null;
-                return;
-            }
-
-            SelectedLocation = item.Location;
-
-            // Add to recent locations if we have a user identifier
-            AddToRecentLocations(SelectedLocation);
-        }
-
-        private void LocationPickerControl_DrawItem(object sender, DrawItemEventArgs e)
-        {
-            if (e.Index < 0)
-                return;
-
-            e.DrawBackground();
-
-            if (e.Index >= _dropdownItems.Count)
-                return;
-
-            var item = _dropdownItems[e.Index];
-            var bounds = e.Bounds;
-
-            if (item.IsHeader)
-            {
-                // Draw header: bold, light gray background
-                using (var font = new Font(Font.FontFamily, Font.Size, FontStyle.Bold))
-                using (var brush = new SolidBrush(Color.FromArgb(245, 245, 245)))
-                {
-                    e.Graphics.FillRectangle(brush, bounds);
-                    TextRenderer.DrawText(
-                        e.Graphics,
-                        item.HeaderText,
-                        font,
-                        bounds,
-                        SystemColors.GrayText,
-                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter
-                    );
-                }
+                _lblPlaceholder.Text = FormatLocationForDisplay(SelectedLocation);
+                _lblPlaceholder.Visible = true;
+                _txtSearch.Visible = false;
             }
             else
             {
-                // Draw location item: normal text
-                if (item.Location != null)
+                _lblPlaceholder.Text = "Chọn điểm đón...";
+                _lblPlaceholder.Visible = true;
+                _txtSearch.Visible = true;
+            }
+        }
+
+        private void LblPlaceholder_Click(object sender, EventArgs e)
+        {
+            _lblPlaceholder.Visible = false;
+            _txtSearch.Visible = true;
+            _txtSearch.Focus();
+            ShowSuggestionsPanel();
+            PopulateSuggestions();
+        }
+
+        private void TxtSearch_Enter(object sender, EventArgs e)
+        {
+            ShowSuggestionsPanel();
+            PopulateSuggestions();
+        }
+
+        private void TxtSearch_Leave(object sender, EventArgs e)
+        {
+            // Delay hide to allow click on listbox
+            var timer = new System.Windows.Forms.Timer { Interval = 200 };
+            timer.Tick += (s, args) =>
+            {
+                timer.Stop();
+                timer.Dispose();
+                if (!_lstSuggestions.ClientRectangle.Contains(_lstSuggestions.PointToClient(Cursor.Position)))
                 {
-                    var text = FormatLocationForDisplay(item.Location);
-                    TextRenderer.DrawText(
-                        e.Graphics,
-                        text,
-                        Font,
-                        bounds,
-                        SystemColors.ControlText,
-                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter
-                    );
+                    HideSuggestionsPanel();
+                }
+            };
+            timer.Start();
+        }
+
+        private void ShowSuggestionsPanel()
+        {
+            if (_pnlSuggestions.Parent != this)
+            {
+                this.Controls.Add(_pnlSuggestions);
+            }
+            _pnlSuggestions.BringToFront();
+            _pnlSuggestions.Visible = true;
+        }
+
+        private void HideSuggestionsPanel()
+        {
+            _pnlSuggestions.Visible = false;
+            UpdatePlaceholder();
+        }
+
+        private void TxtSearch_TextChanged(object sender, EventArgs e)
+        {
+            _searchTimer.Stop();
+            if (_txtSearch.Text.Length >= 3)
+            {
+                _searchTimer.Start();
+            }
+            else if (string.IsNullOrWhiteSpace(_txtSearch.Text))
+            {
+                // Reset to default list when cleared
+                PopulateSuggestions();
+            }
+        }
+
+        private void TxtSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+                PerformSearch(_txtSearch.Text);
+            }
+            else if (e.KeyCode == Keys.Down && _lstSuggestions.Visible && _lstSuggestions.Items.Count > 0)
+            {
+                _lstSuggestions.SelectedIndex = 0;
+                _lstSuggestions.Focus();
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                HideSuggestionsPanel();
+            }
+        }
+
+        private async void SearchTimer_Tick(object sender, EventArgs e)
+        {
+            _searchTimer.Stop();
+            await PerformSearch(_txtSearch.Text);
+        }
+
+        private async System.Threading.Tasks.Task PerformSearch(string query)
+        {
+            if (_mapService == null || string.IsNullOrWhiteSpace(query) || query == _lastSearchQuery || _isSearching)
+                return;
+
+            if (query.Length < 3) return;
+
+            _isSearching = true;
+            _lastSearchQuery = query;
+
+            try
+            {
+                var results = await _mapService.SearchLocationAsync(query);
+                if (results != null && results.Count > 0)
+                {
+                    UpdateSuggestionsWithSearchResults(results);
+                }
+            }
+            finally
+            {
+                _isSearching = false;
+            }
+        }
+
+        private void UpdateSuggestionsWithSearchResults(List<Location> results)
+        {
+            _lstSuggestions.Items.Clear();
+            
+            // Add header
+            _lstSuggestions.Items.Add(new DropdownItem { IsHeader = true, HeaderText = "KẾT QUẢ TÌM KIẾM" });
+
+            foreach (var loc in results)
+            {
+                _lstSuggestions.Items.Add(new DropdownItem { IsHeader = false, Location = loc });
+            }
+
+            _lstSuggestions.Visible = true;
+        }
+
+        private void PopulateSuggestions()
+        {
+            // Build a list of suggestions from recent + fixed locations
+            _lstSuggestions.Items.Clear();
+
+            // Add recent locations header
+            var recentLocations = GetRecentLocations(_currentUserIdentifier);
+            if (recentLocations.Count > 0)
+            {
+                _lstSuggestions.Items.Add(new DropdownItem { IsHeader = true, HeaderText = "ĐỊA ĐIỂM GẦN ĐÂY" });
+                foreach (var location in recentLocations)
+                {
+                    _lstSuggestions.Items.Add(new DropdownItem { IsHeader = false, Location = location });
                 }
             }
 
-            e.DrawFocusRectangle();
+            // Add fixed UEH locations header
+            _lstSuggestions.Items.Add(new DropdownItem { IsHeader = true, HeaderText = "CƠ SỞ UEH" });
+            foreach (var location in _fixedLocations)
+            {
+                _lstSuggestions.Items.Add(new DropdownItem { IsHeader = false, Location = location });
+            }
+        }
+
+        private void LstSuggestions_Click(object sender, EventArgs e)
+        {
+            HandleSelection();
+        }
+
+        private void LstSuggestions_DoubleClick(object sender, EventArgs e)
+        {
+            HandleSelection();
+        }
+
+        private void LstSuggestions_MouseEnter(object sender, EventArgs e)
+        {
+            // Keep panel visible when mouse enters listbox
+        }
+
+        private void HandleSelection()
+        {
+            if (_lstSuggestions.SelectedItem is DropdownItem item)
+            {
+                if (item.IsHeader)
+                {
+                    // Don't allow header selection
+                    return;
+                }
+
+                SelectedLocation = item.Location;
+
+                // Update display
+                if (SelectedLocation != null && SelectedLocation.Address != null)
+                {
+                    _txtSearch.Text = SelectedLocation.Address.Street + ", " + SelectedLocation.Address.District;
+                }
+
+                // Add to recent locations
+                AddToRecentLocations(SelectedLocation);
+
+                // Hide suggestions panel and show selected location
+                HideSuggestionsPanel();
+
+                // Trigger selection event
+                OnSelectedLocationChanged();
+            }
         }
 
         private string FormatLocationForDisplay(Location location)
@@ -170,69 +309,12 @@ namespace Presentation.Components
                 return $"[{location.Coordinate.Latitude:F5}, {location.Coordinate.Longitude:F5}]";
         }
 
-
-        /// <summary>
-        /// Populates the dropdown with headers and locations.
-        /// Should be called when the control needs to refresh its data.
-        /// </summary>
         public void PopulateDropdown(string userIdentifier = null)
         {
-            _dropdownItems.Clear();
-            Items.Clear();
-
-            // Add recent locations header and items
-            _dropdownItems.Add(new DropdownItem
-            {
-                IsHeader = true,
-                HeaderText = "ĐỊA ĐIỂM GẦN ĐÂY"
-            });
-
-            var recentLocations = GetRecentLocations(userIdentifier);
-            foreach (var location in recentLocations)
-            {
-                _dropdownItems.Add(new DropdownItem
-                {
-                    IsHeader = false,
-                    Location = location
-                });
-                Items.Add(FormatLocationForDisplay(location));
-            }
-
-            // Add fixed locations header and items
-            _dropdownItems.Add(new DropdownItem
-            {
-                IsHeader = true,
-                HeaderText = "CƠ SỞ UEH"
-            });
-
-            foreach (var location in _fixedLocations)
-            {
-                _dropdownItems.Add(new DropdownItem
-                {
-                    IsHeader = false,
-                    Location = location
-                });
-                Items.Add(FormatLocationForDisplay(location));
-            }
-
-            // Select first item by default (which will be the first recent location or first fixed location)
-            if (_dropdownItems.Count > 0)
-            {
-                // Find first non-header item
-                for (int i = 0; i < _dropdownItems.Count; i++)
-                {
-                    if (!_dropdownItems[i].IsHeader)
-                    {
-                        SelectedIndex = i;
-                        break;
-                    }
-                }
-            }
+            _currentUserIdentifier = userIdentifier;
+            PopulateSuggestions();
         }
 
-        /// <summary>
-        /// Gets recent locations for a user identifier.
-        /// </summary>
         private List<Location> GetRecentLocations(string userIdentifier)
         {
             if (string.IsNullOrWhiteSpace(userIdentifier))
@@ -244,14 +326,33 @@ namespace Presentation.Components
             return new List<Location>();
         }
 
-        /// <summary>
-        /// Adds a location to the recent locations list for a user.
-        /// </summary>
         private void AddToRecentLocations(Location location)
         {
-            // We need a user identifier - in a real app, this would come from the passenger
-            // For now, we'll use a placeholder or skip if not available
-            // This method will be called from UcPassenger when a location is selected
+            if (string.IsNullOrWhiteSpace(_currentUserIdentifier) || location == null) return;
+
+            if (!_recentByUser.TryGetValue(_currentUserIdentifier, out var list))
+            {
+                list = new List<Location>();
+                _recentByUser[_currentUserIdentifier] = list;
+            }
+
+            // Remove duplicates by coordinates
+            list.RemoveAll(l =>
+                Math.Abs(l.Coordinate.Latitude - location.Coordinate.Latitude) < CoordinateTolerance &&
+                Math.Abs(l.Coordinate.Longitude - location.Coordinate.Longitude) < CoordinateTolerance);
+
+            list.Insert(0, location);
+
+            if (list.Count > MaxRecentLocations)
+                list.RemoveAt(list.Count - 1);
+        }
+
+        // Event for selection changed
+        public event EventHandler<LocationSelectedEventArgs> LocationSelected;
+        
+        protected virtual void OnSelectedLocationChanged()
+        {
+            LocationSelected?.Invoke(this, new LocationSelectedEventArgs(SelectedLocation));
         }
 
         /// <summary>
@@ -299,37 +400,9 @@ namespace Presentation.Components
                         _recentByUser[kvp.Key] = locations;
                 }
             }
-            catch (InvalidOperationException ex)
-            {
-                MessageBox.Show(
-                    "Khong the tai lich su dia diem.\nChi tiet: " + ex.Message,
-                    "Loi tai du lieu",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
-            catch (FormatException ex)
-            {
-                MessageBox.Show(
-                    "Du lieu lich su dia diem khong dung dinh dang.\nChi tiet: " + ex.Message,
-                    "Loi dinh dang",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
-            catch (IOException ex)
-            {
-                MessageBox.Show(
-                    "Khong the doc tep lich su dia diem.\nChi tiet: " + ex.Message,
-                    "Loi doc tep",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Tai lich su dia diem that bai.\nChi tiet: " + ex.Message,
-                    "Loi he thong",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error loading recent locations: {ex.Message}");
             }
         }
 
@@ -380,46 +453,39 @@ namespace Presentation.Components
                 var json = JsonConvert.SerializeObject(recentData, Formatting.Indented);
                 File.WriteAllText(filePath, json);
             }
-            catch (InvalidOperationException ex)
-            {
-                MessageBox.Show(
-                    "Khong the luu lich su dia diem.\nChi tiet: " + ex.Message,
-                    "Loi luu du lieu",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
-            catch (FormatException ex)
-            {
-                MessageBox.Show(
-                    "Du lieu lich su dia diem khong hop le khi luu.\nChi tiet: " + ex.Message,
-                    "Loi dinh dang",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
-            catch (IOException ex)
-            {
-                MessageBox.Show(
-                    "Khong the ghi tep lich su dia diem.\nChi tiet: " + ex.Message,
-                    "Loi ghi tep",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                MessageBox.Show(
-                    "Khong du quyen luu lich su dia diem.\nChi tiet: " + ex.Message,
-                    "Khong du quyen",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Luu lich su dia diem that bai.\nChi tiet: " + ex.Message,
-                    "Loi he thong",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                System.Diagnostics.Debug.WriteLine($"Error saving recent locations: {ex.Message}");
             }
+        }
+
+        // Internal item structure for suggestions list
+        private class DropdownItem
+        {
+            public bool IsHeader { get; set; }
+            public string HeaderText { get; set; }
+            public Location Location { get; set; }
+
+            public override string ToString()
+            {
+                if (IsHeader)
+                    return HeaderText;
+                else if (Location != null)
+                {
+                    var addr = Location.Address;
+                    if (addr != null)
+                        return $"{addr.Street}, {addr.District}";
+                    return $"[{Location.Coordinate.Latitude:F5}, {Location.Coordinate.Longitude:F5}]";
+                }
+                return string.Empty;
+            }
+        }
+
+        // Event args for location selection
+        public class LocationSelectedEventArgs : EventArgs
+        {
+            public Location Location { get; }
+            public LocationSelectedEventArgs(Location location) { Location = location; }
         }
 
         // Helper classes for JSON serialization

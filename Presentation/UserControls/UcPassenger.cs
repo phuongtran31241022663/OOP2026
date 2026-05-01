@@ -29,6 +29,7 @@ namespace Presentation.UserControls
         public event EventHandler<User> RequestShowProfile;
 
         private Trip _currentTrip;
+        private bool _isSidebarExpanded = true;
 
         private void ShowStage(string status)
         {
@@ -83,16 +84,25 @@ namespace Presentation.UserControls
             _matchingService = matchingService;
             _reviewService = reviewService;
             InitializeComponent();
+            
+            // Populate location pickers
+            pickupPicker.SetMapService(_mapService);
+            destinationPicker.SetMapService(_mapService);
+            pickupPicker.PopulateDropdown(_passenger.Id.ToString());
+            destinationPicker.PopulateDropdown(_passenger.Id.ToString());
+
+            lblPassengerName.Text = "Xin chào, " + _passenger.Name;
+
             ShowStage(null);
 
-            pickupPicker.Click += PickupPicker_Click;
+pickupPicker.Click += PickupPicker_Click;
             destinationPicker.Click += DestinationPicker_Click;
-            mapControl.MapClicked += MapControl_MapClicked;
 
             btnBook.Click += btnBook_Click;
             btnHistory.Click += btnHistory_Click;
             btnLogout.Click += btnLogout_Click;
             btnProfile.Click += btnProfile_Click;
+            btnMenu.Click += btnMenu_Click;
 
             _tripService.TripStatusChanged += OnTripStatusChanged;
             Disposed += (s, e) => _tripService.TripStatusChanged -= OnTripStatusChanged;
@@ -100,33 +110,42 @@ namespace Presentation.UserControls
 
         private void PickupPicker_Click(object sender, EventArgs e)
         {
-            mapControl.ActiveSlot = Presentation.Components.MapSlot.Pickup;
-            lblStatus.Text = "Nhấp vào bản đồ để chọn điểm đón";
+            // Location selection handled by LocationPickerControl directly
+            // Show hint to user
+            lblStatus.Text = "Chọn điểm đón từ danh sách";
         }
 
         private void DestinationPicker_Click(object sender, EventArgs e)
         {
-            mapControl.ActiveSlot = Presentation.Components.MapSlot.Destination;
-            lblStatus.Text = "Nhấp vào bản đồ để chọn điểm đến";
-        }
-
-        private void MapControl_MapClicked(Presentation.Components.MapControl map, Domain.ValueObjects.Location location)
-        {
-            if (map.ActiveSlot == Presentation.Components.MapSlot.Pickup)
-            {
-                pickupPicker.SelectedLocation = location;
-            }
-            else if (map.ActiveSlot == Presentation.Components.MapSlot.Destination)
-            {
-                destinationPicker.SelectedLocation = location;
-            }
-            map.ActiveSlot = Presentation.Components.MapSlot.None;
-            lblStatus.Text = "Đã chọn vị trí";
+            // Location selection handled by LocationPickerControl directly
+            // Show hint to user
+            lblStatus.Text = "Chọn điểm đến từ danh sách";
         }
 
         private void btnLogout_Click(object sender, EventArgs e) => RequestLogout?.Invoke(this, EventArgs.Empty);
         private void btnProfile_Click(object sender, EventArgs e) => RequestShowProfile?.Invoke(this, _passenger);
         private void btnHistory_Click(object sender, EventArgs e) { /* Show history */ }
+
+        private void btnMenu_Click(object sender, EventArgs e)
+        {
+            _isSidebarExpanded = !_isSidebarExpanded;
+            if (_isSidebarExpanded)
+            {
+                pnlSidebar.Width = 200;
+                btnMenu.Text = "☰  Menu";
+                btnHistory.Text = "🕒  Lịch sử";
+                btnProfile.Text = "👤  Hồ sơ";
+                btnLogout.Text = "⏻  Thoát";
+            }
+            else
+            {
+                pnlSidebar.Width = 50;
+                btnMenu.Text = "☰";
+                btnHistory.Text = "🕒";
+                btnProfile.Text = "👤";
+                btnLogout.Text = "⏻";
+            }
+        }
         private async void btnBook_Click(object sender, EventArgs e)
         {
             if (pickupPicker.SelectedLocation == null)

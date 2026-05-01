@@ -1,5 +1,8 @@
 namespace Presentation.UserControls
 {
+    using Presentation.Constants;
+    using System.Windows.Forms;
+
     partial class UcRating
     {
         private System.ComponentModel.IContainer components = null;
@@ -122,13 +125,17 @@ namespace Presentation.UserControls
             this.txtComment.TabIndex = 2;
 
             this.btnSubmit.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSubmit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(150)))), ((int)(((byte)(243))))); // Premium Blue
+            this.btnSubmit.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.btnSubmit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSubmit.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold);
-            this.btnSubmit.ForeColor = System.Drawing.Color.White;
+            this.btnSubmit.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnSubmit.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnSubmit.AutoSize = true;
+            this.btnSubmit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnSubmit.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnSubmit.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Large;
             this.btnSubmit.Location = new System.Drawing.Point(180, 275);
             this.btnSubmit.Name = "btnSubmit";
-            this.btnSubmit.Size = new System.Drawing.Size(200, 50);
+            this.btnSubmit.Size = Presentation.Constants.UiConstants.ButtonSizes.Large;
             this.btnSubmit.TabIndex = 3;
             this.btnSubmit.Text = "Gửi đánh giá ngay";
             this.btnSubmit.UseVisualStyleBackColor = false;

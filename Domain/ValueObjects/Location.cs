@@ -21,9 +21,7 @@ namespace Domain.ValueObjects
         #endregion
 
         #region Constructors
-        // Constructor cho ORM (như EF Core) - giữ private để đảm bảo tính đóng gói
-        public Location() { }
-
+        [Newtonsoft.Json.JsonConstructor]
         public Location(Coordinate coordinate, Address address)
         {
             _coordinate = coordinate ?? throw new ArgumentNullException(nameof(coordinate));

@@ -8,7 +8,7 @@ namespace Presentation
     public partial class BaseUserControl : UserControl
     {
         private bool _isLoading;
-        protected ErrorProvider _validationErrorProvider;
+        protected ErrorProvider _validationErrorProvider = new ErrorProvider { BlinkStyle = ErrorBlinkStyle.NeverBlink };
 
         public bool IsLoading
         {
@@ -24,8 +24,6 @@ namespace Presentation
         public BaseUserControl()
         {
             InitializeComponent();
-            _validationErrorProvider = new ErrorProvider();
-            _validationErrorProvider.BlinkStyle = ErrorBlinkStyle.NeverBlink;
         }
 
         protected void ShowInfo(string message, string caption = "Thông báo")
@@ -83,34 +81,35 @@ namespace Presentation
 
         protected void ExecuteWithHandling(Action action)
         {
-            ExecuteWithHandling(action, null, null);
+            ExecuteWithHandling(null, action, null);
         }
 
         protected void ExecuteWithHandling(string context, Action action)
         {
-            ExecuteWithHandling(action, null, context);
+            ExecuteWithHandling(context, action, null);
         }
 
-        protected void ExecuteWithHandling(Action action, string successMessage, string errorContext)
+        protected void ExecuteWithHandling(string actionName, Action action, Action finallyAction = null)
         {
             try
             {
-                action();
-                if (!string.IsNullOrEmpty(successMessage))
-                    ShowInfo(successMessage, "Thông báo");
+                action?.Invoke();
             }
             catch (ArgumentException ex)
             {
-                ShowWarning(ex.Message, "Lỗi nhập liệu");
+                ShowFriendlyException(ex, actionName);
             }
             catch (InvalidOperationException ex)
             {
-                ShowError(ex.Message, "Lỗi nghiệp vụ");
+                ShowFriendlyException(ex, actionName);
             }
             catch (Exception ex)
             {
-                LogException(ex);
-                ShowError("Có lỗi hệ thống, vui lòng thử lại sau.", "Lỗi");
+                ShowFriendlyException(ex, actionName);
+            }
+            finally
+            {
+                finallyAction?.Invoke();
             }
         }
 
@@ -124,27 +123,29 @@ namespace Presentation
             await ExecuteWithHandlingAsync(action, null, onComplete);
         }
 
-        protected async Task ExecuteWithHandlingAsync(Func<Task> action, string successMessage, Action onSuccess)
+        protected async Task ExecuteWithHandlingAsync(Func<Task> action, string successMessage, Action onComplete)
         {
             try
             {
-                await action();
+                if (action != null) await action();
                 if (!string.IsNullOrEmpty(successMessage))
                     ShowInfo(successMessage, "Thông báo");
-                onSuccess?.Invoke();
             }
             catch (ArgumentException ex)
             {
-                ShowWarning(ex.Message, "Lỗi nhập liệu");
+                ShowFriendlyException(ex);
             }
             catch (InvalidOperationException ex)
             {
-                ShowError(ex.Message, "Lỗi nghiệp vụ");
+                ShowFriendlyException(ex);
             }
             catch (Exception ex)
             {
-                LogException(ex);
-                ShowError("Có lỗi hệ thống, vui lòng thử lại sau.", "Lỗi");
+                ShowFriendlyException(ex);
+            }
+            finally
+            {
+                onComplete?.Invoke();
             }
         }
 

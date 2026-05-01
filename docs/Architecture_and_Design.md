@@ -177,8 +177,7 @@ RideGo2026/
 └── Common/
     ├── Constants/        # FareConstants, SimulationConstants
     ├── Extensions/       # StringExtensions, DecimalExtensions
-    ├── Helpers/          # PasswordHasher
-    └── Utilities/        # PasswordHasher (duplicate — needs consolidation)
+    └── Utilities/        # PasswordHasher
 ```
 
 **Reserved folders (currently empty):** `Application/Features/`, `Application/DTOs/`, `Application/Behaviors/`, `Application/Mappings/`
@@ -237,30 +236,32 @@ Entity (Domain.SharedKernel, abstract)
 
 ---
 
-## 6. State Machines
+### Trip — State Pattern
 
-### Trip — State Pattern (not State Machine)
+`Trip` delegates state behavior to `ITripState` implementations.
 
-`Trip` delegates state behavior to `ITripState` implementations. **State pattern** encapsulates each behavior; state machine hiện chỉ dùng cho `Driver` (`DriverStateMachine`).
+### Driver — State Pattern
 
-| State Class      | Valid Next States             |
-| ---------------- | ----------------------------- |
-| `RequestedState` | Searching                     |
-| `SearchingState` | Matched, Cancelled, Timeout   |
-| `MatchedState`   | Arrived, Cancelled, Searching |
-| `ArrivedState`   | Started, Cancelled            |
-| `StartedState`   | Completed, Cancelled          |
-| `CompletedState` | (terminal)                    |
-| `CancelledState` | (terminal)                    |
-| `TimeoutState`   | (terminal)                    |
+`Driver` delegates state behavior to `IDriverState` implementations.
 
-### Driver — State Machine
+| State Class | Valid Next States |
+| ----------- | ----------------- |
+| `RequestedState` | Searching |
+| `SearchingState` | Matched, Cancelled, Timeout |
+| `MatchedState` | Arrived, Cancelled, Searching |
+| `ArrivedState` | Started, Cancelled |
+| `StartedState` | Completed, Cancelled |
+| `CompletedState` | (terminal) |
+| `CancelledState` | (terminal) |
+| `TimeoutState` | (terminal) |
+
+### Driver States
 
 ```
-Offline → Available → OnTrip → Available
+Offline ↔ Available ↔ OnTrip
 ```
 
-`DriverStateMachine.CanTransition(from, to)` validates driver status transitions. Changes via `SetAvailable()`, `SetOnTrip()`, `SetOffline()`.
+Valid transitions are managed by `IDriverState` implementations (`DriverAvailableState`, `DriverOnTripState`, `DriverOfflineState`).
 
 ---
 
@@ -286,8 +287,7 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 
 | Pattern                        | Implementation                                                                    |
 | ------------------------------ | --------------------------------------------------------------------------------- |
-| **State Pattern**              | `ITripState` implementations validate Trip lifecycle.                             |
-| **State Machine**              | `DriverStateMachine` validates Driver transitions.                                |
+| **State Pattern**              | `ITripState` and `IDriverState` implementations validate lifecycle.                |
 | **Domain Events & Observer**   | Aggregates emit events; `TripService.TripStatusChanged` for UI real-time updates. |
 | **Value Object**               | `Money`, `Location`, `Route`, `Fare` — immutable, value equality.                 |
 | **Manual Service Composition** | All services instantiated with `new` in `Program.cs`.                             |

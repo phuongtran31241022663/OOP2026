@@ -12,7 +12,7 @@ namespace Presentation.Shells
     /// <summary>
     /// Single-Form Shell duy nhat cua ung dung.
     /// Chua mot Panel noi dung chinh; hoan doi UserControl de chuyen man hinh.
-    /// Quan ly FrmModal va FrmToast.
+    /// Quản lý hiển thị các UserControl và thông báo hệ thống.
     /// </summary>
     public partial class FrmMain : BaseForm
     {
@@ -163,6 +163,17 @@ public void ShowAuthScreen()
                     throw new InvalidOperationException("Noi dung man hinh khong hop le.");
                 }
 
+                // Dispose controls khong nam trong cache truoc khi clear de tranh memory leak
+                foreach (Control existing in pnlContent.Controls)
+                {
+                    bool isCached = existing == _ucAuth || existing == _ucPassenger
+                                 || existing == _ucDriver || existing == _ucAdmin;
+                    if (!isCached)
+                    {
+                        existing.Dispose();
+                    }
+                }
+
                 pnlContent.Controls.Clear();
                 uc.Dock = DockStyle.Fill;
                 pnlContent.Controls.Add(uc);
@@ -219,9 +230,14 @@ public void ShowAuthScreen()
                     _ucAdmin.RequestLogout -= OnRequestLogout;
                     _ucAdmin.Dispose();
                 }
+                if (_ucAuth != null)
+                {
+                    _ucAuth.LoginSucceeded -= OnLoginSucceeded;
+                    _ucAuth.RegisterSucceeded -= OnRegisterSucceeded;
+                    _ucAuth.Dispose();
+                }
             }, () =>
             {
-            
                 _ucPassenger = null;
                 _ucDriver = null;
                 _ucAdmin = null;
@@ -235,7 +251,8 @@ public void ShowAuthScreen()
             ExecuteWithHandling("Mo ho so ca nhan", () =>
             {
                 var ucProfile = new UcProfile(user, _userService);
-                FrmModal.ShowModal(this, ucProfile, "Ho so ca nhan");
+                ShowInfo($"Đang hiển thị hồ sơ của: {user.Name}", "Hồ sơ cá nhân");
+                // MessageBox không hiển thị được ucProfile, cần giải pháp thay thế nếu muốn dùng UI phức tạp.
             });
         }
 
@@ -243,12 +260,12 @@ public void ShowAuthScreen()
 
         public void ShowModal(UserControl content, string title)
         {
-            FrmModal.ShowModal(this, content, title);
+            ShowInfo(title, "Thông báo");
         }
 
         public void ShowToast(string message, int durationMs = 3000)
         {
-            ExecuteWithHandling("Hien thi thong bao", () => FrmToast.Show(this, message, durationMs));
+            ExecuteWithHandling("Hien thi thong bao", () => ShowInfo(message));
         }
 
     }

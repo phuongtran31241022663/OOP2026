@@ -1,5 +1,8 @@
 namespace Presentation.UserControls
 {
+    using Presentation.Constants;
+    using System.Windows.Forms;
+
     partial class UcDriver
     {
         private System.ComponentModel.IContainer components = null;
@@ -21,6 +24,10 @@ namespace Presentation.UserControls
         private System.Windows.Forms.Button btnAcceptRequest;
         private System.Windows.Forms.Button btnRejectRequest;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTripId;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPickup;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colDestination;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colDistance;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAmount;
 
         private System.Windows.Forms.Panel pnlCurrentTrip;
         private System.Windows.Forms.Label lblTripStatus;
@@ -58,6 +65,11 @@ namespace Presentation.UserControls
             this.btnRejectRequest = new System.Windows.Forms.Button();
             this.btnAcceptRequest = new System.Windows.Forms.Button();
             this.dgvRequests = new System.Windows.Forms.DataGridView();
+            this.colTripId = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPickup = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colDestination = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colDistance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAmount = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.lblRequestsTitle = new System.Windows.Forms.Label();
             this.pnlCurrentTrip = new System.Windows.Forms.Panel();
             this.pnlTripActions = new System.Windows.Forms.Panel();
@@ -154,10 +166,14 @@ namespace Presentation.UserControls
             // 
             // btnToggleStatus
             // 
-            this.btnToggleStatus.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
+            this.btnToggleStatus.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.btnToggleStatus.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnToggleStatus.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnToggleStatus.ForeColor = System.Drawing.Color.White;
+            this.btnToggleStatus.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnToggleStatus.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnToggleStatus.AutoSize = true;
+            this.btnToggleStatus.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnToggleStatus.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnToggleStatus.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Action;
             this.btnToggleStatus.Location = new System.Drawing.Point(160, 8);
             this.btnToggleStatus.Name = "btnToggleStatus";
             this.btnToggleStatus.Size = new System.Drawing.Size(160, 40);
@@ -220,10 +236,13 @@ namespace Presentation.UserControls
             // 
             this.btnAcceptRequest.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAcceptRequest.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
+            this.btnAcceptRequest.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.btnAcceptRequest.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAcceptRequest.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnAcceptRequest.ForeColor = System.Drawing.Color.White;
+            this.btnAcceptRequest.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnAcceptRequest.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnAcceptRequest.AutoSize = true;
+            this.btnAcceptRequest.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnAcceptRequest.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
             this.btnAcceptRequest.Location = new System.Drawing.Point(8, 688);
             this.btnAcceptRequest.Name = "btnAcceptRequest";
             this.btnAcceptRequest.Size = new System.Drawing.Size(192, 32);
@@ -235,7 +254,23 @@ namespace Presentation.UserControls
             // 
             this.dgvRequests.AllowUserToAddRows = false;
             this.dgvRequests.AllowUserToDeleteRows = false;
+            this.dgvRequests.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvRequests.BackgroundColor = System.Drawing.Color.White;
+            this.dgvRequests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvRequests.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colTripId,
+            this.colPickup,
+            this.colDestination,
+            this.colDistance,
+            this.colAmount});
             this.dgvRequests.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvRequests.Location = new System.Drawing.Point(0, 33);
+            this.dgvRequests.Name = "dgvRequests";
+            this.dgvRequests.ReadOnly = true;
+            this.dgvRequests.RowHeadersVisible = false;
+            this.dgvRequests.RowTemplate.Height = 24;
+            this.dgvRequests.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvRequests.Size = new System.Drawing.Size(417, 655);
             this.dgvRequests.TabIndex = 1;
             // 
             // colTripId
@@ -244,6 +279,30 @@ namespace Presentation.UserControls
             this.colTripId.Name = "colTripId";
             this.colTripId.ReadOnly = true;
             this.colTripId.Visible = false;
+            // 
+            // colPickup
+            // 
+            this.colPickup.HeaderText = "Điểm đón";
+            this.colPickup.Name = "colPickup";
+            this.colPickup.ReadOnly = true;
+            // 
+            // colDestination
+            // 
+            this.colDestination.HeaderText = "Điểm đến";
+            this.colDestination.Name = "colDestination";
+            this.colDestination.ReadOnly = true;
+            // 
+            // colDistance
+            // 
+            this.colDistance.HeaderText = "Quãng đường";
+            this.colDistance.Name = "colDistance";
+            this.colDistance.ReadOnly = true;
+            // 
+            // colAmount
+            // 
+            this.colAmount.HeaderText = "Giá cước";
+            this.colAmount.Name = "colAmount";
+            this.colAmount.ReadOnly = true;
             // 
             // lblRequestsTitle
             // 
@@ -283,10 +342,13 @@ namespace Presentation.UserControls
             // 
             this.btnCancelTrip.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancelTrip.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(211)))), ((int)(((byte)(47)))), ((int)(((byte)(47)))));
+            this.btnCancelTrip.BackColor = Presentation.Constants.UiConstants.Colors.Danger;
             this.btnCancelTrip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancelTrip.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnCancelTrip.ForeColor = System.Drawing.Color.White;
+            this.btnCancelTrip.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnCancelTrip.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnCancelTrip.AutoSize = true;
+            this.btnCancelTrip.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnCancelTrip.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
             this.btnCancelTrip.Location = new System.Drawing.Point(0, 288);
             this.btnCancelTrip.Name = "btnCancelTrip";
             this.btnCancelTrip.Size = new System.Drawing.Size(740, 48);
@@ -298,10 +360,13 @@ namespace Presentation.UserControls
             // 
             this.btnCompleteTrip.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCompleteTrip.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
+            this.btnCompleteTrip.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.btnCompleteTrip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCompleteTrip.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.btnCompleteTrip.ForeColor = System.Drawing.Color.White;
+            this.btnCompleteTrip.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnCompleteTrip.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnCompleteTrip.AutoSize = true;
+            this.btnCompleteTrip.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnCompleteTrip.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
             this.btnCompleteTrip.Location = new System.Drawing.Point(0, 192);
             this.btnCompleteTrip.Name = "btnCompleteTrip";
             this.btnCompleteTrip.Size = new System.Drawing.Size(740, 80);
@@ -313,10 +378,13 @@ namespace Presentation.UserControls
             // 
             this.btnStartTrip.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnStartTrip.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
+            this.btnStartTrip.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.btnStartTrip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStartTrip.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.btnStartTrip.ForeColor = System.Drawing.Color.White;
+            this.btnStartTrip.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnStartTrip.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnStartTrip.AutoSize = true;
+            this.btnStartTrip.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnStartTrip.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
             this.btnStartTrip.Location = new System.Drawing.Point(0, 96);
             this.btnStartTrip.Name = "btnStartTrip";
             this.btnStartTrip.Size = new System.Drawing.Size(740, 80);
@@ -328,10 +396,13 @@ namespace Presentation.UserControls
             // 
             this.btnArrived.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnArrived.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
+            this.btnArrived.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.btnArrived.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnArrived.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.btnArrived.ForeColor = System.Drawing.Color.White;
+            this.btnArrived.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnArrived.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnArrived.AutoSize = true;
+            this.btnArrived.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnArrived.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
             this.btnArrived.Location = new System.Drawing.Point(0, 0);
             this.btnArrived.Name = "btnArrived";
             this.btnArrived.Size = new System.Drawing.Size(740, 80);

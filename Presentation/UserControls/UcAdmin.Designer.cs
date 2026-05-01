@@ -1,5 +1,8 @@
 namespace Presentation.UserControls
 {
+    using Presentation.Constants;
+    using System.Windows.Forms;
+
     partial class UcAdmin
     {
         private System.ComponentModel.IContainer components = null;
@@ -35,6 +38,24 @@ namespace Presentation.UserControls
         private System.Windows.Forms.Label lblTotalTrips;
         private System.Windows.Forms.Label lblGMV;
         private System.Windows.Forms.Label lblPlaceholder;
+
+        // DataGridView Columns
+        private System.Windows.Forms.DataGridViewTextBoxColumn colUserId;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colUserName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colUserPhone;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colUserRole;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colUserStatus;
+
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTripId;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTripStatus;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTripVehicle;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTripAmount;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTripTime;
+
+        private System.Windows.Forms.DataGridViewTextBoxColumn colFareVehicle;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colFareBase;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colFareKm;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colFareCommission;
 
         protected override void Dispose(bool disposing)
         {
@@ -126,6 +147,14 @@ namespace Presentation.UserControls
             this.dgvUsers.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvUsers.BackgroundColor = System.Drawing.Color.White;
             this.dgvUsers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.colUserId = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "ID", Name = "colUserId" };
+            this.colUserName = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Tên", Name = "colUserName" };
+            this.colUserPhone = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "SĐT", Name = "colUserPhone" };
+            this.colUserRole = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Vai trò", Name = "colUserRole" };
+            this.colUserStatus = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Trạng thái", Name = "colUserStatus" };
+            this.dgvUsers.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+                this.colUserId, this.colUserName, this.colUserPhone, this.colUserRole, this.colUserStatus
+            });
             this.dgvUsers.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvUsers.Location = new System.Drawing.Point(8, 64);
             this.dgvUsers.Name = "dgvUsers";
@@ -152,9 +181,13 @@ namespace Presentation.UserControls
             // 
             this.btnUnlockUser.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnUnlockUser.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnUnlockUser.AutoSize = true;
+            this.btnUnlockUser.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnUnlockUser.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnUnlockUser.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
             this.btnUnlockUser.Location = new System.Drawing.Point(1072, 8);
             this.btnUnlockUser.Name = "btnUnlockUser";
-            this.btnUnlockUser.Size = new System.Drawing.Size(96, 36);
+            this.btnUnlockUser.Size = new System.Drawing.Size(100, 36);
             this.btnUnlockUser.TabIndex = 3;
             this.btnUnlockUser.Text = "Mở khoá";
             this.btnUnlockUser.UseVisualStyleBackColor = true;
@@ -163,9 +196,13 @@ namespace Presentation.UserControls
             // 
             this.btnLockUser.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnLockUser.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnLockUser.AutoSize = true;
+            this.btnLockUser.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnLockUser.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnLockUser.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
             this.btnLockUser.Location = new System.Drawing.Point(968, 8);
             this.btnLockUser.Name = "btnLockUser";
-            this.btnLockUser.Size = new System.Drawing.Size(96, 36);
+            this.btnLockUser.Size = new System.Drawing.Size(100, 36);
             this.btnLockUser.TabIndex = 2;
             this.btnLockUser.Text = "Khoá";
             this.btnLockUser.UseVisualStyleBackColor = true;
@@ -207,6 +244,14 @@ namespace Presentation.UserControls
             this.dgvTrips.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvTrips.BackgroundColor = System.Drawing.Color.White;
             this.dgvTrips.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.colTripId = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "ID", Name = "colTripId" };
+            this.colTripStatus = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Trạng thái", Name = "colTripStatus" };
+            this.colTripVehicle = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Loại xe", Name = "colTripVehicle" };
+            this.colTripAmount = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Tổng tiền", Name = "colTripAmount" };
+            this.colTripTime = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Thời gian", Name = "colTripTime" };
+            this.dgvTrips.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+                this.colTripId, this.colTripStatus, this.colTripVehicle, this.colTripAmount, this.colTripTime
+            });
             this.dgvTrips.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvTrips.Location = new System.Drawing.Point(8, 64);
             this.dgvTrips.Name = "dgvTrips";
@@ -232,9 +277,13 @@ namespace Presentation.UserControls
             // 
             this.btnTripDetail.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnTripDetail.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnTripDetail.AutoSize = true;
+            this.btnTripDetail.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnTripDetail.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnTripDetail.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
             this.btnTripDetail.Location = new System.Drawing.Point(1072, 8);
             this.btnTripDetail.Name = "btnTripDetail";
-            this.btnTripDetail.Size = new System.Drawing.Size(96, 36);
+            this.btnTripDetail.Size = new System.Drawing.Size(100, 36);
             this.btnTripDetail.TabIndex = 2;
             this.btnTripDetail.Text = "Chi tiết";
             this.btnTripDetail.UseVisualStyleBackColor = true;
@@ -242,12 +291,16 @@ namespace Presentation.UserControls
             // btnCancelTrip
             // 
             this.btnCancelTrip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancelTrip.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(211)))), ((int)(((byte)(47)))), ((int)(((byte)(47)))));
+            this.btnCancelTrip.BackColor = Presentation.Constants.UiConstants.Colors.Danger;
             this.btnCancelTrip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancelTrip.ForeColor = System.Drawing.Color.White;
+            this.btnCancelTrip.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnCancelTrip.AutoSize = true;
+            this.btnCancelTrip.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnCancelTrip.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnCancelTrip.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
             this.btnCancelTrip.Location = new System.Drawing.Point(968, 8);
             this.btnCancelTrip.Name = "btnCancelTrip";
-            this.btnCancelTrip.Size = new System.Drawing.Size(96, 36);
+            this.btnCancelTrip.Size = new System.Drawing.Size(100, 36);
             this.btnCancelTrip.TabIndex = 1;
             this.btnCancelTrip.Text = "Huỷ";
             this.btnCancelTrip.UseVisualStyleBackColor = false;
@@ -279,6 +332,13 @@ namespace Presentation.UserControls
             this.dgvFareRules.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvFareRules.BackgroundColor = System.Drawing.Color.White;
             this.dgvFareRules.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.colFareVehicle = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Loại xe", Name = "colFareVehicle" };
+            this.colFareBase = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Giá cơ bản", Name = "colFareBase" };
+            this.colFareKm = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Giá/Km", Name = "colFareKm" };
+            this.colFareCommission = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Chiết khấu", Name = "colFareCommission" };
+            this.dgvFareRules.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+                this.colFareVehicle, this.colFareBase, this.colFareKm, this.colFareCommission
+            });
             this.dgvFareRules.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvFareRules.Location = new System.Drawing.Point(8, 64);
             this.dgvFareRules.Name = "dgvFareRules";
@@ -303,12 +363,16 @@ namespace Presentation.UserControls
             // btnDeleteFare
             // 
             this.btnDeleteFare.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnDeleteFare.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(211)))), ((int)(((byte)(47)))), ((int)(((byte)(47)))));
+            this.btnDeleteFare.BackColor = Presentation.Constants.UiConstants.Colors.Danger;
             this.btnDeleteFare.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDeleteFare.ForeColor = System.Drawing.Color.White;
+            this.btnDeleteFare.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnDeleteFare.AutoSize = true;
+            this.btnDeleteFare.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnDeleteFare.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnDeleteFare.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
             this.btnDeleteFare.Location = new System.Drawing.Point(1072, 8);
             this.btnDeleteFare.Name = "btnDeleteFare";
-            this.btnDeleteFare.Size = new System.Drawing.Size(96, 36);
+            this.btnDeleteFare.Size = new System.Drawing.Size(100, 36);
             this.btnDeleteFare.TabIndex = 2;
             this.btnDeleteFare.Text = "Xoá";
             this.btnDeleteFare.UseVisualStyleBackColor = false;
@@ -317,9 +381,13 @@ namespace Presentation.UserControls
             // 
             this.btnEditFare.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnEditFare.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnEditFare.AutoSize = true;
+            this.btnEditFare.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnEditFare.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnEditFare.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
             this.btnEditFare.Location = new System.Drawing.Point(968, 8);
             this.btnEditFare.Name = "btnEditFare";
-            this.btnEditFare.Size = new System.Drawing.Size(96, 36);
+            this.btnEditFare.Size = new System.Drawing.Size(100, 36);
             this.btnEditFare.TabIndex = 1;
             this.btnEditFare.Text = "Sửa";
             this.btnEditFare.UseVisualStyleBackColor = true;
@@ -327,13 +395,17 @@ namespace Presentation.UserControls
             // btnAddFare
             // 
             this.btnAddFare.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAddFare.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
+            this.btnAddFare.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.btnAddFare.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAddFare.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnAddFare.ForeColor = System.Drawing.Color.White;
+            this.btnAddFare.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnAddFare.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnAddFare.AutoSize = true;
+            this.btnAddFare.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnAddFare.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnAddFare.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
             this.btnAddFare.Location = new System.Drawing.Point(864, 8);
             this.btnAddFare.Name = "btnAddFare";
-            this.btnAddFare.Size = new System.Drawing.Size(96, 36);
+            this.btnAddFare.Size = new System.Drawing.Size(100, 36);
             this.btnAddFare.TabIndex = 0;
             this.btnAddFare.Text = "Thêm";
             this.btnAddFare.UseVisualStyleBackColor = false;
@@ -453,9 +525,13 @@ namespace Presentation.UserControls
             // 
             this.btnLogout.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnLogout.AutoSize = true;
+            this.btnLogout.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnLogout.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnLogout.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
             this.btnLogout.Location = new System.Drawing.Point(1104, 8);
             this.btnLogout.Name = "btnLogout";
-            this.btnLogout.Size = new System.Drawing.Size(88, 32);
+            this.btnLogout.Size = new System.Drawing.Size(100, 32);
             this.btnLogout.TabIndex = 2;
             this.btnLogout.Text = "Đăng xuất";
             this.btnLogout.UseVisualStyleBackColor = true;
@@ -464,9 +540,13 @@ namespace Presentation.UserControls
             // 
             this.btnRefresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnRefresh.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRefresh.AutoSize = true;
+            this.btnRefresh.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnRefresh.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnRefresh.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
             this.btnRefresh.Location = new System.Drawing.Point(1008, 8);
             this.btnRefresh.Name = "btnRefresh";
-            this.btnRefresh.Size = new System.Drawing.Size(88, 32);
+            this.btnRefresh.Size = new System.Drawing.Size(100, 32);
             this.btnRefresh.TabIndex = 1;
             this.btnRefresh.Text = "Làm mới";
             this.btnRefresh.UseVisualStyleBackColor = true;

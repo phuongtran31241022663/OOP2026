@@ -105,10 +105,10 @@ namespace Presentation.UserControls
                 {
                     dgvRequests.Rows.Add(
                         trip.Id,
-                        trip.TripRoute.Pickup,
-                        trip.TripRoute.Destination,
+                        FormatLocation(trip.TripRoute.Pickup),
+                        FormatLocation(trip.TripRoute.Destination),
                         trip.TripRoute.Distance.ToString("F2") + " km",
-                        trip.TripFare.TotalAmount
+                        trip.TripFare.TotalAmount.Amount.ToString("N0") + "đ"
                     );
                 }
             }
@@ -294,9 +294,9 @@ namespace Presentation.UserControls
             try
             {
                 await _tripService.CompleteTripAsync(_currentTrip.Id);
-                _currentTrip = await _tripService.GetTripAsync(_currentTrip.Id);
                 _driver.SetAvailable();
                 _driver.AddTrip();
+                await _userService.UpdateUserAsync(_driver);
                 _currentTrip = null;
                 UpdateHeaderStatus();
                 UpdateTripPanel();
@@ -320,7 +320,6 @@ namespace Presentation.UserControls
             try
             {
                 await _tripService.CancelTripAsync(_currentTrip.Id, "Tài xế huỷ");
-                _currentTrip = await _tripService.GetTripAsync(_currentTrip.Id);
                 _driver.SetAvailable();
                 _currentTrip = null;
                 UpdateHeaderStatus();
@@ -334,6 +333,11 @@ namespace Presentation.UserControls
             {
                 IsLoading = false;
             }
+        }
+        private static string FormatLocation(Domain.ValueObjects.Location loc)
+        {
+            if (loc == null) return "N/A";
+            return $"{loc.Address?.Street}, {loc.Address?.District}";
         }
     }
 }

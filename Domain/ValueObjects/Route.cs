@@ -24,8 +24,8 @@ namespace Domain.ValueObjects
         public string Polyline => _polyline;
         #endregion
         #region Constructors
-        private Route() { }
-       public Route(Location pickup, Location destination, double distance, TimeSpan duration, string polyline)
+        [Newtonsoft.Json.JsonConstructor]
+        public Route(Location pickup, Location destination, double distance, TimeSpan duration, string polyline)
         {
             if (pickup == null) throw new ArgumentNullException(nameof(pickup));
             if (destination == null) throw new ArgumentNullException(nameof(destination));

@@ -1,5 +1,8 @@
 namespace Presentation.UserControls
 {
+    using Presentation.Constants;
+    using System.Windows.Forms;
+
     partial class UcProfile
     {
         private System.ComponentModel.IContainer components = null;
@@ -136,10 +139,14 @@ namespace Presentation.UserControls
             this.txtConfirmPassword.TabIndex = 11;
 
             this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
+            this.btnSave.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSave.ForeColor = System.Drawing.Color.White;
+            this.btnSave.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnSave.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnSave.AutoSize = true;
+            this.btnSave.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnSave.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnSave.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Action;
             this.btnSave.Location = new System.Drawing.Point(416, 416);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(128, 40);
@@ -169,10 +176,14 @@ namespace Presentation.UserControls
             this.txtTopUpAmount.Size = new System.Drawing.Size(184, 30);
             this.txtTopUpAmount.TabIndex = 0;
 
-            this.btnTopUp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
+            this.btnTopUp.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.btnTopUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnTopUp.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnTopUp.ForeColor = System.Drawing.Color.White;
+            this.btnTopUp.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnTopUp.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnTopUp.AutoSize = true;
+            this.btnTopUp.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
+            this.btnTopUp.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
+            this.btnTopUp.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
             this.btnTopUp.Location = new System.Drawing.Point(0, 60);
             this.btnTopUp.Name = "btnTopUp";
             this.btnTopUp.Size = new System.Drawing.Size(184, 36);

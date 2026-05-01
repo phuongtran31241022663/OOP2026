@@ -1,4 +1,4 @@
-﻿﻿namespace Presentation.UserControls
+namespace Presentation.UserControls
 {
     using Presentation.Constants;
 
@@ -115,21 +115,21 @@
             this.tblMain.Controls.Add(this.pnlCenter, 0, 1);
             this.tblMain.Controls.Add(this.lblFooter, 0, 2);
             this.tblMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tblMain.Location = UiConstants.Layout.ZeroPoint;
+            this.tblMain.Location = Presentation.Constants.UiConstants.Layout.ZeroPoint;
             this.tblMain.Name = "tblMain";
             this.tblMain.RowCount = 3;
-            this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.HeaderRow));
+            this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.HeaderRow));
             this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.FooterRow));
-            this.tblMain.Size = UiConstants.Sizes.DefaultForm;
+            this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.FooterRow));
+            this.tblMain.Size = Presentation.Constants.UiConstants.Sizes.DefaultForm;
             this.tblMain.TabIndex = 0;
             // 
             // lblLogo
             // 
             this.lblLogo.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblLogo.AutoSize = true;
-            this.lblLogo.Font = UiConstants.Typography.Logo;
-            this.lblLogo.ForeColor = UiConstants.Colors.Primary;
+            this.lblLogo.Font = Presentation.Constants.UiConstants.Typography.Logo;
+            this.lblLogo.ForeColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.lblLogo.Location = new System.Drawing.Point(364, 24);
             this.lblLogo.Name = "lblLogo";
             this.lblLogo.Size = new System.Drawing.Size(171, 50);
@@ -143,11 +143,11 @@
             this.pnlCenter.AutoSize = true;
             this.pnlCenter.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.pnlCenter.ColumnCount = 1;
-            this.pnlCenter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, UiConstants.Layout.FullPercent));
+            this.pnlCenter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, Presentation.Constants.UiConstants.Layout.FullPercent));
             this.pnlCenter.Controls.Add(this.pnlLogin, 0, 0);
             this.pnlCenter.Controls.Add(this.pnlRegister, 0, 1);
-            this.pnlCenter.Location = new System.Drawing.Point(200, UiConstants.Heights.HeaderRow + UiConstants.Layout.FormPadding); // Adjusted based on HeaderRowHeight
-            this.pnlCenter.MinimumSize = new System.Drawing.Size(UiConstants.Sizes.MinContentPanelWidth, 0);
+            this.pnlCenter.Location = new System.Drawing.Point(200, Presentation.Constants.UiConstants.Heights.HeaderRow + Presentation.Constants.UiConstants.Layout.FormPadding); // Adjusted based on HeaderRowHeight
+            this.pnlCenter.MinimumSize = new System.Drawing.Size(Presentation.Constants.UiConstants.Sizes.MinContentPanelWidth, 0);
             this.pnlCenter.Name = "pnlCenter";
             this.pnlCenter.RowCount = 2;
             this.pnlCenter.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
@@ -159,8 +159,8 @@
             this.pnlLogin.AutoSize = true;
             this.pnlLogin.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.pnlLogin.ColumnCount = 2;
-            this.pnlLogin.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, UiConstants.Layout.FullPercent));
-            this.pnlLogin.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Layout.PasswordToggleColumnWidth));
+            this.pnlLogin.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, Presentation.Constants.UiConstants.Layout.FullPercent));
+            this.pnlLogin.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Layout.PasswordToggleColumnWidth));
             this.pnlLogin.Controls.Add(this.lblLoginTitle, 0, 0);
             this.pnlLogin.Controls.Add(this.lblLoginPhone, 0, 1);
             this.pnlLogin.Controls.Add(this.txtLoginPhone, 0, 2);
@@ -170,23 +170,23 @@
             this.pnlLogin.Controls.Add(this.btnLogin, 0, 5);
             this.pnlLogin.Controls.Add(this.linkToRegister, 0, 6);
             this.pnlLogin.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlLogin.Location = UiConstants.Layout.ZeroPoint;
+            this.pnlLogin.Location = Presentation.Constants.UiConstants.Layout.ZeroPoint;
             this.pnlLogin.Name = "pnlLogin";
             this.pnlLogin.RowCount = 7;
-            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.TitleRow));
-            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.LabelRow));
-            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.InputControlRow));
-            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.LabelRow));
-            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.InputControlRow));
-            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.ActionButtonRow));
-            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.LinkRow));
+            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.TitleRow));
+            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.LabelRow));
+            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.InputControlRow));
+            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.LabelRow));
+            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.InputControlRow));
+            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.ActionButtonRow));
+            this.pnlLogin.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.LinkRow));
             this.pnlLogin.TabIndex = 0;
             // 
             // lblLoginTitle
             // 
             this.lblLoginTitle.AutoSize = true;
             this.pnlLogin.SetColumnSpan(this.lblLoginTitle, 2);
-            this.lblLoginTitle.Font = UiConstants.Typography.Header;
+            this.lblLoginTitle.Font = Presentation.Constants.UiConstants.Typography.Header;
             this.lblLoginTitle.Location = new System.Drawing.Point(3, 10);
             this.lblLoginTitle.Name = "lblLoginTitle";
             this.lblLoginTitle.Size = new System.Drawing.Size(145, 32);
@@ -198,7 +198,7 @@
             this.lblLoginPhone.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblLoginPhone.AutoSize = true;
             this.pnlLogin.SetColumnSpan(this.lblLoginPhone, 2);
-            this.lblLoginPhone.Font = UiConstants.Typography.Small;
+            this.lblLoginPhone.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblLoginPhone.Location = new System.Drawing.Point(3, 57);
             this.lblLoginPhone.Name = "lblLoginPhone";
             this.lblLoginPhone.Size = new System.Drawing.Size(111, 23);
@@ -209,7 +209,7 @@
             // 
             this.pnlLogin.SetColumnSpan(this.txtLoginPhone, 2);
             this.txtLoginPhone.Dock = System.Windows.Forms.DockStyle.Fill; // Dock.Fill is fine, no constant needed
-            this.txtLoginPhone.Font = UiConstants.Typography.Body;
+            this.txtLoginPhone.Font = Presentation.Constants.UiConstants.Typography.Body;
             this.txtLoginPhone.Location = new System.Drawing.Point(3, 83);
             this.txtLoginPhone.Name = "txtLoginPhone";
             this.txtLoginPhone.Size = new System.Drawing.Size(494, 34);
@@ -220,7 +220,7 @@
             this.lblLoginPassword.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblLoginPassword.AutoSize = true;
             this.pnlLogin.SetColumnSpan(this.lblLoginPassword, 2);
-            this.lblLoginPassword.Font = UiConstants.Typography.Small;
+            this.lblLoginPassword.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblLoginPassword.Location = new System.Drawing.Point(3, 127);
             this.lblLoginPassword.Name = "lblLoginPassword";
             this.lblLoginPassword.Size = new System.Drawing.Size(82, 23);
@@ -230,7 +230,7 @@
             // txtLoginPassword
             // 
             this.txtLoginPassword.Dock = System.Windows.Forms.DockStyle.Fill; // Dock.Fill is fine
-            this.txtLoginPassword.Font = UiConstants.Typography.Body;
+            this.txtLoginPassword.Font = Presentation.Constants.UiConstants.Typography.Body;
             this.txtLoginPassword.Location = new System.Drawing.Point(3, 153);
             this.txtLoginPassword.Name = "txtLoginPassword";
             this.txtLoginPassword.PasswordChar = '*';
@@ -239,13 +239,13 @@
             // 
             // btnToggleLoginPassword
             //
-            this.btnToggleLoginPassword.BackColor = UiConstants.Colors.SurfaceWhite;
+            this.btnToggleLoginPassword.BackColor = Presentation.Constants.UiConstants.Colors.SurfaceWhite;
             this.btnToggleLoginPassword.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnToggleLoginPassword.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnToggleLoginPassword.Font = UiConstants.Typography.Small;
+            this.btnToggleLoginPassword.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.btnToggleLoginPassword.Location = new System.Drawing.Point(458, 153); // Relative position, keep as is
             this.btnToggleLoginPassword.Name = "btnToggleLoginPassword"; // Name, keep as is
-            this.btnToggleLoginPassword.Size = UiConstants.Sizes.PasswordToggleButton;
+            this.btnToggleLoginPassword.Size = Presentation.Constants.UiConstants.Sizes.PasswordToggleButton;
             this.btnToggleLoginPassword.TabIndex = 5;
             this.btnToggleLoginPassword.Text = "👁";
             this.btnToggleLoginPassword.UseVisualStyleBackColor = false;
@@ -253,14 +253,14 @@
             // btnLogin
             // 
             this.pnlLogin.SetColumnSpan(this.btnLogin, 2);
-            this.btnLogin.BackColor = UiConstants.Colors.Primary;
+            this.btnLogin.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.btnLogin.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnLogin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLogin.Font = UiConstants.Typography.BodyBold;
-            this.btnLogin.ForeColor = UiConstants.Colors.TextOnKey;
+            this.btnLogin.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnLogin.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnLogin.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
             this.btnLogin.Location = new System.Drawing.Point(3, 193);
             this.btnLogin.Name = "btnLogin";
-            this.btnLogin.Size = new System.Drawing.Size(494, 64);
             this.btnLogin.TabIndex = 6;
             this.btnLogin.Text = "Đăng nhập";
             this.btnLogin.UseVisualStyleBackColor = false;
@@ -270,7 +270,7 @@
             this.linkToRegister.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.linkToRegister.AutoSize = true;
             this.pnlLogin.SetColumnSpan(this.linkToRegister, 2);
-            this.linkToRegister.Font = UiConstants.Typography.Small;
+            this.linkToRegister.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.linkToRegister.Location = new System.Drawing.Point(145, 268);
             this.linkToRegister.Name = "linkToRegister";
             this.linkToRegister.Size = new System.Drawing.Size(210, 23);
@@ -283,8 +283,8 @@
             this.pnlRegister.AutoSize = true;
             this.pnlRegister.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.pnlRegister.ColumnCount = 2;
-            this.pnlRegister.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, UiConstants.Layout.FullPercent));
-            this.pnlRegister.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Layout.PasswordToggleColumnWidth));
+            this.pnlRegister.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, Presentation.Constants.UiConstants.Layout.FullPercent));
+            this.pnlRegister.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Layout.PasswordToggleColumnWidth));
             this.pnlRegister.Controls.Add(this.lblRegisterTitle, 0, 0);
             this.pnlRegister.Controls.Add(this.lblRegName, 0, 1);
             this.pnlRegister.Controls.Add(this.txtRegName, 0, 2);
@@ -299,21 +299,21 @@
             this.pnlRegister.Controls.Add(this.btnRegister, 0, 10);
             this.pnlRegister.Controls.Add(this.linkToLogin, 0, 11);
             this.pnlRegister.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlRegister.Location = new System.Drawing.Point(0, UiConstants.Heights.TitleRow + UiConstants.Heights.LabelRow + UiConstants.Heights.InputControlRow + UiConstants.Heights.LabelRow + UiConstants.Heights.InputControlRow + UiConstants.Heights.ActionButtonRow + UiConstants.Heights.LinkRow); // Calculated based on pnlLogin height
+            this.pnlRegister.Location = new System.Drawing.Point(0, Presentation.Constants.UiConstants.Heights.TitleRow + Presentation.Constants.UiConstants.Heights.LabelRow + Presentation.Constants.UiConstants.Heights.InputControlRow + Presentation.Constants.UiConstants.Heights.LabelRow + Presentation.Constants.UiConstants.Heights.InputControlRow + Presentation.Constants.UiConstants.Heights.ActionButtonRow + Presentation.Constants.UiConstants.Heights.LinkRow); // Calculated based on pnlLogin height
             this.pnlRegister.Name = "pnlRegister";
             this.pnlRegister.RowCount = 12;
-            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.TitleRow));
-            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.LabelRow));
-            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.InputControlRow));
-            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.LabelRow));
-            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.InputControlRow));
-            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.LabelRow));
-            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.InputControlRow));
-            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.LabelRow));
-            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.InputControlRow));
+            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.TitleRow));
+            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.LabelRow));
+            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.InputControlRow));
+            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.LabelRow));
+            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.InputControlRow));
+            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.LabelRow));
+            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.InputControlRow));
+            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.LabelRow));
+            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.InputControlRow));
             this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
-            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.ActionButtonRow));
-            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.LinkRow));
+            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.ActionButtonRow));
+            this.pnlRegister.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.LinkRow));
             this.pnlRegister.TabIndex = 1;
             this.pnlRegister.Visible = false;
             // 
@@ -321,7 +321,7 @@
             // 
             this.lblRegisterTitle.AutoSize = true;
             this.pnlRegister.SetColumnSpan(this.lblRegisterTitle, 2);
-            this.lblRegisterTitle.Font = UiConstants.Typography.Header;
+            this.lblRegisterTitle.Font = Presentation.Constants.UiConstants.Typography.Header;
             this.lblRegisterTitle.Location = new System.Drawing.Point(3, 10);
             this.lblRegisterTitle.Name = "lblRegisterTitle";
             this.lblRegisterTitle.Size = new System.Drawing.Size(112, 32);
@@ -333,7 +333,7 @@
             this.lblRegName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblRegName.AutoSize = true;
             this.pnlRegister.SetColumnSpan(this.lblRegName, 2);
-            this.lblRegName.Font = UiConstants.Typography.Small;
+            this.lblRegName.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblRegName.Location = new System.Drawing.Point(3, 57);
             this.lblRegName.Name = "lblRegName";
             this.lblRegName.Size = new System.Drawing.Size(83, 23);
@@ -344,7 +344,7 @@
             // 
             this.pnlRegister.SetColumnSpan(this.txtRegName, 2);
             this.txtRegName.Dock = System.Windows.Forms.DockStyle.Fill; // Dock.Fill is fine
-            this.txtRegName.Font = UiConstants.Typography.Body;
+            this.txtRegName.Font = Presentation.Constants.UiConstants.Typography.Body;
             this.txtRegName.Location = new System.Drawing.Point(3, 83);
             this.txtRegName.Name = "txtRegName";
             this.txtRegName.Size = new System.Drawing.Size(494, 34);
@@ -355,7 +355,7 @@
             this.lblRegPhone.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblRegPhone.AutoSize = true;
             this.pnlRegister.SetColumnSpan(this.lblRegPhone, 2);
-            this.lblRegPhone.Font = UiConstants.Typography.Small;
+            this.lblRegPhone.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblRegPhone.Location = new System.Drawing.Point(3, 127);
             this.lblRegPhone.Name = "lblRegPhone";
             this.lblRegPhone.Size = new System.Drawing.Size(111, 23);
@@ -366,7 +366,7 @@
             // 
             this.pnlRegister.SetColumnSpan(this.txtRegPhone, 2);
             this.txtRegPhone.Dock = System.Windows.Forms.DockStyle.Fill; // Dock.Fill is fine
-            this.txtRegPhone.Font = UiConstants.Typography.Body;
+            this.txtRegPhone.Font = Presentation.Constants.UiConstants.Typography.Body;
             this.txtRegPhone.Location = new System.Drawing.Point(3, 153);
             this.txtRegPhone.Name = "txtRegPhone";
             this.txtRegPhone.Size = new System.Drawing.Size(494, 34);
@@ -377,7 +377,7 @@
             this.lblRegPassword.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblRegPassword.AutoSize = true;
             this.pnlRegister.SetColumnSpan(this.lblRegPassword, 2);
-            this.lblRegPassword.Font = UiConstants.Typography.Small;
+            this.lblRegPassword.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblRegPassword.Location = new System.Drawing.Point(3, 197);
             this.lblRegPassword.Name = "lblRegPassword";
             this.lblRegPassword.Size = new System.Drawing.Size(82, 23);
@@ -387,7 +387,7 @@
             // txtRegPassword
             // 
             this.txtRegPassword.Dock = System.Windows.Forms.DockStyle.Fill; // Dock.Fill is fine
-            this.txtRegPassword.Font = UiConstants.Typography.Body;
+            this.txtRegPassword.Font = Presentation.Constants.UiConstants.Typography.Body;
             this.txtRegPassword.Location = new System.Drawing.Point(3, 223);
             this.txtRegPassword.Name = "txtRegPassword";
             this.txtRegPassword.PasswordChar = '*';
@@ -396,13 +396,13 @@
             // 
             // btnToggleRegPassword
             //
-            this.btnToggleRegPassword.BackColor = UiConstants.Colors.SurfaceWhite;
+            this.btnToggleRegPassword.BackColor = Presentation.Constants.UiConstants.Colors.SurfaceWhite;
             this.btnToggleRegPassword.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnToggleRegPassword.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnToggleRegPassword.Font = UiConstants.Typography.Small;
+            this.btnToggleRegPassword.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.btnToggleRegPassword.Location = new System.Drawing.Point(458, 223); // Relative position, keep as is
             this.btnToggleRegPassword.Name = "btnToggleRegPassword"; // Name, keep as is
-            this.btnToggleRegPassword.Size = UiConstants.Sizes.PasswordToggleButton;
+            this.btnToggleRegPassword.Size = Presentation.Constants.UiConstants.Sizes.PasswordToggleButton;
             this.btnToggleRegPassword.TabIndex = 7;
             this.btnToggleRegPassword.Text = "👁";
             this.btnToggleRegPassword.UseVisualStyleBackColor = false;
@@ -412,7 +412,7 @@
             this.lblRole.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblRole.AutoSize = true;
             this.pnlRegister.SetColumnSpan(this.lblRole, 2);
-            this.lblRole.Font = UiConstants.Typography.Small;
+            this.lblRole.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblRole.Location = new System.Drawing.Point(3, 267);
             this.lblRole.Name = "lblRole";
             this.lblRole.Size = new System.Drawing.Size(148, 23);
@@ -436,11 +436,11 @@
             // 
             this.pnlVehicleInfo.AutoSize = true;
             this.pnlVehicleInfo.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.pnlVehicleInfo.BackColor = UiConstants.Colors.SurfaceLight;
+            this.pnlVehicleInfo.BackColor = Presentation.Constants.UiConstants.Colors.SurfaceLight;
             this.pnlVehicleInfo.ColumnCount = 2;
             this.pnlRegister.SetColumnSpan(this.pnlVehicleInfo, 2);
-            this.pnlVehicleInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, UiConstants.Layout.LabelColumnPercent));
-            this.pnlVehicleInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, UiConstants.Layout.InputColumnPercent));
+            this.pnlVehicleInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, Presentation.Constants.UiConstants.Layout.LabelColumnPercent));
+            this.pnlVehicleInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, Presentation.Constants.UiConstants.Layout.InputColumnPercent));
             this.pnlVehicleInfo.Controls.Add(this.lblVehicleType, 0, 0);
             this.pnlVehicleInfo.Controls.Add(this.cmbVehicleType, 1, 0);
             this.pnlVehicleInfo.Controls.Add(this.lblPlate, 0, 1);
@@ -455,15 +455,15 @@
             this.pnlVehicleInfo.Controls.Add(this.numCapacity, 1, 5);
             this.pnlVehicleInfo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlVehicleInfo.Location = new System.Drawing.Point(3, 333); // Relative position, keep as is
-            this.pnlVehicleInfo.Margin = UiConstants.Layout.VehicleInfoPanelMargin;
+            this.pnlVehicleInfo.Margin = Presentation.Constants.UiConstants.Layout.VehicleInfoPanelMargin;
             this.pnlVehicleInfo.Name = "pnlVehicleInfo";
             this.pnlVehicleInfo.RowCount = 6;
-            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.VehicleInfoRow));
-            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.VehicleInfoRow));
-            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.VehicleInfoRow));
-            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.VehicleInfoRow));
-            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.VehicleInfoRow));
-            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, UiConstants.Heights.VehicleInfoRow));
+            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.VehicleInfoRow));
+            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.VehicleInfoRow));
+            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.VehicleInfoRow));
+            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.VehicleInfoRow));
+            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.VehicleInfoRow));
+            this.pnlVehicleInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, Presentation.Constants.UiConstants.Heights.VehicleInfoRow));
             this.pnlVehicleInfo.TabIndex = 10;
             this.pnlVehicleInfo.Visible = false;
             // 
@@ -471,7 +471,7 @@
             // 
             this.lblVehicleType.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblVehicleType.AutoSize = true;
-            this.lblVehicleType.Font = UiConstants.Typography.Small;
+            this.lblVehicleType.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblVehicleType.Location = new System.Drawing.Point(3, 8);
             this.lblVehicleType.Name = "lblVehicleType";
             this.lblVehicleType.Size = new System.Drawing.Size(63, 23);
@@ -482,7 +482,7 @@
             // 
             this.cmbVehicleType.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cmbVehicleType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList; // Keep as is
-            this.cmbVehicleType.Font = UiConstants.Typography.Small;
+            this.cmbVehicleType.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.cmbVehicleType.FormattingEnabled = true;
             this.cmbVehicleType.Items.AddRange(new object[] { "Xe máy", "Ô tô" });
             this.cmbVehicleType.Location = new System.Drawing.Point(177, 5);
@@ -495,7 +495,7 @@
             // 
             this.lblPlate.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblPlate.AutoSize = true;
-            this.lblPlate.Font = UiConstants.Typography.Small;
+            this.lblPlate.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblPlate.Location = new System.Drawing.Point(3, 48);
             this.lblPlate.Name = "lblPlate";
             this.lblPlate.Size = new System.Drawing.Size(69, 23);
@@ -505,7 +505,7 @@
             // txtPlate
             // 
             this.txtPlate.Dock = System.Windows.Forms.DockStyle.Fill; // Keep as is
-            this.txtPlate.Font = UiConstants.Typography.Small;
+            this.txtPlate.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.txtPlate.Location = new System.Drawing.Point(177, 45);
             this.txtPlate.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.txtPlate.Name = "txtPlate";
@@ -516,7 +516,7 @@
             // 
             this.lblBrand.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblBrand.AutoSize = true;
-            this.lblBrand.Font = UiConstants.Typography.Small;
+            this.lblBrand.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblBrand.Location = new System.Drawing.Point(3, 88);
             this.lblBrand.Name = "lblBrand";
             this.lblBrand.Size = new System.Drawing.Size(74, 23);
@@ -526,7 +526,7 @@
             // txtBrand
             // 
             this.txtBrand.Dock = System.Windows.Forms.DockStyle.Fill; // Keep as is
-            this.txtBrand.Font = UiConstants.Typography.Small;
+            this.txtBrand.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.txtBrand.Location = new System.Drawing.Point(177, 85);
             this.txtBrand.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.txtBrand.Name = "txtBrand";
@@ -537,7 +537,7 @@
             // 
             this.lblModel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblModel.AutoSize = true;
-            this.lblModel.Font = UiConstants.Typography.Small;
+            this.lblModel.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblModel.Location = new System.Drawing.Point(3, 128);
             this.lblModel.Name = "lblModel";
             this.lblModel.Size = new System.Drawing.Size(70, 23);
@@ -547,7 +547,7 @@
             // txtModel
             // 
             this.txtModel.Dock = System.Windows.Forms.DockStyle.Fill; // Keep as is
-            this.txtModel.Font = UiConstants.Typography.Small;
+            this.txtModel.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.txtModel.Location = new System.Drawing.Point(177, 125);
             this.txtModel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.txtModel.Name = "txtModel";
@@ -558,7 +558,7 @@
             // 
             this.lblColor.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblColor.AutoSize = true;
-            this.lblColor.Font = UiConstants.Typography.Small;
+            this.lblColor.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblColor.Location = new System.Drawing.Point(3, 168);
             this.lblColor.Name = "lblColor";
             this.lblColor.Size = new System.Drawing.Size(61, 23);
@@ -568,7 +568,7 @@
             // txtColor
             // 
             this.txtColor.Dock = System.Windows.Forms.DockStyle.Fill; // Keep as is
-            this.txtColor.Font = UiConstants.Typography.Small;
+            this.txtColor.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.txtColor.Location = new System.Drawing.Point(177, 165);
             this.txtColor.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.txtColor.Name = "txtColor";
@@ -579,7 +579,7 @@
             // 
             this.lblCapacity.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblCapacity.AutoSize = true;
-            this.lblCapacity.Font = UiConstants.Typography.Small;
+            this.lblCapacity.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.lblCapacity.Location = new System.Drawing.Point(3, 208);
             this.lblCapacity.Name = "lblCapacity";
             this.lblCapacity.Size = new System.Drawing.Size(75, 23);
@@ -589,7 +589,7 @@
             // numCapacity
             // 
             this.numCapacity.Anchor = System.Windows.Forms.AnchorStyles.Left; // Keep as is
-            this.numCapacity.Font = UiConstants.Typography.Small;
+            this.numCapacity.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.numCapacity.Location = new System.Drawing.Point(177, 205);
             this.numCapacity.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.numCapacity.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
@@ -602,14 +602,14 @@
             // btnRegister
             // 
             this.pnlRegister.SetColumnSpan(this.btnRegister, 2);
-            this.btnRegister.BackColor = UiConstants.Colors.Primary;
+            this.btnRegister.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
             this.btnRegister.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnRegister.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnRegister.Font = UiConstants.Typography.BodyBold;
-            this.btnRegister.ForeColor = UiConstants.Colors.TextOnKey;
+            this.btnRegister.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
+            this.btnRegister.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
+            this.btnRegister.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
             this.btnRegister.Location = new System.Drawing.Point(3, 400);
             this.btnRegister.Name = "btnRegister";
-            this.btnRegister.Size = new System.Drawing.Size(494, 64);
             this.btnRegister.TabIndex = 11;
             this.btnRegister.Text = "Tạo tài khoản";
             this.btnRegister.UseVisualStyleBackColor = false;
@@ -619,7 +619,7 @@
             this.linkToLogin.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.linkToLogin.AutoSize = true;
             this.pnlRegister.SetColumnSpan(this.linkToLogin, 2);
-            this.linkToLogin.Font = UiConstants.Typography.Small;
+            this.linkToLogin.Font = Presentation.Constants.UiConstants.Typography.Small;
             this.linkToLogin.Location = new System.Drawing.Point(145, 478);
             this.linkToLogin.Name = "linkToLogin";
             this.linkToLogin.Size = new System.Drawing.Size(210, 23);
@@ -630,8 +630,8 @@
             // lblFooter
             // 
             this.lblFooter.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblFooter.Font = UiConstants.Typography.Tiny;
-            this.lblFooter.ForeColor = UiConstants.Colors.TextMuted;
+            this.lblFooter.Font = Presentation.Constants.UiConstants.Typography.Tiny;
+            this.lblFooter.ForeColor = Presentation.Constants.UiConstants.Colors.TextMuted;
             this.lblFooter.Location = new System.Drawing.Point(3, 560);
             this.lblFooter.Name = "lblFooter";
             this.lblFooter.Size = new System.Drawing.Size(894, 40);
@@ -643,10 +643,10 @@
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font; // Keep as is
-            this.BackColor = UiConstants.Colors.SurfaceWhite;
+            this.BackColor = Presentation.Constants.UiConstants.Colors.SurfaceWhite;
             this.Controls.Add(this.tblMain);
             this.Name = "UcAuth";
-            this.Size = UiConstants.Sizes.DefaultForm;
+            this.Size = Presentation.Constants.UiConstants.Sizes.DefaultForm;
             this.tblMain.ResumeLayout(false);
             this.tblMain.PerformLayout();
             this.pnlCenter.ResumeLayout(false);

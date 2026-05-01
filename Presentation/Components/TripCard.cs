@@ -1,4 +1,4 @@
-﻿using Domain.ValueObjects;
+using Domain.ValueObjects;
 using Domain.Entities.Users;
 using Domain.Entities;
 // Presentation/Components/TripCard.cs
@@ -20,9 +20,9 @@ namespace Presentation.Components
         public event Action<TripCard> Clicked;
 
         /// <summary>
-        /// Trip Ä‘Æ°á»£c hiá»ƒn thá»‹
+        /// Chuyến đi được hiển thị
         /// </summary>
-        public object Trip { get; private set; }
+        public Trip DisplayedTrip { get; private set; }
 
         public TripCard()
         {
@@ -42,17 +42,30 @@ namespace Presentation.Components
             this.MouseLeave += OnMouseLeave;
         }
 
-        /// <summary>
-        /// Set thÃ´ng tin trip tá»« cÃ¡c tham sá»‘
-        /// </summary>
-        public void SetTrip(string status, string route, string info, string time, Color statusColor)
+        public void SetTrip(Trip trip)
         {
-            Trip = new { Status = status, Route = route, Info = info, Time = time };
-            _lblStatus.Text = status;
-            _statusIndicator.BackColor = statusColor;
-            _lblRoute.Text = route;
-            _lblInfo.Text = info;
-            _lblTime.Text = time;
+            DisplayedTrip = trip;
+            _lblStatus.Text = trip.Status;
+            _statusIndicator.BackColor = GetStatusColor(trip.Status);
+            _lblRoute.Text = $"{trip.TripRoute?.Pickup?.Address?.Street ?? "---"} -> {trip.TripRoute?.Destination?.Address?.Street ?? "---"}";
+            _lblInfo.Text = $"{trip.TripVehicleType} - {trip.TripFare?.TotalAmount.Amount:N0} đ";
+            _lblTime.Text = trip.RequestAt.ToString("HH:mm dd/MM");
+        }
+
+        private Color GetStatusColor(string status)
+        {
+            switch (status)
+            {
+                case "Requested":
+                case "Searching": return Color.Orange;
+                case "Matched":
+                case "Arrived": return Color.Blue;
+                case "Started": return Color.Green;
+                case "Completed": return Color.Gray;
+                case "Cancelled":
+                case "Timeout": return Color.Red;
+                default: return Color.Black;
+            }
         }
 
         private void OnCardClick(object sender, EventArgs e)

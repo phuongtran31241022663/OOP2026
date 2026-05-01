@@ -19,6 +19,8 @@ namespace Presentation.Components
         public StatusPanel()
         {
             InitializeComponent();
+            _clearButton.Click += ClearLogs;
+            _viewLogButton.Click += OpenLogFile;
         }
 
         /// <summary>
@@ -45,7 +47,7 @@ namespace Presentation.Components
             }
             else if (level == LogLevel.Warning)
             {
-                textColor = Color.Yellow;
+                textColor = Color.Orange;
                 prefix = "[CẢNH BÁO]";
             }
             else if (level == LogLevel.Debug)
@@ -110,7 +112,7 @@ namespace Presentation.Components
             }
             else if (_warningCount > 0)
             {
-                _errorCountLabel.ForeColor = Color.Yellow;
+                _errorCountLabel.ForeColor = Color.Orange;
             }
             else
             {
@@ -170,33 +172,21 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Hiển thị thông báo lỗi với chi tiết đầy đủ
+        /// Ghi log và hiển thị thông báo lỗi với chi tiết đầy đủ
         /// </summary>
-        public new void ShowError(string title, string message, Exception ex = null)
+        public void LogAndShowError(string title, string message, Exception ex = null)
         {
-            string fullMessage = message;
-            if (ex != null)
-            {
-                fullMessage += $"\n\nChi tiết lỗi:\n{ex.GetType().Name}: {ex.Message}";
-                if (ex.StackTrace != null)
-                {
-                    fullMessage += $"\n\nStack Trace:\n{ex.StackTrace}";
-                }
-            }
-
             AddLog($"{title}: {message}", LogLevel.Error);
-
-            // Hiển thị MessageBox
-            MessageBox.Show(fullMessage, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            base.ShowError(message, title);
         }
 
         /// <summary>
-        /// Hiển thị cảnh báo
+        /// Ghi log và hiển thị cảnh báo
         /// </summary>
-        public new void ShowWarning(string title, string message)
+        public void LogAndShowWarning(string title, string message)
         {
             AddLog($"{title}: {message}", LogLevel.Warning);
-            MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            base.ShowWarning(message, title);
         }
 
         /// <summary>
@@ -213,14 +203,6 @@ namespace Presentation.Components
             public string Message { get; set; } = "";
             public LogLevel Level { get; set; }
         }
-    }
-
-    public enum LogLevel
-    {
-        Info,
-        Warning,
-        Error,
-        Debug
     }
 }
 

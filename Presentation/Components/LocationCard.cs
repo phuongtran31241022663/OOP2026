@@ -1,4 +1,4 @@
-﻿using Domain.ValueObjects;
+using Domain.ValueObjects;
 using Domain.Entities.Users;
 using Domain.Entities;
 // Presentation/Components/LocationCard.cs
@@ -20,13 +20,15 @@ namespace Presentation.Components
         public event Action<LocationCard> Clicked;
 
         /// <summary>
-        /// Äá»‹a Ä‘iá»ƒm Ä‘Æ°á»£c hiá»ƒn thá»‹
+        /// Địa điểm được hiển thị
         /// </summary>
-        public object GeoLocation { get; private set; }
+        public Location SelectedLocation { get; private set; }
+        private Color _originalBackColor;
 
         public LocationCard()
         {
             InitializeComponent();
+            _originalBackColor = this.BackColor;
 
             // Enable click events
             this.Cursor = Cursors.Hand;
@@ -43,14 +45,14 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Set thÃ´ng tin Ä‘á»‹a Ä‘iá»ƒm tá»« cÃ¡c tham sá»‘ riÃªng
+        /// Set thông tin địa điểm từ Location object
         /// </summary>
-        public void SetLocation(string name, string address, double lat, double lng)
+        public void SetLocation(Location location)
         {
-            GeoLocation = new { Name = name, Address = address, Lat = lat, Lng = lng };
-            _lblName.Text = name;
-            _lblAddress.Text = address;
-            _lblCoords.Text = $"{lat:F5}, {lng:F5}";
+            SelectedLocation = location;
+            _lblName.Text = location.Address?.Street ?? "Không rõ tên";
+            _lblAddress.Text = $"{location.Address?.District}, {location.Address?.City}";
+            _lblCoords.Text = $"{location.Coordinate.Latitude:F5}, {location.Coordinate.Longitude:F5}";
         }
 
         /// <summary>
@@ -58,7 +60,7 @@ namespace Presentation.Components
         /// </summary>
         public void SetIcon(string emoji)
         {
-            if (_iconPanel.Controls[0] is Label iconLabel)
+            if (_iconPanel.Controls.Count > 0 && _iconPanel.Controls[0] is Label iconLabel)
             {
                 iconLabel.Text = emoji;
             }
@@ -76,7 +78,7 @@ namespace Presentation.Components
 
         private void OnMouseLeave(object sender, EventArgs e)
         {
-            this.BackColor = Color.White;
+            this.BackColor = _originalBackColor;
         }
     }
 }

@@ -36,7 +36,9 @@ Hệ thống được tổ chức theo mô hình 5 lớp:
 
 Hệ thống giải quyết được các bài toán chính:
 
-- **Quản lý trạng thái Trip**: Trip sử dụng **State Pattern** (`ITripState`) đảm bảo chỉ chuyển trạng thái hợp lệ. Flow: Requested → Searching → Matched → Arrived → Started → Completed/Cancelled/Timeout. **Driver** sử dụng **State Machine** (`DriverStateMachine`) — phân biệt rõ 2 cách quản lý trạng thái.
+- **Quản lý trạng thái Trip & Driver**: Cả **Trip** và **Driver** đều sử dụng **State Pattern** (`ITripState`, `IDriverState`) đảm bảo chỉ chuyển trạng thái hợp lệ. 
+  - **Trip Flow**: Requested → Searching → Matched → Arrived → Started → Completed/Cancelled/Timeout.
+  - **Driver Flow**: Offline ↔ Available ↔ OnTrip.
 - **Ghép tài xế (Matching)**: MatchingService lọc driver theo: `Status == Available` + `VehicleType` match + `Wallet` đủ trả hoa hồng (Commission). Có `SemaphoreSlim` để tránh race condition khi 2 tài xế cùng nhận 1 chuyến.
 - **Cơ chế Event-Driven**: `ITripService.TripStatusChanged` event (`EventHandler<TripStatusChangedEventArgs>`) để UI real-time update.
 
@@ -61,7 +63,7 @@ Driver: StatusChanged, LocationUpdated.
 Review: ReviewCreated.
 
 **State Validation:**
-Trip State Pattern (8 states via `ITripState`), DriverStateMachine (3 states).
+Trip & Driver State Pattern (`ITripState`, `IDriverState`).
 
 ---
 
@@ -122,16 +124,12 @@ Trip State Pattern (8 states via `ITripState`), DriverStateMachine (3 states).
 
 **Trip — State Pattern** — 8 states via `ITripState` implementations:
 Requested → Searching → Matched → Arrived → Started → Completed (terminal)
-↘︎ Cancelled (terminal), Timeout (terminal) có thể xảy ra từ Searching/Matched/Arrived/Started.
+↘︎ Cancelled (terminal), Timeout (terminal) có thể xảy ra từ các trạng thái phù hợp.
 
-> Trip dùng **State Pattern** (behavior delegation), không phải State Machine.
-
-**Driver — State Machine** — 3 states:
+**Driver — State Pattern** — 3 states:
 Offline ↔ Available ↔ OnTrip (vòng lặp).
 
-> Driver dùng **State Machine** (static dictionary transitions).
-
-Transition rules enforced via `DriverStateMachine.CanTransition(from, to)` static method and `ITripState` state classes.
+Transition rules enforced via `ITripState` and `IDriverState` implementations.
 
 ---
 
@@ -140,8 +138,7 @@ Transition rules enforced via `DriverStateMachine.CanTransition(from, to)` stati
 | Pattern / Abstraction | Usage |
 |---|---|
 | Repository (Data Access Contract) | `IRepository<T>` → `JsonRepository<T>` — *không phải GoF Pattern* |
-| State Pattern | `ITripState` + state classes cho Trip lifecycle |
-| State Machine | `DriverStateMachine` cho Driver status transitions |
+| State Pattern | `ITripState` + `IDriverState` implementations |
 | Domain Events | Aggregates emit events (9 Trip events, 2 Driver events, 1 Review event) |
 | Value Object | Immutable VOs with operator overloading |
 | Observer | `ITripService.TripStatusChanged` event — UI subscribes |
@@ -193,4 +190,4 @@ Run:
 
 ---
 
-*Last updated: 2026-04-24 — synced with current codebase state.*
+*Last updated: 2026-05-01 — synced with current codebase state.*

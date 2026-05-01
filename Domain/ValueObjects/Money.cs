@@ -19,9 +19,7 @@ namespace Domain.ValueObjects
         public string Currency => _currency;
         #endregion
 
-        // Constructor for ORM/persistence
-        private Money() { }
-
+        [Newtonsoft.Json.JsonConstructor]
         public Money(decimal amount, string currency)
         {
             if (amount < 0)

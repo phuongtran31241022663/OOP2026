@@ -8,7 +8,7 @@ namespace Presentation.UserControls
 {
     /// <summary>
     /// Xem/sua ho so ca nhan + Nap vi.
-    /// Mo trong FrmModal.
+    /// Hiển thị hồ sơ người dùng.
     /// </summary>
     public partial class UcProfile : BaseUserControl
     {
@@ -91,9 +91,9 @@ namespace Presentation.UserControls
                     }
 
                     driver.DepositToWallet(new Domain.ValueObjects.Money(amount, "VND"));
+                    await _userService.UpdateUserAsync(_user);
                     lblWallet.Text = "Ví: " + driver.Wallet.Amount.ToString("N0") + "đ";
                     ShowInfo("Nạp tiền thành công!");
-                    await System.Threading.Tasks.Task.CompletedTask;
                 }, () => IsLoading = false);
             }
         }

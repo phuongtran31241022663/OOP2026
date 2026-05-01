@@ -1,4 +1,4 @@
-﻿namespace Presentation
+namespace Presentation
 {
     partial class BaseUserControl
     {
@@ -6,8 +6,16 @@
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && components != null)
-                components.Dispose();
+            if (disposing)
+            {
+                if (components != null)
+                    components.Dispose();
+                if (_validationErrorProvider != null)
+                {
+                    _validationErrorProvider.Dispose();
+                    _validationErrorProvider = null;
+                }
+            }
             base.Dispose(disposing);
         }
 

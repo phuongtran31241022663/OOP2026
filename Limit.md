@@ -8,7 +8,7 @@
 ## 1. Môi trường & Phiên bản
 
 - **.NET Framework:** 4.8 (không phải .NET Core/.NET 5+)
-- **Ngôn ngữ C#:** 7.3 (mặc định của .NET Framework 4.8)
+- **Ngôn ngữ C#:** 8.0 (đã nâng cấp từ 7.3)
 - **IDE:** Visual Studio 2019/2022 (có hỗ trợ .NET Framework 4.8)
 - **Hệ điều hành:** Windows (WinForms)
 
@@ -20,7 +20,7 @@
 
 | Phiên bản | Tính năng / Từ khóa cần tránh |
 |-----------|-------------------------------|
-| **C# 8.0** | `Nullable reference types` (`string?`, `#nullable enable`), `switch expression` (`x switch { ... }`), `using var`, `await foreach`, `IAsyncEnumerable<T>`, `^1`, `..`, `??=`, `static local functions`, default interface methods |
+| **C# 8.0** | `Nullable reference types` (`string?`, `#nullable enable`), `using var`, `await foreach`, `IAsyncEnumerable<T>`, `^1`, `..`, `??=`, `static local functions`, default interface methods. <br>**Lưu ý:** `switch expression` (`x switch { ... }`) hiện **ĐƯỢC PHÉP** sử dụng. |
 | **C# 9.0** | `record`, `init`, `with`, `target-typed new`, pattern matching với `and`/`or`/`not`, top-level statements |
 | **C# 10.0** | `global using`, file-scoped namespaces (`namespace X;`), `record struct` |
 | **C# 11.0** | `required`, raw string literals (`"""`), list patterns, generic attributes |
@@ -52,5 +52,5 @@
 
 ## 5. Cách kiểm tra nhanh
 
-- Mở file `.csproj`, đảm bảo không có dòng `<LangVersion>` (hoặc nếu có thì phải là `7.3`).
+- Mở file `.csproj`, đảm bảo dòng `<LangVersion>` là `8.0`.
 - Sau khi build, kiểm tra cảnh báo (warning) và lỗi (error) liên quan đến phiên bản ngôn ngữ.

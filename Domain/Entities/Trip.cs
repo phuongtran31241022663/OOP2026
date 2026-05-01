@@ -20,11 +20,11 @@ namespace Domain.Entities
     {
         #region Fields
 
-        private readonly Guid _passengerId;
-        private readonly VehicleType _tripVehicleType;
-        private readonly Fare _tripFare;
-        private readonly Route _tripRoute;
-        private readonly DateTime _requestAt;
+        private Guid _passengerId;
+        private VehicleType _tripVehicleType;
+        private Fare _tripFare;
+        private Route _tripRoute;
+        private DateTime _requestAt;
 
         private Guid? _driverId;
         private bool _isPaid;
@@ -45,18 +45,32 @@ namespace Domain.Entities
             get
             {
                 if (_currentState == null)
-                    return "Unknown";
+                    return "Requested";
                 string name = _currentState.GetType().Name;
                 if (name.EndsWith("State"))
                     name = name.Substring(0, name.Length - 5);
                 return name;
+            }
+            private set
+            {
+                _currentState = value switch
+                {
+                    "Searching" => new SearchingState(),
+                    "Matched" => new MatchedState(),
+                    "Arrived" => new ArrivedState(),
+                    "Started" => new StartedState(),
+                    "Completed" => new CompletedState(),
+                    "Cancelled" => new CancelledState(),
+                    "Timeout" => new TimeoutState(),
+                    _ => new RequestedState()
+                };
             }
         }
 
         /// <summary>
         /// ID của hành khách đặt chuyến.
         /// </summary>
-        public Guid PassengerId => _passengerId;
+        public Guid PassengerId { get => _passengerId; private set => _passengerId = value; }
 
         /// <summary>
         /// ID của tài xế được ghép cặp. Có thể là <c>null</c> nếu chưa có tài xế.
@@ -66,12 +80,12 @@ namespace Domain.Entities
         /// <summary>
         /// Thông tin lộ trình của chuyến đi (điểm đón, điểm đến, khoảng cách, thời gian).
         /// </summary>
-        public Route TripRoute => _tripRoute;
+        public Route TripRoute { get => _tripRoute; private set => _tripRoute = value; }
 
         /// <summary>
         /// Thông tin giá cước của chuyến đi (tổng tiền, hoa hồng, thu nhập tài xế).
         /// </summary>
-        public Fare TripFare => _tripFare;
+        public Fare TripFare { get => _tripFare; private set => _tripFare = value; }
 
         /// <summary>
         /// Khoảng cách của chuyến đi (tính bằng km), lấy từ <see cref="TripRoute"/>.
@@ -91,12 +105,12 @@ namespace Domain.Entities
         /// <summary>
         /// Thời điểm chuyến đi được yêu cầu (UTC).
         /// </summary>
-        public DateTime RequestAt => _requestAt;
+        public DateTime RequestAt { get => _requestAt; private set => _requestAt = value; }
 
         /// <summary>
         /// Loại phương tiện được yêu cầu cho chuyến đi.
         /// </summary>
-        public VehicleType TripVehicleType => _tripVehicleType;
+        public VehicleType TripVehicleType { get => _tripVehicleType; private set => _tripVehicleType = value; }
 
         #endregion
 
@@ -181,9 +195,30 @@ namespace Domain.Entities
         }
 
         /// <summary>
-        /// Constructor private cho mục đích deserialization (ví dụ: từ JSON).
+        /// Constructor để tái tạo đối tượng chuyến đi từ cơ sở dữ liệu.
         /// </summary>
-        private Trip() : base(default) { }
+        [Newtonsoft.Json.JsonConstructor]
+        public Trip(
+            Guid id,
+            Guid passengerId,
+            Guid? driverId,
+            Route tripRoute,
+            Fare tripFare,
+            VehicleType tripVehicleType,
+            DateTime requestAt,
+            string status,
+            bool isPaid)
+            : base(id)
+        {
+            _passengerId = passengerId;
+            _driverId = driverId;
+            _tripRoute = tripRoute;
+            _tripFare = tripFare;
+            _tripVehicleType = tripVehicleType;
+            _requestAt = requestAt;
+            Status = status;
+            _isPaid = isPaid;
+        }
 
         #endregion
 

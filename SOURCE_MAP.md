@@ -59,7 +59,7 @@
 ### 1.3 Namespace: `Common.Utilities` / `Common.Helpers`
 
 #### `PasswordHasher`
-- **File**: `Common/Utilities/PasswordHasher.cs` (duplicate tại `Common/Helpers/PasswordHasher.cs`)
+- **File**: `Common/Utilities/PasswordHasher.cs`
 - **Mục đích**: Băm mật khẩu an toàn (PBKDF2-SHA256)
 - **Phương thức**:
   - `HashPassword(string) : string` - Format: "pbkdf2-sha256$iterations$salt$hash"
@@ -143,16 +143,16 @@
 - **File**: `Domain/Entities/Trip.cs`
 - **Mục đích**: Quản lý lifecycle chuyến đi (State Pattern)
 - **Thuộc tính**:
-  - `string Status` {get} - Derived từ ITripState (Requested, Searching, Matched, Arrived, Started, Completed, Cancelled, Timeout)
-  - `Guid PassengerId` {get}
-  - `Guid? DriverId` {get; private set}
-  - `VehicleType TripVehicleType` {get}
-  - `Route TripRoute` {get}
-  - `Fare TripFare` {get}
+  - `string Status` {get; private set} - Derived từ ITripState (Requested, Searching, Matched, Arrived, Started, Completed, Cancelled, Timeout)
+  - `Guid PassengerId` {get; private set}
+  - `Guid? DriverId` {get}
+  - `VehicleType TripVehicleType` {get; private set}
+  - `Route TripRoute` {get; private set}
+  - `Fare TripFare` {get; private set}
   - `double? Distance` {get} - from Route
   - `double? Duration` {get} - from Route (seconds)
   - `bool IsPaid` {get}
-  - `DateTime RequestAt` {get}
+  - `DateTime RequestAt` {get; private set}
 - **Phương thức** (public behavior - delegated to state):
   - `SetSearching() : void` - Transition to SearchingState
   - `MatchDriver(Guid) : void` - Transition to MatchedState
@@ -164,6 +164,9 @@
   - `ConfirmPayment() : void` - Mark paid, throw nếu đã paid
   - `IsSearching() : bool`, `IsMatched() : bool`, `IsArrived() : bool`, `IsStarted() : bool`, `IsCompleted() : bool`, `IsCancelled() : bool`, `IsTimeout() : bool` - State check helpers
   - `IsTerminal() : bool` - True nếu Completed, Cancelled, hoặc Timeout
+- **Constructors**: 
+  - `Trip(Guid, Route, Fare, VehicleType)` - Business constructor
+  - `[JsonConstructor] Trip(...)` - Persistence constructor
 - **Internal helpers**: TransitionTo(ITripState), SetDriverId(Guid)
 - **Sự kiện**: TripRequestedEvent, TripSearchingEvent, TripMatchedEvent, TripArrivedEvent, TripStartedEvent, TripCompletedEvent, TripCancelledEvent, TripPaidEvent, TripTimeoutEvent
 - **Phụ thuộc**: ITripState, Route, Fare, VehicleType
@@ -187,6 +190,9 @@
   - `ChangePassword(string oldRaw, string newRaw) : void` - verify old, validate new
   - `VerifyPassword(string raw) : bool`
   - `virtual string GetInfo() : string`
+- **Constructors**: 
+  - `User(string, string, string)` - Business constructor (hashes password)
+  - `[JsonConstructor] User(Guid, string, string, string)` - Persistence constructor
 - **Phụ thuộc**: PasswordHasher
 
 #### `FareRule`
@@ -226,11 +232,10 @@
 - **File**: `Domain/Entities/Users/Driver.cs`
 - **Mục đích**: Tài xế với state pattern + financial tracking
 - **Thuộc tính**:
-  - `string Status` {get} - Derived từ IDriverState (Offline, Available, OnTrip)
-  - `DriverStatus SerializedStatus` {get; private set} - Chỉ dùng cho JSON backward compatibility
-  - `Location Position` {get; set}
-  - `string LicenseNumber` {get}
-  - `Guid VehicleId` {get}
+  - `string Status` {get; private set} - Derived từ IDriverState (Offline, Available, OnTrip)
+  - `Location Position` {get; private set}
+  - `string LicenseNumber` {get; private set}
+  - `Guid VehicleId` {get; private set}
   - `Money Wallet` {get; private set}
   - `Money Income` {get; private set}
   - `int TotalTrips` {get; private set}
@@ -249,6 +254,9 @@
   - `UpdateReviews(int) : void` - Rating 1-5
   - `DepositToWallet(Money) : void`
   - `PayCommission(Fare) : void` - Trừ wallet, cộng income
+- **Constructors**: 
+  - `Driver(string, string, string, string, Guid, Location)` - Business constructor
+  - `[JsonConstructor] Driver(...)` - Persistence constructor
 - **Sự kiện**: DriverStatusChangedEvent, DriverLocationUpdatedEvent
 - **Phụ thuộc**: IDriverState, Money, VehicleId
 - **Ràng buộc nghiệp vụ**: Không thể Offline khi OnTrip; Wallet ≥ Commission để PayCommission

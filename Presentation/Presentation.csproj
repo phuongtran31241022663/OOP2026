@@ -84,16 +84,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseForm.cs">
+    <Compile Include="Base\BaseForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BaseForm.Designer.cs">
+    <Compile Include="Base\BaseForm.Designer.cs">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="BaseUserControl.cs">
+    <Compile Include="Base\BaseUserControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="BaseUserControl.Designer.cs">
+    <Compile Include="Base\BaseUserControl.Designer.cs">
       <DependentUpon>BaseUserControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Components\DriverCardControl.cs">
@@ -144,6 +144,7 @@
     <Compile Include="Components\TripStatusPanel.Designer.cs">
       <DependentUpon>TripStatusPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Components\LogLevel.cs" />
     <Compile Include="Constants\UiConstants.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -152,18 +153,6 @@
     </Compile>
     <Compile Include="Forms\FrmMain.Designer.cs">
       <DependentUpon>FrmMain.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\FrmModal.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\FrmModal.Designer.cs">
-      <DependentUpon>FrmModal.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\FrmToast.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\FrmToast.Designer.cs">
-      <DependentUpon>FrmToast.cs</DependentUpon>
     </Compile>
     <Compile Include="UserControls\UcAuth.cs">
       <SubType>UserControl</SubType>
@@ -189,25 +178,25 @@
     <Compile Include="UserControls\UcAdmin.Designer.cs">
       <DependentUpon>UcAdmin.cs</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\UcRating.cs">
+    <Compile Include="Components\UcRating.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UserControls\UcRating.Designer.cs">
+    <Compile Include="Components\UcRating.Designer.cs">
       <DependentUpon>UcRating.cs</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\UcProfile.cs">
+    <Compile Include="Components\UcProfile.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UserControls\UcProfile.Designer.cs">
+    <Compile Include="Components\UcProfile.Designer.cs">
       <DependentUpon>UcProfile.cs</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\UcTripDetail.cs">
+    <Compile Include="Components\UcTripDetail.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UserControls\UcTripDetail.Designer.cs">
+    <Compile Include="Components\UcTripDetail.Designer.cs">
       <DependentUpon>UcTripDetail.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="BaseForm.resx">
+    <EmbeddedResource Include="Base\BaseForm.resx">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Components\FarePanel.resx">
@@ -215,6 +204,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Components\MapControl.resx">
       <DependentUpon>MapControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Components\UcTripDetail.resx">
+      <DependentUpon>UcTripDetail.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -225,9 +217,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="UserControls\UcPassenger.resx">
-      <DependentUpon>UcPassenger.cs</DependentUpon>
-    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
