@@ -100,7 +100,7 @@ Common → Domain → Application → Infrastructure → Presentation
   |---|---|
   | Repository (data access contract) | `IRepository<T>` → `JsonRepository<T>` (generic base) |
   | State Pattern | `ITripState` + 8 state classes cho Trip lifecycle |
-  | State Machine | `DriverStateMachine` (static, dictionary-defined transitions) — **chỉ dùng cho Driver** |
+  | State Pattern | `IDriverState` + 3 state classes cho Driver lifecycle |
   | Domain Events | Aggregate emit events (9 Trip + 2 Driver + 1 Review) |
   | Observer | `ITripService.TripStatusChanged` — UI subscribe |
   | Manual Service Composition | Khởi tạo services bằng `new` trong `Program.cs` |
@@ -163,12 +163,11 @@ Common → Domain → Application → Infrastructure → Presentation
 | `Money` | Amount (decimal ≥ 0, rounded), Currency ("VND") — operators: `+ - < > <= >=` |
 | `Location` | Compose `Coordinate` + `Address` |
 | `Coordinate` | Latitude, Longitude |
-| `Address` | Street, Ward, District, City |
+| `Address` | Name, Street, District, City, Country, HouseNumber, Osm_Value, Locality |
 | `Route` | Pickup (Location), Destination (Location), encoded polyline |
-| `Fare` | BaseFare, PerKmRate, TotalAmount (Money) |
+| `Fare` | TotalAmount, Commission, DriverIncome (Money) |
 
 **Domain Services:**
-- `DriverStateMachine` (static) — validate Driver state transitions
 - `FareRule.CalculateFare(double)` — inline fare logic (không tách thành FareCalculationService riêng)
 
 **Repository Interfaces (Domain layer):**
@@ -195,8 +194,8 @@ Cancelled → (terminal)
 Timeout   → (terminal)
 ```
 
-**Driver State Machine:**
-> Driver sử dụng State Machine (static dictionary transitions).
+**Driver State Pattern:**
+> Driver sử dụng State Pattern (IDriverState), giống như Trip.
 
 ```
 Offline   → Available

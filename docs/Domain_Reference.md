@@ -266,7 +266,7 @@ All inherit `DomainEvent` (base with `Id`, `OccurredOn`).
 | `TripArrivedEvent` | `MarkAsArrived()` | Id |
 | `TripStartedEvent` | `StartTrip()` | Id |
 | `TripCompletedEvent` | `CompleteTrip()` | Id, PassengerId, DriverId, Fare |
-| `TripPaidEvent` | `ConfirmPayment()` | Id, Amount, PaidAt |
+| `TripPaidEvent` | `ConfirmPayment()` | TripId, PassengerId, DriverId, TotalAmount, PaidAt |
 | `TripCancelledEvent` | `Cancel()` | Id, Reason |
 | `TripTimeoutEvent` | `MarkTimeout()` | Id |
 
@@ -383,4 +383,4 @@ public interface IRepository<T> : IReadRepository<T> where T : class
 
 ---
 
-*Document version: 3.1 — Updated: fixed Entity non-generic, Driver State Pattern, Vehicle properties, Event parameters, Repository async interfaces, removed DriverStateMachine references.*
+*Document version: 3.2 — Updated: Đồng bộ với code thực tế - sửa TripPaidEvent parameters, Driver State Pattern, Fare/Address VO properties, UpdateRule signature.*

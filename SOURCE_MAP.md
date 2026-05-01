@@ -206,7 +206,7 @@
   - `DateTime UpdatedAt` {get}
 - **Phương thức**:
   - `CalculateFare(double distanceKm) : Fare` - Tính tổng cước + hoa hồng
-  - `UpdateRule(Money, Money, decimal) : void` - Update và validate
+  - `UpdateRule(VehicleType, Money, Money, decimal) : void` - Update và validate (tạo rule mới)
 - **Ràng buộc nghiệp vụ**: BaseFare ≥ 0, PricePerKm ≥ 0, CommissionRate ∈ [0,1]
 
 #### `Review`

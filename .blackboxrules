@@ -1,0 +1,49 @@
+## 1. Ask the user to perform simple tasks
+
+When the Agent realizes that a task (or a step in the plan) can be done more quickly and easily by the user, it should suggest that the user do it themselves instead of trying to automate it in a complex way.
+
+**Signs to recognize:**
+
+- The task would take only a few seconds to under a minute if the user does it directly.
+- The Agent would have to take many steps, is prone to errors, or needs access rights that the Agent doesn’t have (e.g., interacting with a graphical UI, mouse operations).
+- The user is already familiar with the task (e.g., creating a new file, running dotnet build, checking console output, fixing a small line of code).
+
+**How to handle:**
+
+- The Agent clearly suggests: “You can do this faster by yourself. Please [short instruction].”
+- Then ask: “Would you like me to try anyway, or will you do it yourself?”
+- If the user agrees to do it themselves, the Agent skips that step, waits for the user to confirm completion, and then continues.
+- If the user insists that the Agent still do it, the Agent will proceed but must warn about risks or complexity beforehand.
+Dưới đây là bản dịch sang tiếng Anh của bạn:
+
+---
+## 2. Using the Source Map (Architectural Map)
+
+When working with a project or solution, you may have a file called `SOURCE_MAP.md` located at the same level as the project or solution directory. This file serves as a detailed architectural map that closely reflects the actual code: layers, namespaces, important classes, and data flows. Think of it as a helpful assistant that allows you to navigate quickly and accurately without having to grope around.
+
+**You can use the source map to:**
+
+- Prepare to analyze, modify, or add a new feature.
+- Determine where a class or file is located and which layer it belongs to.
+- Understand the workflow of a function (e.g., booking a ride, canceling a trip).
+- Verify whether you are adhering to the intended architecture.
+- Investigate when the actual code appears to differ from what you previously knew.
+
+**How to use it specifically in response to a user's command:**
+
+- Before starting a task, take a few seconds to skim or search for information in the source map. This will save you a significant amount of time.
+When you locate the file or class you need to work with, gently cite it: “According to the Source Map, this file is located at…”. This helps me know you are on the right track.
+- If the Source Map provides sufficient information, follow it. Don't hesitate to use it as your compass.
+- If the Source Map lacks detail for the task at hand, you can ask me: “The Source Map doesn't cover this part. Would you like me to look it up directly in the code?”
+
+**Rules for synchronizing the Source Map with the actual code:**
+
+- If, while working, you discover that the Source Map describes something incorrectly (e.g., wrong file path, incorrect class name, missing a new flow), don't ignore it. Propose to me: “The Source Map has a point that doesn't match the code: [brief description], and I will go ahead and update the source map.”
+Similarly, after you complete a significant change (e.g., adding a new class, renaming a file, deleting a folder or file, adding a step to a processing flow), update the Source Map to match.
+- The goal is to keep the Source Map always reflecting the actual code. This benefits both of us – the user and the AI agent – in future sessions.
+
+**General spirit:**
+
+- The Source Map is your friend, not your boss. It helps you be faster and more accurate, but it does not forbid you from thinking independently.
+- If you see a better solution that still fits the overall architecture, feel free to propose it.
+- Use the Source Map as a natural habit, just like glancing at a map before you drive off. No need to stress – just enough to keep you from getting lost.
