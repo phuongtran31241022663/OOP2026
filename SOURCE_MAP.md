@@ -168,6 +168,7 @@
   - `Trip(Guid, Route, Fare, VehicleType)` - Business constructor
   - `[JsonConstructor] Trip(...)` - Persistence constructor
 - **Internal helpers**: TransitionTo(ITripState), SetDriverId(Guid)
+- **Thread Safety**: Uses `Interlocked.Exchange` for atomic state transitions (per docs/State.md Section 3.3)
 - **Sự kiện**: TripRequestedEvent, TripSearchingEvent, TripMatchedEvent, TripArrivedEvent, TripStartedEvent, TripCompletedEvent, TripCancelledEvent, TripPaidEvent, TripTimeoutEvent
 - **Phụ thuộc**: ITripState, Route, Fare, VehicleType
 - **Ràng buộc nghiệp vụ**:
@@ -198,6 +199,26 @@
 #### `FareRule`
 - **File**: `Domain/Entities/FareRule.cs`
 - **Mục đích**: Quy tắc tính giá theo loại xe
+- **NOTE**: Legacy - now replaced by Strategy Pattern (see below)
+
+### 2.7 Namespace: `Domain.Strategies`
+
+#### `IFareCalculationStrategy`
+- **File**: `Domain/Strategies/IFareCalculationStrategy.cs`
+- **Interface**: `CalculateFare(double distanceKm) : Fare`
+
+#### Concrete Strategies
+| Class | File | Description |
+|-------|------|-----------|
+| MotorbikeFareStrategy | `Domain/Strategies/MotorbikeFareStrategy.cs` | Fare calculation for motorbike |
+| CarFareStrategy | `Domain/Strategies/CarFareStrategy.cs` | Fare calculation for car |
+
+#### `FareCalculationStrategyFactory`
+- **File**: `Domain/Strategies/FareCalculationStrategyFactory.cs`
+- **Method**: `Create(VehicleType) : IFareCalculationStrategy`
+- **Pattern**: Factory Method (docs/Strategy.md Section 5.1)
+
+**Pattern**: Fare calculation now uses Strategy Pattern. `FareService` delegates to strategy via factory, with fallback to `FareRule` repository for custom admin rules.
 - **Thuộc tính**:
   - `VehicleType` {get}
   - `Money BaseFare` {get}
@@ -231,6 +252,7 @@
 #### `Driver`
 - **File**: `Domain/Entities/Users/Driver.cs`
 - **Mục đích**: Tài xế với state pattern + financial tracking
+- **Thread Safety**: Uses `Interlocked.Exchange` for atomic state transitions (per docs/State.md Section 3.3)
 - **Thuộc tính**:
   - `string Status` {get; private set} - Derived từ IDriverState (Offline, Available, OnTrip)
   - `Location Position` {get; private set}

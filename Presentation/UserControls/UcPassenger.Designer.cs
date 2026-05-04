@@ -2,13 +2,13 @@ namespace Presentation.UserControls
 {
     using Presentation.Constants;
     using System.Windows.Forms;
-
+    // cái cmb chọn loại xe nên gộp với thằng hiện giá
     partial class UcPassenger
     {
         private System.ComponentModel.IContainer components = null;
-        private System.Windows.Forms.ErrorProvider errorProvider;
+        private Presentation.Components.UcFareVehicleSelector farePanel;
         private System.Windows.Forms.SplitContainer splitMain;
-        private Presentation.Components.MapControl mapControl;
+        private Presentation.Components.UcMap mapControl;
 
         // Navigation and Layout
         private System.Windows.Forms.Panel pnlSidebar;
@@ -26,9 +26,9 @@ namespace Presentation.UserControls
         // Stage panels
         private System.Windows.Forms.Panel pnlBooking;
         private System.Windows.Forms.Label lblPickup;
-        private Presentation.Components.LocationPickerControl pickupPicker;
+        private Presentation.Components.UcLocationPicker pickupPicker;
         private System.Windows.Forms.Label lblDestination;
-        private Presentation.Components.LocationPickerControl destinationPicker;
+        private Presentation.Components.UcLocationPicker destinationPicker;
         private System.Windows.Forms.Label lblVehicleType;
         private System.Windows.Forms.ComboBox cmbVehicleType;
         private System.Windows.Forms.Button btnBook;
@@ -39,8 +39,8 @@ namespace Presentation.UserControls
         private System.Windows.Forms.Button btnCancelSearch;
 
         private System.Windows.Forms.Panel pnlTracking;
-        private Presentation.Components.TripStatusPanel tripStatusPanel;
-        private Presentation.Components.DriverCardControl driverCard;
+private Presentation.Components.TripStatusPanel tripStatusPanel;
+        private Presentation.Components.UcDriverCard driverCard;
         private System.Windows.Forms.Button btnCancelTrip;
 
         private System.Windows.Forms.Panel pnlPayment;
@@ -58,11 +58,6 @@ namespace Presentation.UserControls
                 components.Dispose();
             }
 
-            if (disposing && (errorProvider != null))
-            {
-                errorProvider.Dispose();
-            }
-
             base.Dispose(disposing);
         }
 
@@ -71,34 +66,28 @@ namespace Presentation.UserControls
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             this.splitMain = new System.Windows.Forms.SplitContainer();
-            this.mapControl = new Presentation.Components.MapControl();
-            this.pnlSidebar = new System.Windows.Forms.Panel();
-            this.btnMenu = new System.Windows.Forms.Button();
-            this.btnHistory = new System.Windows.Forms.Button();
-            this.btnProfile = new System.Windows.Forms.Button();
-            this.btnLogout = new System.Windows.Forms.Button();
-            this.lblPassengerName = new System.Windows.Forms.Label();
+            this.mapControl = new Presentation.Components.UcMap();
             this.tblRight = new System.Windows.Forms.TableLayoutPanel();
             this.pnlHeader = new System.Windows.Forms.Panel();
+            this.lblPassengerName = new System.Windows.Forms.Label();
             this.pnlActionStage = new System.Windows.Forms.Panel();
             this.pnlBooking = new System.Windows.Forms.Panel();
             this.btnBook = new System.Windows.Forms.Button();
-            this.lblVehicleType = new System.Windows.Forms.Label();
             this.cmbVehicleType = new System.Windows.Forms.ComboBox();
+            this.lblVehicleType = new System.Windows.Forms.Label();
+            this.destinationPicker = new Presentation.Components.UcLocationPicker();
             this.lblDestination = new System.Windows.Forms.Label();
-            this.destinationPicker = new Presentation.Components.LocationPickerControl();
+            this.pickupPicker = new Presentation.Components.UcLocationPicker();
             this.lblPickup = new System.Windows.Forms.Label();
-            this.pickupPicker = new Presentation.Components.LocationPickerControl();
             this.pnlSearching = new System.Windows.Forms.Panel();
             this.btnCancelSearch = new System.Windows.Forms.Button();
             this.lblSearching = new System.Windows.Forms.Label();
             this.progressSearching = new System.Windows.Forms.ProgressBar();
             this.pnlTracking = new System.Windows.Forms.Panel();
             this.btnCancelTrip = new System.Windows.Forms.Button();
-            this.driverCard = new Presentation.Components.DriverCardControl();
-            this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
+            this.driverCard = new Presentation.Components.UcDriverCard();
+this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
             this.pnlPayment = new System.Windows.Forms.Panel();
             this.btnRateDriver = new System.Windows.Forms.Button();
             this.btnConfirmPayment = new System.Windows.Forms.Button();
@@ -106,8 +95,16 @@ namespace Presentation.UserControls
             this.pnlHistory = new System.Windows.Forms.Panel();
             this.dgvHistory = new System.Windows.Forms.DataGridView();
             this.lblStatus = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this._validationErrorProvider)).BeginInit();
-            this.pnlSidebar.SuspendLayout();
+            this.pnlSidebar = new System.Windows.Forms.Panel();
+            this.btnLogout = new System.Windows.Forms.Button();
+            this.btnProfile = new System.Windows.Forms.Button();
+            this.btnHistory = new System.Windows.Forms.Button();
+            this.btnMenu = new System.Windows.Forms.Button();
+            this.farePanel = new Presentation.Components.UcFareVehicleSelector();
+            ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
+            this.splitMain.Panel1.SuspendLayout();
+            this.splitMain.Panel2.SuspendLayout();
+            this.splitMain.SuspendLayout();
             this.tblRight.SuspendLayout();
             this.pnlHeader.SuspendLayout();
             this.pnlActionStage.SuspendLayout();
@@ -117,122 +114,44 @@ namespace Presentation.UserControls
             this.pnlPayment.SuspendLayout();
             this.pnlHistory.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvHistory)).BeginInit();
+            this.pnlSidebar.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // errorProvider
-            // 
-            this.errorProvider.ContainerControl = this;
-            // 
-            // pnlSidebar
-            // 
-            this.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
-            this.pnlSidebar.Controls.Add(this.btnLogout);
-            this.pnlSidebar.Controls.Add(this.btnProfile);
-            this.pnlSidebar.Controls.Add(this.btnHistory);
-            this.pnlSidebar.Controls.Add(this.btnMenu);
-            this.pnlSidebar.Dock = System.Windows.Forms.DockStyle.Left;
-            this.pnlSidebar.Location = new System.Drawing.Point(0, 0);
-            this.pnlSidebar.Name = "pnlSidebar";
-            this.pnlSidebar.Size = new System.Drawing.Size(200, 753);
-            this.pnlSidebar.TabIndex = 1;
-            // 
-            // btnMenu
-            // 
-            this.btnMenu.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnMenu.FlatAppearance.BorderSize = 0;
-            this.btnMenu.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
-            this.btnMenu.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
-            this.btnMenu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnMenu.Font = new System.Drawing.Font("Segoe UI", 12F);
-            this.btnMenu.ForeColor = System.Drawing.Color.White;
-            this.btnMenu.Location = new System.Drawing.Point(0, 0);
-            this.btnMenu.Name = "btnMenu";
-            this.btnMenu.Size = new System.Drawing.Size(200, 50);
-            this.btnMenu.TabIndex = 0;
-            this.btnMenu.Text = "☰  Menu";
-            this.btnMenu.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnMenu.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
-            this.btnMenu.UseVisualStyleBackColor = true;
-            // 
-            // btnHistory
-            // 
-            this.btnHistory.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnHistory.FlatAppearance.BorderSize = 0;
-            this.btnHistory.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
-            this.btnHistory.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
-            this.btnHistory.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnHistory.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.btnHistory.ForeColor = System.Drawing.Color.White;
-            this.btnHistory.Location = new System.Drawing.Point(0, 50);
-            this.btnHistory.Name = "btnHistory";
-            this.btnHistory.Size = new System.Drawing.Size(200, 50);
-            this.btnHistory.TabIndex = 1;
-            this.btnHistory.Text = "🕒  Lịch sử";
-            this.btnHistory.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnHistory.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
-            this.btnHistory.UseVisualStyleBackColor = true;
-            // 
-            // btnProfile
-            // 
-            this.btnProfile.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnProfile.FlatAppearance.BorderSize = 0;
-            this.btnProfile.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
-            this.btnProfile.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
-            this.btnProfile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnProfile.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.btnProfile.ForeColor = System.Drawing.Color.White;
-            this.btnProfile.Location = new System.Drawing.Point(0, 100);
-            this.btnProfile.Name = "btnProfile";
-            this.btnProfile.Size = new System.Drawing.Size(200, 50);
-            this.btnProfile.TabIndex = 2;
-            this.btnProfile.Text = "👤  Hồ sơ";
-            this.btnProfile.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnProfile.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
-            this.btnProfile.UseVisualStyleBackColor = true;
-            // 
-            // btnLogout
-            // 
-            this.btnLogout.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.btnLogout.FlatAppearance.BorderSize = 0;
-            this.btnLogout.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
-            this.btnLogout.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
-            this.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLogout.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.btnLogout.ForeColor = System.Drawing.Color.White;
-            this.btnLogout.Location = new System.Drawing.Point(0, 703);
-            this.btnLogout.Name = "btnLogout";
-            this.btnLogout.Size = new System.Drawing.Size(200, 50);
-            this.btnLogout.TabIndex = 3;
-            this.btnLogout.Text = "⏻  Thoát";
-            this.btnLogout.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnLogout.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
-            this.btnLogout.UseVisualStyleBackColor = true;
             // 
             // splitMain
             // 
             this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitMain.Location = new System.Drawing.Point(200, 0);
+            this.splitMain.Location = new System.Drawing.Point(0, 0);
             this.splitMain.Name = "splitMain";
+            // 
+            // farePanel
+            // 
+            this.farePanel.BackColor = System.Drawing.Color.White;
+            this.farePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.farePanel.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.farePanel.Location = new System.Drawing.Point(0, 703);
+            this.farePanel.Name = "farePanel";
+            this.farePanel.Size = new System.Drawing.Size(768, 50);
+            this.farePanel.TabIndex = 1;
             // 
             // splitMain.Panel1
             // 
             this.splitMain.Panel1.Controls.Add(this.mapControl);
+            this.splitMain.Panel1.Controls.Add(this.farePanel);
             // 
             // splitMain.Panel2
             // 
             this.splitMain.Panel2.Controls.Add(this.tblRight);
-            this.splitMain.Size = new System.Drawing.Size(1000, 753);
-            this.splitMain.SplitterDistance = 640;
+            this.splitMain.Size = new System.Drawing.Size(1200, 753);
+            this.splitMain.SplitterDistance = 768;
             this.splitMain.TabIndex = 0;
-// 
+            // 
             // mapControl
             // 
-            // ActiveSlot removed - location selection now handled by LocationPickerControl
             this.mapControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mapControl.Location = new System.Drawing.Point(0, 0);
             this.mapControl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.mapControl.Name = "mapControl";
-            this.mapControl.Size = new System.Drawing.Size(840, 753);
+            this.mapControl.Size = new System.Drawing.Size(768, 753);
             this.mapControl.TabIndex = 0;
             // 
             // tblRight
@@ -249,7 +168,7 @@ namespace Presentation.UserControls
             this.tblRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 53F));
             this.tblRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tblRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tblRight.Size = new System.Drawing.Size(356, 753);
+            this.tblRight.Size = new System.Drawing.Size(428, 753);
             this.tblRight.TabIndex = 0;
             // 
             // pnlHeader
@@ -259,7 +178,7 @@ namespace Presentation.UserControls
             this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlHeader.Location = new System.Drawing.Point(3, 3);
             this.pnlHeader.Name = "pnlHeader";
-            this.pnlHeader.Size = new System.Drawing.Size(350, 47);
+            this.pnlHeader.Size = new System.Drawing.Size(422, 47);
             this.pnlHeader.TabIndex = 0;
             // 
             // lblPassengerName
@@ -283,52 +202,41 @@ namespace Presentation.UserControls
             this.pnlActionStage.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlActionStage.Location = new System.Drawing.Point(3, 56);
             this.pnlActionStage.Name = "pnlActionStage";
-            this.pnlActionStage.Size = new System.Drawing.Size(350, 664);
+            this.pnlActionStage.Size = new System.Drawing.Size(422, 664);
             this.pnlActionStage.TabIndex = 1;
             // 
             // pnlBooking
             // 
+            this.pnlBooking.Controls.Add(this.btnBook);
             this.pnlBooking.Controls.Add(this.cmbVehicleType);
             this.pnlBooking.Controls.Add(this.lblVehicleType);
             this.pnlBooking.Controls.Add(this.destinationPicker);
             this.pnlBooking.Controls.Add(this.lblDestination);
             this.pnlBooking.Controls.Add(this.pickupPicker);
             this.pnlBooking.Controls.Add(this.lblPickup);
-            this.pnlBooking.Controls.Add(this.btnBook);
             this.pnlBooking.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlBooking.Location = new System.Drawing.Point(0, 0);
             this.pnlBooking.Name = "pnlBooking";
             this.pnlBooking.Padding = new System.Windows.Forms.Padding(8);
-            this.pnlBooking.Size = new System.Drawing.Size(350, 664);
+            this.pnlBooking.Size = new System.Drawing.Size(422, 664);
             this.pnlBooking.TabIndex = 0;
             // 
             // btnBook
             // 
-            this.btnBook.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
+            this.btnBook.AutoSize = true;
+            this.btnBook.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
             this.btnBook.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.btnBook.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnBook.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
-            this.btnBook.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
-            this.btnBook.AutoSize = true;
-            this.btnBook.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
-            this.btnBook.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
-            this.btnBook.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Large;
-            this.btnBook.Location = new System.Drawing.Point(8, 592);
+            this.btnBook.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.btnBook.ForeColor = System.Drawing.Color.White;
+            this.btnBook.Location = new System.Drawing.Point(8, 586);
+            this.btnBook.MinimumSize = new System.Drawing.Size(200, 48);
             this.btnBook.Name = "btnBook";
-            this.btnBook.Size = new System.Drawing.Size(200, Presentation.Constants.UiConstants.Heights.ActionButtonRow);
+            this.btnBook.Padding = new System.Windows.Forms.Padding(8, 6, 8, 6);
+            this.btnBook.Size = new System.Drawing.Size(406, 70);
             this.btnBook.TabIndex = 3;
             this.btnBook.Text = "Đặt xe";
             this.btnBook.UseVisualStyleBackColor = false;
-            // 
-            // lblVehicleType
-            // 
-            this.lblVehicleType.AutoSize = true;
-            this.lblVehicleType.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.lblVehicleType.Location = new System.Drawing.Point(8, 201);
-            this.lblVehicleType.Name = "lblVehicleType";
-            this.lblVehicleType.Size = new System.Drawing.Size(67, 23);
-            this.lblVehicleType.TabIndex = 4;
-            this.lblVehicleType.Text = "Loại xe:";
             // 
             // cmbVehicleType
             // 
@@ -338,49 +246,64 @@ namespace Presentation.UserControls
             this.cmbVehicleType.Items.AddRange(new object[] {
             "Xe máy",
             "Ô tô"});
-            this.cmbVehicleType.Location = new System.Drawing.Point(8, 226);
+            this.cmbVehicleType.Location = new System.Drawing.Point(8, 311);
             this.cmbVehicleType.Name = "cmbVehicleType";
             this.cmbVehicleType.Size = new System.Drawing.Size(334, 31);
             this.cmbVehicleType.TabIndex = 2;
+            this.cmbVehicleType.SelectedIndexChanged += new System.EventHandler(this.cmbVehicleType_SelectedIndexChanged);
             // 
+            // lblVehicleType
+            // 
+            this.lblVehicleType.AutoSize = true;
+            this.lblVehicleType.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.lblVehicleType.Location = new System.Drawing.Point(8, 268);
+            this.lblVehicleType.Name = "lblVehicleType";
+            this.lblVehicleType.Size = new System.Drawing.Size(67, 23);
+            this.lblVehicleType.TabIndex = 4;
+            this.lblVehicleType.Text = "Loại xe:";
+            // 
+            // destinationPicker
+            // 
+            this.destinationPicker.BackColor = System.Drawing.Color.White;
+            this.destinationPicker.CurrentDestination = null;
+            this.destinationPicker.CurrentPickup = null;
+            this.destinationPicker.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.destinationPicker.Dock = System.Windows.Forms.DockStyle.Top;
+            this.destinationPicker.ForeColor = System.Drawing.Color.Black;
+            this.destinationPicker.Location = new System.Drawing.Point(8, 102);
+            this.destinationPicker.Name = "destinationPicker";
+            this.destinationPicker.SelectedLocation = null;
+            this.destinationPicker.Size = new System.Drawing.Size(406, 34);
+            this.destinationPicker.SlotLabel = "";
+            this.destinationPicker.TabIndex = 1;
             // 
             // lblDestination
             // 
             this.lblDestination.AutoSize = true;
             this.lblDestination.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblDestination.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblDestination.Location = new System.Drawing.Point(8, 84);
+            this.lblDestination.Location = new System.Drawing.Point(8, 67);
             this.lblDestination.Name = "lblDestination";
             this.lblDestination.Padding = new System.Windows.Forms.Padding(0, 10, 0, 5);
-            this.lblDestination.Size = new System.Drawing.Size(81, 35);
+            this.lblDestination.Size = new System.Drawing.Size(74, 35);
             this.lblDestination.TabIndex = 5;
             this.lblDestination.Text = "Đến đâu?";
             // 
-// destinationPicker
+            // pickupPicker
             // 
-            this.destinationPicker.CurrentDestination = null;
-            this.destinationPicker.CurrentPickup = null;
-            this.destinationPicker.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.destinationPicker.Dock = System.Windows.Forms.DockStyle.Top;
-            this.destinationPicker.Location = new System.Drawing.Point(8, 50);
-            this.destinationPicker.Name = "destinationPicker";
-            this.destinationPicker.SelectedLocation = null;
-            this.destinationPicker.Size = new System.Drawing.Size(334, 34);
-            this.destinationPicker.SlotLabel = "";
-            this.destinationPicker.TabIndex = 1;
-            // 
-// pickupPicker
-            // 
+            this.pickupPicker.BackColor = System.Drawing.Color.White;
             this.pickupPicker.CurrentDestination = null;
             this.pickupPicker.CurrentPickup = null;
             this.pickupPicker.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pickupPicker.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pickupPicker.Location = new System.Drawing.Point(8, 43);
+            this.pickupPicker.ForeColor = System.Drawing.Color.Black;
+            this.pickupPicker.Location = new System.Drawing.Point(8, 33);
             this.pickupPicker.Name = "pickupPicker";
             this.pickupPicker.SelectedLocation = null;
-            this.pickupPicker.Size = new System.Drawing.Size(334, 34);
+            this.pickupPicker.Size = new System.Drawing.Size(406, 34);
             this.pickupPicker.SlotLabel = "";
             this.pickupPicker.TabIndex = 0;
+            this.pickupPicker.Load += new System.EventHandler(this.pickupPicker_Load);
             // 
             // lblPickup
             // 
@@ -390,7 +313,7 @@ namespace Presentation.UserControls
             this.lblPickup.Location = new System.Drawing.Point(8, 8);
             this.lblPickup.Name = "lblPickup";
             this.lblPickup.Padding = new System.Windows.Forms.Padding(0, 0, 0, 5);
-            this.lblPickup.Size = new System.Drawing.Size(73, 25);
+            this.lblPickup.Size = new System.Drawing.Size(65, 25);
             this.lblPickup.TabIndex = 6;
             this.lblPickup.Text = "Từ đâu?";
             // 
@@ -402,20 +325,19 @@ namespace Presentation.UserControls
             this.pnlSearching.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlSearching.Location = new System.Drawing.Point(0, 0);
             this.pnlSearching.Name = "pnlSearching";
-            this.pnlSearching.Size = new System.Drawing.Size(350, 664);
+            this.pnlSearching.Size = new System.Drawing.Size(422, 664);
             this.pnlSearching.TabIndex = 1;
             this.pnlSearching.Visible = false;
             // 
             // btnCancelSearch
             // 
             this.btnCancelSearch.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.btnCancelSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCancelSearch.AutoSize = true;
-            this.btnCancelSearch.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
-            this.btnCancelSearch.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
-            this.btnCancelSearch.Location = new System.Drawing.Point(100, 188);
+            this.btnCancelSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCancelSearch.Location = new System.Drawing.Point(136, 188);
             this.btnCancelSearch.Name = "btnCancelSearch";
-            this.btnCancelSearch.Size = new System.Drawing.Size(150, 38);
+            this.btnCancelSearch.Padding = new System.Windows.Forms.Padding(8, 6, 8, 6);
+            this.btnCancelSearch.Size = new System.Drawing.Size(150, 40);
             this.btnCancelSearch.TabIndex = 2;
             this.btnCancelSearch.Text = "Huỷ yêu cầu";
             this.btnCancelSearch.UseVisualStyleBackColor = true;
@@ -425,7 +347,7 @@ namespace Presentation.UserControls
             this.lblSearching.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.lblSearching.AutoSize = true;
             this.lblSearching.Font = new System.Drawing.Font("Segoe UI", 12F);
-            this.lblSearching.Location = new System.Drawing.Point(80, 113);
+            this.lblSearching.Location = new System.Drawing.Point(116, 113);
             this.lblSearching.Name = "lblSearching";
             this.lblSearching.Size = new System.Drawing.Size(156, 28);
             this.lblSearching.TabIndex = 1;
@@ -434,7 +356,7 @@ namespace Presentation.UserControls
             // progressSearching
             // 
             this.progressSearching.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.progressSearching.Location = new System.Drawing.Point(40, 151);
+            this.progressSearching.Location = new System.Drawing.Point(76, 151);
             this.progressSearching.MarqueeAnimationSpeed = 30;
             this.progressSearching.Name = "progressSearching";
             this.progressSearching.Size = new System.Drawing.Size(270, 15);
@@ -449,23 +371,17 @@ namespace Presentation.UserControls
             this.pnlTracking.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlTracking.Location = new System.Drawing.Point(0, 0);
             this.pnlTracking.Name = "pnlTracking";
-            this.pnlTracking.Size = new System.Drawing.Size(350, 664);
+            this.pnlTracking.Size = new System.Drawing.Size(422, 664);
             this.pnlTracking.TabIndex = 2;
             this.pnlTracking.Visible = false;
             // 
             // btnCancelTrip
             // 
-            this.btnCancelTrip.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancelTrip.BackColor = Presentation.Constants.UiConstants.Colors.Danger;
-            this.btnCancelTrip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancelTrip.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
-            this.btnCancelTrip.AutoSize = true;
-            this.btnCancelTrip.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
-            this.btnCancelTrip.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
-            this.btnCancelTrip.Location = new System.Drawing.Point(8, 621);
+            this.btnCancelTrip.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnCancelTrip.Location = new System.Drawing.Point(0, 169);
             this.btnCancelTrip.Name = "btnCancelTrip";
-            this.btnCancelTrip.Size = new System.Drawing.Size(334, 38);
+            this.btnCancelTrip.Padding = new System.Windows.Forms.Padding(8, 6, 8, 6);
+            this.btnCancelTrip.Size = new System.Drawing.Size(422, 38);
             this.btnCancelTrip.TabIndex = 2;
             this.btnCancelTrip.Text = "Huỷ chuyến";
             this.btnCancelTrip.UseVisualStyleBackColor = false;
@@ -478,7 +394,7 @@ namespace Presentation.UserControls
             this.driverCard.Dock = System.Windows.Forms.DockStyle.Top;
             this.driverCard.Location = new System.Drawing.Point(0, 94);
             this.driverCard.Name = "driverCard";
-            this.driverCard.Size = new System.Drawing.Size(350, 75);
+            this.driverCard.Size = new System.Drawing.Size(422, 75);
             this.driverCard.TabIndex = 3;
             // 
             // tripStatusPanel
@@ -486,7 +402,7 @@ namespace Presentation.UserControls
             this.tripStatusPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.tripStatusPanel.Location = new System.Drawing.Point(0, 0);
             this.tripStatusPanel.Name = "tripStatusPanel";
-            this.tripStatusPanel.Size = new System.Drawing.Size(350, 94);
+            this.tripStatusPanel.Size = new System.Drawing.Size(422, 94);
             this.tripStatusPanel.TabIndex = 0;
             // 
             // pnlPayment
@@ -497,20 +413,19 @@ namespace Presentation.UserControls
             this.pnlPayment.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlPayment.Location = new System.Drawing.Point(0, 0);
             this.pnlPayment.Name = "pnlPayment";
-            this.pnlPayment.Size = new System.Drawing.Size(350, 664);
+            this.pnlPayment.Size = new System.Drawing.Size(422, 664);
             this.pnlPayment.TabIndex = 3;
             this.pnlPayment.Visible = false;
             // 
             // btnRateDriver
             // 
             this.btnRateDriver.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.btnRateDriver.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRateDriver.AutoSize = true;
-            this.btnRateDriver.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
-            this.btnRateDriver.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
-            this.btnRateDriver.Location = new System.Drawing.Point(100, 226);
+            this.btnRateDriver.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRateDriver.Location = new System.Drawing.Point(136, 226);
             this.btnRateDriver.Name = "btnRateDriver";
-            this.btnRateDriver.Size = new System.Drawing.Size(150, 38);
+            this.btnRateDriver.Padding = new System.Windows.Forms.Padding(8, 6, 8, 6);
+            this.btnRateDriver.Size = new System.Drawing.Size(150, 40);
             this.btnRateDriver.TabIndex = 2;
             this.btnRateDriver.Text = "Đánh giá tài xế";
             this.btnRateDriver.UseVisualStyleBackColor = true;
@@ -518,17 +433,16 @@ namespace Presentation.UserControls
             // btnConfirmPayment
             // 
             this.btnConfirmPayment.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.btnConfirmPayment.BackColor = Presentation.Constants.UiConstants.Colors.Primary;
-            this.btnConfirmPayment.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnConfirmPayment.Font = Presentation.Constants.UiConstants.Typography.BodyBold;
-            this.btnConfirmPayment.ForeColor = Presentation.Constants.UiConstants.Colors.TextOnKey;
             this.btnConfirmPayment.AutoSize = true;
-            this.btnConfirmPayment.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
-            this.btnConfirmPayment.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
-            this.btnConfirmPayment.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Large;
-            this.btnConfirmPayment.Location = new System.Drawing.Point(40, 151);
+            this.btnConfirmPayment.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
+            this.btnConfirmPayment.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnConfirmPayment.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.btnConfirmPayment.ForeColor = System.Drawing.Color.White;
+            this.btnConfirmPayment.Location = new System.Drawing.Point(76, 151);
+            this.btnConfirmPayment.MinimumSize = new System.Drawing.Size(200, 48);
             this.btnConfirmPayment.Name = "btnConfirmPayment";
-            this.btnConfirmPayment.Size = new System.Drawing.Size(270, Presentation.Constants.UiConstants.Heights.ActionButtonRow);
+            this.btnConfirmPayment.Padding = new System.Windows.Forms.Padding(8, 6, 8, 6);
+            this.btnConfirmPayment.Size = new System.Drawing.Size(270, 70);
             this.btnConfirmPayment.TabIndex = 1;
             this.btnConfirmPayment.Text = "Xác nhận thanh toán";
             this.btnConfirmPayment.UseVisualStyleBackColor = false;
@@ -538,7 +452,7 @@ namespace Presentation.UserControls
             this.lblTotalAmount.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.lblTotalAmount.AutoSize = true;
             this.lblTotalAmount.Font = new System.Drawing.Font("Segoe UI", 20F, System.Drawing.FontStyle.Bold);
-            this.lblTotalAmount.Location = new System.Drawing.Point(100, 75);
+            this.lblTotalAmount.Location = new System.Drawing.Point(136, 75);
             this.lblTotalAmount.Name = "lblTotalAmount";
             this.lblTotalAmount.Size = new System.Drawing.Size(62, 46);
             this.lblTotalAmount.TabIndex = 0;
@@ -550,7 +464,7 @@ namespace Presentation.UserControls
             this.pnlHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlHistory.Location = new System.Drawing.Point(0, 0);
             this.pnlHistory.Name = "pnlHistory";
-            this.pnlHistory.Size = new System.Drawing.Size(350, 664);
+            this.pnlHistory.Size = new System.Drawing.Size(422, 664);
             this.pnlHistory.TabIndex = 4;
             this.pnlHistory.Visible = false;
             // 
@@ -569,7 +483,7 @@ namespace Presentation.UserControls
             this.dgvHistory.RowHeadersWidth = 51;
             this.dgvHistory.RowTemplate.Height = 24;
             this.dgvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvHistory.Size = new System.Drawing.Size(350, 664);
+            this.dgvHistory.Size = new System.Drawing.Size(422, 664);
             this.dgvHistory.TabIndex = 0;
             // 
             // lblStatus
@@ -579,10 +493,95 @@ namespace Presentation.UserControls
             this.lblStatus.ForeColor = System.Drawing.Color.Gray;
             this.lblStatus.Location = new System.Drawing.Point(3, 723);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(350, 30);
+            this.lblStatus.Size = new System.Drawing.Size(422, 30);
             this.lblStatus.TabIndex = 2;
             this.lblStatus.Text = "Sẵn sàng";
             this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // pnlSidebar
+            // 
+            this.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
+            this.pnlSidebar.Controls.Add(this.btnLogout);
+            this.pnlSidebar.Controls.Add(this.btnProfile);
+            this.pnlSidebar.Controls.Add(this.btnHistory);
+            this.pnlSidebar.Controls.Add(this.btnMenu);
+            this.pnlSidebar.Dock = System.Windows.Forms.DockStyle.Left;
+            this.pnlSidebar.Location = new System.Drawing.Point(0, 0);
+            this.pnlSidebar.Name = "pnlSidebar";
+            this.pnlSidebar.Size = new System.Drawing.Size(200, 753);
+            this.pnlSidebar.TabIndex = 1;
+            // 
+            // btnLogout
+            // 
+            this.btnLogout.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnLogout.FlatAppearance.BorderSize = 0;
+            this.btnLogout.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
+            this.btnLogout.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnLogout.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.btnLogout.ForeColor = System.Drawing.Color.White;
+            this.btnLogout.Location = new System.Drawing.Point(0, 150);
+            this.btnLogout.Name = "btnLogout";
+            this.btnLogout.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
+            this.btnLogout.Size = new System.Drawing.Size(200, 50);
+            this.btnLogout.TabIndex = 3;
+            this.btnLogout.Text = "⏻  Thoát";
+            this.btnLogout.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnLogout.UseVisualStyleBackColor = true;
+            // 
+            // btnProfile
+            // 
+            this.btnProfile.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnProfile.FlatAppearance.BorderSize = 0;
+            this.btnProfile.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
+            this.btnProfile.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.btnProfile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnProfile.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.btnProfile.ForeColor = System.Drawing.Color.White;
+            this.btnProfile.Location = new System.Drawing.Point(0, 100);
+            this.btnProfile.Name = "btnProfile";
+            this.btnProfile.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
+            this.btnProfile.Size = new System.Drawing.Size(200, 50);
+            this.btnProfile.TabIndex = 2;
+            this.btnProfile.Text = "👤  Hồ sơ";
+            this.btnProfile.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnProfile.UseVisualStyleBackColor = true;
+            // 
+            // btnHistory
+            // 
+            this.btnHistory.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnHistory.FlatAppearance.BorderSize = 0;
+            this.btnHistory.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
+            this.btnHistory.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.btnHistory.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnHistory.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.btnHistory.ForeColor = System.Drawing.Color.White;
+            this.btnHistory.Location = new System.Drawing.Point(0, 50);
+            this.btnHistory.Name = "btnHistory";
+            this.btnHistory.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
+            this.btnHistory.Size = new System.Drawing.Size(200, 50);
+            this.btnHistory.TabIndex = 1;
+            this.btnHistory.Text = "🕒  Lịch sử";
+            this.btnHistory.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnHistory.UseVisualStyleBackColor = true;
+            // 
+            // btnMenu
+            // 
+            this.btnMenu.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnMenu.FlatAppearance.BorderSize = 0;
+            this.btnMenu.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(122)))), ((int)(((byte)(204)))));
+            this.btnMenu.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(62)))), ((int)(((byte)(62)))), ((int)(((byte)(66)))));
+            this.btnMenu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMenu.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.btnMenu.ForeColor = System.Drawing.Color.White;
+            this.btnMenu.Location = new System.Drawing.Point(0, 0);
+            this.btnMenu.Name = "btnMenu";
+            this.btnMenu.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
+            this.btnMenu.Size = new System.Drawing.Size(200, 50);
+            this.btnMenu.TabIndex = 0;
+            this.btnMenu.Text = "☰  Menu";
+            this.btnMenu.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnMenu.UseVisualStyleBackColor = true;
             // 
             // UcPassenger
             // 
@@ -592,9 +591,6 @@ namespace Presentation.UserControls
             this.Controls.Add(this.splitMain);
             this.Name = "UcPassenger";
             this.Size = new System.Drawing.Size(1200, 753);
-            ((System.ComponentModel.ISupportInitialize)(this._validationErrorProvider)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
-            this.pnlSidebar.ResumeLayout(false);
             this.splitMain.Panel1.ResumeLayout(false);
             this.splitMain.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).EndInit();
@@ -612,6 +608,7 @@ namespace Presentation.UserControls
             this.pnlPayment.PerformLayout();
             this.pnlHistory.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvHistory)).EndInit();
+            this.pnlSidebar.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

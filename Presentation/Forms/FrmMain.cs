@@ -1,11 +1,12 @@
 using Application.Interfaces;
+using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.Repositories;
+using Domain.ValueObjects;
 using Presentation.UserControls;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using Domain.Entities;
 
 namespace Presentation.Shells
 {
@@ -26,11 +27,11 @@ namespace Presentation.Shells
         private readonly IReviewService _reviewService;
         private readonly IVehicleRepository _vehicleRepository;
 
-        private User _currentUser;
+        private User _currentUser; // sao cái này không dùng
         private UcAuth _ucAuth;
-        private UcPassenger _ucPassenger;
-        private UcDriver _ucDriver;
-        private UcAdmin _ucAdmin;
+private UcPassenger _ucPassenger;
+private UcDriver _ucDriver;
+private UcAdmin _ucAdmin;
 
         public FrmMain(
             IUserService userService,
@@ -57,23 +58,61 @@ namespace Presentation.Shells
             SetupShell();
         }
 
-private void SetupShell()
+        private void SetupShell()
         {
-            Text = "RideGo";
+            Text = "OOP";
             Size = new Size(1200, 800);
             MinimumSize = new Size(900, 600);
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = Color.White;
             Font = new Font("Segoe UI", 9.5f);
+            // BaseForm giờ là shell đơn giản, pnlContent đã Dock = Fill trong Designer
 
-            // Hide inherited TabControl from BaseShell to allow custom content panel
-            if (MainTabControl != null)
-            {
-                MainTabControl.Visible = false;
-            }
+            // Thêm sự kiện cho nút Multi-Role
+            btnMultiRole.Click += btnMultiRole_Click;
+            btnMultiRole.BringToFront();
         }
 
-protected override void OnLoad(EventArgs e)
+        private void btnMultiRole_Click(object sender, EventArgs e)
+        {
+            ExecuteWithHandling("Mở giao diện Multi-Role", () =>
+            {
+                // ơ cái này ngộ, tạo trong data seed rồi lấy nó làm cái test cố định, chứ sao tạo ở đây
+                // Tạo tài khoản demo cho Passenger và Driver
+                var passenger = new Passenger(
+                    "Hành khách Demo",
+                    "0911111111",
+                    "123456");
+
+                var demoLocation = new Location(
+                    new Coordinate(10.7769, 106.7009),
+                    new Address("Điểm demo", "Lê Lợi", "Quận 1", "Hồ Chí Minh", "Việt Nam", "1"));
+
+                var driver = new Driver(
+                    "Tài xế Demo",
+                    "0900000000",
+                    "123456",
+                    "DL123456",
+                    Guid.NewGuid(),
+                    demoLocation);
+
+                var multiRoleForm = new FrmMultiRole(
+                    _userService,
+                    _tripService,
+                    _fareService,
+                    _mapService,
+                    _simulationService,
+                    _matchingService,
+                    _reviewService,
+                    _vehicleRepository,
+                    passenger,
+                    driver);
+
+                multiRoleForm.Show();
+            });
+        }
+        // 1 method deadcode
+        protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
             ExecuteWithHandling("Mo man hinh dang nhap", ShowAuthScreen);
@@ -103,7 +142,7 @@ public void ShowAuthScreen()
                 _currentUser = passenger;
                 if (_ucPassenger == null)
                 {
-                    _ucPassenger = new UcPassenger(
+_ucPassenger = new UcPassenger(
                         passenger,
                         _tripService,
                         _userService,
@@ -113,7 +152,6 @@ public void ShowAuthScreen()
                         _matchingService,
                         _reviewService);
                     _ucPassenger.RequestLogout += OnRequestLogout;
-                    _ucPassenger.RequestShowProfile += OnRequestShowProfile;
                 }
                 ShowUserControl(_ucPassenger);
             });
@@ -126,7 +164,7 @@ public void ShowAuthScreen()
                 _currentUser = driver;
                 if (_ucDriver == null)
                 {
-                    _ucDriver = new UcDriver(
+_ucDriver = new UcDriver(
                         driver,
                         _tripService,
                         _userService,
@@ -134,7 +172,6 @@ public void ShowAuthScreen()
                         _fareService,
                         _matchingService);
                     _ucDriver.RequestLogout += OnRequestLogout;
-                    _ucDriver.RequestShowProfile += OnRequestShowProfile;
                 }
                 ShowUserControl(_ucDriver);
             });
@@ -213,21 +250,18 @@ public void ShowAuthScreen()
         {
             ExecuteWithHandling("Dang xuat", () =>
             {
-                if (_ucPassenger != null)
+if (_ucPassenger is UcPassenger ucP)
                 {
-                    _ucPassenger.RequestLogout -= OnRequestLogout;
-                    _ucPassenger.RequestShowProfile -= OnRequestShowProfile;
-                    _ucPassenger.Dispose();
+                    ucP.RequestLogout -= OnRequestLogout;
+                    ucP.Dispose();
                 }
-                if (_ucDriver != null)
+if (_ucDriver is UcDriver ucD)
                 {
-                    _ucDriver.RequestLogout -= OnRequestLogout;
-                    _ucDriver.RequestShowProfile -= OnRequestShowProfile;
-                    _ucDriver.Dispose();
+                    ucD.RequestLogout -= OnRequestLogout;
+                    ucD.Dispose();
                 }
                 if (_ucAdmin != null)
                 {
-                    _ucAdmin.RequestLogout -= OnRequestLogout;
                     _ucAdmin.Dispose();
                 }
                 if (_ucAuth != null)
@@ -244,28 +278,6 @@ public void ShowAuthScreen()
                 _ucAuth = null; 
                 ShowAuthScreen();
             });
-        }
-
-        private void OnRequestShowProfile(object sender, User user)
-        {
-            ExecuteWithHandling("Mo ho so ca nhan", () =>
-            {
-                var ucProfile = new UcProfile(user, _userService);
-                ShowInfo($"Đang hiển thị hồ sơ của: {user.Name}", "Hồ sơ cá nhân");
-                // MessageBox không hiển thị được ucProfile, cần giải pháp thay thế nếu muốn dùng UI phức tạp.
-            });
-        }
-
-        // --- Modal & Toast Helpers -----------------------------------------
-
-        public void ShowModal(UserControl content, string title)
-        {
-            ShowInfo(title, "Thông báo");
-        }
-
-        public void ShowToast(string message, int durationMs = 3000)
-        {
-            ExecuteWithHandling("Hien thi thong bao", () => ShowInfo(message));
         }
 
     }

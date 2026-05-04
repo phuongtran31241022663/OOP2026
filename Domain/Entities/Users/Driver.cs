@@ -4,6 +4,7 @@ using Domain.States.Drivers;
 using Domain.ValueObjects;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Threading;
 
 namespace Domain.Entities.Users
 {
@@ -308,16 +309,20 @@ namespace Domain.Entities.Users
         }
         #endregion
 
-        #region Private Methods
+#region Private Methods
         
         /// <summary>
-        /// (Internal) Chuyển đổi trạng thái của tài xế. Chỉ được gọi bởi các đối tượng <see cref="IDriverState"/>.
+        /// (Internal) Chuyển đổi trạng thái của tài xế một cách thread-safe.
+        /// Sử dụng Interlocked.Exchange để đảm bảo atomic state transition.
+        /// Chỉ được gọi bởi các đối tượng <see cref="IDriverState"/>.
         /// </summary>
         /// <param name="newState">Trạng thái mới cần chuyển đến.</param>
         internal void TransitionTo(IDriverState newState)
         {
-            var oldStateName = Status;
-            _currentState = newState;
+            if (newState == null)
+                throw new ArgumentNullException(nameof(newState));
+            string oldStateName = Status;
+            Interlocked.Exchange(ref _currentState, newState);
             AddEvent(new DriverStatusChangedEvent(Id, oldStateName, Status));
         }
 

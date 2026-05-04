@@ -1,36 +1,34 @@
-using Domain.ValueObjects;
-using System;
+﻿using System;
 using System.Drawing;
 using Domain.Entities.Users;
-using Domain.Entities;
+// file này bị lỗi unicode nhiều
+// cái này là thông tin tài xế trên giao diện à, với cho passenger thấy à??
 
 namespace Presentation.Components
 {
     /// <summary>
-    /// BaseUserControl hi?n th? th�ng tin t�i x? du?i d?ng card.
-    /// S? d?ng trong danh s�ch t�i x? c� s?n ho?c t�m ki?m.
+    /// BaseUserControl hi?n th? thông tin tài x? du?i d?ng card.
+    /// S? d?ng trong danh sách tài x? có s?n ho?c tìm ki?m.
     /// </summary>
-    public partial class DriverCardControl : BaseUserControl
+    public partial class UcDriverCard : BaseUserControl
     {
-
-
         /// <summary>
-        /// S? ki?n khi ngu?i d�ng click v�o driver card
+        /// S? ki?n khi ngu?i dùng click vào driver card
         /// </summary>
-        public event Action<DriverCardControl> Clicked;
+        public event Action<UcDriverCard> Clicked;
 
         /// <summary>
-        /// T�i x? du?c hi?n th?
+        /// Tài x? du?c hi?n th?
         /// </summary>
         public Driver Driver { get; private set; }
 
-        public DriverCardControl()
+        public UcDriverCard()
         {
             InitializeComponent();
         }
 
         /// <summary>
-        /// Set th�ng tin t�i x? d? hi?n th?
+        /// Set thông tin tài x? d? hi?n th?
         /// </summary>
         public void SetDriver(Driver driver, string vehicleDisplayText = null, double distanceKm = 0)
         {
@@ -70,12 +68,12 @@ namespace Presentation.Components
             switch (status)
             {
                 case "Available":
-                    _lblStatus.Text = "C� s?n";
+                    _lblStatus.Text = "Có s?n";
                     _lblStatus.ForeColor = Color.Green;
                     _statusIndicator.BackColor = Color.Green;
                     break;
                 case "OnTrip":
-                    _lblStatus.Text = "�ang ch?y";
+                    _lblStatus.Text = "Ðang ch?y";
                     _lblStatus.ForeColor = Color.Blue;
                     _statusIndicator.BackColor = Color.Blue;
                     break;
@@ -99,12 +97,12 @@ namespace Presentation.Components
 
         private void OnMouseEnter(object sender, EventArgs e)
         {
-            this.BackColor = Color.LightBlue;
+            BackColor = Color.LightBlue;
         }
 
         private void OnMouseLeave(object sender, EventArgs e)
         {
-            this.BackColor = Color.White;
+          BackColor = Color.White;
         }
     }
 }

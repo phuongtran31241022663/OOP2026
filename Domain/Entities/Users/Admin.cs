@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 
 namespace Domain.Entities.Users
@@ -29,13 +30,14 @@ namespace Domain.Entities.Users
         /// <param name="id">ID đã tồn tại.</param>
         /// <param name="name">Tên Quản trị viên.</param>
         /// <param name="phone">Số điện thoại.</param>
-        /// <param name="hashedPassword">Mật khẩu đã được hash.</param>
+        /// <param name="password">Mật khẩu đã được hash.</param>
+        [JsonConstructor]
         public Admin(
             Guid id,
             string name,
             string phone,
-            string hashedPassword)
-            : base(id, name, phone, hashedPassword) // Gọi constructor persistence của lớp User
+            string password)
+            : base(id, name, phone, password) // Gọi constructor persistence của lớp User
         {
         }
 

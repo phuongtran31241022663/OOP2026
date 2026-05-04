@@ -14,19 +14,43 @@ namespace Infrastructure.Repositories
         public async Task<Driver> GetByPhoneAsync(string phone)
         {
             await EnsureLoadedAsync();
-            return _items.FirstOrDefault(d => d.Phone == phone);
+            await _fileLock.WaitAsync();
+            try
+            {
+                return _items.FirstOrDefault(d => d.Phone == phone);
+            }
+            finally
+            {
+                _fileLock.Release();
+            }
         }
 
         public async Task<List<Driver>> GetAvailableDriversAsync()
         {
             await EnsureLoadedAsync();
-            return _items.Where(d => d.IsAvailable()).ToList();
+            await _fileLock.WaitAsync();
+            try
+            {
+                return _items.Where(d => d.IsAvailable()).ToList();
+            }
+            finally
+            {
+                _fileLock.Release();
+            }
         }
 
         public async Task<bool> ExistsByPhoneAsync(string phone)
         {
             await EnsureLoadedAsync();
-            return _items.Any(d => d.Phone == phone);
+            await _fileLock.WaitAsync();
+            try
+            {
+                return _items.Any(d => d.Phone == phone);
+            }
+            finally
+            {
+                _fileLock.Release();
+            }
         }
     }
 }

@@ -13,13 +13,29 @@ namespace Infrastructure.Repositories
         public async Task<Passenger> GetByPhoneAsync(string phone)
         {
             await EnsureLoadedAsync();
-            return _items.FirstOrDefault(p => p.Phone == phone);
+            await _fileLock.WaitAsync();
+            try
+            {
+                return _items.FirstOrDefault(p => p.Phone == phone);
+            }
+            finally
+            {
+                _fileLock.Release();
+            }
         }
 
         public async Task<bool> ExistsByPhoneAsync(string phone)
         {
             await EnsureLoadedAsync();
-            return _items.Any(p => p.Phone == phone);
+            await _fileLock.WaitAsync();
+            try
+            {
+                return _items.Any(p => p.Phone == phone);
+            }
+            finally
+            {
+                _fileLock.Release();
+            }
         }
     }
 }

@@ -35,6 +35,9 @@ namespace Presentation
                 IMapService mapService = services.MapService;
                 Domain.Repositories.IVehicleRepository vehicleRepository = services.VehicleRepository;
 
+                // Start simulation service for auto-matching
+                simulationService.StartSimulation();
+
                 FrmMain shell = new FrmMain(
                     userService,
                     tripService,
@@ -45,30 +48,29 @@ namespace Presentation
                     matchingService,
                     reviewService,
                     vehicleRepository);
-
                 System.Windows.Forms.Application.Run(shell);
             }
             catch (InvalidOperationException ex)
             {
                 MessageBox.Show(
-                    "Khoi dong ung dung that bai vi trang thai he thong chua san sang.\nChi tiet: " + ex.Message,
-                    "Loi khoi dong",
+                    "Khởi động ứng dụng thất bại vì trạng thái hệ thống chưa sẵn sàng.\nChi tiết: " + ex.Message,
+                    "Lỗi khởi động",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
             catch (FormatException ex)
             {
                 MessageBox.Show(
-                    "Khoi dong ung dung that bai do du lieu cau hinh khong dung dinh dang.\nChi tiet: " + ex.Message,
-                    "Loi dinh dang",
+                    "Khởi động ứng dụng thất bại do dữ liệu cấu hình không đúng định dạng.\nChi tiết: " + ex.Message,
+                    "Lỗi định dạng",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Khoi dong ung dung that bai do loi khong mong muon.\nChi tiet: " + ex.Message,
-                    "Loi he thong",
+                    "Khởi động ứng dụng thất bại do lỗi không mong muốn.\nChi tiết: " + ex.Message,
+                    "Lỗi hệ thống",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }

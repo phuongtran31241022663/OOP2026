@@ -1,5 +1,6 @@
 using Common.Utilities;
 using System;
+using System.Text.RegularExpressions;
 using Domain.SharedKernel;
 
 namespace Domain.Entities
@@ -48,8 +49,11 @@ namespace Domain.Entities
             protected set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Số điện thoại không hợp lệ.", nameof(Phone));
-                _phone = value.Trim();
+                    throw new ArgumentException("Số điện thoại không được để trống.", nameof(Phone));
+                string trimmed = value.Trim();
+                if (!Regex.IsMatch(trimmed, @"^0[0-9]{9}$"))
+                    throw new ArgumentException("Số điện thoại không đúng định dạng (phải là 10 số, bắt đầu bằng 0).", nameof(Phone));
+                _phone = trimmed;
             }
         }
 

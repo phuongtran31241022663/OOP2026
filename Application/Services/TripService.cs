@@ -1,11 +1,10 @@
-﻿﻿using Application.Events;
+﻿﻿﻿﻿using Application.Events;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.Enums;
 using Domain.Repositories;
 using Domain.ValueObjects;
-
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -18,10 +17,12 @@ namespace Application.Services
         public event EventHandler<TripStatusChangedEventArgs> TripStatusChanged;
 
         private static readonly SemaphoreSlim _matchLock = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim _tripCommandLock = new SemaphoreSlim(1, 1);
 
         private readonly ITripRepository _tripRepository;
         private readonly IDriverRepository _driverRepository;
         private readonly IPassengerRepository _passengerRepository;
+        private readonly IVehicleRepository _vehicleRepository;
         private readonly IFareService _fareService;
         private readonly IMapService _mapService;
 
@@ -29,19 +30,21 @@ namespace Application.Services
             ITripRepository tripRepository,
             IDriverRepository driverRepository,
             IPassengerRepository passengerRepository,
+            IVehicleRepository vehicleRepository,
             IFareService fareService,
             IMapService mapService)
         {
             _tripRepository = tripRepository;
             _driverRepository = driverRepository;
             _passengerRepository = passengerRepository;
+            _vehicleRepository = vehicleRepository;
             _fareService = fareService;
             _mapService = mapService;
         }
 
         protected virtual void OnTripStatusChanged(TripStatusChangedEventArgs e)
         {
-            EventHandler<TripStatusChangedEventArgs> handler = this.TripStatusChanged;
+            EventHandler<TripStatusChangedEventArgs> handler = TripStatusChanged;
             if (handler != null)
             {
                 handler(this, e);
@@ -102,6 +105,27 @@ namespace Application.Services
                     throw new InvalidOperationException("Không tìm thấy tài xế.");
                 }
 
+                if (!trip.IsSearching())
+                {
+                    throw new InvalidOperationException("Chuyến đi hiện không ở trạng thái tìm tài xế.");
+                }
+
+                if (!driver.IsAvailable())
+                {
+                    throw new InvalidOperationException("Tài xế hiện không khả dụng.");
+                }
+
+                Vehicle vehicle = await _vehicleRepository.GetByIdAsync(driver.VehicleId);
+                if (vehicle == null)
+                {
+                    throw new InvalidOperationException("Không tìm thấy xe của tài xế.");
+                }
+
+                if (vehicle.Type != trip.TripVehicleType)
+                {
+                    throw new InvalidOperationException("Loại xe của tài xế không khớp với yêu cầu chuyến đi.");
+                }
+
                 // Kiểm tra ví tài xế có đủ tiền trả hoa hồng không
                 if (driver.Wallet.Amount < trip.TripFare.Commission.Amount)
                 {
@@ -125,103 +149,144 @@ namespace Application.Services
 
         public async Task MarkAsArrivedAsync(Guid tripId)
         {
-            Trip trip = await _tripRepository.GetByIdAsync(tripId);
-            if (trip == null)
+            await _tripCommandLock.WaitAsync();
+            try
             {
-                throw new InvalidOperationException("Không tìm thấy chuyến.");
+                Trip trip = await _tripRepository.GetByIdAsync(tripId);
+                if (trip == null)
+                {
+                    throw new InvalidOperationException("Không tìm thấy chuyến.");
+                }
+                trip.MarkAsArrived();
+                await _tripRepository.UpdateAsync(trip);
+                await _tripRepository.SaveChangesAsync();
+                OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
             }
-            trip.MarkAsArrived();
-            await _tripRepository.UpdateAsync(trip);
-            await _tripRepository.SaveChangesAsync();
-            OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
+            finally
+            {
+                _tripCommandLock.Release();
+            }
         }
 
         public async Task StartTripAsync(Guid tripId)
         {
-            Trip trip = await _tripRepository.GetByIdAsync(tripId);
-            if (trip == null)
+            await _tripCommandLock.WaitAsync();
+            try
             {
-                throw new InvalidOperationException("Không tìm thấy chuyến.");
+                Trip trip = await _tripRepository.GetByIdAsync(tripId);
+                if (trip == null)
+                {
+                    throw new InvalidOperationException("Không tìm thấy chuyến.");
+                }
+                trip.StartTrip();
+                await _tripRepository.UpdateAsync(trip);
+                await _tripRepository.SaveChangesAsync();
+                OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
             }
-            trip.StartTrip();
-            await _tripRepository.UpdateAsync(trip);
-            await _tripRepository.SaveChangesAsync();
-            OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
+            finally
+            {
+                _tripCommandLock.Release();
+            }
         }
 
         public async Task CompleteTripAsync(Guid tripId)
         {
-            Trip trip = await _tripRepository.GetByIdAsync(tripId);
-            if (trip == null)
+            await _tripCommandLock.WaitAsync();
+            try
             {
-                throw new InvalidOperationException("Không tìm thấy chuyến.");
-            }
-
-            trip.CompleteTrip();
-            trip.ConfirmPayment();
-
-            if (trip.DriverId.HasValue)
-            {
-                Driver driver = await _driverRepository.GetByIdAsync(trip.DriverId.Value);
-                if (driver != null)
+                Trip trip = await _tripRepository.GetByIdAsync(tripId);
+                if (trip == null)
                 {
-                    driver.SetAvailable();
-                    driver.AddTrip();
-                    await _driverRepository.UpdateAsync(driver);
+                    throw new InvalidOperationException("Không tìm thấy chuyến.");
                 }
-            }
 
-            Passenger passenger = await _passengerRepository.GetByIdAsync(trip.PassengerId);
-            if (passenger != null)
+                trip.CompleteTrip();
+                trip.ConfirmPayment();
+
+                if (trip.DriverId.HasValue)
+                {
+                    Driver driver = await _driverRepository.GetByIdAsync(trip.DriverId.Value);
+                    if (driver != null)
+                    {
+                        driver.PayCommission(trip.TripFare);
+                        driver.SetAvailable();
+                        driver.AddTrip();
+                        await _driverRepository.UpdateAsync(driver);
+                    }
+                }
+
+                Passenger passenger = await _passengerRepository.GetByIdAsync(trip.PassengerId);
+                if (passenger != null)
+                {
+                    passenger.AddTrip();
+                    await _passengerRepository.UpdateAsync(passenger);
+                }
+
+                await _tripRepository.UpdateAsync(trip);
+                await _tripRepository.SaveChangesAsync();
+                await _driverRepository.SaveChangesAsync();
+                await _passengerRepository.SaveChangesAsync();
+                OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
+            }
+            finally
             {
-                passenger.AddTrip();
-                await _passengerRepository.UpdateAsync(passenger);
+                _tripCommandLock.Release();
             }
-
-            await _tripRepository.UpdateAsync(trip);
-            await _tripRepository.SaveChangesAsync();
-            await _driverRepository.SaveChangesAsync();
-            await _passengerRepository.SaveChangesAsync();
-            OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
         }
 
         public async Task CancelTripAsync(Guid tripId, string reason)
         {
-            Trip trip = await _tripRepository.GetByIdAsync(tripId);
-            if (trip == null)
+            await _tripCommandLock.WaitAsync();
+            try
             {
-                throw new InvalidOperationException("Không tìm thấy chuyến.");
-            }
-
-            trip.Cancel(reason);
-
-            if (trip.DriverId.HasValue)
-            {
-                Driver driver = await _driverRepository.GetByIdAsync(trip.DriverId.Value);
-                if (driver != null)
+                Trip trip = await _tripRepository.GetByIdAsync(tripId);
+                if (trip == null)
                 {
-                    driver.SetAvailable();
-                    await _driverRepository.UpdateAsync(driver);
+                    throw new InvalidOperationException("Không tìm thấy chuyến.");
                 }
-            }
 
-            await _tripRepository.UpdateAsync(trip);
-            await _tripRepository.SaveChangesAsync();
-            await _driverRepository.SaveChangesAsync();
-            OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
+                trip.Cancel(reason);
+
+                if (trip.DriverId.HasValue)
+                {
+                    Driver driver = await _driverRepository.GetByIdAsync(trip.DriverId.Value);
+                    if (driver != null)
+                    {
+                        driver.SetAvailable();
+                        await _driverRepository.UpdateAsync(driver);
+                    }
+                }
+
+                await _tripRepository.UpdateAsync(trip);
+                await _tripRepository.SaveChangesAsync();
+                await _driverRepository.SaveChangesAsync();
+                OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
+            }
+            finally
+            {
+                _tripCommandLock.Release();
+            }
         }
 
         public async Task ConfirmPaymentAsync(Guid tripId)
         {
-            Trip trip = await _tripRepository.GetByIdAsync(tripId);
-            if (trip == null)
+            await _tripCommandLock.WaitAsync();
+            try
             {
-                throw new InvalidOperationException("Không tìm thấy chuyến.");
+                Trip trip = await _tripRepository.GetByIdAsync(tripId);
+                if (trip == null)
+                {
+                    throw new InvalidOperationException("Không tìm thấy chuyến.");
+                }
+                trip.ConfirmPayment();
+                await _tripRepository.UpdateAsync(trip);
+                await _tripRepository.SaveChangesAsync();
+                OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
             }
-            trip.ConfirmPayment();
-            await _tripRepository.UpdateAsync(trip);
-            await _tripRepository.SaveChangesAsync();
-            OnTripStatusChanged(new TripStatusChangedEventArgs(tripId, trip.Status, trip.DriverId));
+            finally
+            {
+                _tripCommandLock.Release();
+            }
         }
 
         // ----- Queries (async) -----

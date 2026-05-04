@@ -46,6 +46,11 @@ namespace Presentation.UserControls
             cmbRole.SelectedIndexChanged += (s, e) => OnRoleChanged();
             cmbVehicleType.SelectedIndexChanged += (s, e) => OnVehicleTypeChanged();
 
+            // Demo buttons - Quick login (chỉ fill field)
+            btnDemoPassenger.Click += (s, e) => DemoLogin("0911111111", "123456");
+            btnDemoDriver.Click += (s, e) => DemoLogin("0900000000", "123456");
+            btnDemoAdmin.Click += (s, e) => DemoLogin("admin", "admin");
+
             txtLoginPhone.KeyDown += OnAuthKeyDown;
             txtLoginPassword.KeyDown += OnAuthKeyDown;
             txtRegName.KeyDown += OnAuthKeyDown;
@@ -69,6 +74,16 @@ namespace Presentation.UserControls
         private static string GetText(TextBox textBox)
         {
             return textBox.Text.Trim();
+        }
+
+        /// <summary>
+        /// Đăng nhập nhanh - chỉ fill field, không auto-submit
+        /// </summary>
+        private void DemoLogin(string phone, string password)
+        {
+            txtLoginPhone.Text = phone;
+            txtLoginPassword.Text = password;
+            // Người dùng tự click nút Đăng nhập
         }
 
         private void OnAuthKeyDown(object sender, KeyEventArgs e)

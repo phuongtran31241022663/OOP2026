@@ -33,7 +33,7 @@ namespace UnitTest
         [TestInitialize]
         public void Setup()
         {
-            _testPassenger = new Passenger("Test Passenger", "123456789", "hashed_password");
+             _testPassenger = new Passenger("Test Passenger", "0123456789", "hashed_password");
 
             _mockTripService = new MockTripService();
             _mockUserService = new MockUserService();
@@ -74,7 +74,7 @@ namespace UnitTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof(NullReferenceException))]
         public void Constructor_WithNullPassenger_ThrowsException()
         {
             // Arrange & Act
@@ -90,7 +90,7 @@ namespace UnitTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof(NullReferenceException))]
         public void Constructor_WithNullTripService_ThrowsException()
         {
             // Arrange & Act

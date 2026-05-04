@@ -19,7 +19,7 @@ namespace Domain.Entities
         private Money _baseFare;
         private Money _pricePerKm;
         private decimal _commissionRate;
-        private readonly DateTime _updatedAt;
+        private DateTime _updatedAt;
 
         #endregion
 
@@ -120,7 +120,13 @@ namespace Domain.Entities
         /// <param name="commissionRate">Tỉ lệ hoa hồng mới.</param>
         public void UpdateRule(VehicleType vehicleType, Money baseFare, Money pricePerKm, decimal commissionRate)
         {
-            FareRule updatedRule = new FareRule(vehicleType, baseFare, pricePerKm, commissionRate);
+            if (vehicleType != VehicleType)
+                throw new InvalidOperationException("Không thể thay đổi loại phương tiện của quy tắc cước hiện có.");
+
+            BaseFare = baseFare;
+            PricePerKm = pricePerKm;
+            CommissionRate = commissionRate;
+            _updatedAt = DateTime.UtcNow;
         }
 
         /// <summary>
@@ -137,6 +143,9 @@ namespace Domain.Entities
             decimal totalAmount =
                 BaseFare.Amount +
                 ((decimal)distanceKm * PricePerKm.Amount);
+
+            // Làm tròn đến 1000đ: >= 500 lên, < 500 xuống
+            totalAmount = Math.Round(totalAmount / 1000m, MidpointRounding.AwayFromZero) * 1000m;
 
             decimal commissionAmount = totalAmount * _commissionRate;
 

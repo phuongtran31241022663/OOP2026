@@ -80,3 +80,11 @@
 | R08 | ReaderWriterLockSlim (.NET) | https://learn.microsoft.com/en-us/dotnet/api/system.threading.readerwriterlockslim | Thread-safe read/write cho JsonStorage |
 | R09 | State Pattern (GoF) | https://refactoring.guru/design-patterns/state | Tham chiếu implement ITripState + 8 state classes |
 | R10 | SemaphoreSlim (.NET) | https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim | Giải race condition trong MatchingService |
+
+---
+
+## 6. Lessons Learned (Tri thức tích lũy)
+> **Cách ghi:** [Ngày] [Loại] Bài học rút ra để tối ưu token/hiệu quả.
+
+- [2026-05-04] [Doc] Đã cấu trúc lại hệ thống tài liệu: PSPEC (nghiệp vụ + limit), TECH_SPEC (kiến trúc), KNOWLEDGE (tri thức), SOURCE_MAP (codebase). Ưu tiên đọc theo thứ tự này giúp Agent nắm context nhanh mà không cần đọc lại toàn bộ code.
+- [2026-05-04] [Agent] Tích hợp Learning Loop: Mỗi task xong phải ghi kết luận/bài học vào DEVLOG để Agent sau kế thừa, tránh lặp lại phân tích tốn token.

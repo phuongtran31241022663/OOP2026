@@ -11,14 +11,39 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GMap.NET.Windows" Version="1.9.7" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Presentation\Presentation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 11_06_53\In\LAPTOP-QCFD95LI\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 11_06_53\Out\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 11_11_17\In\LAPTOP-QCFD95LI\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 11_11_17\Out\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 11_13_42\In\LAPTOP-QCFD95LI\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 11_13_42\Out\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 11_15_01\In\LAPTOP-QCFD95LI\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 11_15_01\Out\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 14_43_27\In\LAPTOP-QCFD95LI\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 14_43_27\Out\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 14_48_30\In\LAPTOP-QCFD95LI\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 14_48_30\Out\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 14_50_38\In\LAPTOP-QCFD95LI\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 14_50_38\Out\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 14_56_04\In\LAPTOP-QCFD95LI\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-01 14_56_04\Out\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-02 13_23_44\In\LAPTOP-QCFD95LI\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-02 13_23_44\Out\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-02 13_24_38\In\LAPTOP-QCFD95LI\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-02 13_24_38\Out\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-02 13_33_38\In\LAPTOP-QCFD95LI\" />
+    <Folder Include="TestResults\Deploy_PC 2026-05-02 13_33_38\Out\" />
   </ItemGroup>
 </Project>

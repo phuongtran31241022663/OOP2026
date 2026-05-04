@@ -117,6 +117,25 @@ namespace Application.Services
             await _fareRuleRepository.SaveChangesAsync();
         }
 
+        public async Task DeleteFareRuleAsync(Guid id)
+        {
+            await _fareRuleRepository.DeleteAsync(id);
+            await _fareRuleRepository.SaveChangesAsync();
+        }
+
+        public async Task CancelTripAsync(Guid tripId, string reason)
+        {
+            Trip trip = await _tripRepository.GetByIdAsync(tripId);
+            if (trip == null)
+            {
+                throw new InvalidOperationException("Khong tim thay chuyen di.");
+            }
+
+            trip.Cancel(reason);
+            await _tripRepository.UpdateAsync(trip);
+            await _tripRepository.SaveChangesAsync();
+        }
+
         public async Task<decimal> GetTotalGMVAsync()
         {
             List<Trip> allTrips = await _tripRepository.GetAllAsync();

@@ -1,25 +1,31 @@
-using Application.Interfaces;
-using Domain.Enums;
+﻿using Application.Interfaces;
 using Domain.Repositories;
 using Infrastructure.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Services
 {
-public class SimulationService : ISimulationService
+    // định làm mô phỏng cho 1 điểm chấm trượt theo route, xóa route đoạn chạy qua
+    public class SimulationService : ISimulationService
     {
         private Timer _timer;
         private ITripRepository _tripRepository;
         private IDriverRepository _driverRepository;
         private IVehicleRepository _vehicleRepository;
         private readonly HashSet<Guid> _simulatingTrips = new HashSet<Guid>();
+        private readonly object _simulatingTripsLock = new object();
+        private readonly SemaphoreSlim _tickLock = new SemaphoreSlim(1, 1);
+        private static readonly Random _random = new Random();
+        private static readonly object _randomLock = new object();
+        private readonly IMapService _mapService;
 
-        public SimulationService()
+        public SimulationService(ITripService tripService, IDriverRepository driverRepository, IPassengerRepository passengerRepository, IMapService mapService)
         {
+            _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
         }
 
         public void SetRepositories(ITripRepository tripRepo, IDriverRepository driverRepo, IVehicleRepository vehicleRepo)
@@ -31,134 +37,271 @@ public class SimulationService : ISimulationService
 
         public void StartSimulation()
         {
-            _timer = new Timer(async _ => await Tick(), null, TimeSpan.Zero, TimeSpan.FromSeconds(3));
+            if (_timer != null)
+            {
+                return;
+            }
+
+            _timer = new Timer(OnTimerTick, null, TimeSpan.Zero, TimeSpan.FromSeconds(3));
         }
 
         public void StopSimulation()
         {
-            _timer?.Change(Timeout.Infinite, Timeout.Infinite);
-            _timer?.Dispose();
+            Timer timer = _timer;
             _timer = null;
+
+            if (timer != null)
+            {
+                timer.Change(Timeout.Infinite, Timeout.Infinite);
+                timer.Dispose();
+            }
         }
 
         public void StartTripSimulation(Guid tripId)
         {
-            _simulatingTrips.Add(tripId);
+            AddSimulatingTrip(tripId);
         }
 
-        public bool IsTripSimulating(Guid tripId) => _simulatingTrips.Contains(tripId);
+        public bool IsTripSimulating(Guid tripId)
+        {
+            return ContainsSimulatingTrip(tripId);
+        }
+
+        private void OnTimerTick(object state)
+        {
+            Tick().ContinueWith(
+                task =>
+                {
+                    if (task.Exception != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("[SimulationService] Tick failed: " + task.Exception.GetBaseException().Message);
+                    }
+                },
+                TaskContinuationOptions.OnlyOnFaulted);
+        }
 
         public async Task Tick()
         {
-            if (_tripRepository == null || _driverRepository == null) return;
+            if (_tripRepository == null || _driverRepository == null || _vehicleRepository == null)
+            {
+                return;
+            }
+
+            if (!await _tickLock.WaitAsync(0))
+            {
+                return;
+            }
 
             try
             {
-                var pendingTrips = await _tripRepository.GetAllAsync();
-                var searchingTrips = pendingTrips.Where(t => t.IsSearching()).ToList();
+                List<Domain.Entities.Trip> allTrips = await _tripRepository.GetAllAsync();
+                List<Domain.Entities.Trip> searchingTrips = new List<Domain.Entities.Trip>();
 
-                foreach (var trip in searchingTrips)
+                for (int i = 0; i < allTrips.Count; i++)
                 {
-                    if (_simulatingTrips.Contains(trip.Id)) continue;
-
-                    var availableDrivers = await _driverRepository.GetAvailableDriversAsync();
-                    var matchingDrivers = new List<Domain.Entities.Users.Driver>();
-
-                    foreach (var driver in availableDrivers)
+                    Domain.Entities.Trip trip = allTrips[i];
+                    if (trip.IsSearching())
                     {
-                        var vehicle = await _vehicleRepository.GetByIdAsync(driver.VehicleId);
+                        searchingTrips.Add(trip);
+                    }
+                }
+
+                for (int i = 0; i < searchingTrips.Count; i++)
+                {
+                    Domain.Entities.Trip trip = searchingTrips[i];
+
+                    if (ContainsSimulatingTrip(trip.Id))
+                    {
+                        continue;
+                    }
+
+                    List<Domain.Entities.Users.Driver> availableDrivers = await _driverRepository.GetAvailableDriversAsync();
+                    List<Domain.Entities.Users.Driver> matchingDrivers = new List<Domain.Entities.Users.Driver>();
+
+                    for (int j = 0; j < availableDrivers.Count; j++)
+                    {
+                        Domain.Entities.Users.Driver driver = availableDrivers[j];
+                        Domain.Entities.Vehicle vehicle = await _vehicleRepository.GetByIdAsync(driver.VehicleId);
+
                         if (vehicle != null && vehicle.Type == trip.TripVehicleType)
                         {
                             matchingDrivers.Add(driver);
                         }
                     }
 
-                    if (matchingDrivers.Any())
+                    if (matchingDrivers.Count > 0)
                     {
-                        var random = new Random();
-                        var selectedDriver = matchingDrivers[random.Next(matchingDrivers.Count)];
-                        var success = await MatchDriverToTrip(trip.Id, selectedDriver.Id);
+                        int selectedIndex;
+                        lock (_randomLock)
+                        {
+                            selectedIndex = _random.Next(matchingDrivers.Count);
+                        }
+
+                        Domain.Entities.Users.Driver selectedDriver = matchingDrivers[selectedIndex];
+                        bool success = await MatchDriverToTrip(trip.Id, selectedDriver.Id);
+
                         if (success)
                         {
-                            _simulatingTrips.Add(trip.Id);
-                            _ = Task.Run(async () => await SimulateTripProgress(trip.Id));
+                            AddSimulatingTrip(trip.Id);
+                            SimulateTripProgress(trip.Id).ContinueWith(
+                                task =>
+                                {
+                                    if (task.Exception != null)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine("[SimulationService] SimulateTripProgress failed: " + task.Exception.GetBaseException().Message);
+                                    }
+                                },
+                                TaskContinuationOptions.OnlyOnFaulted);
                         }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Silently handle errors
+                System.Diagnostics.Debug.WriteLine("[SimulationService] Tick error: " + ex.Message);
+            }
+            finally
+            {
+                _tickLock.Release();
             }
         }
 
         private async Task<bool> MatchDriverToTrip(Guid tripId, Guid driverId)
         {
-            var trip = await _tripRepository.GetByIdAsync(tripId);
-            if (trip == null || !trip.IsSearching()) return false;
+            Domain.Entities.Trip trip = await _tripRepository.GetByIdAsync(tripId);
+            if (trip == null || !trip.IsSearching())
+            {
+                return false;
+            }
 
-            var driver = await _driverRepository.GetByIdAsync(driverId);
-            if (driver == null || !driver.IsAvailable()) return false;
+            Domain.Entities.Users.Driver driver = await _driverRepository.GetByIdAsync(driverId);
+            if (driver == null || !driver.IsAvailable())
+            {
+                return false;
+            }
 
             try
             {
+                Domain.Entities.Vehicle vehicle = await _vehicleRepository.GetByIdAsync(driver.VehicleId);
+                if (vehicle == null)
+                {
+                    return false;
+                }
+
+                if (vehicle.Type != trip.TripVehicleType)
+                {
+                    return false;
+                }
+
+                if (driver.Wallet.Amount < trip.TripFare.Commission.Amount)
+                {
+                    return false;
+                }
+
                 trip.MatchDriver(driverId);
                 driver.SetOnTrip();
-await _tripRepository.UpdateAsync(trip);
+
+                await _tripRepository.UpdateAsync(trip);
                 await _driverRepository.UpdateAsync(driver);
                 await _tripRepository.SaveChangesAsync();
                 await _driverRepository.SaveChangesAsync();
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[SimulationService] MatchDriverToTrip error: " + ex.Message);
+                return false;
+            }
         }
 
         public async Task SimulateTripProgress(Guid tripId)
         {
-            await Task.Delay(TimeSpan.FromSeconds(3));
             try
             {
-                var trip = await _tripRepository.GetByIdAsync(tripId);
-                if (trip == null || !trip.IsMatched()) return;
+                await Task.Delay(TimeSpan.FromSeconds(3));
+
+                Domain.Entities.Trip trip = await _tripRepository.GetByIdAsync(tripId);
+                if (trip == null || !trip.IsMatched())
+                {
+                    RemoveSimulatingTrip(tripId);
+                    return;
+                }
+
                 trip.MarkAsArrived();
                 await _tripRepository.UpdateAsync(trip);
                 await _tripRepository.SaveChangesAsync();
-            }
-            catch { }
 
-            await Task.Delay(TimeSpan.FromSeconds(3));
-            try
-            {
-                var trip = await _tripRepository.GetByIdAsync(tripId);
-                if (trip == null || !trip.IsArrived()) return;
+                await Task.Delay(TimeSpan.FromSeconds(3));
+
+                trip = await _tripRepository.GetByIdAsync(tripId);
+                if (trip == null || !trip.IsArrived())
+                {
+                    RemoveSimulatingTrip(tripId);
+                    return;
+                }
+
                 trip.StartTrip();
                 await _tripRepository.UpdateAsync(trip);
                 await _tripRepository.SaveChangesAsync();
-            }
-            catch { }
 
-            await Task.Delay(TimeSpan.FromSeconds(5));
-            try
-            {
-                var trip = await _tripRepository.GetByIdAsync(tripId);
-                if (trip == null || !trip.IsStarted()) return;
+                await Task.Delay(TimeSpan.FromSeconds(5));
+
+                trip = await _tripRepository.GetByIdAsync(tripId);
+                if (trip == null || !trip.IsStarted())
+                {
+                    RemoveSimulatingTrip(tripId);
+                    return;
+                }
+
                 trip.CompleteTrip();
+                trip.ConfirmPayment();
+
                 if (trip.DriverId.HasValue)
                 {
-                    var driver = await _driverRepository.GetByIdAsync(trip.DriverId.Value);
+                    Domain.Entities.Users.Driver driver = await _driverRepository.GetByIdAsync(trip.DriverId.Value);
                     if (driver != null)
                     {
+                        driver.PayCommission(trip.TripFare);
                         driver.SetAvailable();
                         driver.AddTrip();
                         await _driverRepository.UpdateAsync(driver);
                     }
                 }
+
                 await _tripRepository.UpdateAsync(trip);
                 await _tripRepository.SaveChangesAsync();
                 await _driverRepository.SaveChangesAsync();
+                RemoveSimulatingTrip(tripId);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[SimulationService] SimulateTripProgress error: " + ex.Message);
+                RemoveSimulatingTrip(tripId);
+            }
+        }
+
+        private void AddSimulatingTrip(Guid tripId)
+        {
+            lock (_simulatingTripsLock)
+            {
+                _simulatingTrips.Add(tripId);
+            }
+        }
+
+        private bool ContainsSimulatingTrip(Guid tripId)
+        {
+            lock (_simulatingTripsLock)
+            {
+                return _simulatingTrips.Contains(tripId);
+            }
+        }
+
+        private void RemoveSimulatingTrip(Guid tripId)
+        {
+            lock (_simulatingTripsLock)
+            {
                 _simulatingTrips.Remove(tripId);
             }
-            catch { }
         }
     }
 
@@ -172,6 +315,7 @@ await _tripRepository.UpdateAsync(trip);
         public IMatchingService MatchingService { get; private set; }
         public IReviewService ReviewService { get; private set; }
         public IMapService MapService { get; private set; }
+
         public IVehicleRepository VehicleRepository { get; private set; }
 
         public static async Task<AppServiceBundle> CreateDefaultAsync()
@@ -182,6 +326,7 @@ await _tripRepository.UpdateAsync(trip);
             IFareRuleRepository fareRuleRepository = new FareRuleRepository();
             IReviewRepository reviewRepository = new ReviewRepository();
             IVehicleRepository vehicleRepository = new VehicleRepository();
+            IUserRepository userRepository = new UserRepository();
 
             await driverRepository.InitializeAsync();
             await passengerRepository.InitializeAsync();
@@ -190,31 +335,42 @@ await _tripRepository.UpdateAsync(trip);
             await fareRuleRepository.EnsureSeededAsync();
             await reviewRepository.InitializeAsync();
             await vehicleRepository.InitializeAsync();
+            await userRepository.InitializeAsync();
 
-            IUserService userService = new UserService(driverRepository, passengerRepository);
-            IMapService mapService = new MapService();
-            FareService fareService = new FareService(fareRuleRepository);
-            ITripService tripService = new TripService(tripRepository, driverRepository, passengerRepository, fareService, mapService);
-            await fareService.SeedDefaultFareRulesAsync();
-
+            // Seed initial data
             await Infrastructure.Data.DataSeeder.SeedAsync(
                 driverRepository,
                 passengerRepository,
                 tripRepository,
-                vehicleRepository);
+                vehicleRepository,
+                userRepository);
 
-SimulationService simService = new SimulationService();
-            simService.SetRepositories(tripRepository, driverRepository, vehicleRepository);
+            IUserService userService = new UserService(driverRepository, passengerRepository);
+            var httpClient = new HttpClient();
+            IMapService mapService = new MapService(httpClient);
+            FareService fareService = new FareService(fareRuleRepository);
+            ITripService tripService = new TripService(
+                tripRepository,
+                driverRepository,
+                passengerRepository,
+                vehicleRepository,
+                fareService,
+                mapService);
+
+            IAdminService adminService = new AdminService(driverRepository, passengerRepository, tripRepository, fareRuleRepository, reviewRepository);
+            IMatchingService matchingService = new MatchingService(tripRepository, driverRepository, vehicleRepository);
+            IReviewService reviewService = new ReviewService(reviewRepository, driverRepository, tripRepository);
+            ISimulationService simulationService = new SimulationService(tripService, driverRepository, passengerRepository, mapService);
 
             return new AppServiceBundle
             {
                 UserService = userService,
                 TripService = tripService,
                 FareService = fareService,
-                SimulationService = simService,
-                AdminService = new AdminService(driverRepository, passengerRepository, tripRepository, fareRuleRepository, reviewRepository),
-                MatchingService = new MatchingService(tripRepository, driverRepository, vehicleRepository),
-                ReviewService = new ReviewService(reviewRepository, driverRepository, tripRepository),
+                SimulationService = simulationService,
+                AdminService = adminService,
+                MatchingService = matchingService,
+                ReviewService = reviewService,
                 MapService = mapService,
                 VehicleRepository = vehicleRepository
             };

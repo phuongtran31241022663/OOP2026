@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace Presentation.Components
 {
-    partial class LocationPickerControl
+    partial class UcLocationPicker
     {
         /// <summary> 
         /// Required designer variable.
@@ -41,6 +41,7 @@ private void InitializeComponent()
             // Create ListBox for suggestions
             _lstSuggestions = new ListBox();
             _lstSuggestions.Dock = DockStyle.Fill;
+            _lstSuggestions.BorderStyle = BorderStyle.None;
             _lstSuggestions.Font = new Font("Segoe UI", 9F);
             _lstSuggestions.ItemHeight = 28;
             _lstSuggestions.Click += LstSuggestions_Click;
@@ -53,11 +54,12 @@ private void InitializeComponent()
             _pnlSuggestions.BackColor = Color.White;
             _pnlSuggestions.BorderStyle = BorderStyle.FixedSingle;
             _pnlSuggestions.Dock = DockStyle.None;
-            _pnlSuggestions.Location = new Point(0, this.Height);
+            _pnlSuggestions.Location = new Point(0, 34); // Ngay dưới textbox
             _pnlSuggestions.Name = "_pnlSuggestions";
             _pnlSuggestions.Size = new Size(334, 200);
             _pnlSuggestions.Visible = false;
             _pnlSuggestions.Controls.Add(_lstSuggestions);
+            _pnlSuggestions.AutoSize = false;
 
             // Create placeholder label
             _lblPlaceholder = new Label();
@@ -70,9 +72,10 @@ private void InitializeComponent()
             _lblPlaceholder.Click += LblPlaceholder_Click;
             _lblPlaceholder.Visible = true;
 
-            // Add to main control
+            // Add to main control (panel phải được thêm sau để nằm trên cùng)
             this.Controls.Add(_txtSearch);
             this.Controls.Add(_lblPlaceholder);
+            this.Controls.Add(_pnlSuggestions);
 
             _pnlSuggestions.ResumeLayout();
             this.ResumeLayout();

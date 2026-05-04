@@ -5,8 +5,6 @@ namespace Domain.SharedKernel
 {
     public abstract class Entity
     {
-        private readonly List<DomainEvent> _domainEvents = new List<DomainEvent>();
-
         public Guid Id { get; protected set; }
 
         protected Entity(Guid id) => Id = id;
@@ -14,11 +12,16 @@ namespace Domain.SharedKernel
 
         protected internal void AddEvent(DomainEvent eventItem)
         {
-            _domainEvents.Add(eventItem);
+            // No-op: domain events are not used in this project.
+        }
+        // cái này liên quan đến vấn đề event và domain event thì phải, giờ hiện cũng chả dùng
+        public IReadOnlyList<DomainEvent> GetEvents() => Array.Empty<DomainEvent>();
+
+        public void ClearEvents()
+        {
+            // No-op: domain events are not used in this project.
         }
 
-        public IReadOnlyList<DomainEvent> GetEvents() => _domainEvents.AsReadOnly();
-        public void ClearEvents() => _domainEvents.Clear();
         public override bool Equals(object obj)
         {
             if (obj is not Entity other) return false;

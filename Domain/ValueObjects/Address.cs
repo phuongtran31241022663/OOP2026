@@ -59,7 +59,7 @@ namespace Domain.ValueObjects
 
         public override string ToString()
         {
-            var parts = new List<string>();
+            List<string> parts = new List<string>();
             string fullStreet = string.IsNullOrWhiteSpace(HouseNumber) ? Street : HouseNumber + " " + Street;
             if (!string.IsNullOrWhiteSpace(fullStreet)) parts.Add(fullStreet);
             if (!string.IsNullOrWhiteSpace(District)) parts.Add(District);

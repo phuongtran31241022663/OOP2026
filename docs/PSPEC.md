@@ -26,7 +26,20 @@
 
 ## 2. Yêu cầu
 
-### 2.1 Functional Requirements
+### 2.1 Giới hạn kỹ thuật (Technical Constraints)
+
+> **Áp dụng cho tất cả code, tài liệu, và câu trả lời từ AI.**
+
+- **Môi trường:** .NET Framework 4.8, C# 8.0, WinForms (Windows).
+- **Cấm các tính năng C# 8.0+:** `Nullable reference types` (`string?`), `using var`, `await foreach`, `IAsyncEnumerable<T>`, `record`, `init`, `with`, `target-typed new`, `global using`, file-scoped namespaces, `required`.
+  - **Lưu ý:** `switch expression` (`x switch { ... }`) hiện **ĐƯỢC PHÉP**.
+- **Cấm thư viện/Pattern:**
+  - **Dependency Injection (DI):** Không dùng container (`Microsoft.Extensions.DependencyInjection`, v.v.). Tự quản lý dependency (truyền qua constructor hoặc `new` trực tiếp).
+  - **LINQ:** Không dùng `Where`, `Select`, `OrderBy`, ... (dùng `foreach` + `if` truyền thống).
+  - **`var`:** Không dùng `var`. Phải khai báo kiểu tường minh.
+- **Ràng buộc khác:** Không tự ý sửa `.csproj`/`.sln` (NuGet, LangVersion) khi chưa duyệt.
+
+### 2.2 Functional Requirements
 
 **Passenger:**
 - Đăng ký / đăng nhập bằng số điện thoại + mật khẩu
@@ -58,9 +71,7 @@
 - Background matching: TripMatchingWorker dò trip Searching → gọi MatchingService
 - Domain events emit theo từng state transition
 
-### 2.2 Non‑functional Requirements
-- **Ngôn ngữ / Runtime:** C# .NET Framework 4.8, Windows Forms
-- **Không dùng:** LINQ, Lambda, `var` (ràng buộc giáo khoa — static typing, explicit loop)
+### 2.3 Non‑functional Requirements
 - **Persistence:** JSON file (Newtonsoft.Json), `TypeNameHandling.All` cho đa hình (List\<User\> chứa Driver + Passenger)
 - **Thread-safety:** `ReaderWriterLockSlim` trong JsonStorage (cần xác minh đầy đủ); `SemaphoreSlim` trong MatchingService và TripService để tránh race condition khi ghép tài xế
 - **Serialization:** Newtonsoft.Json 13.x — `JsonConvert.SerializeObject` / `DeserializeObject<List<T>>`

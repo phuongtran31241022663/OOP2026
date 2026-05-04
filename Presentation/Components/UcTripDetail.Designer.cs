@@ -36,7 +36,6 @@ namespace Presentation.UserControls
             this.lblDriverName = new System.Windows.Forms.Label();
             this.lblPassengerName = new System.Windows.Forms.Label();
             this.lblRequestTime = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this._validationErrorProvider)).BeginInit();
             this.tableLayout.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -140,7 +139,6 @@ namespace Presentation.UserControls
             this.Controls.Add(this.tableLayout);
             this.Name = "UcTripDetail";
             this.Size = new System.Drawing.Size(480, 320);
-            ((System.ComponentModel.ISupportInitialize)(this._validationErrorProvider)).EndInit();
             this.tableLayout.ResumeLayout(false);
             this.ResumeLayout(false);
 

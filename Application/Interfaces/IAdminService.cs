@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Entities.Users;
@@ -20,6 +21,9 @@ namespace Application.Interfaces
         Task CreateFareRuleAsync(FareRule rule);
         Task UpdateFareRuleAsync(FareRule rule);
         Task UpdateFareRuleAsync(VehicleType vehicleType, Money baseFare, Money pricePerKm, double commissionRate);
+        Task DeleteFareRuleAsync(Guid id);
+
+        Task CancelTripAsync(Guid tripId, string reason);
 
         Task<decimal> GetTotalGMVAsync();
         Task<decimal> GetTotalNTRAsync();

@@ -486,8 +486,9 @@ namespace UnitTest
             trip.ConfirmPayment();
         }
 
-[TestMethod]
-        public void ConfirmPayment_WhenNoDriver_SetsPaidTrue()
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void ConfirmPayment_WhenNoDriver_ThrowsException()
         {
             // Arrange
             Trip trip = CreateSearchingTrip();
@@ -495,9 +496,6 @@ namespace UnitTest
 
             // Act
             trip.ConfirmPayment();
-
-            // Assert - Payment is confirmed but no event is fired (design decision)
-            Assert.IsTrue(trip.IsPaid);
         }
 
         #endregion
