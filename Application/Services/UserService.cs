@@ -1,7 +1,6 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
-using Domain.Enums;
 using Domain.Repositories;
 using Domain.ValueObjects;
 using System;

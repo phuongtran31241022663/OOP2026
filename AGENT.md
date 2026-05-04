@@ -90,45 +90,24 @@ Trong khi thực hiện các bước của Modification hoặc Read-only request
 
 ---
 
-## 5. Sử dụng file giới hạn và kiến thức
+## 5. Hệ thống tài liệu và Tri thức tích lũy
 
-Thư mục `docs/` chứa hai loại tài liệu:
+Agent phải đọc tài liệu trong `docs/` theo thứ tự ưu tiên để nắm bắt context nhanh nhất:
 
-- **File kiến thức (read-only)**: là các tài liệu tham khảo cố định, không được sửa đổi trong quá trình làm việc. Danh sách:
-  - `APM.md`
-  - `Gmap.md`
-  - `Inheritance.md`
-  - `Observer.md`
-  - `OOP.md`
-  - `Polymorphism.md`
-  - `Principles.md`
-  - `Relationship.md`
-  - `Serialize.md`
-  - `State.md`
-  - `Strategy.md`
-  - `WinForms.md`
-  - `XML.md`
-  - `Limit.md` (file ràng buộc kỹ thuật)
+1.  **`docs/PSPEC.md`**: (Bắt buộc) Chứa đặc tả nghiệp vụ và **Giới hạn kỹ thuật**. Mọi vi phạm giới hạn trong này đều bị từ chối.
+2.  **`docs/SOURCE_MAP.md`**: Để hiểu cấu trúc codebase mà không cần đọc toàn bộ code.
+3.  **`docs/TECH_SPEC.md`**: Hiểu các quyết định kiến trúc và luồng dữ liệu.
+4.  **`docs/KNOWLEDGE.md`**: Tra cứu các pattern và tri thức dùng chung.
+5.  **`DEVLOG.md`**: (Quan trọng) Đọc các task gần nhất và mục **Lessons Learned** để không lặp lại sai lầm cũ.
 
-- **File mô tả dự án (có thể cập nhật)**: các tài liệu như devlog, changelog, spec, thiết kế, … phản ánh trạng thái thực tế của code.
+### 5.1 Quy trình tích lũy tri thức (Learning Loop)
 
-### 5.1 File `Limit.md`
+Sau khi hoàn thành mỗi Modification request, Agent phải:
+1.  **Tổng kết bài học**: Đúc kết 1 câu ngắn gọn về kỹ thuật hoặc nghiệp vụ vừa thực hiện.
+2.  **Cập nhật DEVLOG.md**: Ghi bài học vào mục **Lessons Learned**. Nếu có thay đổi kiến trúc, cập nhật `TECH_SPEC.md`.
+3.  **Cập nhật Source Map**: Nếu thay đổi contract (class, method public).
 
-- Phải được đọc trước khi thực hiện bất kỳ Modification nào.
-- Mọi vi phạm các giới hạn trong file đó đều bị coi là **Architecture Violation** và bị từ chối.
-
-### 5.2 File kiến thức chuyên ngành
-
-- Trước khi thực hiện một yêu cầu (Read-only hoặc Modification), Agent phải **xác định các file kiến thức liên quan** dựa trên ngữ cảnh yêu cầu.
-- Nếu người dùng đã chỉ định rõ file kiến thức cần đọc, Agent phải ưu tiên đọc những file đó.
-- Nếu không có chỉ định, Agent tự suy luận dựa trên loại công việc, ví dụ:
-  - Yêu cầu liên quan đến giao diện: đọc `WinForms.md`.
-  - Yêu cầu về lập trình bất đồng bộ: đọc `APM.md`.
-  - Yêu cầu về bản đồ: đọc `Gmap.md`.
-  - Yêu cầu về thiết kế lớp, quan hệ: đọc `OOP.md`, `Inheritance.md`, `Polymorphism.md`, `Relationship.md`, `Principles.md`.
-  - Yêu cầu về pattern cụ thể: đọc file tương ứng (`Strategy.md`, `Observer.md`, `State.md`...).
-  - Yêu cầu về serialization: đọc `Serialize.md`.
-  - Yêu cầu về comment, tài liệu: đọc `XML.md`.
+Điều này giúp giảm token input cho các lần làm việc sau vì Agent có thể tin tưởng vào tài liệu thay vì đọc lại code.
 
 - Agent phải đọc các file kiến thức đã chọn **trước khi** lên kế hoạch hoặc trả lời.
 

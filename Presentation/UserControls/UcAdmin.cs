@@ -1,9 +1,9 @@
 using Application.Interfaces;
+using Domain.Entities;
 using Domain.Entities.Users;
-using Presentation.Shells;
+using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -42,11 +42,11 @@ namespace Presentation.UserControls
             // Trips tab
             txtSearchTrips.TextChanged += (s, e) => FilterTrips(txtSearchTrips.Text);
             btnCancelTrip.Click += async (s, e) => await CancelSelectedTrip();
-            btnTripDetail.Click += (s, e) => ShowTripDetail();
+            btnTripDetail.Click += (s, e) => ShowTripDetailUnavailable();
 
             // FareRules tab
-            btnAddFare.Click += (s, e) => ShowFareEditDialog(null);
-            btnEditFare.Click += (s, e) => ShowFareEditDialog(GetSelectedFareRule());
+            btnAddFare.Click += async (s, e) => await AddFareRuleAsync();
+            btnEditFare.Click += async (s, e) => await EditSelectedFareRuleAsync();
             btnDeleteFare.Click += async (s, e) => await DeleteSelectedFareRule();
 
             this.Load += async (s, e) => await LoadAllData();
@@ -191,12 +191,22 @@ namespace Presentation.UserControls
         private async Task CancelSelectedTrip()
         {
             if (dgvTrips.SelectedRows.Count == 0) return;
+
+            var trip = dgvTrips.SelectedRows[0].Tag as Trip;
+            if (trip == null)
+            {
+                ShowInfo("Không thể xác định chuyến đi.");
+                return;
+            }
+
             if (!Confirm("Huỷ chuyến đi đã chọn?")) return;
 
             IsLoading = true;
             try
             {
-                await Task.CompletedTask; // TODO: goi service huy chuyen
+                await _adminService.CancelTripAsync(trip.Id, "Admin cancelled trip");
+                _allTrips = await _adminService.GetAllTripsAsync() ?? new List<Trip>();
+                PopulateTripsGrid();
                 ShowInfo("Đã huỷ chuyến đi.");
             }
             catch (Exception ex)
@@ -209,28 +219,9 @@ namespace Presentation.UserControls
             }
         }
 
-        private void ShowTripDetail()
+        private void ShowTripDetailUnavailable()
         {
-            ExecuteWithHandling("Mở chi tiết chuyến đi", () =>
-            {
-                if (dgvTrips.SelectedRows.Count == 0)
-                {
-                    throw new InvalidOperationException("Vui lòng chọn chuyến đi cần xem.");
-                }
-                
-                var trip = dgvTrips.SelectedRows[0].Tag as Domain.Entities.Trip;
-                if (trip == null)
-                {
-                    throw new InvalidOperationException("Không thể xác định chuyến đi.");
-                }
-
-                var ucDetail = new UcTripDetail(trip);
-                Form parentForm = this.FindForm();
-                // Thay thế FrmModal bằng ShowInfo theo yêu cầu
-                ShowInfo($"Đang hiển thị: Chi tiết chuyến đi (ID: {trip.Id})");
-                // Ghi chú: MessageBox không thể hiển thị UserControl, 
-                // cần giải pháp thay thế cho UcTripDetail nếu muốn xem chi tiết đầy đủ.
-            });
+            ShowInfo("Chức năng chi tiết chuyến đi đã bị gỡ.");
         }
 
         // --- FareRules Tab ---
@@ -255,20 +246,215 @@ namespace Presentation.UserControls
             return dgvFareRules.SelectedRows[0].Tag as Domain.Entities.FareRule;
         }
 
-        private void ShowFareEditDialog(Domain.Entities.FareRule rule)
+        private async Task AddFareRuleAsync()
         {
-            ShowInfo(rule == null ? "Thêm mới quy tắc giá." : "Sửa quy tắc giá.");
+            FareRuleInputResult input = ShowFareRuleInputDialog(null);
+            if (input == null) return;
+
+            IsLoading = true;
+            try
+            {
+                await _adminService.UpdateFareRuleAsync(
+                    input.VehicleType,
+                    new Money(input.BaseFare),
+                    new Money(input.PricePerKm),
+                    input.CommissionRate);
+
+                _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<Domain.Entities.FareRule>();
+                PopulateFareRulesGrid();
+                ShowInfo("Đã thêm quy tắc giá.");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Thêm quy tắc giá");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async Task EditSelectedFareRuleAsync()
+        {
+            Domain.Entities.FareRule selectedRule = GetSelectedFareRule();
+            if (selectedRule == null)
+            {
+                ShowInfo("Vui lòng chọn quy tắc giá cần sửa.");
+                return;
+            }
+
+            FareRuleInputResult input = ShowFareRuleInputDialog(selectedRule);
+            if (input == null) return;
+
+            IsLoading = true;
+            try
+            {
+                await _adminService.UpdateFareRuleAsync(
+                    input.VehicleType,
+                    new Money(input.BaseFare),
+                    new Money(input.PricePerKm),
+                    input.CommissionRate);
+
+                _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<Domain.Entities.FareRule>();
+                PopulateFareRulesGrid();
+                ShowInfo("Đã cập nhật quy tắc giá.");
+            }
+            catch (Exception ex)
+            {
+                ShowFriendlyException(ex, "Cập nhật quy tắc giá");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private FareRuleInputResult ShowFareRuleInputDialog(Domain.Entities.FareRule existingRule)
+        {
+            using (Form dialog = new Form())
+            using (TableLayoutPanel layout = new TableLayoutPanel())
+            using (Label lblVehicleType = new Label())
+            using (ComboBox cmbVehicleType = new ComboBox())
+            using (Label lblBaseFare = new Label())
+            using (TextBox txtBaseFare = new TextBox())
+            using (Label lblPricePerKm = new Label())
+            using (TextBox txtPricePerKm = new TextBox())
+            using (Label lblCommissionRate = new Label())
+            using (TextBox txtCommissionRate = new TextBox())
+            using (FlowLayoutPanel buttonPanel = new FlowLayoutPanel())
+            using (Button btnOk = new Button())
+            using (Button btnCancel = new Button())
+            {
+                dialog.Text = existingRule == null ? "Thêm quy tắc giá" : "Sửa quy tắc giá";
+                dialog.StartPosition = FormStartPosition.CenterParent;
+                dialog.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dialog.MaximizeBox = false;
+                dialog.MinimizeBox = false;
+                dialog.ShowInTaskbar = false;
+                dialog.ClientSize = new System.Drawing.Size(360, 220);
+
+                layout.Dock = DockStyle.Fill;
+                layout.ColumnCount = 2;
+                layout.RowCount = 5;
+                layout.Padding = new Padding(12);
+                layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
+                layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
+
+                lblVehicleType.Text = "Loại xe";
+                lblVehicleType.Anchor = AnchorStyles.Left;
+                cmbVehicleType.DropDownStyle = ComboBoxStyle.DropDownList;
+                cmbVehicleType.Items.Add(Domain.Enums.VehicleType.Motorbike);
+                cmbVehicleType.Items.Add(Domain.Enums.VehicleType.Car);
+                cmbVehicleType.SelectedItem = existingRule == null
+                    ? (object)Domain.Enums.VehicleType.Motorbike
+                    : existingRule.VehicleType;
+                cmbVehicleType.Enabled = existingRule == null;
+
+                lblBaseFare.Text = "Giá mở cửa";
+                lblBaseFare.Anchor = AnchorStyles.Left;
+                txtBaseFare.Text = existingRule == null ? string.Empty : existingRule.BaseFare.Amount.ToString("F0");
+
+                lblPricePerKm.Text = "Giá mỗi km";
+                lblPricePerKm.Anchor = AnchorStyles.Left;
+                txtPricePerKm.Text = existingRule == null ? string.Empty : existingRule.PricePerKm.Amount.ToString("F0");
+
+                lblCommissionRate.Text = "Hoa hồng (%)";
+                lblCommissionRate.Anchor = AnchorStyles.Left;
+                txtCommissionRate.Text = existingRule == null ? string.Empty : (existingRule.CommissionRate * 100m).ToString("F2");
+
+                buttonPanel.FlowDirection = FlowDirection.RightToLeft;
+                buttonPanel.Dock = DockStyle.Fill;
+
+                btnOk.Text = "Lưu";
+                btnOk.DialogResult = DialogResult.OK;
+                btnCancel.Text = "Huỷ";
+                btnCancel.DialogResult = DialogResult.Cancel;
+
+                buttonPanel.Controls.Add(btnOk);
+                buttonPanel.Controls.Add(btnCancel);
+
+                layout.Controls.Add(lblVehicleType, 0, 0);
+                layout.Controls.Add(cmbVehicleType, 1, 0);
+                layout.Controls.Add(lblBaseFare, 0, 1);
+                layout.Controls.Add(txtBaseFare, 1, 1);
+                layout.Controls.Add(lblPricePerKm, 0, 2);
+                layout.Controls.Add(txtPricePerKm, 1, 2);
+                layout.Controls.Add(lblCommissionRate, 0, 3);
+                layout.Controls.Add(txtCommissionRate, 1, 3);
+                layout.Controls.Add(buttonPanel, 0, 4);
+                layout.SetColumnSpan(buttonPanel, 2);
+
+                dialog.Controls.Add(layout);
+                dialog.AcceptButton = btnOk;
+                dialog.CancelButton = btnCancel;
+
+                if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
+                {
+                    return null;
+                }
+
+                decimal baseFare;
+                decimal pricePerKm;
+                decimal commissionPercent;
+
+                if (!decimal.TryParse(txtBaseFare.Text.Trim(), out baseFare))
+                {
+                    ShowWarning("Giá mở cửa không hợp lệ.");
+                    return null;
+                }
+
+                if (!decimal.TryParse(txtPricePerKm.Text.Trim(), out pricePerKm))
+                {
+                    ShowWarning("Giá mỗi km không hợp lệ.");
+                    return null;
+                }
+
+                if (!decimal.TryParse(txtCommissionRate.Text.Trim(), out commissionPercent))
+                {
+                    ShowWarning("Hoa hồng không hợp lệ.");
+                    return null;
+                }
+
+                if (baseFare < 0m || pricePerKm < 0m)
+                {
+                    ShowWarning("Giá cước phải lớn hơn hoặc bằng 0.");
+                    return null;
+                }
+
+                if (commissionPercent < 0m || commissionPercent > 100m)
+                {
+                    ShowWarning("Hoa hồng phải nằm trong khoảng 0 đến 100.");
+                    return null;
+                }
+
+                FareRuleInputResult result = new FareRuleInputResult();
+                result.VehicleType = (Domain.Enums.VehicleType)cmbVehicleType.SelectedItem;
+                result.BaseFare = baseFare;
+                result.PricePerKm = pricePerKm;
+                result.CommissionRate = (double)(commissionPercent / 100m);
+                return result;
+            }
         }
 
         private async Task DeleteSelectedFareRule()
         {
             if (dgvFareRules.SelectedRows.Count == 0) return;
+
+            Domain.Entities.FareRule rule = GetSelectedFareRule();
+            if (rule == null)
+            {
+                ShowInfo("Không thể xác định quy tắc giá.");
+                return;
+            }
+
             if (!Confirm("Xoá quy tắc giá đã chọn?")) return;
 
             IsLoading = true;
             try
             {
-                await Task.CompletedTask; // TODO: goi service xoa quy tac gia
+                await _adminService.DeleteFareRuleAsync(rule.Id);
+                _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<Domain.Entities.FareRule>();
+                PopulateFareRulesGrid();
                 ShowInfo("Đã xoá quy tắc giá.");
             }
             catch (Exception ex)
@@ -282,6 +468,14 @@ namespace Presentation.UserControls
         }
 
         // --- Stats Tab ---
+        private class FareRuleInputResult
+        {
+            public Domain.Enums.VehicleType VehicleType { get; set; }
+            public decimal BaseFare { get; set; }
+            public decimal PricePerKm { get; set; }
+            public double CommissionRate { get; set; }
+        }
+
         private async System.Threading.Tasks.Task UpdateStatsAsync()
         {
             IsLoading = true;

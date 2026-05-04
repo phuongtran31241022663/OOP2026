@@ -4,6 +4,7 @@ using Domain.SharedKernel;
 using Domain.States;
 using Domain.ValueObjects;
 using System;
+using System.Threading;
 
 namespace Domain.Entities
 {
@@ -191,7 +192,6 @@ namespace Domain.Entities
             // Set initial state and raise domain events
             _currentState = new RequestedState();
             AddEvent(new TripRequestedEvent(Id, _passengerId, _tripRoute.Pickup, _tripRoute.Destination, _tripVehicleType));
-            AddEvent(new TripSearchingEvent(Id));
         }
 
         /// <summary>
@@ -222,13 +222,20 @@ namespace Domain.Entities
 
         #endregion
 
-        #region State Management
+#region State Management
 
         /// <summary>
-        /// (Internal) Chuyển đổi trạng thái của chuyến đi. Chỉ được gọi bởi các đối tượng <see cref="ITripState"/>.
+        /// (Internal) Chuyển đổi trạng thái của chuyến đi một cách thread-safe.
+        /// Sử dụng Interlocked.Exchange để đảm bảo atomic state transition.
+        /// Chỉ được gọi bởi các đối tượng <see cref="ITripState"/>.
         /// </summary>
         /// <param name="newState">Trạng thái mới cần chuyển đến.</param>
-        internal void TransitionTo(ITripState newState) => _currentState = newState;
+        internal void TransitionTo(ITripState newState)
+        {
+            if (newState == null)
+                throw new ArgumentNullException(nameof(newState));
+            Interlocked.Exchange(ref _currentState, newState);
+        }
 
         /// <summary>
         /// (Internal) Gán ID tài xế cho chuyến đi. Chỉ được gọi bởi <see cref="MatchedState"/>.
@@ -293,12 +300,11 @@ namespace Domain.Entities
             if (_isPaid)
                 throw new InvalidOperationException("Chuyến đi này đã được thanh toán.");
 
+            if (!DriverId.HasValue)
+                throw new InvalidOperationException("Chuyến đi chưa có tài xế nên không thể thanh toán.");
+
             _isPaid = true;
-            // A trip can only be paid for if it has been matched with a driver.
-            if (DriverId.HasValue)
-            {
-                AddEvent(new TripPaidEvent(Id, PassengerId, DriverId.Value, _tripFare.TotalAmount));
-            }
+            AddEvent(new TripPaidEvent(Id, PassengerId, DriverId.Value, _tripFare.TotalAmount));
         }
 
         #endregion

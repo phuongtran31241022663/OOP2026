@@ -28,6 +28,11 @@ namespace UnitTest.Mocks
         public bool RequestTripCalled => _requestTripCalled;
         public string LastTripStatus => _lastTripStatus;
         public int RequestTripCallCount { get; private set; }
+        public bool CancelTripCalled { get; private set; }
+        public bool CancelTripAsyncCalled { get; private set; }
+        public int CanCancelCallCount { get; private set; }
+        public bool CanCancelReturnValue { get; private set; } = true;
+        private Trip _tripToReturn;
 
         public MockTripService()
         {
@@ -45,9 +50,20 @@ namespace UnitTest.Mocks
                 throw ex;
         }
 
+        public void SetTripToReturn(Trip trip)
+        {
+            _tripToReturn = trip;
+            SetupRequestTripSuccess(trip);
+        }
+
+        public void SetCanCancel(bool canCancel)
+        {
+            CanCancelReturnValue = canCancel;
+        }
+
         public Task<Trip> CreateTripAsync(Guid passengerId, Route route, Fare fare, VehicleType vehicleType)
         {
-            return Task.FromResult<Trip>(null);
+            return Task.FromResult(_tripToReturn);
         }
 
         public Task MatchDriverAsync(Guid tripId, Guid driverId)
@@ -72,6 +88,8 @@ namespace UnitTest.Mocks
 
         public Task CancelTripAsync(Guid tripId, string reason)
         {
+            CancelTripCalled = true;
+            CancelTripAsyncCalled = true;
             return Task.CompletedTask;
         }
 
@@ -91,7 +109,7 @@ namespace UnitTest.Mocks
 
         public Task<Trip> GetTripAsync(Guid tripId)
         {
-            return Task.FromResult<Trip>(null);
+            return Task.FromResult(_tripToReturn);
         }
 
         public Task<Trip> GetTripByIdAsync(Guid id)
@@ -126,7 +144,8 @@ namespace UnitTest.Mocks
 
         public Task<bool> CanTripBeCancelledAsync(Guid tripId)
         {
-            return Task.FromResult(true);
+            CanCancelCallCount++;
+            return Task.FromResult(CanCancelReturnValue);
         }
 
         public Task ConfirmPaymentAsync(Guid tripId)

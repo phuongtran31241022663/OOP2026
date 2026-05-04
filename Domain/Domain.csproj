@@ -87,6 +87,9 @@
     <Compile Include="SharedKernel\DomainEvent.cs" />
     <Compile Include="SharedKernel\Entity.cs" />
     <Compile Include="SharedKernel\ValueObject.cs" />
+    <Compile Include="Strategies\IFareCalculationStrategy.cs" />
+    <Compile Include="Strategies\MotorbikeFareStrategy.cs" />
+    <Compile Include="Strategies\CarFareStrategy.cs" />
     <Compile Include="States\IDriverState.cs" />
     <Compile Include="States\Drivers\DriverOfflineState.cs" />
     <Compile Include="States\Drivers\DriverAvailableState.cs" />

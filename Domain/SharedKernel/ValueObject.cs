@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Domain.SharedKernel
 {
@@ -14,17 +13,42 @@ namespace Domain.SharedKernel
 
         public override bool Equals(object obj)
         {
-            if (!(obj is ValueObject)) return false;
-            var other = (ValueObject)obj;
+            if (obj == null)
+                return false;
 
-            return GetEqualityComponents()
-                .SequenceEqual(other.GetEqualityComponents());
+            if (GetType() != obj.GetType())
+                return false;
+
+            ValueObject other = (ValueObject)obj;
+            IEnumerator<object> thisEnumerator = GetEqualityComponents().GetEnumerator();
+            IEnumerator<object> otherEnumerator = other.GetEqualityComponents().GetEnumerator();
+
+            while (true)
+            {
+                bool hasThis = thisEnumerator.MoveNext();
+                bool hasOther = otherEnumerator.MoveNext();
+
+                if (!hasThis && !hasOther)
+                    return true;
+
+                if (hasThis != hasOther)
+                    return false;
+
+                if (!object.Equals(thisEnumerator.Current, otherEnumerator.Current))
+                    return false;
+            }
         }
 
         public override int GetHashCode()
         {
-            return GetEqualityComponents()
-                .Aggregate(0, (hash, obj) => unchecked(hash * 31 + (obj != null ? obj.GetHashCode() : 0)));
+            int hash = 0;
+
+            foreach (object component in GetEqualityComponents())
+            {
+                hash = unchecked(hash * 31 + (component != null ? component.GetHashCode() : 0));
+            }
+
+            return hash;
         }
     }
 }

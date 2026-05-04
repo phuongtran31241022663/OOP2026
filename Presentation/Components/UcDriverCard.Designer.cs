@@ -3,7 +3,8 @@ using Presentation.Constants;
 
 namespace Presentation.Components
 {
-    partial class DriverCardControl : BaseUserControl
+    // tao thấy cái design này đẹp ấy, có điều nó hơi nhỏ, có thể học hỏi cái này áp dụng cho cái khác
+    partial class UcDriverCard : BaseUserControl
     {
         /// <summary> 
         /// Required designer variable.

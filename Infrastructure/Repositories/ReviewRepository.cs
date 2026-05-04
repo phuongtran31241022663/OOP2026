@@ -14,14 +14,30 @@ namespace Infrastructure.Repositories
 
         public async Task<List<Review>> GetByDriverIdAsync(Guid driverId)
         {
-            await Task.CompletedTask;
-            return _items.Where(r => r.DriverId == driverId).ToList();
+            await EnsureLoadedAsync();
+            await _fileLock.WaitAsync();
+            try
+            {
+                return _items.Where(r => r.DriverId == driverId).ToList();
+            }
+            finally
+            {
+                _fileLock.Release();
+            }
         }
 
         public async Task<List<Review>> GetByTripIdAsync(Guid tripId)
         {
-            await Task.CompletedTask;
-            return _items.Where(r => r.TripId == tripId).ToList();
+            await EnsureLoadedAsync();
+            await _fileLock.WaitAsync();
+            try
+            {
+                return _items.Where(r => r.TripId == tripId).ToList();
+            }
+            finally
+            {
+                _fileLock.Release();
+            }
         }
     }
 }

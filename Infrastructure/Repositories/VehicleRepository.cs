@@ -15,8 +15,16 @@ namespace Infrastructure.Repositories
 
         public async Task<List<Vehicle>> GetByTypeAsync(VehicleType type)
         {
-            await Task.CompletedTask;
-            return _items.Where(v => v.Type == type).ToList();
+            await EnsureLoadedAsync();
+            await _fileLock.WaitAsync();
+            try
+            {
+                return _items.Where(v => v.Type == type).ToList();
+            }
+            finally
+            {
+                _fileLock.Release();
+            }
         }
     }
 }

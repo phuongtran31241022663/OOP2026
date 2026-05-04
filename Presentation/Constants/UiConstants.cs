@@ -88,15 +88,6 @@ namespace Presentation.Constants
             public const int ModernInputHeight = 32;
         }
 
-        public static class GridSettings
-        {
-            public const int HeaderHeight = 35;
-            public const int RowHeight = 30;
-            public static readonly Color GridLineColor = Color.FromArgb(240, 240, 240);
-            public const int IdColumnWidth = 50;
-            public const int ActionColumnWidth = 100;
-            public const int DateColumnWidth = 120;
-        }
 
         public static class Heights
         {

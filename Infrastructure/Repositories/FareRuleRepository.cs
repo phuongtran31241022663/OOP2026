@@ -15,32 +15,47 @@ namespace Infrastructure.Repositories
 
         public async Task<FareRule> GetByVehicleTypeAsync(VehicleType vehicleType)
         {
-            await Task.CompletedTask;
-            return _items.FirstOrDefault(r => r.VehicleType == vehicleType);
+            await EnsureLoadedAsync();
+            await _fileLock.WaitAsync();
+            try
+            {
+                return _items.FirstOrDefault(r => r.VehicleType == vehicleType);
+            }
+            finally
+            {
+                _fileLock.Release();
+            }
         }
 
         public async Task EnsureSeededAsync()
         {
             await InitializeAsync();
-
-            if (!_items.Any(r => r.VehicleType == VehicleType.Motorbike))
+            await _fileLock.WaitAsync();
+            try
             {
-                _items.Add(new FareRule(
-                    VehicleType.Motorbike,
-                    new Money(15000, "VND"),
-                    new Money(3000, "VND"),
-                    0.2m
-                ));
+                if (!_items.Any(r => r.VehicleType == VehicleType.Motorbike))
+                {
+                    _items.Add(new FareRule(
+                        VehicleType.Motorbike,
+                        new Money(15000, "VND"),
+                        new Money(3000, "VND"),
+                        0.2m
+                    ));
+                }
+
+                if (!_items.Any(r => r.VehicleType == VehicleType.Car))
+                {
+                    _items.Add(new FareRule(
+                        VehicleType.Car,
+                        new Money(25000, "VND"),
+                        new Money(5000, "VND"),
+                        0.2m
+                    ));
+                }
             }
-
-            if (!_items.Any(r => r.VehicleType == VehicleType.Car))
+            finally
             {
-                _items.Add(new FareRule(
-                    VehicleType.Car,
-                    new Money(25000, "VND"),
-                    new Money(5000, "VND"),
-                    0.2m
-                ));
+                _fileLock.Release();
             }
 
             await SaveChangesAsync();

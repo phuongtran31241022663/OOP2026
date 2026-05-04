@@ -40,14 +40,10 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
-   <ItemGroup>
-     <Compile Include="Constants\FareConstants.cs" />
-     <Compile Include="Constants\SimulationConstants.cs" />
-     <Compile Include="Extensions\DecimalExtensions.cs" />
-     <Compile Include="Extensions\StringExtensions.cs" />
-     <Compile Include="Utilities\PasswordHasher.cs" />
-     <Compile Include="Properties\AssemblyInfo.cs" />
-   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Utilities\PasswordHasher.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

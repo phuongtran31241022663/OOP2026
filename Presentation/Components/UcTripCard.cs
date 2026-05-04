@@ -12,19 +12,19 @@ namespace Presentation.Components
     /// BaseUserControl hiá»ƒn thá»‹ thÃ´ng tin chuyáº¿n Ä‘i vá»›i style nháº¥t quÃ¡n.
     /// DÃ¹ng vá»›i FlowLayoutPanel Ä‘á»ƒ hiá»ƒn thá»‹ danh sÃ¡ch chuyáº¿n.
     /// </summary>
-    public partial class TripCard : BaseUserControl
+    public partial class UcTripCard : BaseUserControl
     {
         /// <summary>
         /// Sá»± kiá»‡n khi ngÆ°á»i dÃ¹ng click vÃ o trip card
         /// </summary>
-        public event Action<TripCard> Clicked;
+        public event Action<UcTripCard> Clicked;
 
         /// <summary>
         /// Chuyến đi được hiển thị
         /// </summary>
         public Trip DisplayedTrip { get; private set; }
 
-        public TripCard()
+        public UcTripCard()
         {
             InitializeComponent();
 

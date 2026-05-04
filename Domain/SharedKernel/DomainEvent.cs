@@ -2,6 +2,7 @@ using System;
 
 namespace Domain.SharedKernel
 {
+    // domainevent này để làm gì vậy tạo hàm và eventhandler thôi không được à, đơn giản thôi
  	public abstract class DomainEvent : IEquatable<DomainEvent>
  	{
         public Guid Id { get; }

@@ -14,39 +14,39 @@ namespace Presentation.Components
             switch (status)
             {
                 case "Requested":
-                    _statusLabel.Text = "–„ yÍu c?u";
+                    _statusLabel.Text = "–ª—Å y–ñu c?u";
                     _progressBar.Value = 20;
-                    _stepLabel.Text = "–ang tÏm t‡i x?...";
+                    _stepLabel.Text = "–ªang t–ím t–Øi x?...";
                     break;
                 case "Matched":
-                    _statusLabel.Text = "–„ ghÈp dÙi";
+                    _statusLabel.Text = "–ª—Å gh–∂p d–ói";
                     _progressBar.Value = 40;
-                    _stepLabel.Text = "T‡i x? dang d?n...";
+                    _stepLabel.Text = "T–Øi x? dang d?n...";
                     break;
                 case "Arrived":
-                    _statusLabel.Text = "T‡i x? d„ d?n";
+                    _statusLabel.Text = "T–Øi x? d—Å d?n";
                     _progressBar.Value = 60;
-                    _stepLabel.Text = "S?n s‡ng kh?i h‡nh";
+                    _stepLabel.Text = "S?n s–Øng kh?i h–Ønh";
                     break;
                 case "Started":
-                    _statusLabel.Text = "–ang ch?y";
+                    _statusLabel.Text = "–ªang ch?y";
                     _progressBar.Value = 80;
-                    _stepLabel.Text = "–?n di?m dÌch...";
+                    _stepLabel.Text = "–ª?n di?m d—åch...";
                     break;
                 case "Completed":
-                    _statusLabel.Text = "Ho‡n th‡nh";
+                    _statusLabel.Text = "Ho–Øn th–Ønh";
                     _progressBar.Value = 100;
-                    _stepLabel.Text = "C?m on d„ s? d?ng";
+                    _stepLabel.Text = "C?m on d—Å s? d?ng";
                     break;
                 case "Cancelled":
-                    _statusLabel.Text = "–„ h?y";
+                    _statusLabel.Text = "–ª—Å h?y";
                     _progressBar.Value = 0;
-                    _stepLabel.Text = "Chuy?n di d„ h?y";
+                    _stepLabel.Text = "Chuy?n di d—Å h?y";
                     break;
                 default:
-                    _statusLabel.Text = "KhÙng x·c d?nh";
+                    _statusLabel.Text = "Kh–óng x—Äc d?nh";
                     _progressBar.Value = 0;
-                    _stepLabel.Text = "Tr?ng th·i khÙng rı";
+                    _stepLabel.Text = "Tr?ng th—Äi kh–óng r—à";
                     break;
             }
         }

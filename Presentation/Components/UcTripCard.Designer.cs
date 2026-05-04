@@ -2,7 +2,7 @@ using Presentation.Constants;
 
 namespace Presentation.Components
 {
-    partial class TripCard
+    partial class UcTripCard
     {
         /// <summary> 
         /// Required designer variable.

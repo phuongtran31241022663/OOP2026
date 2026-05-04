@@ -9,7 +9,6 @@ namespace Presentation
 {
     public partial class BaseForm : Form
     {
-        public TabControl MainTabControl => tabControlMain;
 
         private bool _isLoading;
         public bool IsLoading
@@ -36,18 +35,6 @@ namespace Presentation
                 if (e.KeyCode == Keys.F1)
                 {
                     ShowHelp();
-                    e.Handled = true;
-                    return;
-                }
-                if (e.Control && !e.Shift && e.KeyCode == Keys.Tab)
-                {
-                    CycleTab(forward: true);
-                    e.Handled = true;
-                    return;
-                }
-                if (e.Control && e.Shift && e.KeyCode == Keys.Tab)
-                {
-                    CycleTab(forward: false);
                     e.Handled = true;
                     return;
                 }
@@ -98,48 +85,10 @@ namespace Presentation
         protected virtual void ShowHelp()
         {
             MessageBox.Show(this,
-                "Phím tắt:\n- Ctrl+Tab: Tab tiếp theo\n- Ctrl+Shift+Tab: Tab trước\n- F1: Trợ giúp\n- Esc: Đóng form",
+                "Phím tắt:\n- F1: Trợ giúp\n- Esc: Đóng form",
                 "Trợ giúp",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
-        }
-
-        // ─── Tab Control ──────────────────────────────────────────────────────
-        private void CycleTab(bool forward)
-        {
-            int count = tabControlMain.TabCount;
-            if (count == 0) return;
-            int current = tabControlMain.SelectedIndex;
-            tabControlMain.SelectedIndex = forward
-                ? (current + 1) % count
-                : (current - 1 + count) % count;
-        }
-
-        public void AddTab(BaseForm contentForm, string title, bool closeable = true)
-        {
-            if (contentForm == null) throw new ArgumentNullException(nameof(contentForm));
-            contentForm.TopLevel = false;
-            contentForm.FormBorderStyle = FormBorderStyle.None;
-            contentForm.Dock = DockStyle.Fill;
-            contentForm.Visible = true;
-            var tabPage = new TabPage(title);
-            tabPage.Controls.Add(contentForm);
-            tabControlMain.TabPages.Add(tabPage);
-            tabControlMain.SelectedTab = tabPage;
-        }
-
-        public bool CloseTab(TabPage page)
-        {
-            if (page == null || !tabControlMain.TabPages.Contains(page)) return false;
-            tabControlMain.TabPages.Remove(page);
-            page.Dispose();
-            return true;
-        }
-
-        public void CloseCurrentTab()
-        {
-            if (tabControlMain.SelectedTab != null)
-                CloseTab(tabControlMain.SelectedTab);
         }
 
         // ─── MessageBox Helpers ───────────────────────────────────────────────

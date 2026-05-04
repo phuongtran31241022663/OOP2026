@@ -10,10 +10,11 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
+    // tạm thời, hiện tại thì lưu trữ hoạt động tốt
     public class JsonRepository<T> : IRepository<T> where T : Entity
     {
         protected readonly string _filePath;
-protected static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
+        protected readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
         protected List<T> _items;
         private readonly JsonSerializerSettings _serializerSettings;
 
@@ -24,8 +25,20 @@ protected static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
 
             string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
 
-            if (!Directory.Exists(folder))
-                Directory.CreateDirectory(folder);
+            try
+            {
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                    System.Diagnostics.Debug.WriteLine($"[JsonRepository] Created directory: {folder}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[JsonRepository] ERROR creating directory {folder}: {ex.Message}");
+                throw;
+            }
+
             _filePath = Path.Combine(folder, fileName);
             _items = new List<T>();
             _serializerSettings = new JsonSerializerSettings
@@ -33,6 +46,8 @@ protected static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
                 TypeNameHandling = TypeNameHandling.Auto
             };
+
+            System.Diagnostics.Debug.WriteLine($"[JsonRepository] Initialized for file: {_filePath}");
         }
 
 
@@ -67,8 +82,13 @@ protected static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
             {
                 string json = JsonConvert.SerializeObject(_items, Formatting.Indented, _serializerSettings);
                 await Task.Run(() => File.WriteAllText(_filePath, json));
+                System.Diagnostics.Debug.WriteLine($"[JsonRepository] Saved {_items.Count} items to {_filePath}");
             }
-
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[JsonRepository] ERROR saving to {_filePath}: {ex.Message}");
+                throw;
+            }
             finally
             {
                 _fileLock.Release();
@@ -89,6 +109,7 @@ protected static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
         public async Task InitializeAsync()
         {
             await LoadFromFileAsync();
+            System.Diagnostics.Debug.WriteLine($"[JsonRepository] Initialized with {_items.Count} items from {_filePath}");
         }
 
         public async Task SaveChangesAsync()
@@ -141,10 +162,7 @@ protected static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
             try
             {
                 _items.Add(entity);
-                string json = JsonConvert.SerializeObject(_items, Formatting.Indented, _serializerSettings);
-                await Task.Run(() => File.WriteAllText(_filePath, json));
             }
-
             finally
             {
                 _fileLock.Release();
@@ -172,11 +190,10 @@ protected static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
                     }
                 }
                 if (!found)
+                {
                     _items.Add(entity);
-                string json = JsonConvert.SerializeObject(_items, Formatting.Indented, _serializerSettings);
-                await Task.Run(() => File.WriteAllText(_filePath, json));
+                }
             }
-
             finally
             {
                 _fileLock.Release();
@@ -205,10 +222,7 @@ protected static readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
                 if (indexToRemove >= 0)
                 {
                     _items.RemoveAt(indexToRemove);
-                    string json = JsonConvert.SerializeObject(_items, Formatting.Indented, _serializerSettings);
-                    await Task.Run(() => File.WriteAllText(_filePath, json));
                 }
-
             }
             finally
             {

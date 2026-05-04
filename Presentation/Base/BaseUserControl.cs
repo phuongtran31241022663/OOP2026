@@ -8,7 +8,7 @@ namespace Presentation
     public partial class BaseUserControl : UserControl
     {
         private bool _isLoading;
-        protected ErrorProvider _validationErrorProvider = new ErrorProvider { BlinkStyle = ErrorBlinkStyle.NeverBlink };
+        // bỏ thằng error provider đi, throw new exception đã đủ lắm rồi
 
         public bool IsLoading
         {
@@ -68,7 +68,7 @@ namespace Presentation
                 ShowError("Có lỗi hệ thống, vui lòng thử lại sau.", "Lỗi");
             }
         }
-
+        // kệ mẹ đi, lưu ra file tao có đọc đâu , nào đọc được dòng này xóa hàm này giùm tao, LogException(Exception ex)
         protected void LogException(Exception ex)
         {
             try
@@ -88,7 +88,7 @@ namespace Presentation
         {
             ExecuteWithHandling(context, action, null);
         }
-
+        // đủ loại lỗi chưa
         protected void ExecuteWithHandling(string actionName, Action action, Action finallyAction = null)
         {
             try
@@ -113,10 +113,6 @@ namespace Presentation
             }
         }
 
-        protected async Task ExecuteWithHandlingAsync(Func<Task> action)
-        {
-            await ExecuteWithHandlingAsync(action, null, null);
-        }
 
         protected async Task ExecuteWithHandlingAsync(string context, Func<Task> action, Action onComplete)
         {
@@ -148,24 +144,10 @@ namespace Presentation
                 onComplete?.Invoke();
             }
         }
-
+        // bỏ error provider đi thì bỏ cái này ValidateControl(Control control, bool condition, string 
         protected bool ValidateControl(Control control, bool condition, string errorMessage)
         {
-            if (condition)
-            {
-                _validationErrorProvider.SetError(control, null);
-                return true;
-            }
-            else
-            {
-                _validationErrorProvider.SetError(control, errorMessage);
-                return false;
-            }
-        }
-
-        protected void ClearValidation()
-        {
-            _validationErrorProvider.Clear();
+            return condition;
         }
     }
 }

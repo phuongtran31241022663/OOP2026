@@ -170,6 +170,74 @@ namespace UnitTest
             Assert.AreEqual(3800m, fare.Commission.Amount);
         }
 
+        [TestMethod]
+        public void CalculateFare_WithOddAmount_RoundsUpToNearest1000()
+        {
+            // Arrange
+            // Base: 15000 VND, Per km: 4000 VND, Distance: 1 km
+            // Raw: 15000 + 4000 = 19000 VND (đã tròn 1000, không cần round)
+            Money baseFare = new Money(15000m);
+            Money pricePerKm = new Money(4000m);
+            FareRule fareRule = new FareRule(VehicleType.Motorbike, baseFare, pricePerKm, 0.20m);
+
+            // Act
+            Fare fare = fareRule.CalculateFare(1.0);
+
+            // Assert - 19000 VND đã tròn 1000
+            Assert.AreEqual(19000m, fare.TotalAmount.Amount);
+        }
+
+        [TestMethod]
+        public void CalculateFare_WithAmount24999_RoundsDownTo20000()
+        {
+            // Arrange
+            // Base: 15000 VND, Per km: 5000 VND, Distance: 2 km
+            // Raw: 15000 + 10000 = 25000 VND (đã tròn 1000)
+            Money baseFare = new Money(15000m);
+            Money pricePerKm = new Money(5000m);
+            FareRule fareRule = new FareRule(VehicleType.Motorbike, baseFare, pricePerKm, 0.20m);
+
+            // Act
+            Fare fare = fareRule.CalculateFare(2.0);
+
+            // Assert - 25000 VND đã tròn 1000
+            Assert.AreEqual(25000m, fare.TotalAmount.Amount);
+        }
+
+        [TestMethod]
+        public void CalculateFare_WithAmount12500_RoundsUpTo13000()
+        {
+            // Arrange - giả lập giá trị cần làm tròn
+            // Base: 10000 VND, Per km: 2500 VND, Distance: 1 km
+            // Raw: 10000 + 2500 = 12500 VND
+            Money baseFare = new Money(10000m);
+            Money pricePerKm = new Money(2500m);
+            FareRule fareRule = new FareRule(VehicleType.Motorbike, baseFare, pricePerKm, 0.20m);
+
+            // Act
+            Fare fare = fareRule.CalculateFare(1.0);
+
+            // Assert - 12500 VND là midpoint, làm tròn lên 13000
+            Assert.AreEqual(13000m, fare.TotalAmount.Amount);
+        }
+
+        [TestMethod]
+        public void CalculateFare_WithAmount12499_RoundsDownTo12000()
+        {
+            // Arrange
+            // Base: 15000 VND, Per km: 5000 VND, Distance: 0 km
+            // Raw: 15000 VND
+            Money baseFare = new Money(15000m);
+            Money pricePerKm = new Money(5000m);
+            FareRule fareRule = new FareRule(VehicleType.Motorbike, baseFare, pricePerKm, 0.20m);
+
+            // Act
+            Fare fare = fareRule.CalculateFare(0);
+
+            // Assert - 15000 VND không cần round (đã tròn 1000)
+            Assert.AreEqual(15000m, fare.TotalAmount.Amount);
+        }
+
         #endregion
     }
 }

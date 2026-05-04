@@ -52,7 +52,9 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
+    <Reference Include="System">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\System.dll</HintPath>
+    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SqlClient, Version=4.6.1.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -96,55 +98,42 @@
     <Compile Include="Base\BaseUserControl.Designer.cs">
       <DependentUpon>BaseUserControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\DriverCardControl.cs">
+    <Compile Include="Components\UcDriverCard.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Components\DriverCardControl.Designer.cs">
-      <DependentUpon>DriverCardControl.cs</DependentUpon>
+    <Compile Include="Components\UcDriverCard.Designer.cs">
+      <DependentUpon>UcDriverCard.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\FarePanel.cs">
+    <Compile Include="Components\UcFareVehicleSelector.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Components\FarePanel.Designer.cs">
-      <DependentUpon>FarePanel.cs</DependentUpon>
+    <Compile Include="Components\UcFareVehicleSelector.Designer.cs">
+      <DependentUpon>UcFareVehicleSelector.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\LocationCard.cs">
+    <Compile Include="Components\UcLocationPicker.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Components\LocationCard.Designer.cs">
-      <DependentUpon>LocationCard.cs</DependentUpon>
+    <Compile Include="Components\UcLocationPicker.Designer.cs">
+      <DependentUpon>UcLocationPicker.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\LocationPickerControl.cs">
+    <Compile Include="Components\UcMap.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Components\LocationPickerControl.Designer.cs">
-      <DependentUpon>LocationPickerControl.cs</DependentUpon>
+    <Compile Include="Components\UcMap.Designer.cs">
+      <DependentUpon>UcMap.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\MapControl.cs">
+    <Compile Include="Components\UcTripCard.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Components\MapControl.Designer.cs">
-      <DependentUpon>MapControl.cs</DependentUpon>
+    <Compile Include="Components\UcTripCard.Designer.cs">
+      <DependentUpon>UcTripCard.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\StatusPanel.cs">
+    <Compile Include="Components\UcTripStatus.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Components\StatusPanel.Designer.cs">
-      <DependentUpon>StatusPanel.cs</DependentUpon>
+    <Compile Include="Components\UcTripStatus.Designer.cs">
+      <DependentUpon>UcTripStatus.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\TripCard.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Components\TripCard.Designer.cs">
-      <DependentUpon>TripCard.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Components\TripStatusPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Components\TripStatusPanel.Designer.cs">
-      <DependentUpon>TripStatusPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Components\LogLevel.cs" />
     <Compile Include="Constants\UiConstants.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -153,6 +142,12 @@
     </Compile>
     <Compile Include="Forms\FrmMain.Designer.cs">
       <DependentUpon>FrmMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FrmMultiRole.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FrmMultiRole.Designer.cs">
+      <DependentUpon>FrmMultiRole.cs</DependentUpon>
     </Compile>
     <Compile Include="UserControls\UcAuth.cs">
       <SubType>UserControl</SubType>
@@ -199,11 +194,8 @@
     <EmbeddedResource Include="Base\BaseForm.resx">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Components\FarePanel.resx">
-      <DependentUpon>FarePanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Components\MapControl.resx">
-      <DependentUpon>MapControl.cs</DependentUpon>
+    <EmbeddedResource Include="Components\UcMap.resx">
+      <DependentUpon>UcMap.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Components\UcTripDetail.resx">
       <DependentUpon>UcTripDetail.cs</DependentUpon>
@@ -217,6 +209,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="UserControls\UcAuth.resx">
+      <DependentUpon>UcAuth.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\UcPassenger.resx">
+      <DependentUpon>UcPassenger.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

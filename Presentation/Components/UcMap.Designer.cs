@@ -1,7 +1,9 @@
 
+using System.Windows.Forms;
+
 namespace Presentation.Components
 {
-    partial class MapControl
+    public partial class UcMap : UserControl
     {
         /// <summary> 
         /// Required designer variable.
