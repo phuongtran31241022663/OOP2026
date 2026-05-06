@@ -1,11 +1,9 @@
-// Presentation/BaseForm.cs
-using System;
-using System.Drawing;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Presentation
+namespace Presentation.Base
 {
     public partial class BaseForm : Form
     {
@@ -27,7 +25,7 @@ namespace Presentation
             InitializeComponent();
         }
 
-        // ─── Event Handlers ──────────────────────────────────────────────────
+// --- Event Handlers ---
         private void BaseForm_KeyDown(object sender, KeyEventArgs e)
         {
             try
@@ -78,12 +76,13 @@ namespace Presentation
             }
         }
 
-        // ─── Virtual Methods ─────────────────────────────────────────────────
+// --- Virtual Methods ---
         protected virtual void OnEscapePressed(KeyEventArgs e) => Close();
         protected virtual void OnFormClosingInternal(FormClosingEventArgs e) { }
 
         protected virtual void ShowHelp()
         {
+            // Fix [High 1]: String encoding for Vietnamese
             MessageBox.Show(this,
                 "Phím tắt:\n- F1: Trợ giúp\n- Esc: Đóng form",
                 "Trợ giúp",
@@ -91,7 +90,7 @@ namespace Presentation
                 MessageBoxIcon.Information);
         }
 
-        // ─── MessageBox Helpers ───────────────────────────────────────────────
+// --- MessageBox Helpers ---
         protected void ShowInfo(string message, string caption = "Thông báo")
             => MessageBox.Show(this, message, caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -101,18 +100,18 @@ namespace Presentation
         protected void ShowError(string message, string caption = "Lỗi")
             => MessageBox.Show(this, message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-        protected bool Confirm(string message, string caption = "Xác nhận")
+        protected bool Confirm(string message, string caption = "XÃ¡c nháº­n")
             => MessageBox.Show(this, message, caption, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
 
-        protected bool ConfirmDelete(string itemName = "mục này")
+        protected bool ConfirmDelete(string itemName = "má»¥c nÃ y")
             => Confirm($"Bạn có chắc chắn muốn xóa {itemName}?", "Xóa");
 
-        // ─── Exception Helpers ────────────────────────────────────────────────
+        // â”€â”€â”€ Exception Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         protected void ShowFriendlyException(ArgumentException ex, string actionName)
-            => ShowWarning($"[{actionName}] {ex.Message}", "Lỗi nhập liệu");
+            => ShowWarning($"[{actionName}] {ex.Message}", "Lá»—i nháº­p liá»‡u");
 
         protected void ShowFriendlyException(InvalidOperationException ex, string actionName)
-            => ShowError($"[{actionName}] {ex.Message}", "Lỗi nghiệp vụ");
+            => ShowError($"[{actionName}] {ex.Message}", "Lá»—i nghiá»‡p vá»¥");
 
         protected void ShowFriendlyException(Exception ex, string actionName)
         {
@@ -122,10 +121,10 @@ namespace Presentation
                 File.AppendAllText(logPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [{actionName}] {ex}{Environment.NewLine}");
             }
             catch { /* Ignore logging errors */ }
-            ShowError("Có lỗi hệ thống, vui lòng thử lại sau.", "Lỗi");
+            ShowError("CÃ³ lá»—i há»‡ thá»‘ng, vui lÃ²ng thá»­ láº¡i sau.", "Lá»—i");
         }
 
-        // ─── Safe Execution Wrappers ─────────────────────────────────────────
+        // â”€â”€â”€ Safe Execution Wrappers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         protected void ExecuteWithHandling(string actionName, Action action, Action finallyAction = null)
         {
             try { action?.Invoke(); }
@@ -147,7 +146,7 @@ namespace Presentation
             finally { finallyAction?.Invoke(); }
         }
 
-        // ─── Cursor Helpers ────────────────────────────────────────────────────
+        // â”€â”€â”€ Cursor Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         protected void ShowWaitCursor()
         {
             Cursor.Current = Cursors.WaitCursor;
@@ -160,7 +159,7 @@ namespace Presentation
             UseWaitCursor = false;
         }
 
-        // ─── UI Thread Helper ─────────────────────────────────────────────────
+        // â”€â”€â”€ UI Thread Helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         protected void RunOnUI(Action action)
         {
             if (InvokeRequired) Invoke(action);
@@ -168,3 +167,4 @@ namespace Presentation
         }
     }
 }
+

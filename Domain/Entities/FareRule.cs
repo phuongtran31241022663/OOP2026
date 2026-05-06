@@ -1,4 +1,3 @@
-using Domain.Enums;
 using Domain.ValueObjects;
 using System;
 using Domain.SharedKernel;
@@ -26,11 +25,11 @@ namespace Domain.Entities
         #region Properties
 
         /// <summary>
-        /// Loại phương tiện áp dụng quy tắc cước này.
+        /// Loại phương tiện áp dụng quy tắc cước này (ví dụ: "Car", "Motorbike").
         /// </summary>
-        public VehicleType VehicleType { get; }
+        public string VehicleType { get; }
 
-/// <summary>
+        /// <summary>
         /// Giá cước mở cửa (giá cố định ban đầu).
         /// </summary>
         public Money BaseFare
@@ -90,17 +89,20 @@ namespace Domain.Entities
         /// <summary>
         /// Tạo một quy tắc tính cước mới.
         /// </summary>
-        /// <param name="vehicleType">Loại phương tiện.</param>
+        /// <param name="vehicleType">Loại phương tiện (ví dụ: "Car", "Motorbike").</param>
         /// <param name="baseFare">Giá mở cửa.</param>
         /// <param name="pricePerKm">Giá mỗi km.</param>
         /// <param name="commissionRate">Tỉ lệ hoa hồng.</param>
         public FareRule(
-            VehicleType vehicleType,
+            string vehicleType,
             Money baseFare,
             Money pricePerKm,
             decimal commissionRate
         ) : base(Guid.NewGuid())
         {
+            if (string.IsNullOrWhiteSpace(vehicleType))
+                throw new ArgumentException("Loại phương tiện không được để trống.", nameof(vehicleType));
+
             VehicleType = vehicleType;
             BaseFare = baseFare;
             PricePerKm = pricePerKm;
@@ -115,12 +117,13 @@ namespace Domain.Entities
         /// <summary>
         /// Cập nhật các thông số của quy tắc cước.
         /// </summary>
+        /// <param name="vehicleType">Loại phương tiện (phải khớp với loại hiện tại).</param>
         /// <param name="baseFare">Giá mở cửa mới.</param>
         /// <param name="pricePerKm">Giá mỗi km mới.</param>
         /// <param name="commissionRate">Tỉ lệ hoa hồng mới.</param>
-        public void UpdateRule(VehicleType vehicleType, Money baseFare, Money pricePerKm, decimal commissionRate)
+        public void UpdateRule(string vehicleType, Money baseFare, Money pricePerKm, decimal commissionRate)
         {
-            if (vehicleType != VehicleType)
+            if (!string.Equals(VehicleType, vehicleType, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Không thể thay đổi loại phương tiện của quy tắc cước hiện có.");
 
             BaseFare = baseFare;

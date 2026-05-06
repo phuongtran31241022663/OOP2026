@@ -1,14 +1,13 @@
-// Presentation/BaseShell_Designer.cs
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
-namespace Presentation
+namespace Presentation.Base
 {
     partial class BaseForm
     {
         private System.ComponentModel.IContainer components = null;
 
-        // Controls - FrmMain dùng Panel riêng, không cần TabControl
+// Controls - FrmMain dùng Panel riêng, không cần TabControl
 
         protected override void Dispose(bool disposing)
         {
@@ -18,7 +17,7 @@ namespace Presentation
         }
 
         #region Windows Form Designer generated code
-        private void InitializeComponent()
+protected void InitializeComponent()
         {
             this.SuspendLayout();
             // 
@@ -32,10 +31,11 @@ namespace Presentation
             this.MinimumSize = new System.Drawing.Size(900, 600);
             this.Name = "BaseForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Ứng dụng";
+this.Text = "Ứng dụng";
             this.ResumeLayout(false);
             this.PerformLayout();
         }
         #endregion
     }
 }
+

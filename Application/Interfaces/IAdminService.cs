@@ -1,10 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Entities.Users;
-using Domain.Enums;
 using Domain.ValueObjects;
 using Domain.Entities;
+
+
 
 namespace Application.Interfaces
 {
@@ -20,7 +21,8 @@ namespace Application.Interfaces
         Task<List<FareRule>> GetFareRulesAsync();
         Task CreateFareRuleAsync(FareRule rule);
         Task UpdateFareRuleAsync(FareRule rule);
-        Task UpdateFareRuleAsync(VehicleType vehicleType, Money baseFare, Money pricePerKm, double commissionRate);
+        Task UpdateFareRuleAsync(string vehicleType, Money baseFare, Money pricePerKm, double commissionRate);
+
         Task DeleteFareRuleAsync(Guid id);
 
         Task CancelTripAsync(Guid tripId, string reason);
@@ -31,3 +33,4 @@ namespace Application.Interfaces
         Task<double> GetAverageSatisfactionAsync();
     }
 }
+

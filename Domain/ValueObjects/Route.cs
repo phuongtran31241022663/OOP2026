@@ -41,7 +41,7 @@ namespace Domain.ValueObjects
         #endregion
         protected override IEnumerable<object> GetEqualityComponents()
         {
-          yield return Pickup;
+            yield return Pickup;
             yield return Destination;
             yield return Distance;
             yield return Duration;

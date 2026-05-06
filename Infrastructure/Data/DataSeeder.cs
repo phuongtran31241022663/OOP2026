@@ -1,14 +1,11 @@
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.Entities.Vehicles;
-using Domain.Enums;
 using Domain.Repositories;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
-using DomainUser = Domain.Entities.Users;
 
 namespace Infrastructure.Data
 {
@@ -110,12 +107,12 @@ namespace Infrastructure.Data
             {
                 // 0. Tạo tài khoản Admin mặc định nếu chưa có
                 // cái demo nhanh trên GUI điền sai rồi, chả matching với nhau gì cả
-                if (!await userRepo.ExistsByPhoneAsync("0987654321"))
+                if (!await userRepo.ExistsByPhoneAsync("0999999999"))
                 {
                     // lại là thư viện!?
                     System.Diagnostics.Debug.WriteLine("[DataSeeder] Creating default admin...");
                     // thư viện ở trên cơ mà
-                    DomainUser.Admin admin = new DomainUser.Admin("Quản trị viên", "0987654321", "123456");
+                    Admin admin = new Admin("Quản trị viên", "0999999999", "admin123");
                     await userRepo.AddAsync(admin);
                     await userRepo.SaveChangesAsync();
                     // nữa
@@ -234,7 +231,7 @@ namespace Infrastructure.Data
             {
                 string brand = BrandsMoto[_random.Next(BrandsMoto.Length)];
                 string model = ModelsMoto[_random.Next(ModelsMoto.Length)];
-                return new Motorbike(null, plate, brand, model, color);
+                return new Motorbike(null, plate, brand, model, color, 2);
             }
         }
 
@@ -263,7 +260,7 @@ namespace Infrastructure.Data
             TimeSpan duration = TimeSpan.FromMinutes(distance * 3 + _random.Next(-5, 10));
             Route route = new Route(pickupLoc, destLoc, distance, duration, "");
             Fare fare = new Fare(new Money((decimal)(distance * 10000 + 15000), "VND"), new Money((decimal)(distance * 2000), "VND"));
-            VehicleType vehicleType = _random.Next(2) == 0 ? VehicleType.Motorbike : VehicleType.Car;
+            string vehicleType = _random.Next(2) == 0 ? "Motorbike" : "Car";
 
             Trip trip = new Trip(passengerId, route, fare, vehicleType);
             trip.SetSearching();

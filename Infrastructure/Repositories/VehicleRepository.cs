@@ -1,11 +1,12 @@
-﻿// Infrastructure/Repositories/VehicleRepository.cs
-using Domain.Entities;
-using Domain.Enums;
+﻿using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain.Repositories;
+
+
+// Infrastructure/Repositories/VehicleRepository.cs
 
 namespace Infrastructure.Repositories
 {
@@ -13,13 +14,13 @@ namespace Infrastructure.Repositories
     {
         public VehicleRepository() : base("vehicles.json") { }
 
-        public async Task<List<Vehicle>> GetByTypeAsync(VehicleType type)
+        public async Task<List<Vehicle>> GetByTypeAsync(string type)
         {
             await EnsureLoadedAsync();
             await _fileLock.WaitAsync();
             try
             {
-                return _items.Where(v => v.Type == type).ToList();
+                return _items.Where(v => string.Equals(v.TypeName, type, StringComparison.OrdinalIgnoreCase)).ToList();
             }
             finally
             {
@@ -28,3 +29,5 @@ namespace Infrastructure.Repositories
         }
     }
 }
+
+

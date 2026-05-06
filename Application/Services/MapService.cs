@@ -18,6 +18,9 @@ namespace Application.Services
         private readonly HttpClient _httpClient;
         private const string PhotonUrl = "https://photon.komoot.io/api/";
         private const string OsrmUrl = "http://router.project-osrm.org/route/v1/driving/";
+        private const string NominatimUrl = "https://nominatim.openstreetmap.org/";
+        private const string OverpassUrl = "https://overpass.kumi.systems/api/interpreter";
+        private const string IpApiUrl = "https://ipapi.co/json/";
 
         private static readonly ConcurrentDictionary<string, List<Location>> _searchCache = new ConcurrentDictionary<string, List<Location>>();
         private static readonly ConcurrentDictionary<string, Location> _reverseCache = new ConcurrentDictionary<string, Location>();
@@ -94,7 +97,7 @@ namespace Application.Services
 
             try
             {
-                var url = $"{PhotonUrl}?q={Uri.EscapeDataString(q)}&limit=7";
+                var url = $"{PhotonUrl}?q={Uri.EscapeDataString(q)}&limit=15";
                 using (var response = await ExecuteWithRetryAsync(url))
                 {
                     if (!response.IsSuccessStatusCode)
@@ -113,22 +116,11 @@ namespace Application.Services
                     {
                         var p = f.Properties;
 
-                        // Filter: chỉ nhận kết quả thuộc TP.HCM
-                        // hình như là ghi đầy đủ thành phố hồ chí minh
-                        string city = p.City ?? "";
-                        if (!city.Equals("Hồ Chí Minh", StringComparison.OrdinalIgnoreCase) &&
-                            !city.Equals("Ho Chi Minh", StringComparison.OrdinalIgnoreCase) &&
-                            !city.Equals("TP HCM", StringComparison.OrdinalIgnoreCase) &&
-                            !city.Equals("TPHCM", StringComparison.OrdinalIgnoreCase))
-                        {
-                            continue;
-                        }
-
                         var addr = new Address(
                             name: p.Name ?? "",
                             street: p.Street ?? "",
                             district: p.District ?? "",
-                            city: "Hồ Chí Minh", // Chuẩn hóa thành "Hồ Chí Minh"
+                            city: p.City ?? "",
                             country: p.Country ?? "Việt Nam",
                             houseNumber: p.HouseNumber,
                             osm_Value: p.Osm_Value,
@@ -455,6 +447,118 @@ namespace Application.Services
                 return null;
             }
         }
+
+        public async Task<List<Location>> GetPOIsAsync(double minLat, double minLon, double maxLat, double maxLon)
+        {
+            try
+            {
+                var query = $"[out:json];node[\"amenity\"]({minLat.ToString(CultureInfo.InvariantCulture)},{minLon.ToString(CultureInfo.InvariantCulture)},{maxLat.ToString(CultureInfo.InvariantCulture)},{maxLon.ToString(CultureInfo.InvariantCulture)});out;";
+                var content = new StringContent("data=" + Uri.EscapeDataString(query), Encoding.UTF8, "application/x-www-form-urlencoded");
+                
+                var response = await _httpClient.PostAsync(OverpassUrl, content);
+                if (!response.IsSuccessStatusCode) return new List<Location>();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var data = JsonConvert.DeserializeObject<OverpassResponse>(json);
+
+                if (data?.Elements == null) return new List<Location>();
+
+                return data.Elements.Select(e => {
+                    string name = "POI";
+                    if (e.Tags != null)
+                    {
+                        if (e.Tags.ContainsKey("name")) name = e.Tags["name"];
+                        else if (e.Tags.ContainsKey("amenity")) name = e.Tags["amenity"];
+                    }
+
+                    string street = "";
+                    if (e.Tags != null && e.Tags.ContainsKey("addr:street")) street = e.Tags["addr:street"];
+
+                    string city = "";
+                    if (e.Tags != null && e.Tags.ContainsKey("addr:city")) city = e.Tags["addr:city"];
+
+                    return new Location(
+                        new Coordinate(e.Lat, e.Lon),
+                        new Address(
+                            name: name,
+                            street: street,
+                            district: "",
+                            city: city,
+                            country: "Việt Nam"
+                        )
+                    );
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"Overpass POI error: {ex.Message}");
+                return new List<Location>();
+            }
+        }
+
+        public async Task<Location> GetIpLocationAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(IpApiUrl);
+                if (!response.IsSuccessStatusCode) return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                var data = JsonConvert.DeserializeObject<IpApiResponse>(json);
+
+                if (data == null) return null;
+
+                return new Location(
+                    new Coordinate(data.Lat, data.Lon),
+                    new Address(
+                        name: "Vị trí của tôi (IP)",
+                        street: "",
+                        district: "",
+                        city: data.City ?? "",
+                        country: data.CountryName ?? "Việt Nam"
+                    )
+                );
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"ipapi error: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<Location> GeocodeNominatimAsync(string query)
+        {
+            try
+            {
+                var url = $"{NominatimUrl}search?q={Uri.EscapeDataString(query)}&format=json&limit=1";
+                using (var response = await ExecuteWithRetryAsync(url))
+                {
+                    if (!response.IsSuccessStatusCode) return null;
+
+                    var json = await response.Content.ReadAsStringAsync();
+                    var results = JsonConvert.DeserializeObject<List<NominatimSearchResult>>(json);
+                    var first = results?.FirstOrDefault();
+
+                    if (first == null) return null;
+
+                    return new Location(
+                        new Coordinate(double.Parse(first.Lat, CultureInfo.InvariantCulture), double.Parse(first.Lon, CultureInfo.InvariantCulture)),
+                        new Address(
+                            name: first.DisplayName,
+                            street: "",
+                            district: "",
+                            city: "",
+                            country: "Việt Nam"
+                        )
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"Nominatim geocode error: {ex.Message}");
+                return null;
+            }
+        }
         //public string GetMapTileUrl(Coordinate c, int zoom)
         //{
         //    // Mock OpenStreetMap tile URL
@@ -505,6 +609,46 @@ namespace Application.Services
 
             [JsonProperty("geometry")]
             public string Geometry { get; set; } // Đây là chuỗi Polyline
+        }
+        #endregion
+
+        #region Overpass DTOs
+        public class OverpassResponse
+        {
+            public List<OverpassElement> Elements { get; set; }
+        }
+
+        public class OverpassElement
+        {
+            public double Lat { get; set; }
+            public double Lon { get; set; }
+            public Dictionary<string, string> Tags { get; set; }
+        }
+        #endregion
+
+        #region ipapi DTOs
+        public class IpApiResponse
+        {
+            [JsonProperty("latitude")]
+            public double Lat { get; set; }
+            [JsonProperty("longitude")]
+            public double Lon { get; set; }
+            [JsonProperty("city")]
+            public string City { get; set; }
+            [JsonProperty("country_name")]
+            public string CountryName { get; set; }
+        }
+        #endregion
+
+        #region Nominatim DTOs
+        public class NominatimSearchResult
+        {
+            [JsonProperty("lat")]
+            public string Lat { get; set; }
+            [JsonProperty("lon")]
+            public string Lon { get; set; }
+            [JsonProperty("display_name")]
+            public string DisplayName { get; set; }
         }
         #endregion
     }

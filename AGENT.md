@@ -32,7 +32,8 @@ Khi nhận được một yêu cầu, Agent phải phân loại ngay vào một 
   - Chỉ tiếp tục sau khi đã phân loại được yêu cầu.
 
 - **Modification requests**:
-  - Bắt buộc tuân theo **quy trình Plan-then-Execute** (Mục 3).
+  - **Task nhỏ (Sửa < 3 dòng code, sửa typo, cập nhật tài liệu)**: Có thể thực hiện trực tiếp, không cần lập Plan chi tiết để tránh rườm rà.
+  - **Task trung bình/lớn**: Bắt buộc tuân theo **quy trình Plan-then-Execute** (Mục 3).
   - Trong quá trình thực thi, nếu phát sinh vấn đề ngoài kế hoạch, phải dừng lại và hỏi.
 
 ---

@@ -1,9 +1,9 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Vehicles;
-using Domain.Enums;
 using Domain.Repositories;
 using Domain.ValueObjects;
+using Presentation.Base;
 using System;
 using System.Drawing;
 using System.Text.RegularExpressions;
@@ -16,6 +16,7 @@ namespace Presentation.UserControls
     {
         private readonly IUserService _userService;
         private readonly IVehicleRepository _vehicleRepository;
+
 
         public event EventHandler<User> LoginSucceeded;
         public event EventHandler<User> RegisterSucceeded;
@@ -49,7 +50,7 @@ namespace Presentation.UserControls
             // Demo buttons - Quick login (chỉ fill field)
             btnDemoPassenger.Click += (s, e) => DemoLogin("0911111111", "123456");
             btnDemoDriver.Click += (s, e) => DemoLogin("0900000000", "123456");
-            btnDemoAdmin.Click += (s, e) => DemoLogin("admin", "admin");
+            btnDemoAdmin.Click += (s, e) => DemoLogin("0999999999", "admin123");
 
             txtLoginPhone.KeyDown += OnAuthKeyDown;
             txtLoginPassword.KeyDown += OnAuthKeyDown;
@@ -125,14 +126,14 @@ namespace Presentation.UserControls
         {
             _loginPasswordVisible = !_loginPasswordVisible;
             txtLoginPassword.PasswordChar = _loginPasswordVisible ? '\0' : '*';
-            btnToggleLoginPassword.Text = _loginPasswordVisible ? "Ẩn" : "Hiện";
+            btnToggleLoginPassword.Text = _loginPasswordVisible ? "👁️" : "🙈";
         }
 
         private void ToggleRegPassword()
         {
             _regPasswordVisible = !_regPasswordVisible;
             txtRegPassword.PasswordChar = _regPasswordVisible ? '\0' : '*';
-            btnToggleRegPassword.Text = _regPasswordVisible ? "Ẩn" : "Hiện";
+            btnToggleRegPassword.Text = _regPasswordVisible ? "👁️" : "🙈";
         }
 
         private void OnRoleChanged()
@@ -225,7 +226,7 @@ namespace Presentation.UserControls
                     try
                     {
                         vehicle = cmbVehicleType.SelectedIndex == 0
-                            ? (Vehicle)new Motorbike(null, plate, brand, model, color)
+                            ? (Vehicle)new Motorbike(null, plate, brand, model, color, 2)
                             : new Car(null, plate, brand, model, color, capacity);
                     }
                     catch (Exception ex)

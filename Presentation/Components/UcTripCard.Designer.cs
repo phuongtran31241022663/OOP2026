@@ -1,4 +1,4 @@
-using Presentation.Constants;
+﻿using Presentation.Constants;
 
 namespace Presentation.Components
 {
@@ -8,19 +8,6 @@ namespace Presentation.Components
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
 
         #region Component Designer generated code
 
@@ -49,39 +36,39 @@ namespace Presentation.Components
             // _lblStatus
             // 
             this._lblStatus.AutoSize = true;
-            this._lblStatus.Font = Presentation.Constants.UiConstants.Cards.Typography.BodyBold;
+            this._lblStatus.Font = Presentation.Constants.UiConstants.Cards.Fonts.BodyBold;
             this._lblStatus.ForeColor = Presentation.Constants.UiConstants.Colors.TextPrimary;
             this._lblStatus.Location = new System.Drawing.Point(16, 8);
             this._lblStatus.Name = "_lblStatus";
             this._lblStatus.Size = new System.Drawing.Size(89, 20);
             this._lblStatus.TabIndex = 1;
-            this._lblStatus.Text = "Đang xử lý";
+this._lblStatus.Text = "Đang xử lý";
             // 
             // _lblRoute
             // 
-            this._lblRoute.Font = Presentation.Constants.UiConstants.Cards.Typography.Body;
+            this._lblRoute.Font = Presentation.Constants.UiConstants.Cards.Fonts.Body;
             this._lblRoute.ForeColor = Presentation.Constants.UiConstants.Colors.TextPrimary;
             this._lblRoute.Location = new System.Drawing.Point(16, 30);
             this._lblRoute.Name = "_lblRoute";
             this._lblRoute.Size = new System.Drawing.Size(320, 18);
             this._lblRoute.TabIndex = 2;
-            this._lblRoute.Text = "Điểm đón → Điểm đến";
+this._lblRoute.Text = "Điểm đón → Điểm đến";
             // 
             // _lblInfo
             // 
             this._lblInfo.AutoSize = true;
-            this._lblInfo.Font = Presentation.Constants.UiConstants.Cards.Typography.Info;
+            this._lblInfo.Font = Presentation.Constants.UiConstants.Cards.Fonts.Info;
             this._lblInfo.ForeColor = Presentation.Constants.UiConstants.Colors.TextSecondary;
             this._lblInfo.Location = new System.Drawing.Point(16, 52);
             this._lblInfo.Name = "_lblInfo";
             this._lblInfo.Size = new System.Drawing.Size(148, 17);
             this._lblInfo.TabIndex = 3;
-            this._lblInfo.Text = "15.000 VNĐ • Xe máy";
+this._lblInfo.Text = "15.000 VNĐ • Xe máy";
             // 
             // _lblTime
             // 
             this._lblTime.AutoSize = true;
-            this._lblTime.Font = Presentation.Constants.UiConstants.Cards.Typography.Info;
+            this._lblTime.Font = Presentation.Constants.UiConstants.Cards.Fonts.Info;
             this._lblTime.ForeColor = Presentation.Constants.UiConstants.Colors.TextMuted;
             this._lblTime.Location = new System.Drawing.Point(250, 52);
             this._lblTime.Name = "_lblTime";
@@ -113,3 +100,4 @@ namespace Presentation.Components
         #endregion
     }
 }
+

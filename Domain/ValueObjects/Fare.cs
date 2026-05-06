@@ -22,10 +22,10 @@ namespace Domain.ValueObjects
         {
             if (totalAmount == null) throw new ArgumentNullException(nameof(totalAmount));
             if (commission == null) throw new ArgumentNullException(nameof(commission));
-            if (totalAmount.Amount < 0) throw new ArgumentException("TotalAmount không thể âm.", nameof(totalAmount));
-            if (commission.Amount < 0) throw new ArgumentException("Commission không thể âm.", nameof(commission));
+            if (totalAmount.Amount < 0) throw new ArgumentException("Tổng tiền không thể âm.", nameof(totalAmount));
+            if (commission.Amount < 0) throw new ArgumentException("Hoa hồng không thể âm.", nameof(commission));
             if (!string.Equals(totalAmount.Currency, commission.Currency, StringComparison.OrdinalIgnoreCase))
-                throw new ArgumentException("TotalAmount và Commission phải cùng loại tiền tệ.");
+                throw new ArgumentException("Tổng tiền và Hoa hồng phải cùng loại tiền tệ.");
             if (commission.Amount > totalAmount.Amount)
                 throw new ArgumentException("Hoa hồng không thể lớn hơn tổng cước.");
 

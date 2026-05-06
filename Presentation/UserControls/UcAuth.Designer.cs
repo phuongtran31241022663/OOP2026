@@ -1,6 +1,11 @@
+﻿
+
+
+
+
+
 namespace Presentation.UserControls
 {
-    using Presentation.Constants;
 
     partial class UcAuth
     {
@@ -52,16 +57,6 @@ namespace Presentation.UserControls
         private System.Windows.Forms.Label lblCapacity;
         private System.Windows.Forms.Button btnRegister;
         private System.Windows.Forms.LinkLabel linkToLogin;
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-
-            base.Dispose(disposing);
-        }
 
         private void InitializeComponent()
         {
@@ -141,11 +136,11 @@ namespace Presentation.UserControls
             this.lblLogo.AutoSize = true;
             this.lblLogo.Font = new System.Drawing.Font("Segoe UI", 22F, System.Drawing.FontStyle.Bold);
             this.lblLogo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(136)))));
-            this.lblLogo.Location = new System.Drawing.Point(375, 22);
+            this.lblLogo.Location = new System.Drawing.Point(399, 22);
             this.lblLogo.Name = "lblLogo";
-            this.lblLogo.Size = new System.Drawing.Size(149, 50);
+            this.lblLogo.Size = new System.Drawing.Size(101, 50);
             this.lblLogo.TabIndex = 0;
-            this.lblLogo.Text = "RideGo";
+            this.lblLogo.Text = "OOP";
             this.lblLogo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // pnlCenter
@@ -264,7 +259,7 @@ namespace Presentation.UserControls
             this.btnToggleLoginPassword.Name = "btnToggleLoginPassword";
             this.btnToggleLoginPassword.Size = new System.Drawing.Size(39, 32);
             this.btnToggleLoginPassword.TabIndex = 5;
-            this.btnToggleLoginPassword.Text = "👁";
+            this.btnToggleLoginPassword.Text = "👁️";
             this.btnToggleLoginPassword.UseVisualStyleBackColor = false;
             // 
             // btnLogin
@@ -335,7 +330,7 @@ namespace Presentation.UserControls
             this.btnDemoPassenger.Name = "btnDemoPassenger";
             this.btnDemoPassenger.Size = new System.Drawing.Size(110, 33);
             this.btnDemoPassenger.TabIndex = 0;
-            this.btnDemoPassenger.Text = "🧑 Hành khách";
+            this.btnDemoPassenger.Text = "👑 Hành khách";
             this.btnDemoPassenger.UseVisualStyleBackColor = false;
             // 
             // btnDemoDriver
@@ -491,7 +486,7 @@ namespace Presentation.UserControls
             this.btnToggleRegPassword.Name = "btnToggleRegPassword";
             this.btnToggleRegPassword.Size = new System.Drawing.Size(39, 32);
             this.btnToggleRegPassword.TabIndex = 7;
-            this.btnToggleRegPassword.Text = "👁";
+            this.btnToggleRegPassword.Text = "👁️";
             this.btnToggleRegPassword.UseVisualStyleBackColor = false;
             // 
             // lblRole
@@ -502,9 +497,9 @@ namespace Presentation.UserControls
             this.lblRole.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblRole.Location = new System.Drawing.Point(3, 250);
             this.lblRole.Name = "lblRole";
-            this.lblRole.Size = new System.Drawing.Size(69, 23);
+            this.lblRole.Size = new System.Drawing.Size(88, 23);
             this.lblRole.TabIndex = 8;
-            this.lblRole.Text = "Bạn là...";
+            this.lblRole.Text = "Báº¡n lÃ ...";
             // 
             // cmbRole
             // 
@@ -564,9 +559,9 @@ namespace Presentation.UserControls
             this.lblVehicleType.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblVehicleType.Location = new System.Drawing.Point(3, 7);
             this.lblVehicleType.Name = "lblVehicleType";
-            this.lblVehicleType.Size = new System.Drawing.Size(67, 23);
+            this.lblVehicleType.Size = new System.Drawing.Size(79, 23);
             this.lblVehicleType.TabIndex = 0;
-            this.lblVehicleType.Text = "Loại xe:";
+            this.lblVehicleType.Text = "Loáº¡i xe:";
             // 
             // cmbVehicleType
             // 
@@ -590,9 +585,9 @@ namespace Presentation.UserControls
             this.lblPlate.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblPlate.Location = new System.Drawing.Point(3, 45);
             this.lblPlate.Name = "lblPlate";
-            this.lblPlate.Size = new System.Drawing.Size(69, 23);
+            this.lblPlate.Size = new System.Drawing.Size(99, 23);
             this.lblPlate.TabIndex = 2;
-            this.lblPlate.Text = "Biển số:";
+            this.lblPlate.Text = "Biá»ƒn sá»‘:";
             // 
             // txtPlate
             // 
@@ -611,9 +606,9 @@ namespace Presentation.UserControls
             this.lblBrand.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblBrand.Location = new System.Drawing.Point(3, 83);
             this.lblBrand.Name = "lblBrand";
-            this.lblBrand.Size = new System.Drawing.Size(77, 23);
+            this.lblBrand.Size = new System.Drawing.Size(88, 23);
             this.lblBrand.TabIndex = 4;
-            this.lblBrand.Text = "Hãng xe:";
+            this.lblBrand.Text = "HÃ£ng xe:";
             // 
             // txtBrand
             // 
@@ -632,9 +627,9 @@ namespace Presentation.UserControls
             this.lblModel.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblModel.Location = new System.Drawing.Point(3, 121);
             this.lblModel.Name = "lblModel";
-            this.lblModel.Size = new System.Drawing.Size(70, 23);
+            this.lblModel.Size = new System.Drawing.Size(86, 23);
             this.lblModel.TabIndex = 6;
-            this.lblModel.Text = "Mẫu xe:";
+            this.lblModel.Text = "Máº«u xe:";
             // 
             // txtModel
             // 
@@ -653,9 +648,9 @@ namespace Presentation.UserControls
             this.lblColor.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblColor.Location = new System.Drawing.Point(3, 159);
             this.lblColor.Name = "lblColor";
-            this.lblColor.Size = new System.Drawing.Size(70, 23);
+            this.lblColor.Size = new System.Drawing.Size(77, 23);
             this.lblColor.TabIndex = 8;
-            this.lblColor.Text = "Màu xe:";
+            this.lblColor.Text = "MÃ u xe:";
             // 
             // txtColor
             // 
@@ -674,9 +669,9 @@ namespace Presentation.UserControls
             this.lblCapacity.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblCapacity.Location = new System.Drawing.Point(3, 197);
             this.lblCapacity.Name = "lblCapacity";
-            this.lblCapacity.Size = new System.Drawing.Size(83, 23);
+            this.lblCapacity.Size = new System.Drawing.Size(129, 23);
             this.lblCapacity.TabIndex = 10;
-            this.lblCapacity.Text = "Sức chứa:";
+            this.lblCapacity.Text = "Sá»©c chá»©a:";
             // 
             // numCapacity
             // 
@@ -741,7 +736,7 @@ namespace Presentation.UserControls
             this.lblFooter.Name = "lblFooter";
             this.lblFooter.Size = new System.Drawing.Size(894, 38);
             this.lblFooter.TabIndex = 2;
-            this.lblFooter.Text = "RideGo 2026 - Ứng dụng đặt xe";
+            this.lblFooter.Text = "OOP 2026 - ứng dụng đặt xe";
             this.lblFooter.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // UcAuth

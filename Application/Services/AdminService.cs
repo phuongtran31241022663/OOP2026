@@ -4,9 +4,11 @@ using System.Threading.Tasks;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
-using Domain.Enums;
 using Domain.Repositories;
 using Domain.ValueObjects;
+
+
+
 
 namespace Application.Services
 {
@@ -92,13 +94,16 @@ namespace Application.Services
             await _fareRuleRepository.SaveChangesAsync();
         }
 
-        public async Task UpdateFareRuleAsync(VehicleType vehicleType, Money baseFare, Money pricePerKm, double commissionRate)
+        public async Task UpdateFareRuleAsync(string vehicleType, Money baseFare, Money pricePerKm, double commissionRate)
         {
+            if (string.IsNullOrEmpty(vehicleType))
+                throw new ArgumentException("Vehicle type is required.", nameof(vehicleType));
+
             List<FareRule> allRules = await _fareRuleRepository.GetAllAsync();
             FareRule existingRule = null;
             for (int i = 0; i < allRules.Count; i++)
             {
-                if (allRules[i].VehicleType == vehicleType)
+                if (string.Equals(allRules[i].VehicleType, vehicleType, StringComparison.OrdinalIgnoreCase))
                 {
                     existingRule = allRules[i];
                     break;
@@ -116,6 +121,7 @@ namespace Application.Services
             }
             await _fareRuleRepository.SaveChangesAsync();
         }
+
 
         public async Task DeleteFareRuleAsync(Guid id)
         {
@@ -195,9 +201,10 @@ namespace Application.Services
             int sum = 0;
             for (int i = 0; i < reviews.Count; i++)
             {
-                sum += reviews[i].Rating;
+                sum += reviews[i].Star;
             }
             return (double)sum / reviews.Count;
         }
     }
 }
+

@@ -1,8 +1,8 @@
-﻿// Infrastructure/Repositories/PassengerRepository.cs
-using Domain.Entities.Users;
+﻿using Domain.Entities.Users;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain.Repositories;
+// Infrastructure/Repositories/PassengerRepository.cs
 
 namespace Infrastructure.Repositories
 {
@@ -39,3 +39,4 @@ namespace Infrastructure.Repositories
         }
     }
 }
+

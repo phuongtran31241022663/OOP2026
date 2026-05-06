@@ -13,6 +13,7 @@ namespace Application.Services
     public class SimulationService : ISimulationService
     {
         private Timer _timer;
+        private ITripService _tripService;
         private ITripRepository _tripRepository;
         private IDriverRepository _driverRepository;
         private IVehicleRepository _vehicleRepository;
@@ -25,6 +26,7 @@ namespace Application.Services
 
         public SimulationService(ITripService tripService, IDriverRepository driverRepository, IPassengerRepository passengerRepository, IMapService mapService)
         {
+            _tripService = tripService ?? throw new ArgumentNullException(nameof(tripService));
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
         }
 
@@ -123,10 +125,11 @@ namespace Application.Services
                         Domain.Entities.Users.Driver driver = availableDrivers[j];
                         Domain.Entities.Vehicle vehicle = await _vehicleRepository.GetByIdAsync(driver.VehicleId);
 
-                        if (vehicle != null && vehicle.Type == trip.TripVehicleType)
+                        if (vehicle != null && string.Equals(vehicle.TypeName, trip.TripVehicleType, StringComparison.OrdinalIgnoreCase))
                         {
                             matchingDrivers.Add(driver);
                         }
+
                     }
 
                     if (matchingDrivers.Count > 0)
@@ -188,23 +191,19 @@ namespace Application.Services
                     return false;
                 }
 
-                if (vehicle.Type != trip.TripVehicleType)
+                if (!string.Equals(vehicle.TypeName, trip.TripVehicleType, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
+
 
                 if (driver.Wallet.Amount < trip.TripFare.Commission.Amount)
                 {
                     return false;
                 }
 
-                trip.MatchDriver(driverId);
-                driver.SetOnTrip();
-
-                await _tripRepository.UpdateAsync(trip);
-                await _driverRepository.UpdateAsync(driver);
-                await _tripRepository.SaveChangesAsync();
-                await _driverRepository.SaveChangesAsync();
+                // Use TripService to ensure events are fired properly
+                await _tripService.MatchDriverAsync(tripId, driverId);
                 return true;
             }
             catch (Exception ex)
@@ -227,9 +226,8 @@ namespace Application.Services
                     return;
                 }
 
-                trip.MarkAsArrived();
-                await _tripRepository.UpdateAsync(trip);
-                await _tripRepository.SaveChangesAsync();
+                // Use TripService to ensure events are fired properly
+                await _tripService.MarkAsArrivedAsync(tripId);
 
                 await Task.Delay(TimeSpan.FromSeconds(3));
 
@@ -240,9 +238,8 @@ namespace Application.Services
                     return;
                 }
 
-                trip.StartTrip();
-                await _tripRepository.UpdateAsync(trip);
-                await _tripRepository.SaveChangesAsync();
+                // Use TripService to ensure events are fired properly
+                await _tripService.StartTripAsync(tripId);
 
                 await Task.Delay(TimeSpan.FromSeconds(5));
 
@@ -253,24 +250,8 @@ namespace Application.Services
                     return;
                 }
 
-                trip.CompleteTrip();
-                trip.ConfirmPayment();
-
-                if (trip.DriverId.HasValue)
-                {
-                    Domain.Entities.Users.Driver driver = await _driverRepository.GetByIdAsync(trip.DriverId.Value);
-                    if (driver != null)
-                    {
-                        driver.PayCommission(trip.TripFare);
-                        driver.SetAvailable();
-                        driver.AddTrip();
-                        await _driverRepository.UpdateAsync(driver);
-                    }
-                }
-
-                await _tripRepository.UpdateAsync(trip);
-                await _tripRepository.SaveChangesAsync();
-                await _driverRepository.SaveChangesAsync();
+                // Use TripService to ensure events are fired properly
+                await _tripService.CompleteTripAsync(tripId);
                 RemoveSimulatingTrip(tripId);
             }
             catch (Exception ex)

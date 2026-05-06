@@ -2,7 +2,6 @@ using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.Repositories;
 using Domain.ValueObjects;
-using Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -209,7 +208,7 @@ namespace UnitTest.Mocks
     {
         private List<FareRule> _rules = new List<FareRule>();
 
-        public Task<FareRule> GetByVehicleTypeAsync(VehicleType vehicleType)
+        public Task<FareRule> GetByVehicleTypeAsync(string vehicleType)
         {
             foreach (var rule in _rules)
             {

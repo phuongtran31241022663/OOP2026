@@ -1,22 +1,25 @@
 using Application.Interfaces;
 using Domain.Entities;
+using Presentation.Base;
 using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Presentation.UserControls
+namespace Presentation.Components
 {
     /// <summary>
     /// Danh gia 5 sao + comment sau chuyen.
     /// Hiển thị thông tin đánh giá.
     /// </summary>
-    public partial class UcRating : BaseUserControl
+    public partial class UcReview : BaseUserControl
     {
         private readonly IReviewService _reviewService;
         private readonly Trip _trip;
         private int _selectedRating = 0;
 
-        public UcRating(IReviewService reviewService, Trip trip)
+
+        public UcReview(IReviewService reviewService, Trip trip)
         {
             _reviewService = reviewService;
             _trip = trip;
@@ -60,12 +63,12 @@ namespace Presentation.UserControls
             Button[] stars = { btnStar1, btnStar2, btnStar3, btnStar4, btnStar5 };
             for (int i = 0; i < stars.Length; i++)
             {
-                stars[i].Text = i < _selectedRating ? "\u2605" : "\u2606";
+                stars[i].Text = i < _selectedRating ? "★" : "☆";
                 stars[i].ForeColor = i < _selectedRating ? Color.Gold : Color.Gray;
             }
         }
 
-        private async System.Threading.Tasks.Task OnSubmitClicked()
+private async Task OnSubmitClicked()
         {
             if (_selectedRating == 0)
             {
@@ -92,4 +95,3 @@ namespace Presentation.UserControls
         }
     }
 }
-

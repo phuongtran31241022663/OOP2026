@@ -1,8 +1,9 @@
-using Domain.Entities;
-using Domain.Enums;
+﻿using Domain.Entities;
 using Domain.ValueObjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+
+
 
 namespace UnitTest
 {
@@ -175,7 +176,7 @@ namespace UnitTest
         {
             // Arrange
             // Base: 15000 VND, Per km: 4000 VND, Distance: 1 km
-            // Raw: 15000 + 4000 = 19000 VND (đã tròn 1000, không cần round)
+            // Raw: 15000 + 4000 = 19000 VND (Ä‘Ã£ trÃ²n 1000, khÃ´ng cáº§n round)
             Money baseFare = new Money(15000m);
             Money pricePerKm = new Money(4000m);
             FareRule fareRule = new FareRule(VehicleType.Motorbike, baseFare, pricePerKm, 0.20m);
@@ -183,7 +184,7 @@ namespace UnitTest
             // Act
             Fare fare = fareRule.CalculateFare(1.0);
 
-            // Assert - 19000 VND đã tròn 1000
+            // Assert - 19000 VND Ä‘Ã£ trÃ²n 1000
             Assert.AreEqual(19000m, fare.TotalAmount.Amount);
         }
 
@@ -192,7 +193,7 @@ namespace UnitTest
         {
             // Arrange
             // Base: 15000 VND, Per km: 5000 VND, Distance: 2 km
-            // Raw: 15000 + 10000 = 25000 VND (đã tròn 1000)
+            // Raw: 15000 + 10000 = 25000 VND (Ä‘Ã£ trÃ²n 1000)
             Money baseFare = new Money(15000m);
             Money pricePerKm = new Money(5000m);
             FareRule fareRule = new FareRule(VehicleType.Motorbike, baseFare, pricePerKm, 0.20m);
@@ -200,14 +201,14 @@ namespace UnitTest
             // Act
             Fare fare = fareRule.CalculateFare(2.0);
 
-            // Assert - 25000 VND đã tròn 1000
+            // Assert - 25000 VND Ä‘Ã£ trÃ²n 1000
             Assert.AreEqual(25000m, fare.TotalAmount.Amount);
         }
 
         [TestMethod]
         public void CalculateFare_WithAmount12500_RoundsUpTo13000()
         {
-            // Arrange - giả lập giá trị cần làm tròn
+            // Arrange - giáº£ láº­p giÃ¡ trá»‹ cáº§n lÃ m trÃ²n
             // Base: 10000 VND, Per km: 2500 VND, Distance: 1 km
             // Raw: 10000 + 2500 = 12500 VND
             Money baseFare = new Money(10000m);
@@ -217,7 +218,7 @@ namespace UnitTest
             // Act
             Fare fare = fareRule.CalculateFare(1.0);
 
-            // Assert - 12500 VND là midpoint, làm tròn lên 13000
+            // Assert - 12500 VND lÃ  midpoint, lÃ m trÃ²n lÃªn 13000
             Assert.AreEqual(13000m, fare.TotalAmount.Amount);
         }
 
@@ -234,10 +235,11 @@ namespace UnitTest
             // Act
             Fare fare = fareRule.CalculateFare(0);
 
-            // Assert - 15000 VND không cần round (đã tròn 1000)
+            // Assert - 15000 VND khÃ´ng cáº§n round (Ä‘Ã£ trÃ²n 1000)
             Assert.AreEqual(15000m, fare.TotalAmount.Amount);
         }
 
         #endregion
     }
 }
+

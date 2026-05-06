@@ -1,11 +1,12 @@
-﻿﻿using Application.Interfaces;
-using Domain.Entities;
-using Domain.Enums;
+﻿using Domain.Entities;
 using Domain.ValueObjects;
 using Domain.Repositories;
 using Domain.Strategies;
 using System;
 using System.Threading.Tasks;
+
+
+﻿using Application.Interfaces;
 
 namespace Application.Services
 {
@@ -27,28 +28,35 @@ namespace Application.Services
         /// <summary>
         /// Calculates fare using fare rules configured by admin.
         /// </summary>
-        public async Task<Fare> CalculateFareAsync(VehicleType vehicleType, double distanceKm)
+        public async Task<Fare> CalculateFareAsync(string vehicleType, double distanceKm)
         {
+            if (string.IsNullOrEmpty(vehicleType))
+                throw new ArgumentException("Vehicle type is required.", nameof(vehicleType));
+
             FareRule rule = await _fareRuleRepo.GetByVehicleTypeAsync(vehicleType);
             if (rule == null)
             {
-                throw new InvalidOperationException("Chưa cấu hình quy tắc giá cho loại xe này.");
+                throw new InvalidOperationException($"Chưa cấu hình quy tắc giá cho loại xe '{vehicleType}'.");
             }
 
             IFareCalculationStrategy strategy;
-            switch (vehicleType)
+            if (vehicleType.Equals("Car", StringComparison.OrdinalIgnoreCase))
             {
-                case VehicleType.Car:
-                    strategy = new CarFareStrategy(rule);
-                    break;
-                case VehicleType.Motorbike:
-                    strategy = new MotorbikeFareStrategy(rule);
-                    break;
-                default:
-                    throw new InvalidOperationException("Loại xe không được hỗ trợ.");
+                strategy = new CarFareStrategy(rule);
+            }
+            else if (vehicleType.Equals("Motorbike", StringComparison.OrdinalIgnoreCase))
+            {
+                strategy = new MotorbikeFareStrategy(rule);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Loại xe '{vehicleType}' không được hỗ trợ.");
             }
 
             return strategy.CalculateFare(distanceKm);
         }
+
     }
 }
+
+

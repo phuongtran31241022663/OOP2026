@@ -1,17 +1,20 @@
 using Domain.Entities;
 using Domain.ValueObjects;
+using Presentation.Base;
 using System;
 using System.Windows.Forms;
 
-namespace Presentation.UserControls
+namespace Presentation.Components
 {
     /// <summary>
     /// Chi tiet mot chuyen di.
     /// Dung trong Tab (Admin) hoac Modal (cac vai tro con lai).
     /// </summary>
-    public partial class UcTripDetail : BaseUserControl
+public partial class UcTripDetail : BaseUserControl
     {
         private Trip _trip;
+
+
 
         public UcTripDetail(Trip trip)
         {

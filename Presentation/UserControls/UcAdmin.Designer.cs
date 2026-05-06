@@ -1,8 +1,5 @@
-namespace Presentation.UserControls
+﻿namespace Presentation.UserControls
 {
-    using Presentation.Constants;
-    using System.Windows.Forms;
-
     partial class UcAdmin
     {
         private System.ComponentModel.IContainer components = null;
@@ -12,11 +9,11 @@ namespace Presentation.UserControls
         private System.Windows.Forms.TabPage tabFareRules;
         private System.Windows.Forms.TabPage tabStats;
         private System.Windows.Forms.DataGridView dgvUsers;
+
         private System.Windows.Forms.Panel pnlUsersToolbar;
-        private System.Windows.Forms.Button btnUnlockUser;
-        private System.Windows.Forms.Button btnLockUser;
         private System.Windows.Forms.ComboBox cmbUserRole;
         private System.Windows.Forms.TextBox txtSearchUsers;
+
         private System.Windows.Forms.DataGridView dgvTrips;
         private System.Windows.Forms.Panel pnlTripsToolbar;
         private System.Windows.Forms.Button btnTripDetail;
@@ -37,7 +34,7 @@ namespace Presentation.UserControls
         private System.Windows.Forms.Label lblActiveDrivers;
         private System.Windows.Forms.Label lblTotalTrips;
         private System.Windows.Forms.Label lblGMV;
-        private System.Windows.Forms.Label lblPlaceholder;
+
 
         // DataGridView Columns
         private System.Windows.Forms.DataGridViewTextBoxColumn colUserId;
@@ -57,25 +54,16 @@ namespace Presentation.UserControls
         private System.Windows.Forms.DataGridViewTextBoxColumn colFareKm;
         private System.Windows.Forms.DataGridViewTextBoxColumn colFareCommission;
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
         private void InitializeComponent()
         {
             this.tabControlAdmin = new System.Windows.Forms.TabControl();
             this.tabUsers = new System.Windows.Forms.TabPage();
             this.dgvUsers = new System.Windows.Forms.DataGridView();
+
             this.pnlUsersToolbar = new System.Windows.Forms.Panel();
-            this.btnUnlockUser = new System.Windows.Forms.Button();
-            this.btnLockUser = new System.Windows.Forms.Button();
             this.cmbUserRole = new System.Windows.Forms.ComboBox();
             this.txtSearchUsers = new System.Windows.Forms.TextBox();
+
             this.tabTrips = new System.Windows.Forms.TabPage();
             this.dgvTrips = new System.Windows.Forms.DataGridView();
             this.pnlTripsToolbar = new System.Windows.Forms.Panel();
@@ -102,7 +90,18 @@ namespace Presentation.UserControls
             this.tabControlAdmin.SuspendLayout();
             this.tabUsers.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).BeginInit();
-            this.pnlUsersToolbar.SuspendLayout();
+
+            // pnlUsersToolbar
+            //
+            this.pnlUsersToolbar.Controls.Add(this.cmbUserRole);
+            this.pnlUsersToolbar.Controls.Add(this.txtSearchUsers);
+
+            this.pnlUsersToolbar.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlUsersToolbar.Location = new System.Drawing.Point(8, 8);
+            this.pnlUsersToolbar.Name = "pnlUsersToolbar";
+            this.pnlUsersToolbar.Size = new System.Drawing.Size(1176, 56);
+            this.pnlUsersToolbar.TabIndex = 0;
+
             this.tabTrips.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTrips)).BeginInit();
             this.pnlTripsToolbar.SuspendLayout();
@@ -147,11 +146,26 @@ namespace Presentation.UserControls
             this.dgvUsers.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvUsers.BackgroundColor = System.Drawing.Color.White;
             this.dgvUsers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.colUserId = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "ID", Name = "colUserId" };
-            this.colUserName = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Tên", Name = "colUserName" };
-            this.colUserPhone = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "SĐT", Name = "colUserPhone" };
-            this.colUserRole = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Vai trò", Name = "colUserRole" };
-            this.colUserStatus = new System.Windows.Forms.DataGridViewTextBoxColumn { HeaderText = "Trạng thái", Name = "colUserStatus" };
+            this.colUserId = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colUserId.HeaderText = "ID";
+            this.colUserId.Name = "colUserId";
+
+            this.colUserName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colUserName.HeaderText = "Tên";
+            this.colUserName.Name = "colUserName";
+
+            this.colUserPhone = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colUserPhone.HeaderText = "SĐT";
+            this.colUserPhone.Name = "colUserPhone";
+
+            this.colUserRole = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colUserRole.HeaderText = "Vai trò";
+            this.colUserRole.Name = "colUserRole";
+
+            this.colUserStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colUserStatus.HeaderText = "Trạng thái";
+            this.colUserStatus.Name = "colUserStatus";
+
             this.dgvUsers.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
                 this.colUserId, this.colUserName, this.colUserPhone, this.colUserRole, this.colUserStatus
             });
@@ -165,51 +179,15 @@ namespace Presentation.UserControls
             this.dgvUsers.Size = new System.Drawing.Size(1176, 644);
             this.dgvUsers.TabIndex = 1;
             // 
-            // pnlUsersToolbar
-            // 
-            this.pnlUsersToolbar.Controls.Add(this.btnUnlockUser);
-            this.pnlUsersToolbar.Controls.Add(this.btnLockUser);
-            this.pnlUsersToolbar.Controls.Add(this.cmbUserRole);
-            this.pnlUsersToolbar.Controls.Add(this.txtSearchUsers);
-            this.pnlUsersToolbar.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlUsersToolbar.Location = new System.Drawing.Point(8, 8);
-            this.pnlUsersToolbar.Name = "pnlUsersToolbar";
-            this.pnlUsersToolbar.Size = new System.Drawing.Size(1176, 56);
-            this.pnlUsersToolbar.TabIndex = 0;
-            // 
-            // btnUnlockUser
-            // 
-            this.btnUnlockUser.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnUnlockUser.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnUnlockUser.AutoSize = true;
-            this.btnUnlockUser.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
-            this.btnUnlockUser.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
-            this.btnUnlockUser.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
-            this.btnUnlockUser.Location = new System.Drawing.Point(1072, 8);
-            this.btnUnlockUser.Name = "btnUnlockUser";
-            this.btnUnlockUser.Size = new System.Drawing.Size(100, 36);
-            this.btnUnlockUser.TabIndex = 3;
-            this.btnUnlockUser.Text = "Mở khoá";
-            this.btnUnlockUser.UseVisualStyleBackColor = true;
-            // 
-            // btnLockUser
-            // 
-            this.btnLockUser.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLockUser.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLockUser.AutoSize = true;
-            this.btnLockUser.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
-            this.btnLockUser.Padding = Presentation.Constants.UiConstants.Spacing.ButtonPadding;
-            this.btnLockUser.MinimumSize = Presentation.Constants.UiConstants.ButtonSizes.Default;
-            this.btnLockUser.Location = new System.Drawing.Point(968, 8);
-            this.btnLockUser.Name = "btnLockUser";
-            this.btnLockUser.Size = new System.Drawing.Size(100, 36);
-            this.btnLockUser.TabIndex = 2;
-            this.btnLockUser.Text = "Khoá";
-            this.btnLockUser.UseVisualStyleBackColor = true;
+
+            this.pnlUsersToolbar.SuspendLayout();
+
+
             // 
             // cmbUserRole
             // 
             this.cmbUserRole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+
             this.cmbUserRole.FormattingEnabled = true;
             this.cmbUserRole.Items.AddRange(new object[] { "Tất cả", "Passenger", "Driver", "Admin" });
             this.cmbUserRole.Location = new System.Drawing.Point(320, 8);
@@ -269,6 +247,12 @@ namespace Presentation.UserControls
             this.pnlTripsToolbar.Controls.Add(this.txtSearchTrips);
             this.pnlTripsToolbar.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTripsToolbar.Location = new System.Drawing.Point(8, 8);
+            // 
+            this.pnlTripsToolbar.Controls.Add(this.btnTripDetail);
+            this.pnlTripsToolbar.Controls.Add(this.btnCancelTrip);
+            this.pnlTripsToolbar.Controls.Add(this.txtSearchTrips);
+            this.pnlTripsToolbar.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlTripsToolbar.Location = new System.Drawing.Point(8, 8);
             this.pnlTripsToolbar.Name = "pnlTripsToolbar";
             this.pnlTripsToolbar.Size = new System.Drawing.Size(1176, 56);
             this.pnlTripsToolbar.TabIndex = 0;
@@ -302,7 +286,7 @@ namespace Presentation.UserControls
             this.btnCancelTrip.Name = "btnCancelTrip";
             this.btnCancelTrip.Size = new System.Drawing.Size(100, 36);
             this.btnCancelTrip.TabIndex = 1;
-            this.btnCancelTrip.Text = "Huỷ";
+            this.btnCancelTrip.Text = "Hủy";
             this.btnCancelTrip.UseVisualStyleBackColor = false;
             // 
             // txtSearchTrips
@@ -374,7 +358,7 @@ namespace Presentation.UserControls
             this.btnDeleteFare.Name = "btnDeleteFare";
             this.btnDeleteFare.Size = new System.Drawing.Size(100, 36);
             this.btnDeleteFare.TabIndex = 2;
-            this.btnDeleteFare.Text = "Xoá";
+this.btnDeleteFare.Text = "Xóa";
             this.btnDeleteFare.UseVisualStyleBackColor = false;
             // 
             // btnEditFare
@@ -389,7 +373,7 @@ namespace Presentation.UserControls
             this.btnEditFare.Name = "btnEditFare";
             this.btnEditFare.Size = new System.Drawing.Size(100, 36);
             this.btnEditFare.TabIndex = 1;
-            this.btnEditFare.Text = "Sửa";
+this.btnEditFare.Text = "Sửa";
             this.btnEditFare.UseVisualStyleBackColor = true;
             // 
             // btnAddFare
@@ -418,7 +402,7 @@ namespace Presentation.UserControls
             this.tabStats.Padding = new System.Windows.Forms.Padding(24);
             this.tabStats.Size = new System.Drawing.Size(1192, 716);
             this.tabStats.TabIndex = 3;
-            this.tabStats.Text = "Thống kê";
+this.tabStats.Text = "Thống kê";
             this.tabStats.UseVisualStyleBackColor = true;
             // 
             // tblStats
@@ -427,7 +411,6 @@ namespace Presentation.UserControls
             this.tblStats.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tblStats.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tblStats.Controls.Add(this.lblGMV, 0, 2);
-            this.tblStats.Controls.Add(this.lblPlaceholder, 1, 2);
             this.tblStats.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tblStats.Location = new System.Drawing.Point(24, 24);
             this.tblStats.Name = "tblStats";
@@ -447,7 +430,7 @@ namespace Presentation.UserControls
             this.lblCompletionRate.Name = "lblCompletionRate";
             this.lblCompletionRate.Size = new System.Drawing.Size(566, 222);
             this.lblCompletionRate.TabIndex = 4;
-            this.lblCompletionRate.Text = "Tỷ lệ hoàn thành: 0%";
+this.lblCompletionRate.Text = "Tỷ lệ hoàn thành: 0%";
             this.lblCompletionRate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblAvgRating
@@ -459,7 +442,7 @@ namespace Presentation.UserControls
             this.lblAvgRating.Name = "lblAvgRating";
             this.lblAvgRating.Size = new System.Drawing.Size(566, 222);
             this.lblAvgRating.TabIndex = 3;
-            this.lblAvgRating.Text = "Điểm hài lòng: 0.0";
+this.lblAvgRating.Text = "Điểm hài lòng: 0.0";
             this.lblAvgRating.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblActiveDrivers
@@ -471,7 +454,7 @@ namespace Presentation.UserControls
             this.lblActiveDrivers.Name = "lblActiveDrivers";
             this.lblActiveDrivers.Size = new System.Drawing.Size(566, 222);
             this.lblActiveDrivers.TabIndex = 2;
-            this.lblActiveDrivers.Text = "Tài xế hoạt động: 0";
+this.lblActiveDrivers.Text = "Tài xế hoạt động: 0";
             this.lblActiveDrivers.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblTotalTrips
@@ -498,18 +481,6 @@ namespace Presentation.UserControls
             this.lblGMV.Text = "GMV: 0 VND";
             this.lblGMV.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // lblPlaceholder
-            // 
-            this.lblPlaceholder.AutoSize = true;
-            this.lblPlaceholder.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblPlaceholder.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
-            this.lblPlaceholder.Location = new System.Drawing.Point(575, 444);
-            this.lblPlaceholder.Name = "lblPlaceholder";
-            this.lblPlaceholder.Size = new System.Drawing.Size(566, 224);
-            this.lblPlaceholder.TabIndex = 5;
-            this.lblPlaceholder.Text = "";
-            this.lblPlaceholder.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // pnlTop
             // 
             this.pnlTop.Controls.Add(this.btnLogout);
@@ -533,7 +504,7 @@ namespace Presentation.UserControls
             this.btnLogout.Name = "btnLogout";
             this.btnLogout.Size = new System.Drawing.Size(100, 32);
             this.btnLogout.TabIndex = 2;
-            this.btnLogout.Text = "Đăng xuất";
+this.btnLogout.Text = "Đăng xuất";
             this.btnLogout.UseVisualStyleBackColor = true;
             // 
             // btnRefresh
@@ -548,7 +519,7 @@ namespace Presentation.UserControls
             this.btnRefresh.Name = "btnRefresh";
             this.btnRefresh.Size = new System.Drawing.Size(100, 32);
             this.btnRefresh.TabIndex = 1;
-            this.btnRefresh.Text = "Làm mới";
+this.btnRefresh.Text = "Làm mới";
             this.btnRefresh.UseVisualStyleBackColor = true;
             // 
             // lblAdminTitle
@@ -559,7 +530,7 @@ namespace Presentation.UserControls
             this.lblAdminTitle.Name = "lblAdminTitle";
             this.lblAdminTitle.Size = new System.Drawing.Size(189, 28);
             this.lblAdminTitle.TabIndex = 0;
-            this.lblAdminTitle.Text = "Quản trị RideGo";
+            this.lblAdminTitle.Text = "Quản trị";
             // 
             // UcAdmin
             // 
@@ -572,8 +543,10 @@ namespace Presentation.UserControls
             this.tabControlAdmin.ResumeLayout(false);
             this.tabUsers.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).EndInit();
+
             this.pnlUsersToolbar.ResumeLayout(false);
             this.pnlUsersToolbar.PerformLayout();
+
             this.tabTrips.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvTrips)).EndInit();
             this.pnlTripsToolbar.ResumeLayout(false);
@@ -591,4 +564,9 @@ namespace Presentation.UserControls
         }
     }
 }
+
+
+
+
+
 

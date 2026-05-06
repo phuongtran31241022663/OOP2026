@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Drawing;
 using Domain.Entities.Users;
-// file này bị lỗi unicode nhiều
-// cái này là thông tin tài xế trên giao diện à, với cho passenger thấy à??
+using Presentation.Base;
+using Presentation.Constants;
 
 namespace Presentation.Components
 {
     /// <summary>
-    /// BaseUserControl hi?n th? thông tin tài x? du?i d?ng card.
-    /// S? d?ng trong danh sách tài x? có s?n ho?c tìm ki?m.
+    /// BaseUserControl hiển thị thông tin tài xế dưới dạng card.
+    /// Sử dụng trong danh sách tài xế có sẵn hoặc tìm kiếm.
     /// </summary>
     public partial class UcDriverCard : BaseUserControl
     {
         /// <summary>
-        /// S? ki?n khi ngu?i dùng click vào driver card
+        /// Sự kiện khi người dùng click vào driver card
         /// </summary>
         public event Action<UcDriverCard> Clicked;
 
         /// <summary>
-        /// Tài x? du?c hi?n th?
+        /// Tài xế được hiển thị
         /// </summary>
         public Driver Driver { get; private set; }
 
@@ -28,7 +28,7 @@ namespace Presentation.Components
         }
 
         /// <summary>
-        /// Set thông tin tài x? d? hi?n th?
+        /// Set thông tin tài xế để hiển thị
         /// </summary>
         public void SetDriver(Driver driver, string vehicleDisplayText = null, double distanceKm = 0)
         {
@@ -37,7 +37,7 @@ namespace Presentation.Components
 
             _lblName.Text = driver.Name;
             _lblPhone.Text = driver.Phone;
-            _lblReview.Text = $"? {driver.AverageRating:F1}";
+            _lblReview.Text = $"★ {driver.AverageRating:F1}";
 
             UpdateStatus(driver.Status);
 
@@ -68,24 +68,24 @@ namespace Presentation.Components
             switch (status)
             {
                 case "Available":
-                    _lblStatus.Text = "Có s?n";
-                    _lblStatus.ForeColor = Color.Green;
-                    _statusIndicator.BackColor = Color.Green;
+                    _lblStatus.Text = "Có sẵn";
+                    _lblStatus.ForeColor = UiConstants.Colors.Success;
+                    _statusIndicator.BackColor = UiConstants.Colors.Success;
                     break;
                 case "OnTrip":
-                    _lblStatus.Text = "Ðang ch?y";
-                    _lblStatus.ForeColor = Color.Blue;
-                    _statusIndicator.BackColor = Color.Blue;
+                    _lblStatus.Text = "Đang chạy";
+                    _lblStatus.ForeColor = UiConstants.Colors.Info;
+                    _statusIndicator.BackColor = UiConstants.Colors.Info;
                     break;
                 case "Offline":
                     _lblStatus.Text = "Offline";
-                    _lblStatus.ForeColor = Color.Gray;
-                    _statusIndicator.BackColor = Color.Gray;
+                    _lblStatus.ForeColor = UiConstants.Colors.TextMuted;
+                    _statusIndicator.BackColor = UiConstants.Colors.TextMuted;
                     break;
                 default:
                     _lblStatus.Text = "Unknown";
-                    _lblStatus.ForeColor = Color.Orange;
-                    _statusIndicator.BackColor = Color.Orange;
+                    _lblStatus.ForeColor = UiConstants.Colors.Warning;
+                    _statusIndicator.BackColor = UiConstants.Colors.Warning;
                     break;
             }
         }
@@ -97,12 +97,12 @@ namespace Presentation.Components
 
         private void OnMouseEnter(object sender, EventArgs e)
         {
-            BackColor = Color.LightBlue;
+            BackColor = UiConstants.Colors.SurfaceLight;
         }
 
         private void OnMouseLeave(object sender, EventArgs e)
         {
-          BackColor = Color.White;
+          BackColor = UiConstants.Colors.SurfaceWhite;
         }
     }
 }

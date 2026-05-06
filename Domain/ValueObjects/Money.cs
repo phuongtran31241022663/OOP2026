@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Domain.SharedKernel;
-
+// Thấy cái này không quá cần thiết nhưng mà cũng hay cũng kệ
 namespace Domain.ValueObjects
 {
     /// <summary>
@@ -43,72 +43,58 @@ namespace Domain.ValueObjects
         private static void EnsureSameCurrency(Money a, Money b)
         {
             if (!string.Equals(a.Currency, b.Currency, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException("Currency mismatch");
+                throw new InvalidOperationException("Đơn vị tiền tệ không khớp.");
         }
 
         public static Money operator +(Money a, Money b)
         {
-            if (a == null)
-                throw new ArgumentNullException(nameof(a), "Left operand cannot be null");
-            if (b == null)
-                throw new ArgumentNullException(nameof(b), "Right operand cannot be null");
+            ValidateOperands(a, b);
             EnsureSameCurrency(a, b);
             return new Money(a.Amount + b.Amount, a.Currency);
         }
 
         public static Money operator -(Money a, Money b)
         {
-            if (a == null)
-                throw new ArgumentNullException(nameof(a), "Left operand cannot be null");
-            if (b == null)
-                throw new ArgumentNullException(nameof(b), "Right operand cannot be null");
+            ValidateOperands(a, b);
             EnsureSameCurrency(a, b);
             decimal result = a.Amount - b.Amount;
-
             if (result < 0)
-                throw new InvalidOperationException("Money cannot be negative");
+                throw new InvalidOperationException("Số tiền không thể âm.");
 
             return new Money(result, a.Currency);
         }
 
         public static bool operator <(Money a, Money b)
         {
-            if (a == null)
-                throw new ArgumentNullException(nameof(a), "Left operand cannot be null");
-            if (b == null)
-                throw new ArgumentNullException(nameof(b), "Right operand cannot be null");
+            ValidateOperands(a, b);
             EnsureSameCurrency(a, b);
             return a.Amount < b.Amount;
         }
 
         public static bool operator >(Money a, Money b)
         {
-            if (a == null)
-                throw new ArgumentNullException(nameof(a), "Left operand cannot be null");
-            if (b == null)
-                throw new ArgumentNullException(nameof(b), "Right operand cannot be null");
+            ValidateOperands(a, b);
             EnsureSameCurrency(a, b);
             return a.Amount > b.Amount;
         }
 
         public static bool operator <=(Money a, Money b)
         {
-            if (a == null)
-                throw new ArgumentNullException(nameof(a), "Left operand cannot be null");
-            if (b == null)
-                throw new ArgumentNullException(nameof(b), "Right operand cannot be null");
+            ValidateOperands(a, b);
             EnsureSameCurrency(a, b);
             return a.Amount <= b.Amount;
         }
 
         public static bool operator >=(Money a, Money b)
         {
-            if (a == null)
-                throw new ArgumentNullException(nameof(a), "Left operand cannot be null");
-            if (b == null)
-                throw new ArgumentNullException(nameof(b), "Right operand cannot be null");
+            ValidateOperands(a, b);
             EnsureSameCurrency(a, b);
             return a.Amount >= b.Amount;
+        }
+        private static void ValidateOperands(Money a, Money b)
+        {
+            if (a == null) throw new ArgumentNullException(nameof(a), "Toán hạng bên trái không được null.");
+            if (b == null) throw new ArgumentNullException(nameof(b), "Toán hạng bên phải không được null.");
         }
         public override string ToString()
         {

@@ -1,26 +1,37 @@
-namespace Presentation
+﻿namespace Presentation.Base
 {
     partial class BaseUserControl
     {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
         private System.ComponentModel.IContainer components = null;
-        // bỏ error provider
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                if (components != null)
-                    components.Dispose();
+                components?.Dispose();
             }
             base.Dispose(disposing);
         }
-
         #region Component Designer generated code
-        // một baseusercontrol mà chả làm được con mẹ gì, đọc uc, usercontrol coi có cái gì lặp lại, chung mà có thể khai báo chung thì viết vào đây rồi dùng, trời ơi
-        private void InitializeComponent()
+
+        /// <summary>
+        /// Required method for Designer support - do not modify 
+        /// the contents of this method with the code editor.
+        /// </summary>
+protected void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.SuspendLayout();
+            // 
+            // BaseUserControl
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Name = "BaseUserControl";
+            this.ResumeLayout(false);
         }
+
         #endregion
     }
 }

@@ -1,5 +1,5 @@
-﻿﻿using Domain.Entities;
-using System;
+﻿using System;
+﻿using Domain.Entities;
 
 namespace Domain.States
 {
@@ -19,3 +19,4 @@ namespace Domain.States
         void MarkTimeout(Trip trip);
     }
 }
+

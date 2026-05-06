@@ -1,7 +1,6 @@
 using System;
 using Domain.SharedKernel;
 using Domain.ValueObjects;
-using Domain.Enums;
 
 namespace Domain.Events
 {
@@ -35,7 +34,7 @@ namespace Domain.Events
         /// <summary>
         /// Loại phương tiện được yêu cầu.
         /// </summary>
-        public VehicleType VehicleType { get; }
+        public string VehicleType { get; }
 
         #endregion
 
@@ -54,7 +53,7 @@ namespace Domain.Events
             Guid passengerId,
             Location pickup,
             Location destination,
-            VehicleType vehicleType)
+            string vehicleType)
         {
             TripId = tripId;
             PassengerId = passengerId;

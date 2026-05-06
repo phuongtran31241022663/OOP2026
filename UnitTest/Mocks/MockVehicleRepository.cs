@@ -1,5 +1,4 @@
 using Domain.Entities;
-using Domain.Enums;
 using Domain.Repositories;
 using Domain.SharedKernel;
 using System;
@@ -53,9 +52,9 @@ namespace UnitTest.Mocks
             return Task.FromResult(_vehicles.ToList());
         }
 
-        public Task<List<Vehicle>> GetByTypeAsync(VehicleType type)
+        public Task<List<Vehicle>> GetByTypeAsync(string type)
         {
-            return Task.FromResult(_vehicles.Where(v => v.Type == type).ToList());
+            return Task.FromResult(_vehicles.Where(v => v.TypeName == type).ToList());
         }
 
         public Task UpdateAsync(Vehicle entity)

@@ -3,7 +3,7 @@ using Application.Services;
 using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.ValueObjects;
-using Domain.Enums;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

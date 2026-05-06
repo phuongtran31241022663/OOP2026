@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace Presentation.Constants
@@ -22,6 +22,7 @@ namespace Presentation.Constants
             public static readonly Color DangerHover = Color.FromArgb(200, 0, 0);
             public static readonly Color Error = Color.Red;
             public static readonly Color Warning = Color.Orange;
+            public static readonly Color Info = Color.FromArgb(33, 150, 243);
 
             // Backgrounds / Surfaces
             public static readonly Color SurfaceWhite = Color.White;
@@ -39,34 +40,15 @@ namespace Presentation.Constants
             public static readonly Color BorderDefault = Color.FromArgb(189, 189, 189);
         }
 
-        public static class Layout
-        {
-            public const int FormPadding = 10;
-            public const int ControlSpacing = 8;
-            public const int BorderRadius = 4;
-            public static readonly Point ZeroPoint = new Point(0, 0);
-            public const float FullPercent = 100F;
-            public const int PasswordToggleColumnWidth = 45;
-            public const float LabelColumnPercent = 35F;
-            public const float InputColumnPercent = 65F;
-            public static readonly Padding VehicleInfoPanelMargin = new Padding(3, 10, 3, 3);
-        }
-
         public static class Typography
         {
             public static readonly Font Logo = new Font("Segoe UI", 22F, FontStyle.Bold);
             public static readonly Font Header = new Font("Segoe UI", 14F, FontStyle.Bold);
             public static readonly Font Body = new Font("Segoe UI", 12F, FontStyle.Regular);
             public static readonly Font BodyBold = new Font("Segoe UI", 12F, FontStyle.Bold);
+            public static readonly Font Default = new Font("Segoe UI", 9.5F, FontStyle.Regular);
             public static readonly Font Small = new Font("Segoe UI", 10, FontStyle.Regular);
             public static readonly Font Tiny = new Font("Segoe UI", 8F, FontStyle.Regular);
-        }
-
-        public static class Sizes
-        {
-            public static readonly Size DefaultForm = new Size(900, 600);
-            public static readonly Size PasswordToggleButton = new Size(39, 34);
-            public const int MinContentPanelWidth = 500;
         }
 
         public static class ButtonSizes
@@ -76,56 +58,6 @@ namespace Presentation.Constants
             public static readonly Size Action = new Size(150, 40);
             public static readonly Size Large = new Size(200, 48);
 
-            public const int StandardHeight = 32;
-            public const int CompactHeight = 26;
-            public const int ActionHeight = 40;
-            public const int LargeHeight = 48;
-        }
-
-        public static class ControlHeights
-        {
-            public const int TextBoxHeight = 23;
-            public const int ModernInputHeight = 32;
-        }
-
-
-        public static class Heights
-        {
-            public const int HeaderRow = 100;
-            public const int FooterRow = 40;
-            public const int TitleRow = 50;
-            public const int LabelRow = 30;
-            public const int InputControlRow = 40;
-            public const int ActionButtonRow = 70;
-            public const int LinkRow = 40;
-            public const int VehicleInfoRow = 40;
-            public const int StandardRow = 32;
-            public const int DataGridViewRow = 28;
-            public const int TabControlHeight = 30;
-        }
-
-        public static class ColumnWidths
-        {
-            public const int LabelDefault = 120;
-            public const int InputDefault = 200;
-            public const int SmallLabel = 80;
-            public const int LargeInput = 300;
-        }
-
-        public static class DialogSizes
-        {
-            public static readonly Size LoginForm = new Size(400, 500);
-            public static readonly Size RegisterForm = new Size(500, 700);
-            public static readonly Size ConfirmationDialog = new Size(350, 200);
-            public static readonly Size FullScreenDialog = new Size(1024, 768);
-        }
-
-        public static class IconSizes
-        {
-            public static readonly Size Small = new Size(16, 16);
-            public static readonly Size Medium = new Size(24, 24);
-            public static readonly Size Large = new Size(32, 32);
-            public static readonly Size ExtraLarge = new Size(48, 48);
         }
 
         public static class Spacing
@@ -145,7 +77,7 @@ namespace Presentation.Constants
             public const int IconSize = 40;
             public const int SmallIconSize = 32;
 
-            public static class Typography
+            public static class Fonts
             {
                 public static readonly Font Title = new Font("Segoe UI", 11F, FontStyle.Bold);
                 public static readonly Font Body = new Font("Segoe UI", 9F, FontStyle.Regular);
@@ -154,16 +86,5 @@ namespace Presentation.Constants
             }
         }
 
-        public static class Separators
-        {
-            public const int DefaultHeight = 2;
-            public static readonly Color Color = Color.LightGray;
-        }
-
-        public static class Shadows
-        {
-            public static readonly Color LightShadow = Color.FromArgb(20, 0, 0, 0);
-            public static readonly Color AmbientShadow = Color.FromArgb(10, 0, 0, 0);
-        }
     }
 }

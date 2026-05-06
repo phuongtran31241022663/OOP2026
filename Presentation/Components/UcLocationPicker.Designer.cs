@@ -10,20 +10,7 @@ namespace Presentation.Components
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-private void InitializeComponent()
+        private void InitializeComponent()
         {
             this.SuspendLayout();
 
@@ -31,8 +18,8 @@ private void InitializeComponent()
             _txtSearch = new TextBox();
             _txtSearch.Location = new Point(0, 0);
             _txtSearch.Size = new Size(334, 28);
-            _txtSearch.Font = new Font("Segoe UI", 10F);
-            _txtSearch.ForeColor = Color.Black;
+            _txtSearch.Font = Presentation.Constants.UiConstants.Typography.Small;
+            _txtSearch.ForeColor = Presentation.Constants.UiConstants.Colors.TextPrimary;
             _txtSearch.KeyDown += TxtSearch_KeyDown;
             _txtSearch.Enter += TxtSearch_Enter;
             _txtSearch.Leave += TxtSearch_Leave;
@@ -42,7 +29,7 @@ private void InitializeComponent()
             _lstSuggestions = new ListBox();
             _lstSuggestions.Dock = DockStyle.Fill;
             _lstSuggestions.BorderStyle = BorderStyle.None;
-            _lstSuggestions.Font = new Font("Segoe UI", 9F);
+            _lstSuggestions.Font = Presentation.Constants.UiConstants.Cards.Fonts.Body;
             _lstSuggestions.ItemHeight = 28;
             _lstSuggestions.Click += LstSuggestions_Click;
             _lstSuggestions.DoubleClick += LstSuggestions_DoubleClick;
@@ -61,28 +48,13 @@ private void InitializeComponent()
             _pnlSuggestions.Controls.Add(_lstSuggestions);
             _pnlSuggestions.AutoSize = false;
 
-            // Create placeholder label
-            _lblPlaceholder = new Label();
-            _lblPlaceholder.Dock = DockStyle.Fill;
-            _lblPlaceholder.Font = new Font("Segoe UI", 10F);
-            _lblPlaceholder.ForeColor = Color.Gray;
-            _lblPlaceholder.Text = "Chọn điểm đón...";
-            _lblPlaceholder.TextAlign = ContentAlignment.MiddleLeft;
-            _lblPlaceholder.Padding = new Padding(5, 0, 0, 0);
-            _lblPlaceholder.Click += LblPlaceholder_Click;
-            _lblPlaceholder.Visible = true;
-
             // Add to main control (panel phải được thêm sau để nằm trên cùng)
             this.Controls.Add(_txtSearch);
-            this.Controls.Add(_lblPlaceholder);
             this.Controls.Add(_pnlSuggestions);
 
             _pnlSuggestions.ResumeLayout();
             this.ResumeLayout();
 
-            // Show placeholder if no selection
-            UpdatePlaceholder();
         }
-
     }
 }

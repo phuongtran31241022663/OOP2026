@@ -1,10 +1,10 @@
 ﻿using Application.Events;
 using Domain.Entities;
-using Domain.Enums;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 
 namespace Application.Interfaces
 {
@@ -14,13 +14,14 @@ namespace Application.Interfaces
         event EventHandler<TripStatusChangedEventArgs> TripStatusChanged;
 
         // Commands (async)
-        Task<Trip> CreateTripAsync(Guid passengerId, Route route, Fare fare, VehicleType vehicleType);
+        Task<Trip> CreateTripAsync(Guid passengerId, Route route, Fare fare, string vehicleType);
         Task MatchDriverAsync(Guid tripId, Guid driverId);
         Task MarkAsArrivedAsync(Guid tripId);
         Task StartTripAsync(Guid tripId);
         Task CompleteTripAsync(Guid tripId);
         Task CancelTripAsync(Guid tripId, string reason);
-        Task<Trip> RequestTripAsync(Guid passengerId, Location pickupLocation, Location destinationLocation, VehicleType vehicleType);
+        Task<Trip> RequestTripAsync(Guid passengerId, Location pickupLocation, Location destinationLocation, string vehicleType);
+
 
         // Queries (async)
         Task<Trip> GetTripAsync(Guid tripId);

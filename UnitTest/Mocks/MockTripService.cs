@@ -1,7 +1,6 @@
 using Application.Events;
 using Application.Interfaces;
 using Domain.Entities;
-using Domain.Enums;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -15,40 +14,40 @@ namespace UnitTest.Mocks
     /// </summary>
     public class MockTripService : ITripService
     {
-        private Func<Guid, Location, Location, VehicleType, Trip> _requestTripHandler;
-        private Action<TripStatusChangedEventArgs> _statusChangedHandler;
-        
-        private Trip _lastRequestedTrip;
-        private bool _requestTripCalled;
-        private string _lastTripStatus;
+    private Func<Guid, Location, Location, string, Trip> _requestTripHandler;
+    private Action<TripStatusChangedEventArgs> _statusChangedHandler;
+    
+    private Trip _lastRequestedTrip;
+    private bool _requestTripCalled;
+    private string _lastTripStatus;
 
-        public event EventHandler<TripStatusChangedEventArgs> TripStatusChanged;
+    public event EventHandler<TripStatusChangedEventArgs> TripStatusChanged;
 
-        public Trip LastRequestedTrip => _lastRequestedTrip;
-        public bool RequestTripCalled => _requestTripCalled;
-        public string LastTripStatus => _lastTripStatus;
-        public int RequestTripCallCount { get; private set; }
-        public bool CancelTripCalled { get; private set; }
-        public bool CancelTripAsyncCalled { get; private set; }
-        public int CanCancelCallCount { get; private set; }
-        public bool CanCancelReturnValue { get; private set; } = true;
-        private Trip _tripToReturn;
+    public Trip LastRequestedTrip => _lastRequestedTrip;
+    public bool RequestTripCalled => _requestTripCalled;
+    public string LastTripStatus => _lastTripStatus;
+    public int RequestTripCallCount { get; private set; }
+    public bool CancelTripCalled { get; private set; }
+    public bool CancelTripAsyncCalled { get; private set; }
+    public int CanCancelCallCount { get; private set; }
+    public bool CanCancelReturnValue { get; private set; } = true;
+    private Trip _tripToReturn;
 
-        public MockTripService()
-        {
-            _requestTripHandler = (passengerId, pickup, destination, vehicleType) => null;
-        }
+    public MockTripService()
+    {
+        _requestTripHandler = (passengerId, pickup, destination, vehicleType) => null;
+    }
 
-        public void SetupRequestTripSuccess(Trip trip)
-        {
-            _requestTripHandler = (passengerId, pickup, destination, vehicleType) => trip;
-        }
+    public void SetupRequestTripSuccess(Trip trip)
+    {
+        _requestTripHandler = (passengerId, pickup, destination, vehicleType) => trip;
+    }
 
-        public void SetupRequestTripFailure(Exception ex)
-        {
-            _requestTripHandler = (passengerId, pickup, destination, vehicleType) =>
-                throw ex;
-        }
+    public void SetupRequestTripFailure(Exception ex)
+    {
+        _requestTripHandler = (passengerId, pickup, destination, vehicleType) =>
+            throw ex;
+    }
 
         public void SetTripToReturn(Trip trip)
         {
@@ -61,10 +60,10 @@ namespace UnitTest.Mocks
             CanCancelReturnValue = canCancel;
         }
 
-        public Task<Trip> CreateTripAsync(Guid passengerId, Route route, Fare fare, VehicleType vehicleType)
-        {
-            return Task.FromResult(_tripToReturn);
-        }
+    public Task<Trip> CreateTripAsync(Guid passengerId, Route route, Fare fare, string vehicleType)
+    {
+        return Task.FromResult(_tripToReturn);
+    }
 
         public Task MatchDriverAsync(Guid tripId, Guid driverId)
         {
@@ -93,19 +92,19 @@ namespace UnitTest.Mocks
             return Task.CompletedTask;
         }
 
-        public Task<Trip> RequestTripAsync(Guid passengerId, Location pickupLocation, Location destinationLocation, VehicleType vehicleType)
+    public Task<Trip> RequestTripAsync(Guid passengerId, Location pickupLocation, Location destinationLocation, string vehicleType)
+    {
+        RequestTripCallCount++;
+        _requestTripCalled = true;
+        _lastRequestedTrip = _requestTripHandler(passengerId, pickupLocation, destinationLocation, vehicleType);
+        
+        if (_lastRequestedTrip != null)
         {
-            RequestTripCallCount++;
-            _requestTripCalled = true;
-            _lastRequestedTrip = _requestTripHandler(passengerId, pickupLocation, destinationLocation, vehicleType);
-            
-            if (_lastRequestedTrip != null)
-            {
-                _lastTripStatus = _lastRequestedTrip.Status;
-            }
-            
-            return Task.FromResult(_lastRequestedTrip);
+            _lastTripStatus = _lastRequestedTrip.Status;
         }
+        
+        return Task.FromResult(_lastRequestedTrip);
+    }
 
         public Task<Trip> GetTripAsync(Guid tripId)
         {

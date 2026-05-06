@@ -1,6 +1,6 @@
 using System;
 using System.Text;
-
+// Hiện tại thì common chỉ có 1 cái này, trong quá trình làm, thấy được cái gì có thể làm common nữa?
 namespace Common.Utilities
 {
     // Mã hóa mật khẩu

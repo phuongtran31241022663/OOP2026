@@ -3,12 +3,11 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Presentation
+namespace Presentation.Base
 {
     public partial class BaseUserControl : UserControl
     {
         private bool _isLoading;
-        // bỏ thằng error provider đi, throw new exception đã đủ lắm rồi
 
         public bool IsLoading
         {
