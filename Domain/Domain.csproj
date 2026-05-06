@@ -63,7 +63,6 @@
     <Compile Include="Entities\Users\Passenger.cs" />
     <Compile Include="Entities\Vehicles\Car.cs" />
     <Compile Include="Entities\Vehicles\Motorbike.cs" />
-    <Compile Include="Enums\VehicleType.cs" />
 
 
 
