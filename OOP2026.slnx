@@ -4,5 +4,4 @@
   <Project Path="Domain/Domain.csproj" Id="3ac87c44-ecaa-4de9-8b55-7fd2f65911a9" />
   <Project Path="Infrastructure/Infrastructure.csproj" Id="99f69e98-68f0-44a9-bb36-9b26151904db" />
   <Project Path="Presentation/Presentation.csproj" Id="ec4603fb-0d6a-4a26-b497-fe53f3278929" />
-  <Project Path="UnitTest/UnitTest.csproj" Id="e71c390c-85fb-4169-b128-f876cff64de0" />
 </Solution>
