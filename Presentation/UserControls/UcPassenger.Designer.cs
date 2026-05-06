@@ -1,12 +1,13 @@
+﻿using Presentation.Components;
+using Presentation.Base;
+
 namespace Presentation.UserControls
 {
-    using Presentation.Constants;
-    using System.Windows.Forms;
-    // cái cmb chọn loại xe nên gộp với thằng hiện giá
+    // cái cmb chọn loại xe nên gộp với thằng hiển giá
     partial class UcPassenger
     {
         private System.ComponentModel.IContainer components = null;
-        private Presentation.Components.UcFareVehicleSelector farePanel;
+        private UcVehicleFareSelector farePanel;
         private System.Windows.Forms.SplitContainer splitMain;
         private Presentation.Components.UcMap mapControl;
 
@@ -29,8 +30,6 @@ namespace Presentation.UserControls
         private Presentation.Components.UcLocationPicker pickupPicker;
         private System.Windows.Forms.Label lblDestination;
         private Presentation.Components.UcLocationPicker destinationPicker;
-        private System.Windows.Forms.Label lblVehicleType;
-        private System.Windows.Forms.ComboBox cmbVehicleType;
         private System.Windows.Forms.Button btnBook;
 
         private System.Windows.Forms.Panel pnlSearching;
@@ -39,7 +38,7 @@ namespace Presentation.UserControls
         private System.Windows.Forms.Button btnCancelSearch;
 
         private System.Windows.Forms.Panel pnlTracking;
-private Presentation.Components.TripStatusPanel tripStatusPanel;
+        private Presentation.Components.UcTripStatus tripStatusPanel;
         private Presentation.Components.UcDriverCard driverCard;
         private System.Windows.Forms.Button btnCancelTrip;
 
@@ -51,21 +50,10 @@ private Presentation.Components.TripStatusPanel tripStatusPanel;
         private System.Windows.Forms.Panel pnlHistory;
         private System.Windows.Forms.DataGridView dgvHistory;
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-
-            base.Dispose(disposing);
-        }
-
         #region Component Designer generated code
 
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.splitMain = new System.Windows.Forms.SplitContainer();
             this.mapControl = new Presentation.Components.UcMap();
             this.tblRight = new System.Windows.Forms.TableLayoutPanel();
@@ -73,9 +61,8 @@ private Presentation.Components.TripStatusPanel tripStatusPanel;
             this.lblPassengerName = new System.Windows.Forms.Label();
             this.pnlActionStage = new System.Windows.Forms.Panel();
             this.pnlBooking = new System.Windows.Forms.Panel();
+            this.farePanel = new Presentation.Components.UcVehicleFareSelector();
             this.btnBook = new System.Windows.Forms.Button();
-            this.cmbVehicleType = new System.Windows.Forms.ComboBox();
-            this.lblVehicleType = new System.Windows.Forms.Label();
             this.destinationPicker = new Presentation.Components.UcLocationPicker();
             this.lblDestination = new System.Windows.Forms.Label();
             this.pickupPicker = new Presentation.Components.UcLocationPicker();
@@ -87,7 +74,7 @@ private Presentation.Components.TripStatusPanel tripStatusPanel;
             this.pnlTracking = new System.Windows.Forms.Panel();
             this.btnCancelTrip = new System.Windows.Forms.Button();
             this.driverCard = new Presentation.Components.UcDriverCard();
-this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
+            this.tripStatusPanel = new Presentation.Components.UcTripStatus();
             this.pnlPayment = new System.Windows.Forms.Panel();
             this.btnRateDriver = new System.Windows.Forms.Button();
             this.btnConfirmPayment = new System.Windows.Forms.Button();
@@ -100,7 +87,6 @@ this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
             this.btnProfile = new System.Windows.Forms.Button();
             this.btnHistory = new System.Windows.Forms.Button();
             this.btnMenu = new System.Windows.Forms.Button();
-            this.farePanel = new Presentation.Components.UcFareVehicleSelector();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
             this.splitMain.Panel2.SuspendLayout();
@@ -123,20 +109,9 @@ this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
             this.splitMain.Location = new System.Drawing.Point(0, 0);
             this.splitMain.Name = "splitMain";
             // 
-            // farePanel
-            // 
-            this.farePanel.BackColor = System.Drawing.Color.White;
-            this.farePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.farePanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.farePanel.Location = new System.Drawing.Point(0, 703);
-            this.farePanel.Name = "farePanel";
-            this.farePanel.Size = new System.Drawing.Size(768, 50);
-            this.farePanel.TabIndex = 1;
-            // 
             // splitMain.Panel1
             // 
             this.splitMain.Panel1.Controls.Add(this.mapControl);
-            this.splitMain.Panel1.Controls.Add(this.farePanel);
             // 
             // splitMain.Panel2
             // 
@@ -207,9 +182,8 @@ this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
             // 
             // pnlBooking
             // 
+            this.pnlBooking.Controls.Add(this.farePanel);
             this.pnlBooking.Controls.Add(this.btnBook);
-            this.pnlBooking.Controls.Add(this.cmbVehicleType);
-            this.pnlBooking.Controls.Add(this.lblVehicleType);
             this.pnlBooking.Controls.Add(this.destinationPicker);
             this.pnlBooking.Controls.Add(this.lblDestination);
             this.pnlBooking.Controls.Add(this.pickupPicker);
@@ -220,6 +194,16 @@ this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
             this.pnlBooking.Padding = new System.Windows.Forms.Padding(8);
             this.pnlBooking.Size = new System.Drawing.Size(422, 664);
             this.pnlBooking.TabIndex = 0;
+            // 
+            // farePanel
+            // 
+            this.farePanel.BackColor = System.Drawing.Color.White;
+            this.farePanel.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.farePanel.Location = new System.Drawing.Point(8, 536);
+            this.farePanel.Margin = new System.Windows.Forms.Padding(4);
+            this.farePanel.Name = "farePanel";
+            this.farePanel.Size = new System.Drawing.Size(406, 50);
+            this.farePanel.TabIndex = 4;
             // 
             // btnBook
             // 
@@ -237,30 +221,6 @@ this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
             this.btnBook.TabIndex = 3;
             this.btnBook.Text = "Đặt xe";
             this.btnBook.UseVisualStyleBackColor = false;
-            // 
-            // cmbVehicleType
-            // 
-            this.cmbVehicleType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbVehicleType.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.cmbVehicleType.FormattingEnabled = true;
-            this.cmbVehicleType.Items.AddRange(new object[] {
-            "Xe máy",
-            "Ô tô"});
-            this.cmbVehicleType.Location = new System.Drawing.Point(8, 311);
-            this.cmbVehicleType.Name = "cmbVehicleType";
-            this.cmbVehicleType.Size = new System.Drawing.Size(334, 31);
-            this.cmbVehicleType.TabIndex = 2;
-            this.cmbVehicleType.SelectedIndexChanged += new System.EventHandler(this.cmbVehicleType_SelectedIndexChanged);
-            // 
-            // lblVehicleType
-            // 
-            this.lblVehicleType.AutoSize = true;
-            this.lblVehicleType.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.lblVehicleType.Location = new System.Drawing.Point(8, 268);
-            this.lblVehicleType.Name = "lblVehicleType";
-            this.lblVehicleType.Size = new System.Drawing.Size(67, 23);
-            this.lblVehicleType.TabIndex = 4;
-            this.lblVehicleType.Text = "Loại xe:";
             // 
             // destinationPicker
             // 
@@ -339,7 +299,7 @@ this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
             this.btnCancelSearch.Padding = new System.Windows.Forms.Padding(8, 6, 8, 6);
             this.btnCancelSearch.Size = new System.Drawing.Size(150, 40);
             this.btnCancelSearch.TabIndex = 2;
-            this.btnCancelSearch.Text = "Huỷ yêu cầu";
+            this.btnCancelSearch.Text = "Hủy yêu cầu";
             this.btnCancelSearch.UseVisualStyleBackColor = true;
             // 
             // lblSearching
@@ -383,7 +343,7 @@ this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
             this.btnCancelTrip.Padding = new System.Windows.Forms.Padding(8, 6, 8, 6);
             this.btnCancelTrip.Size = new System.Drawing.Size(422, 38);
             this.btnCancelTrip.TabIndex = 2;
-            this.btnCancelTrip.Text = "Huỷ chuyến";
+            this.btnCancelTrip.Text = "Hủy chuyến";
             this.btnCancelTrip.UseVisualStyleBackColor = false;
             // 
             // driverCard
@@ -393,6 +353,7 @@ this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
             this.driverCard.Cursor = System.Windows.Forms.Cursors.Hand;
             this.driverCard.Dock = System.Windows.Forms.DockStyle.Top;
             this.driverCard.Location = new System.Drawing.Point(0, 94);
+            this.driverCard.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.driverCard.Name = "driverCard";
             this.driverCard.Size = new System.Drawing.Size(422, 75);
             this.driverCard.TabIndex = 3;
@@ -401,6 +362,7 @@ this.tripStatusPanel = new Presentation.Components.TripStatusPanel();
             // 
             this.tripStatusPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.tripStatusPanel.Location = new System.Drawing.Point(0, 0);
+            this.tripStatusPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tripStatusPanel.Name = "tripStatusPanel";
             this.tripStatusPanel.Size = new System.Drawing.Size(422, 94);
             this.tripStatusPanel.TabIndex = 0;

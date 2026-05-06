@@ -2,6 +2,7 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.ValueObjects;
+using Presentation.Base;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,9 +15,10 @@ namespace Presentation.UserControls
         private readonly Admin _admin;
         private readonly IAdminService _adminService;
 
-        private List<Domain.Entities.User> _allUsers = new List<Domain.Entities.User>();
-        private List<Domain.Entities.Trip> _allTrips = new List<Domain.Entities.Trip>();
-        private List<Domain.Entities.FareRule> _allFareRules = new List<Domain.Entities.FareRule>();
+
+        private List<User> _allUsers = new List<User>();
+        private List<Trip> _allTrips = new List<Trip>();
+        private List<FareRule> _allFareRules = new List<FareRule>();
 
         public event EventHandler RequestLogout;
 
@@ -36,8 +38,6 @@ namespace Presentation.UserControls
 
             // Users tab
             txtSearchUsers.TextChanged += (s, e) => FilterUsers(txtSearchUsers.Text);
-            btnLockUser.Click += async (s, e) => await ToggleUserLock(true);
-            btnUnlockUser.Click += async (s, e) => await ToggleUserLock(false);
 
             // Trips tab
             txtSearchTrips.TextChanged += (s, e) => FilterTrips(txtSearchTrips.Text);
@@ -51,6 +51,7 @@ namespace Presentation.UserControls
 
             this.Load += async (s, e) => await LoadAllData();
         }
+
 
         private async Task OnTabChanged()
         {
@@ -68,9 +69,9 @@ namespace Presentation.UserControls
             IsLoading = true;
             try
             {
-                _allUsers = await _adminService.GetAllUsersAsync() ?? new List<Domain.Entities.User>();
-                _allTrips = await _adminService.GetAllTripsAsync() ?? new List<Domain.Entities.Trip>();
-                _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<Domain.Entities.FareRule>();
+                _allUsers = await _adminService.GetAllUsersAsync() ?? new List<User>();
+                _allTrips = await _adminService.GetAllTripsAsync() ?? new List<Trip>();
+                _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<FareRule>();
                 await OnTabChanged();
             }
             catch (Exception ex)
@@ -103,8 +104,9 @@ namespace Presentation.UserControls
                 return;
             }
 
-            var filteredUsers = new List<Domain.Entities.User>();
-            foreach (var u in _allUsers)
+            // Fix [High 3]: Explicit type instead of var
+            List<User> filteredUsers = new List<User>();
+            foreach (User u in _allUsers)
             {
                 if (u.Name.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0 ||
                     u.Phone.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0)
@@ -114,32 +116,16 @@ namespace Presentation.UserControls
             }
 
             dgvUsers.Rows.Clear();
-            foreach (var user in filteredUsers)
+            foreach (User user in filteredUsers)
             {
                 string role = user is Driver ? "Tài xế" : (user is Passenger ? "Hành khách" : "Quản trị viên");
                 dgvUsers.Rows.Add(user.Id.ToString().Substring(0, 8), user.Name, user.Phone, role, "Hoạt động");
             }
         }
 
-        private async Task ToggleUserLock(bool lockUser)
-        {
-            if (dgvUsers.SelectedRows.Count == 0) return;
 
-            IsLoading = true;
-            try
-            {
-                await Task.CompletedTask; // TODO: goi service khoa/mo khoa user
-                ShowInfo(lockUser ? "Đã khoá tài khoản." : "Đã mở khoá tài khoản.");
-            }
-            catch (Exception ex)
-            {
-                ShowFriendlyException(ex, "Cập nhật trạng thái tài khoản");
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
+        // Removed ToggleUserLock method
+
 
         // --- Trips Tab ---
         private void PopulateTripsGrid()
@@ -157,7 +143,7 @@ namespace Presentation.UserControls
                 dgvTrips.Rows[rowIndex].Tag = trip;
             }
         }
-        
+
         private void FilterTrips(string term)
         {
             if (string.IsNullOrWhiteSpace(term))
@@ -165,24 +151,25 @@ namespace Presentation.UserControls
                 PopulateTripsGrid();
                 return;
             }
-            
-            var filteredTrips = new List<Domain.Entities.Trip>();
-            foreach (var t in _allTrips)
+
+            // Fix [High 3]: Explicit type instead of var
+            List<Trip> filteredTrips = new List<Trip>();
+            foreach (Trip t in _allTrips)
             {
                 if (t.Id.ToString().IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     filteredTrips.Add(t);
                 }
             }
-                
+
             dgvTrips.Rows.Clear();
-            foreach (var trip in filteredTrips)
+            foreach (Trip trip in filteredTrips)
             {
                 int rowIndex = dgvTrips.Rows.Add(
-                    trip.Id.ToString().Substring(0, 8), 
-                    trip.Status, 
-                    trip.TripVehicleType, 
-                    (trip.TripFare?.TotalAmount.Amount.ToString("N0") ?? "N/A") + "đ", 
+                    trip.Id.ToString().Substring(0, 8),
+                    trip.Status,
+                    trip.TripVehicleType,
+                    (trip.TripFare?.TotalAmount.Amount.ToString("N0") ?? "N/A") + "đ",
                     trip.RequestAt.ToString("dd/MM HH:mm"));
                 dgvTrips.Rows[rowIndex].Tag = trip;
             }
@@ -192,7 +179,8 @@ namespace Presentation.UserControls
         {
             if (dgvTrips.SelectedRows.Count == 0) return;
 
-            var trip = dgvTrips.SelectedRows[0].Tag as Trip;
+            // Fix [High 3]: Explicit type instead of var
+            Trip trip = dgvTrips.SelectedRows[0].Tag as Trip;
             if (trip == null)
             {
                 ShowInfo("Không thể xác định chuyến đi.");
@@ -232,18 +220,18 @@ namespace Presentation.UserControls
             foreach (var rule in _allFareRules)
             {
                 int rowIndex = dgvFareRules.Rows.Add(
-                    rule.VehicleType, 
-                    rule.BaseFare.Amount.ToString("N0"), 
-                    rule.PricePerKm.Amount.ToString("N0"), 
+                    rule.VehicleType,
+                    rule.BaseFare.Amount.ToString("N0"),
+                    rule.PricePerKm.Amount.ToString("N0"),
                     (rule.CommissionRate * 100).ToString("F0") + "%");
                 dgvFareRules.Rows[rowIndex].Tag = rule;
             }
         }
 
-        private Domain.Entities.FareRule GetSelectedFareRule()
+        private FareRule GetSelectedFareRule()
         {
             if (dgvFareRules.SelectedRows.Count == 0) return null;
-            return dgvFareRules.SelectedRows[0].Tag as Domain.Entities.FareRule;
+            return dgvFareRules.SelectedRows[0].Tag as FareRule;
         }
 
         private async Task AddFareRuleAsync()
@@ -260,7 +248,7 @@ namespace Presentation.UserControls
                     new Money(input.PricePerKm),
                     input.CommissionRate);
 
-                _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<Domain.Entities.FareRule>();
+                _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<FareRule>();
                 PopulateFareRulesGrid();
                 ShowInfo("Đã thêm quy tắc giá.");
             }
@@ -276,7 +264,7 @@ namespace Presentation.UserControls
 
         private async Task EditSelectedFareRuleAsync()
         {
-            Domain.Entities.FareRule selectedRule = GetSelectedFareRule();
+            FareRule selectedRule = GetSelectedFareRule();
             if (selectedRule == null)
             {
                 ShowInfo("Vui lòng chọn quy tắc giá cần sửa.");
@@ -295,7 +283,7 @@ namespace Presentation.UserControls
                     new Money(input.PricePerKm),
                     input.CommissionRate);
 
-                _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<Domain.Entities.FareRule>();
+                _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<FareRule>();
                 PopulateFareRulesGrid();
                 ShowInfo("Đã cập nhật quy tắc giá.");
             }
@@ -309,7 +297,7 @@ namespace Presentation.UserControls
             }
         }
 
-        private FareRuleInputResult ShowFareRuleInputDialog(Domain.Entities.FareRule existingRule)
+        private FareRuleInputResult ShowFareRuleInputDialog(FareRule existingRule)
         {
             using (Form dialog = new Form())
             using (TableLayoutPanel layout = new TableLayoutPanel())
@@ -343,11 +331,11 @@ namespace Presentation.UserControls
                 lblVehicleType.Text = "Loại xe";
                 lblVehicleType.Anchor = AnchorStyles.Left;
                 cmbVehicleType.DropDownStyle = ComboBoxStyle.DropDownList;
-                cmbVehicleType.Items.Add(Domain.Enums.VehicleType.Motorbike);
-                cmbVehicleType.Items.Add(Domain.Enums.VehicleType.Car);
+                cmbVehicleType.Items.Add("Motorbike");
+                cmbVehicleType.Items.Add("Car");
                 cmbVehicleType.SelectedItem = existingRule == null
-                    ? (object)Domain.Enums.VehicleType.Motorbike
-                    : existingRule.VehicleType;
+                    ? (object)"Motorbike"
+                    : existingRule.VehicleType?.ToString();
                 cmbVehicleType.Enabled = existingRule == null;
 
                 lblBaseFare.Text = "Giá mở cửa";
@@ -388,50 +376,62 @@ namespace Presentation.UserControls
                 dialog.AcceptButton = btnOk;
                 dialog.CancelButton = btnCancel;
 
+                // Fix [High 2]: Validate before closing dialog
+                FareRuleInputResult result = null;
+                btnOk.Click += (s, ev) =>
+                {
+                    decimal baseFare;
+                    decimal pricePerKm;
+                    decimal commissionPercent;
+
+                    if (!decimal.TryParse(txtBaseFare.Text.Trim(), out baseFare))
+                    {
+                        ShowWarning("Giá mở cửa không hợp lệ.");
+                        dialog.DialogResult = DialogResult.None;
+                        return;
+                    }
+
+                    if (!decimal.TryParse(txtPricePerKm.Text.Trim(), out pricePerKm))
+                    {
+                        ShowWarning("Giá mỗi km không hợp lệ.");
+                        dialog.DialogResult = DialogResult.None;
+                        return;
+                    }
+
+                    if (!decimal.TryParse(txtCommissionRate.Text.Trim(), out commissionPercent))
+                    {
+                        ShowWarning("Hoa hồng không hợp lệ.");
+                        dialog.DialogResult = DialogResult.None;
+                        return;
+                    }
+
+                    if (baseFare < 0m || pricePerKm < 0m)
+                    {
+                        ShowWarning("Giá cước phải lớn hơn hoặc bằng 0.");
+                        dialog.DialogResult = DialogResult.None;
+                        return;
+                    }
+
+                    if (commissionPercent < 0m || commissionPercent > 100m)
+                    {
+                        ShowWarning("Hoa hồng phải nằm trong khoảng 0 đến 100.");
+                        dialog.DialogResult = DialogResult.None;
+                        return;
+                    }
+
+                    result = new FareRuleInputResult();
+                    result.VehicleType = (string)cmbVehicleType.SelectedItem;
+                    result.BaseFare = baseFare;
+                    result.PricePerKm = pricePerKm;
+                    result.CommissionRate = (double)(commissionPercent / 100m);
+                    dialog.DialogResult = DialogResult.OK;
+                };
+
                 if (dialog.ShowDialog(FindForm()) != DialogResult.OK)
                 {
                     return null;
                 }
 
-                decimal baseFare;
-                decimal pricePerKm;
-                decimal commissionPercent;
-
-                if (!decimal.TryParse(txtBaseFare.Text.Trim(), out baseFare))
-                {
-                    ShowWarning("Giá mở cửa không hợp lệ.");
-                    return null;
-                }
-
-                if (!decimal.TryParse(txtPricePerKm.Text.Trim(), out pricePerKm))
-                {
-                    ShowWarning("Giá mỗi km không hợp lệ.");
-                    return null;
-                }
-
-                if (!decimal.TryParse(txtCommissionRate.Text.Trim(), out commissionPercent))
-                {
-                    ShowWarning("Hoa hồng không hợp lệ.");
-                    return null;
-                }
-
-                if (baseFare < 0m || pricePerKm < 0m)
-                {
-                    ShowWarning("Giá cước phải lớn hơn hoặc bằng 0.");
-                    return null;
-                }
-
-                if (commissionPercent < 0m || commissionPercent > 100m)
-                {
-                    ShowWarning("Hoa hồng phải nằm trong khoảng 0 đến 100.");
-                    return null;
-                }
-
-                FareRuleInputResult result = new FareRuleInputResult();
-                result.VehicleType = (Domain.Enums.VehicleType)cmbVehicleType.SelectedItem;
-                result.BaseFare = baseFare;
-                result.PricePerKm = pricePerKm;
-                result.CommissionRate = (double)(commissionPercent / 100m);
                 return result;
             }
         }
@@ -440,7 +440,7 @@ namespace Presentation.UserControls
         {
             if (dgvFareRules.SelectedRows.Count == 0) return;
 
-            Domain.Entities.FareRule rule = GetSelectedFareRule();
+            FareRule rule = GetSelectedFareRule();
             if (rule == null)
             {
                 ShowInfo("Không thể xác định quy tắc giá.");
@@ -453,7 +453,7 @@ namespace Presentation.UserControls
             try
             {
                 await _adminService.DeleteFareRuleAsync(rule.Id);
-                _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<Domain.Entities.FareRule>();
+                _allFareRules = await _adminService.GetFareRulesAsync() ?? new List<FareRule>();
                 PopulateFareRulesGrid();
                 ShowInfo("Đã xoá quy tắc giá.");
             }
@@ -470,13 +470,13 @@ namespace Presentation.UserControls
         // --- Stats Tab ---
         private class FareRuleInputResult
         {
-            public Domain.Enums.VehicleType VehicleType { get; set; }
+            public string VehicleType { get; set; }
             public decimal BaseFare { get; set; }
             public decimal PricePerKm { get; set; }
             public double CommissionRate { get; set; }
         }
 
-        private async System.Threading.Tasks.Task UpdateStatsAsync()
+        private async Task UpdateStatsAsync()
         {
             IsLoading = true;
             try
@@ -485,7 +485,7 @@ namespace Presentation.UserControls
                 lblTotalTrips.Text = "Tổng chuyến: " + _allTrips.Count.ToString();
 
                 int activeCount = 0;
-                foreach (Domain.Entities.User u in _allUsers)
+                foreach (User u in _allUsers)
                 {
                     if (u is Driver d && d.IsAvailable())
                         activeCount++;

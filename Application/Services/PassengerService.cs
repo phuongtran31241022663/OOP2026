@@ -1,12 +1,14 @@
-﻿﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
-using Domain.Enums;
 using Domain.Repositories;
 using Domain.ValueObjects;
+
+
+
+﻿using System;
 
 
 namespace Application.Services
@@ -33,8 +35,11 @@ namespace Application.Services
             _fareService = fareService;
         }
 
-        public async Task<Trip> RequestTripAsync(Guid passengerId, Location pickup, Location destination, VehicleType vehicleType)
+        public async Task<Trip> RequestTripAsync(Guid passengerId, Location pickup, Location destination, string vehicleType)
         {
+            if (string.IsNullOrEmpty(vehicleType))
+                throw new ArgumentException("Vehicle type is required.", nameof(vehicleType));
+
             // Kiểm tra hành khách tồn tại
             Passenger passenger = await _passengerRepository.GetByIdAsync(passengerId);
             if (passenger == null)
@@ -52,6 +57,7 @@ namespace Application.Services
             Trip trip = await _tripService.CreateTripAsync(passengerId, route, fare, vehicleType);
             return trip;
         }
+
 
         public async Task CancelTripAsync(Guid passengerId, Guid tripId, string reason)
         {
@@ -114,3 +120,5 @@ namespace Application.Services
         }
     }
 }
+
+

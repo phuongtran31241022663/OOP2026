@@ -2,7 +2,8 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.Repositories;
-using Domain.ValueObjects;
+using Presentation.Base;
+using Presentation.Constants;
 using Presentation.UserControls;
 using System;
 using System.Drawing;
@@ -26,12 +27,14 @@ namespace Presentation.Shells
         private readonly IMatchingService _matchingService;
         private readonly IReviewService _reviewService;
         private readonly IVehicleRepository _vehicleRepository;
+        private readonly IDriverRepository _driverRepository;
+        private readonly IPassengerRepository _passengerRepository;
 
-        private User _currentUser; // sao cái này không dùng
+        private User _currentUser;
         private UcAuth _ucAuth;
-private UcPassenger _ucPassenger;
-private UcDriver _ucDriver;
-private UcAdmin _ucAdmin;
+        private UcPassenger _ucPassenger;
+        private UcDriver _ucDriver;
+        private UcAdmin _ucAdmin;
 
         public FrmMain(
             IUserService userService,
@@ -42,7 +45,9 @@ private UcAdmin _ucAdmin;
             IAdminService adminService,
             IMatchingService matchingService,
             IReviewService reviewService,
-            IVehicleRepository vehicleRepository)
+            IVehicleRepository vehicleRepository,
+            IDriverRepository driverRepository,
+            IPassengerRepository passengerRepository)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _tripService = tripService ?? throw new ArgumentNullException(nameof(tripService));
@@ -53,6 +58,8 @@ private UcAdmin _ucAdmin;
             _matchingService = matchingService ?? throw new ArgumentNullException(nameof(matchingService));
             _reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
             _vehicleRepository = vehicleRepository ?? throw new ArgumentNullException(nameof(vehicleRepository));
+            _driverRepository = driverRepository ?? throw new ArgumentNullException(nameof(driverRepository));
+            _passengerRepository = passengerRepository ?? throw new ArgumentNullException(nameof(passengerRepository));
 
             InitializeComponent();
             SetupShell();
@@ -64,8 +71,8 @@ private UcAdmin _ucAdmin;
             Size = new Size(1200, 800);
             MinimumSize = new Size(900, 600);
             StartPosition = FormStartPosition.CenterScreen;
-            BackColor = Color.White;
-            Font = new Font("Segoe UI", 9.5f);
+            BackColor = UiConstants.Colors.SurfaceWhite;
+            Font = UiConstants.Typography.Default;
             // BaseForm giờ là shell đơn giản, pnlContent đã Dock = Fill trong Designer
 
             // Thêm sự kiện cho nút Multi-Role
@@ -73,28 +80,20 @@ private UcAdmin _ucAdmin;
             btnMultiRole.BringToFront();
         }
 
-        private void btnMultiRole_Click(object sender, EventArgs e)
+        private async void btnMultiRole_Click(object sender, EventArgs e)
         {
-            ExecuteWithHandling("Mở giao diện Multi-Role", () =>
+            await ExecuteWithHandlingAsync("Mở giao diện Multi-Role", async () =>
             {
-                // ơ cái này ngộ, tạo trong data seed rồi lấy nó làm cái test cố định, chứ sao tạo ở đây
-                // Tạo tài khoản demo cho Passenger và Driver
-                var passenger = new Passenger(
-                    "Hành khách Demo",
-                    "0911111111",
-                    "123456");
+                // Lấy tài khoản demo từ repository thay vì tạo mới
+                // Các tài khoản này đã được tạo trong DataSeeder
+                Passenger passenger = await _passengerRepository.GetByPhoneAsync("0911111111");
+                Driver driver = await _driverRepository.GetByPhoneAsync("0900000000");
 
-                var demoLocation = new Location(
-                    new Coordinate(10.7769, 106.7009),
-                    new Address("Điểm demo", "Lê Lợi", "Quận 1", "Hồ Chí Minh", "Việt Nam", "1"));
-
-                var driver = new Driver(
-                    "Tài xế Demo",
-                    "0900000000",
-                    "123456",
-                    "DL123456",
-                    Guid.NewGuid(),
-                    demoLocation);
+                if (passenger == null || driver == null)
+                {
+                    MessageBox.Show("Không tìm thấy tài khoản demo. Vui lòng chạy DataSeeder trước.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
                 var multiRoleForm = new FrmMultiRole(
                     _userService,
@@ -111,7 +110,6 @@ private UcAdmin _ucAdmin;
                 multiRoleForm.Show();
             });
         }
-        // 1 method deadcode
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -120,7 +118,7 @@ private UcAdmin _ucAdmin;
 
         // --- Navigation ----------------------------------------------------
 
-public void ShowAuthScreen()
+        public void ShowAuthScreen()
         {
             ExecuteWithHandling("Tai man hinh dang nhap", () =>
             {
@@ -142,15 +140,15 @@ public void ShowAuthScreen()
                 _currentUser = passenger;
                 if (_ucPassenger == null)
                 {
-_ucPassenger = new UcPassenger(
-                        passenger,
-                        _tripService,
-                        _userService,
-                        _mapService,
-                        _fareService,
-                        _simulationService,
-                        _matchingService,
-                        _reviewService);
+                    _ucPassenger = new UcPassenger(
+                                            passenger,
+                                            _tripService,
+                                            _userService,
+                                            _mapService,
+                                            _fareService,
+                                            _simulationService,
+                                            _matchingService,
+                                            _reviewService);
                     _ucPassenger.RequestLogout += OnRequestLogout;
                 }
                 ShowUserControl(_ucPassenger);
@@ -164,13 +162,13 @@ _ucPassenger = new UcPassenger(
                 _currentUser = driver;
                 if (_ucDriver == null)
                 {
-_ucDriver = new UcDriver(
-                        driver,
-                        _tripService,
-                        _userService,
-                        _simulationService,
-                        _fareService,
-                        _matchingService);
+                    _ucDriver = new UcDriver(
+                                            driver,
+                                            _tripService,
+                                            _userService,
+                                            _simulationService,
+                                            _fareService,
+                                            _matchingService);
                     _ucDriver.RequestLogout += OnRequestLogout;
                 }
                 ShowUserControl(_ucDriver);
@@ -250,18 +248,20 @@ _ucDriver = new UcDriver(
         {
             ExecuteWithHandling("Dang xuat", () =>
             {
-if (_ucPassenger is UcPassenger ucP)
+                if (_ucPassenger is UcPassenger ucP)
                 {
                     ucP.RequestLogout -= OnRequestLogout;
                     ucP.Dispose();
                 }
-if (_ucDriver is UcDriver ucD)
+                if (_ucDriver is UcDriver ucD)
                 {
                     ucD.RequestLogout -= OnRequestLogout;
                     ucD.Dispose();
                 }
                 if (_ucAdmin != null)
                 {
+                    // Fix [Critical 3]: Unsubscribe before disposal
+                    _ucAdmin.RequestLogout -= OnRequestLogout;
                     _ucAdmin.Dispose();
                 }
                 if (_ucAuth != null)
@@ -275,7 +275,7 @@ if (_ucDriver is UcDriver ucD)
                 _ucPassenger = null;
                 _ucDriver = null;
                 _ucAdmin = null;
-                _ucAuth = null; 
+                _ucAuth = null;
                 ShowAuthScreen();
             });
         }

@@ -1,6 +1,7 @@
 using Application.Interfaces;
 using Domain.Entities.Users;
 using Domain.Entities;
+using Presentation.Base;
 using System;
 using System.Windows.Forms;
 
@@ -14,6 +15,7 @@ namespace Presentation.UserControls
     {
         private readonly User _user;
         private readonly IUserService _userService;
+
 
         public UcProfile(User user, IUserService userService)
         {
@@ -61,7 +63,7 @@ namespace Presentation.UserControls
                 {
                     if (txtNewPassword.Text != txtConfirmPassword.Text)
                     {
-                        throw new FormatException("Mật khẩu xác nhận không khớp.");
+            throw new InvalidOperationException("Mật khẩu xác nhận không khớp.");
                     }
                     _user.ChangePassword(txtCurrentPassword.Text, txtNewPassword.Text);
                 }
@@ -87,7 +89,7 @@ namespace Presentation.UserControls
                     decimal amount;
                     if (!decimal.TryParse(txtTopUpAmount.Text, out amount) || amount <= 0)
                     {
-                        throw new FormatException("Số tiền nạp không hợp lệ.");
+            throw new ArgumentException("Số tiền nạp không hợp lệ.");
                     }
 
                     driver.DepositToWallet(new Domain.ValueObjects.Money(amount, "VND"));

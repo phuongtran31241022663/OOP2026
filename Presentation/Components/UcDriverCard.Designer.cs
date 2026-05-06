@@ -1,6 +1,8 @@
 using System.Windows.Forms;
 using Presentation.Constants;
 
+using Presentation.Base;
+
 namespace Presentation.Components
 {
     // tao thấy cái design này đẹp ấy, có điều nó hơi nhỏ, có thể học hỏi cái này áp dụng cho cái khác
@@ -10,6 +12,7 @@ namespace Presentation.Components
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
+
 
         /// <summary> 
         /// Clean up any resources being used.
@@ -64,7 +67,7 @@ namespace Presentation.Components
             // _lblName
             // 
             this._lblName.AutoSize = true;
-            this._lblName.Font = Presentation.Constants.UiConstants.Cards.Typography.Title;
+            this._lblName.Font = Presentation.Constants.UiConstants.Cards.Fonts.Title;
             this._lblName.ForeColor = Presentation.Constants.UiConstants.Colors.TextPrimary;
             this._lblName.Location = new System.Drawing.Point(50, 8);
             this._lblName.Name = "_lblName";
@@ -75,7 +78,7 @@ namespace Presentation.Components
             // _lblPhone
             // 
             this._lblPhone.AutoSize = true;
-            this._lblPhone.Font = Presentation.Constants.UiConstants.Cards.Typography.Body;
+            this._lblPhone.Font = Presentation.Constants.UiConstants.Cards.Fonts.Body;
             this._lblPhone.ForeColor = Presentation.Constants.UiConstants.Colors.TextSecondary;
             this._lblPhone.Location = new System.Drawing.Point(50, 30);
             this._lblPhone.Name = "_lblPhone";
@@ -86,7 +89,7 @@ namespace Presentation.Components
             // _lblReview
             // 
             this._lblReview.AutoSize = true;
-            this._lblReview.Font = Presentation.Constants.UiConstants.Cards.Typography.BodyBold;
+            this._lblReview.Font = Presentation.Constants.UiConstants.Cards.Fonts.BodyBold;
             this._lblReview.ForeColor = Presentation.Constants.UiConstants.Colors.Warning;
             this._lblReview.Location = new System.Drawing.Point(50, 50);
             this._lblReview.Name = "_lblReview";
@@ -97,7 +100,7 @@ namespace Presentation.Components
             // _lblStatus
             // 
             this._lblStatus.AutoSize = true;
-            this._lblStatus.Font = Presentation.Constants.UiConstants.Cards.Typography.Info;
+            this._lblStatus.Font = Presentation.Constants.UiConstants.Cards.Fonts.Info;
             this._lblStatus.Location = new System.Drawing.Point(150, 8);
             this._lblStatus.Name = "_lblStatus";
             this._lblStatus.Size = new System.Drawing.Size(53, 13);
@@ -107,7 +110,7 @@ namespace Presentation.Components
             // _lblVehicle
             // 
             this._lblVehicle.AutoSize = true;
-            this._lblVehicle.Font = Presentation.Constants.UiConstants.Cards.Typography.Info;
+            this._lblVehicle.Font = Presentation.Constants.UiConstants.Cards.Fonts.Info;
             this._lblVehicle.ForeColor = Presentation.Constants.UiConstants.Colors.TextMuted;
             this._lblVehicle.Location = new System.Drawing.Point(150, 30);
             this._lblVehicle.Name = "_lblVehicle";
@@ -118,7 +121,7 @@ namespace Presentation.Components
             // _lblDistance
             // 
             this._lblDistance.AutoSize = true;
-            this._lblDistance.Font = Presentation.Constants.UiConstants.Cards.Typography.Info;
+            this._lblDistance.Font = Presentation.Constants.UiConstants.Cards.Fonts.Info;
             this._lblDistance.ForeColor = Presentation.Constants.UiConstants.Colors.Primary;
             this._lblDistance.Location = new System.Drawing.Point(150, 50);
             this._lblDistance.Name = "_lblDistance";
@@ -129,7 +132,7 @@ namespace Presentation.Components
             // DriverCardControl
             //
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.White;
+            this.BackColor = Presentation.Constants.UiConstants.Colors.SurfaceWhite;
             this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Controls.Add(this._lblDistance);
             this.Controls.Add(this._lblVehicle);

@@ -4,7 +4,7 @@ using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.Entities.Vehicles;
 using Domain.ValueObjects;
-using Domain.Enums;
+ 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -40,7 +40,7 @@ namespace UnitTest
             var location = new Location(new Coordinate(0, 0), new Address("S", "1", "D", "C", "C"));
             var route = new Route(location, location, 1.0, TimeSpan.FromMinutes(1), "R");
             var fare = new Fare(new Money(50000), new Money(5000));
-            var trip = new Trip(Guid.NewGuid(), passengerId, null, route, fare, VehicleType.Car, DateTime.UtcNow, "Searching", false);
+var trip = new Trip(Guid.NewGuid(), passengerId, null, route, fare, "Car", DateTime.UtcNow, "Searching", false);
             await _tripRepository.AddAsync(trip);
 
             var car = new Car(null, "ABC", "T", "V", "R", 4);
@@ -75,7 +75,7 @@ namespace UnitTest
             var location = new Location(new Coordinate(0, 0), new Address("S", "1", "D", "C", "C"));
             var route = new Route(location, location, 1.0, TimeSpan.FromMinutes(1), "R");
             var fare = new Fare(new Money(50000), new Money(5000));
-            var trip = new Trip(Guid.NewGuid(), passengerId, null, route, fare, VehicleType.Car, DateTime.UtcNow, "Searching", false);
+var trip = new Trip(Guid.NewGuid(), passengerId, null, route, fare, "Car", DateTime.UtcNow, "Searching", false);
             await _tripRepository.AddAsync(trip);
 
             var car = new Car(null, "ABC", "T", "V", "R", 4);

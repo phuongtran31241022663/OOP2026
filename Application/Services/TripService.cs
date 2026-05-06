@@ -1,14 +1,15 @@
-﻿﻿﻿﻿using Application.Events;
-using Application.Interfaces;
+﻿using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
-using Domain.Enums;
+
+
 using Domain.Repositories;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+﻿﻿﻿using Application.Events;
 
 namespace Application.Services
 {
@@ -52,8 +53,11 @@ namespace Application.Services
         }
 
         // ----- Commands (async) -----
-        public async Task<Trip> RequestTripAsync(Guid passengerId, Location pickupLocation, Location destinationLocation, VehicleType vehicleType)
+        public async Task<Trip> RequestTripAsync(Guid passengerId, Location pickupLocation, Location destinationLocation, string vehicleType)
         {
+            if (string.IsNullOrEmpty(vehicleType))
+                throw new ArgumentException("Vehicle type is required.", nameof(vehicleType));
+
             Passenger passenger = await _passengerRepository.GetByIdAsync(passengerId);
             if (passenger == null)
             {
@@ -78,8 +82,12 @@ namespace Application.Services
             return trip;
         }
 
-        public async Task<Trip> CreateTripAsync(Guid passengerId, Route route, Fare fare, VehicleType vehicleType)
+
+        public async Task<Trip> CreateTripAsync(Guid passengerId, Route route, Fare fare, string vehicleType)
         {
+            if (string.IsNullOrEmpty(vehicleType))
+                throw new ArgumentException("Vehicle type is required.", nameof(vehicleType));
+
             Trip trip = new Trip(passengerId, route, fare, vehicleType);
             trip.SetSearching();
             await _tripRepository.AddAsync(trip);
@@ -87,6 +95,7 @@ namespace Application.Services
             OnTripStatusChanged(new TripStatusChangedEventArgs(trip.Id, trip.Status, null));
             return trip;
         }
+
 
         public async Task MatchDriverAsync(Guid tripId, Guid driverId)
         {
@@ -121,10 +130,11 @@ namespace Application.Services
                     throw new InvalidOperationException("Không tìm thấy xe của tài xế.");
                 }
 
-                if (vehicle.Type != trip.TripVehicleType)
+                if (!string.Equals(vehicle.TypeName, trip.TripVehicleType, StringComparison.OrdinalIgnoreCase))
                 {
                     throw new InvalidOperationException("Loại xe của tài xế không khớp với yêu cầu chuyến đi.");
                 }
+
 
                 // Kiểm tra ví tài xế có đủ tiền trả hoa hồng không
                 if (driver.Wallet.Amount < trip.TripFare.Commission.Amount)

@@ -12,15 +12,16 @@ namespace Domain.Entities
     /// Chứa các thông tin chung như Tên, Số điện thoại và Mật khẩu đã được hash.
     /// Cung cấp các phương thức để cập nhật thông tin và xác thực mật khẩu.
     /// </remarks>
-    public abstract class User : Entity
-    {
-        #region Fields
+public abstract class User : Entity
+{
+    #region Fields
 
-        private string _name;
-        private string _phone;
-        private string _password;
+    private string _name;
+    private string _phone;
+    private string _password;
 
-        #endregion
+    #endregion
+
 
         #region Properties
 
@@ -157,9 +158,10 @@ namespace Domain.Entities
         /// <returns>Chuỗi chứa Id và Tên người dùng.</returns>
         public virtual string GetInfo()
         {
-            return $"ID: {Id.ToString().Substring(0, 8)} | Tên: {Name}";
+            return $"ID: {Id.ToString().Substring(0, 8)} | Tên: {Name} | Hoạt động";
         }
 
         #endregion
     }
 }
+

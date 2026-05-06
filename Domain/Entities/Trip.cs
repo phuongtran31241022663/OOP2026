@@ -1,4 +1,3 @@
-using Domain.Enums;
 using Domain.Events;
 using Domain.SharedKernel;
 using Domain.States;
@@ -22,7 +21,7 @@ namespace Domain.Entities
         #region Fields
 
         private Guid _passengerId;
-        private VehicleType _tripVehicleType;
+private string _tripVehicleType;
         private Fare _tripFare;
         private Route _tripRoute;
         private DateTime _requestAt;
@@ -111,7 +110,7 @@ namespace Domain.Entities
         /// <summary>
         /// Loại phương tiện được yêu cầu cho chuyến đi.
         /// </summary>
-        public VehicleType TripVehicleType { get => _tripVehicleType; private set => _tripVehicleType = value; }
+public string TripVehicleType { get => _tripVehicleType; private set => _tripVehicleType = value; }
 
         #endregion
 
@@ -178,14 +177,14 @@ namespace Domain.Entities
         /// <param name="vehicleType">Loại phương tiện yêu cầu.</param>
         /// <exception cref="ArgumentException">Ném khi <paramref name="passengerId"/> hoặc <paramref name="vehicleType"/> không hợp lệ.</exception>
         /// <exception cref="ArgumentNullException">Ném khi <paramref name="route"/> hoặc <paramref name="fare"/> là <c>null</c>.</exception>
-        public Trip(Guid passengerId, Route route, Fare fare, VehicleType vehicleType)
+public Trip(Guid passengerId, Route route, Fare fare, string vehicleType)
             : base(Guid.NewGuid())
         {
             if (passengerId == Guid.Empty) throw new ArgumentException("Id hành khách không hợp lệ.", nameof(passengerId));
             _passengerId = passengerId;
             _tripRoute = route ?? throw new ArgumentNullException(nameof(route));
             _tripFare = fare ?? throw new ArgumentNullException(nameof(fare));
-            if (vehicleType == 0) throw new ArgumentException("Loại xe không hợp lệ.", nameof(vehicleType));
+            if (string.IsNullOrEmpty(vehicleType)) throw new ArgumentException("Loại xe không hợp lệ.", nameof(vehicleType));
             _tripVehicleType = vehicleType;
             _requestAt = DateTime.UtcNow;
 
@@ -197,14 +196,14 @@ namespace Domain.Entities
         /// <summary>
         /// Constructor để tái tạo đối tượng chuyến đi từ cơ sở dữ liệu.
         /// </summary>
-        [Newtonsoft.Json.JsonConstructor]
+[Newtonsoft.Json.JsonConstructor]
         public Trip(
             Guid id,
             Guid passengerId,
             Guid? driverId,
             Route tripRoute,
             Fare tripFare,
-            VehicleType tripVehicleType,
+            string tripVehicleType,
             DateTime requestAt,
             string status,
             bool isPaid)

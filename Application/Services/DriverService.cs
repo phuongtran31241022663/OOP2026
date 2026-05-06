@@ -1,10 +1,10 @@
-﻿﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Interfaces;
 using Domain.Entities.Users;
 using Domain.Repositories;
 using Domain.ValueObjects;
+﻿using System;
 
 namespace Application.Services
 {
@@ -61,3 +61,4 @@ namespace Application.Services
         }
     }
 }
+

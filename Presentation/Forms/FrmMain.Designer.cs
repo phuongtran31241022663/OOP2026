@@ -1,3 +1,5 @@
+﻿using Presentation.Constants;
+
 namespace Presentation.Shells
 {
     partial class FrmMain
@@ -34,7 +36,7 @@ namespace Presentation.Shells
             // btnMultiRole
             // 
             this.btnMultiRole.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnMultiRole.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.btnMultiRole.BackColor = Presentation.Constants.UiConstants.Colors.SurfaceLight;
             this.btnMultiRole.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMultiRole.Location = new System.Drawing.Point(1080, 10);
             this.btnMultiRole.Name = "btnMultiRole";
@@ -50,9 +52,9 @@ namespace Presentation.Shells
             this.ClientSize = new System.Drawing.Size(1200, 800);
             this.Controls.Add(this.btnMultiRole);
             this.Controls.Add(this.pnlContent);
-            this.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.Font = Presentation.Constants.UiConstants.Typography.Default;
             this.Name = "FrmMainShell";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;// cái này khai báo chung được nè
+this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen; // cái này khai báo chung được nè
             this.Text = "OOP";
             this.ResumeLayout(false);
             // màu màn hình chính và ucauth đồng bộ, cùng màu là 1 điểm hay
@@ -61,4 +63,9 @@ namespace Presentation.Shells
         #endregion
     }
 }
+
+
+
+
+
 

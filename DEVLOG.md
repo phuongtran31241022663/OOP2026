@@ -88,3 +88,6 @@
 
 - [2026-05-04] [Doc] Đã cấu trúc lại hệ thống tài liệu: PSPEC (nghiệp vụ + limit), TECH_SPEC (kiến trúc), KNOWLEDGE (tri thức), SOURCE_MAP (codebase). Ưu tiên đọc theo thứ tự này giúp Agent nắm context nhanh mà không cần đọc lại toàn bộ code.
 - [2026-05-04] [Agent] Tích hợp Learning Loop: Mỗi task xong phải ghi kết luận/bài học vào DEVLOG để Agent sau kế thừa, tránh lặp lại phân tích tốn token.
+- [2026-05-06] [Doc] Kiểm tra & cập nhật tài liệu theo hướng “code-first”: đối chiếu SOURCE_MAP/TECH_SPEC/Business_and_UI_Guide với contracts & flow trong codebase, giảm drift giữa tài liệu và implementation.
+- [2026-05-06] [UI] Modernize UI/UX: Vehicle card selection, Driver status pills, and Passenger layout polishing.
+

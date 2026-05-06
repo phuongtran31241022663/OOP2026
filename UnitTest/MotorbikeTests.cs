@@ -1,5 +1,4 @@
 using Domain.Entities.Vehicles;
-using Domain.Enums;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 

@@ -1,10 +1,10 @@
-﻿﻿using Application.Interfaces;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.Repositories;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+﻿using Application.Interfaces;
 
 namespace Application.Services
 {
@@ -58,10 +58,11 @@ namespace Application.Services
                 }
 
                 // Kiểm tra loại xe khớp với yêu cầu của chuyến
-                if (vehicle.Type != trip.TripVehicleType)
+                if (string.Equals(vehicle.TypeName, trip.TripVehicleType, StringComparison.OrdinalIgnoreCase) == false)
                 {
                     return false;
                 }
+
 
                 // Kiểm tra ví tài xế có đủ tiền trả hoa hồng không
                 if (driver.Wallet.Amount < trip.TripFare.Commission.Amount)
@@ -87,3 +88,4 @@ namespace Application.Services
         }
     }
 }
+

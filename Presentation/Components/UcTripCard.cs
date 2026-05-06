@@ -1,23 +1,25 @@
-using Domain.ValueObjects;
+﻿using Domain.ValueObjects;
 using Domain.Entities.Users;
 using Domain.Entities;
-// Presentation/Components/TripCard.cs
+using Presentation.Base;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+// Presentation/Components/UcTripCard.cs
 
 namespace Presentation.Components
 {
     /// <summary>
-    /// BaseUserControl hiá»ƒn thá»‹ thÃ´ng tin chuyáº¿n Ä‘i vá»›i style nháº¥t quÃ¡n.
-    /// DÃ¹ng vá»›i FlowLayoutPanel Ä‘á»ƒ hiá»ƒn thá»‹ danh sÃ¡ch chuyáº¿n.
+    /// BaseUserControl hiển thị thông tin chuyến đi với style nhất quán.
+    /// Dùng với FlowLayoutPanel để hiển thị danh sách chuyến.
     /// </summary>
     public partial class UcTripCard : BaseUserControl
     {
         /// <summary>
-        /// Sá»± kiá»‡n khi ngÆ°á»i dÃ¹ng click vÃ o trip card
+        /// Sự kiện khi người dùng click vào trip card
         /// </summary>
         public event Action<UcTripCard> Clicked;
+
 
         /// <summary>
         /// Chuyến đi được hiển thị
@@ -70,7 +72,7 @@ namespace Presentation.Components
 
         private void OnCardClick(object sender, EventArgs e)
         {
-            if (Clicked != null) Clicked(this);
+            Clicked?.Invoke(this);
         }
 
         private void OnMouseEnter(object sender, EventArgs e)

@@ -1,10 +1,11 @@
+using Application.Interfaces;
 using Domain.ValueObjects;
+using Presentation.Constants;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Application.Interfaces;
 
 namespace Presentation.Components
 {
@@ -22,13 +23,13 @@ namespace Presentation.Components
         private bool _pendingSearch = false;
 
         private const int MaxRecentLocations = 10;
+        private Timer _hideTimer;
         public const double CoordinateTolerance = 0.0001;
-
+        // controls mà ở bên .cs là sai rồi
         // UI Controls
         private TextBox _txtSearch;
         private ListBox _lstSuggestions;
         private Panel _pnlSuggestions;
-        private Label _lblPlaceholder;
         private ToolTip _displayTooltip = new ToolTip();
 
         // Properties
@@ -69,54 +70,21 @@ namespace Presentation.Components
 
             // Configure control
             Size = new Size(334, 34);
-            BackColor = Color.White;
-            ForeColor = Color.Black;
+            BackColor = UiConstants.Colors.SurfaceWhite;
+            ForeColor = UiConstants.Colors.TextPrimary;
 
             // Load initial data
             PopulateSuggestions();
         }
 
-
-        private void UpdatePlaceholder()
+        protected override void Dispose(bool disposing)
         {
-            if (SelectedLocation != null)
+            if (disposing)
             {
-                string fullText = FormatLocationForDisplay(SelectedLocation);
-                _lblPlaceholder.Text = fullText;
-                _lblPlaceholder.AutoEllipsis = true;
-                _lblPlaceholder.ForeColor = Color.Black;
-                _displayTooltip.SetToolTip(_lblPlaceholder, fullText);
-                _lblPlaceholder.Visible = true;
-                _txtSearch.Visible = false;
+                _debounceTimer?.Dispose();
+                _hideTimer?.Dispose();
             }
-            else
-            {
-                _lblPlaceholder.Text = SlotLabel == "B" ? "Chọn điểm đến..." : "Chọn điểm đón...";
-                _lblPlaceholder.AutoEllipsis = false;
-                _lblPlaceholder.ForeColor = Color.Gray;
-                _displayTooltip.SetToolTip(_lblPlaceholder, string.Empty);
-                _lblPlaceholder.Visible = true;
-                _txtSearch.Visible = false;
-            }
-        }
-
-        private void LblPlaceholder_Click(object sender, EventArgs e)
-        {
-            _lblPlaceholder.Visible = false;
-            _txtSearch.Visible = true;
-
-            // Reset input without triggering TxtSearch_TextChanged side effects.
-            if (_txtSearch.Text.Length > 0)
-            {
-                _txtSearch.TextChanged -= TxtSearch_TextChanged;
-                _txtSearch.Clear();
-                _txtSearch.TextChanged += TxtSearch_TextChanged;
-            }
-
-            _lastSearchQuery = string.Empty;
-            PopulateSuggestions();
-            _txtSearch.Focus();
-            ShowSuggestionsPanel();
+            base.Dispose(disposing);
         }
 
         private void TxtSearch_Enter(object sender, EventArgs e)
@@ -132,22 +100,26 @@ namespace Presentation.Components
         private void TxtSearch_Leave(object sender, EventArgs e)
         {
             // Delay hide to allow click on listbox
-            var timer = new Timer { Interval = 200 };
-            timer.Tick += (s, args) =>
+            _hideTimer = new Timer { Interval = 200 };
+            _hideTimer.Tick += HideTimer_Tick;
+            _hideTimer.Start();
+        }
+
+        private void HideTimer_Tick(object sender, EventArgs e)
+        {
+            _hideTimer.Stop();
+            _hideTimer.Dispose();
+            _hideTimer = null;
+            
+            // Check if control is disposed or being disposed
+            if (IsDisposed || _lstSuggestions == null || _lstSuggestions.IsDisposed)
+                return;
+            if (!_lstSuggestions.Visible)
+                return;
+            if (!_lstSuggestions.ClientRectangle.Contains(_lstSuggestions.PointToClient(Cursor.Position)))
             {
-                timer.Stop();
-                timer.Dispose();
-                // Check if control is disposed or being disposed
-                if (IsDisposed || _lstSuggestions == null || _lstSuggestions.IsDisposed)
-                    return;
-                if (!_lstSuggestions.Visible)
-                    return;
-                if (!_lstSuggestions.ClientRectangle.Contains(_lstSuggestions.PointToClient(Cursor.Position)))
-                {
-                    HideSuggestionsPanel();
-                }
-            };
-            timer.Start();
+                HideSuggestionsPanel();
+            }
         }
 
         private void ShowSuggestionsPanel()
@@ -191,38 +163,44 @@ namespace Presentation.Components
             {
                 this.Controls.Add(_pnlSuggestions);
             }
-            UpdatePlaceholder();
         }
 
         private void TxtSearch_TextChanged(object sender, EventArgs e)
         {
             // Debounce: hủy timer cũ, tạo timer mới
-            _debounceTimer?.Dispose();
+            if (_debounceTimer != null)
+            {
+                _debounceTimer.Dispose();
+            }
             _pendingSearch = true;
 
-            _debounceTimer = new System.Threading.Timer(_ =>
+            _debounceTimer = new System.Threading.Timer(new System.Threading.TimerCallback(OnDebounceTimerTick), null, DebounceDelayMs, System.Threading.Timeout.Infinite);
+        }
+
+        private void OnDebounceTimerTick(object state)
+        {
+            if (!IsDisposed && _txtSearch != null && !_txtSearch.IsDisposed)
             {
-                if (!IsDisposed && _txtSearch != null && !_txtSearch.IsDisposed)
+                _txtSearch.Invoke(new MethodInvoker(ProcessPendingSearch));
+            }
+        }
+
+        private void ProcessPendingSearch()
+        {
+            if (_pendingSearch)
+            {
+                _pendingSearch = false;
+                if (_txtSearch.Text.Length >= 2)
                 {
-                    _txtSearch.Invoke(new Action(() =>
-                    {
-                        if (_pendingSearch)
-                        {
-                            _pendingSearch = false;
-                            if (_txtSearch.Text.Length >= 2)
-                            {
-                                ShowSuggestionsPanel();
-                                _ = PerformSearch(_txtSearch.Text);
-                            }
-                            else if (string.IsNullOrWhiteSpace(_txtSearch.Text))
-                            {
-                                PopulateSuggestions();
-                                ShowSuggestionsPanel();
-                            }
-                        }
-                    }));
+                    ShowSuggestionsPanel();
+                    _ = PerformSearch(_txtSearch.Text);
                 }
-            }, null, DebounceDelayMs, System.Threading.Timeout.Infinite);
+                else if (string.IsNullOrWhiteSpace(_txtSearch.Text))
+                {
+                    PopulateSuggestions();
+                    ShowSuggestionsPanel();
+                }
+            }
         }
 
         private void TxtSearch_KeyDown(object sender, KeyEventArgs e)
@@ -267,17 +245,15 @@ namespace Presentation.Components
                 // Nếu local không có đủ kết quả (ví dụ < 3), tìm thêm từ MapService
                 if (results.Count < 3 && _mapService != null)
                 {
-                    var remoteResults = await _mapService.SearchLocationAsync(query);
+                    List<Location> remoteResults = await _mapService.SearchLocationAsync(query);
                     if (remoteResults != null)
                     {
-                        foreach (var loc in remoteResults)
+                        foreach (Location loc in remoteResults)
                         {
                             if (loc == null || loc.Coordinate == null) continue;
 
                             // Tránh trùng với kết quả local đã tìm thấy
-                            if (!results.Exists(l =>
-                                Math.Abs(l.Coordinate.Latitude - loc.Coordinate.Latitude) < CoordinateTolerance &&
-                                Math.Abs(l.Coordinate.Longitude - loc.Coordinate.Longitude) < CoordinateTolerance))
+                            if (!ContainsLocation(results, loc))
                             {
                                 results.Add(loc);
                             }
@@ -300,6 +276,20 @@ namespace Presentation.Components
             }
         }
 
+        private bool ContainsLocation(List<Location> list, Location loc)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                Location l = list[i];
+                if (Math.Abs(l.Coordinate.Latitude - loc.Coordinate.Latitude) < CoordinateTolerance &&
+                    Math.Abs(l.Coordinate.Longitude - loc.Coordinate.Longitude) < CoordinateTolerance)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private List<Location> FindLocalMatches(string query)
         {
             string normalizedQuery = query.Trim().ToLowerInvariant();
@@ -308,7 +298,7 @@ namespace Presentation.Components
 
             candidates.AddRange(GetRecentLocations(_currentUserIdentifier));
 
-            foreach (var location in candidates)
+            foreach (Location location in candidates)
             {
                 if (location == null) continue;
 
@@ -321,9 +311,7 @@ namespace Presentation.Components
 
                 if (!isMatch) continue;
 
-                bool isDuplicate = matches.Exists(l =>
-                    Math.Abs(l.Coordinate.Latitude - location.Coordinate.Latitude) < CoordinateTolerance &&
-                    Math.Abs(l.Coordinate.Longitude - location.Coordinate.Longitude) < CoordinateTolerance);
+                bool isDuplicate = ContainsLocation(matches, location);
 
                 if (!isDuplicate)
                 {
@@ -338,7 +326,7 @@ namespace Presentation.Components
         {
             _lstSuggestions.Items.Clear();
 
-            foreach (var loc in results)
+            foreach (Location loc in results)
             {
                 _lstSuggestions.Items.Add(new DropdownItem { IsHeader = false, Location = loc });
             }
@@ -350,10 +338,10 @@ namespace Presentation.Components
         {
             _lstSuggestions.Items.Clear();
 
-            var recentLocations = GetRecentLocations(_currentUserIdentifier);
+            List<Location> recentLocations = GetRecentLocations(_currentUserIdentifier);
             if (recentLocations.Count > 0)
             {
-                foreach (var location in recentLocations)
+                foreach (Location location in recentLocations)
                     _lstSuggestions.Items.Add(new DropdownItem { IsHeader = false, Location = location });
             }
         }
@@ -402,10 +390,10 @@ namespace Presentation.Components
             if (location.Address == null)
                 return $"{location.Coordinate.Latitude:F5}, {location.Coordinate.Longitude:F5}";
 
-            var addr = location.Address;
+            Address addr = location.Address;
 
             // Hiển thị Name + Street + District để người dùng nhận ra địa điểm
-            var parts = new System.Collections.Generic.List<string>();
+            List<string> parts = new List<string>();
             if (!string.IsNullOrWhiteSpace(addr.Name) && addr.Name != "Unknown")
                 parts.Add(addr.Name);
             if (!string.IsNullOrWhiteSpace(addr.Street))   parts.Add(addr.Street);
@@ -428,7 +416,8 @@ namespace Presentation.Components
             if (string.IsNullOrWhiteSpace(userIdentifier))
                 return new List<Location>();
 
-            if (_recentByUser.TryGetValue(userIdentifier, out var locations))
+            List<Location> locations;
+            if (_recentByUser.TryGetValue(userIdentifier, out locations))
                 return locations;
 
             return new List<Location>();
@@ -438,16 +427,23 @@ namespace Presentation.Components
         {
             if (string.IsNullOrWhiteSpace(_currentUserIdentifier) || location == null) return;
 
-            if (!_recentByUser.TryGetValue(_currentUserIdentifier, out var list))
+            List<Location> list;
+            if (!_recentByUser.TryGetValue(_currentUserIdentifier, out list))
             {
                 list = new List<Location>();
                 _recentByUser[_currentUserIdentifier] = list;
             }
 
             // Remove duplicates by coordinates
-            list.RemoveAll(l =>
-                Math.Abs(l.Coordinate.Latitude - location.Coordinate.Latitude) < CoordinateTolerance &&
-                Math.Abs(l.Coordinate.Longitude - location.Coordinate.Longitude) < CoordinateTolerance);
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                Location l = list[i];
+                if (Math.Abs(l.Coordinate.Latitude - location.Coordinate.Latitude) < CoordinateTolerance &&
+                    Math.Abs(l.Coordinate.Longitude - location.Coordinate.Longitude) < CoordinateTolerance)
+                {
+                    list.RemoveAt(i);
+                }
+            }
 
             list.Insert(0, location);
 
@@ -461,7 +457,6 @@ namespace Presentation.Components
         public void SetSelectedLocation(Location location)
         {
             SelectedLocation = location;
-            UpdatePlaceholder();
             _pnlSuggestions.Visible = false;
         }
 
@@ -486,7 +481,7 @@ namespace Presentation.Components
                     return HeaderText;
                 else if (Location != null)
                 {
-                    var addr = Location.Address;
+                    Address addr = Location.Address;
                     if (addr != null)
                     {
                         // Hiển thị Name nếu có, kèm Street + District

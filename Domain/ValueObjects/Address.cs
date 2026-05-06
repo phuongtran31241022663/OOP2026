@@ -1,6 +1,6 @@
-﻿﻿using System;
-using Domain.SharedKernel;
+﻿using Domain.SharedKernel;
 using System.Collections.Generic;
+﻿using System;
 
 
 namespace Domain.ValueObjects
@@ -9,7 +9,7 @@ namespace Domain.ValueObjects
     {
         #region Backing Fields
         private readonly string _osm_Value;
-        private readonly string _houseNumber; // có thể null nếu không có số nhà
+        private readonly string _houseNumber; 
         private readonly string _name;
         private readonly string _street;
         private readonly string _locality;
@@ -70,3 +70,4 @@ namespace Domain.ValueObjects
         }
     }
 }
+

@@ -21,7 +21,7 @@ namespace UnitTest.Mocks
 
         public event EventHandler<TripMatchedEvent> TripMatched;
 
-        public Task<Driver> FindNearbyDriverAsync(Location passengerLocation, Domain.Enums.VehicleType vehicleType)
+        public Task<Driver> FindNearbyDriverAsync(Location passengerLocation, string vehicleType)
         {
             _matchCalled = true;
             return Task.FromResult<Driver>(null);

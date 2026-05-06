@@ -1,8 +1,5 @@
-namespace Presentation.UserControls
+﻿namespace Presentation.UserControls
 {
-    using Presentation.Constants;
-    using System.Windows.Forms;
-
     partial class UcProfile
     {
         private System.ComponentModel.IContainer components = null;
@@ -23,13 +20,6 @@ namespace Presentation.UserControls
         private System.Windows.Forms.Label lblTopUpAmount;
         private System.Windows.Forms.TextBox txtTopUpAmount;
         private System.Windows.Forms.Button btnTopUp;
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-                components.Dispose();
-            base.Dispose(disposing);
-        }
 
         private void InitializeComponent()
         {
@@ -218,4 +208,9 @@ namespace Presentation.UserControls
         }
     }
 }
+
+
+
+
+
 

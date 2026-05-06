@@ -1,5 +1,4 @@
 using System;
-using Domain.Enums;
 using Domain.SharedKernel;
 
 namespace Domain.Entities
@@ -96,9 +95,9 @@ namespace Domain.Entities
         }
 
         /// <summary>
-        /// Loại phương tiện (ví dụ: Car, Motorbike).
+        /// Tên loại phương tiện (ví dụ: "Car", "Motorbike").
         /// </summary>
-        public VehicleType Type { get; protected set; }
+        public abstract string TypeName { get; }
 
         #endregion
 

@@ -104,12 +104,6 @@
     <Compile Include="Components\UcDriverCard.Designer.cs">
       <DependentUpon>UcDriverCard.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\UcFareVehicleSelector.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Components\UcFareVehicleSelector.Designer.cs">
-      <DependentUpon>UcFareVehicleSelector.cs</DependentUpon>
-    </Compile>
     <Compile Include="Components\UcLocationPicker.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -133,6 +127,12 @@
     </Compile>
     <Compile Include="Components\UcTripStatus.Designer.cs">
       <DependentUpon>UcTripStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Components\UcVehicleFareSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Components\UcVehicleFareSelector.Designer.cs">
+      <DependentUpon>UcVehicleFareSelector.cs</DependentUpon>
     </Compile>
     <Compile Include="Constants\UiConstants.cs" />
     <Compile Include="Program.cs" />
@@ -173,11 +173,11 @@
     <Compile Include="UserControls\UcAdmin.Designer.cs">
       <DependentUpon>UcAdmin.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\UcRating.cs">
+    <Compile Include="Components\UcReview.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Components\UcRating.Designer.cs">
-      <DependentUpon>UcRating.cs</DependentUpon>
+    <Compile Include="Components\UcReview.Designer.cs">
+      <DependentUpon>UcReview.cs</DependentUpon>
     </Compile>
     <Compile Include="Components\UcProfile.cs">
       <SubType>UserControl</SubType>
@@ -191,15 +191,6 @@
     <Compile Include="Components\UcTripDetail.Designer.cs">
       <DependentUpon>UcTripDetail.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Base\BaseForm.resx">
-      <DependentUpon>BaseForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Components\UcMap.resx">
-      <DependentUpon>UcMap.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Components\UcTripDetail.resx">
-      <DependentUpon>UcTripDetail.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

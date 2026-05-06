@@ -1,9 +1,9 @@
-﻿﻿using Domain.Entities; 
-using Domain.Entities.Users;
+﻿using Domain.Entities.Users;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+﻿using Domain.Entities; 
 
 namespace Application.Interfaces
 {
@@ -22,3 +22,4 @@ namespace Application.Interfaces
         Task UpdateUserAsync(User user);
     }
 }
+

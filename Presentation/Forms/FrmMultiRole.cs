@@ -1,6 +1,8 @@
 using Application.Interfaces;
 using Domain.Entities.Users;
 using Domain.Repositories;
+using Presentation.Base;
+using Presentation.Constants;
 using Presentation.UserControls;
 using System;
 using System.Drawing;
@@ -58,12 +60,12 @@ namespace Presentation.Shells
 
         private void SetupForm()
         {
-            Text = "RideGo - Multi-Role View";
+            Text = "Multi-Role View";
             Size = new Size(1400, 800);
             MinimumSize = new Size(1200, 600);
             StartPosition = FormStartPosition.CenterScreen;
-            BackColor = Color.White;
-            Font = new Font("Segoe UI", 9.5f);
+            BackColor = UiConstants.Colors.SurfaceWhite;
+            Font = UiConstants.Typography.Default;
         }
 
         private void InitializeControls()

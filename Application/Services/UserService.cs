@@ -20,35 +20,45 @@ namespace Application.Services
             _passengerRepository = passengerRepository;
         }
 
-        public async Task<User> LoginAsync(string phone, string password)
+public async Task<User> LoginAsync(string phone, string password)
         {
+            // Check Driver
             Driver driver = await _driverRepository.GetByPhoneAsync(phone);
             if (driver != null)
             {
-                // Kiểm tra null _password trong driver
                 if (string.IsNullOrEmpty(driver.Password))
                     throw new UnauthorizedAccessException("Lỗi dữ liệu: tài xế không có mật khẩu. Vui lòng liên hệ admin.");
-
                 if (driver.VerifyPassword(password))
                     return driver;
-                else
-                    throw new UnauthorizedAccessException("Sai mật khẩu. (Tài xế)");
+                throw new UnauthorizedAccessException("Sai mật khẩu.");
             }
 
+            // Check Passenger
             Passenger passenger = await _passengerRepository.GetByPhoneAsync(phone);
             if (passenger != null)
             {
                 if (string.IsNullOrEmpty(passenger.Password))
                     throw new UnauthorizedAccessException("Lỗi dữ liệu: hành khách không có mật khẩu. Vui lòng liên hệ admin.");
-
                 if (passenger.VerifyPassword(password))
                     return passenger;
-                else
-                    throw new UnauthorizedAccessException("Sai mật khẩu. (Hành khách)");
+                throw new UnauthorizedAccessException("Sai mật khẩu.");
+            }
+
+            // Admin from users.json (UserRepository)
+            var userRepo = new Infrastructure.Repositories.UserRepository();
+            User admin = await userRepo.GetByPhoneAsync(phone);
+            if (admin != null)
+            {
+                if (string.IsNullOrEmpty(admin.Password))
+                    throw new UnauthorizedAccessException("Lỗi dữ liệu admin.");
+                if (admin.VerifyPassword(password))
+                    return admin;
+                throw new UnauthorizedAccessException("Sai mật khẩu.");
             }
 
             throw new InvalidOperationException("Số điện thoại chưa được đăng ký.");
         }
+
 
         public async Task RegisterDriverAsync(string name, string phone, string password,
             string licenseNumber, Guid vehicleId, Location initialPosition)

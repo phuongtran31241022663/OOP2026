@@ -1,6 +1,8 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Entities.Users;
+using Presentation.Base;
+using Presentation.Constants;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -12,6 +14,7 @@ namespace Presentation.UserControls
         private readonly Driver _driver;
         private readonly ITripService _tripService;
         private readonly IUserService _userService;
+
         private readonly ISimulationService _simulationService;
         private readonly IFareService _fareService;
         private readonly IMatchingService _matchingService;
@@ -42,19 +45,25 @@ namespace Presentation.UserControls
             lblIdle.Text = "Đang rảnh, chờ yêu cầu…";
             lblIdle.Dock = DockStyle.Fill;
             lblIdle.TextAlign = ContentAlignment.MiddleCenter;
-            lblIdle.Font = new Font("Segoe UI", 12F);
-            lblIdle.ForeColor = Color.Gray;
+            lblIdle.Font = UiConstants.Typography.Header;
+            lblIdle.ForeColor = UiConstants.Colors.TextMuted;
             pnlNoTrip.Controls.Add(lblIdle);
             pnlNoTrip.Dock = DockStyle.Fill;
 
-            var btnRefresh = new Button
+            // Fix [High 4]: Avoid docking conflict by using Anchor for dgvRequests
+            dgvRequests.Dock = DockStyle.None;
+            dgvRequests.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dgvRequests.Location = new Point(0, 75);
+            dgvRequests.Size = new Size(pnlRequests.Width, pnlRequests.Height - 110);
+
+            Button btnRefresh = new Button
             {
                 Text = "Làm mới",
-                Dock = DockStyle.Top,
-                BackColor = Color.FromArgb(33, 150, 243),
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                Height = 40,
+                Location = new Point(8, 35),
+                Size = UiConstants.ButtonSizes.Default,
+                BackColor = UiConstants.Colors.Info,
+                ForeColor = UiConstants.Colors.TextOnKey,
+                Font = UiConstants.Typography.Default,
                 FlatStyle = FlatStyle.Flat,
             };
             btnRefresh.FlatAppearance.BorderSize = 0;
@@ -69,7 +78,8 @@ namespace Presentation.UserControls
 
         private void SetupEvents(Button btnRefresh)
         {
-            btnToggleStatus.Click += (s, e) => ToggleActive();
+            // Fix [Medium 2]: Register event directly
+            btnToggleStatus.Click += ToggleActive;
             btnProfile.Click += (s, e) => RequestShowProfile?.Invoke(this, _driver);
             btnLogout.Click += (s, e) => RequestLogout?.Invoke(this, e);
 
@@ -92,16 +102,18 @@ namespace Presentation.UserControls
         {
             if (_driver.IsOffline())
             {
-                dgvRequests.DataSource = null;
+                // Fix [Critical 1]: Use Rows.Clear() for manual rows
+                dgvRequests.Rows.Clear();
                 return;
             }
 
             IsLoading = true;
             try
             {
-                var pendingTrips = await _tripService.GetPendingTripsAsync();
+                // Fix [High 3]: Explicit type instead of var
+                System.Collections.Generic.List<Trip> pendingTrips = await _tripService.GetPendingTripsAsync();
                 dgvRequests.Rows.Clear();
-                foreach (var trip in pendingTrips)
+                foreach (Trip trip in pendingTrips)
                 {
                     dgvRequests.Rows.Add(
                         trip.Id,
@@ -140,14 +152,34 @@ namespace Presentation.UserControls
             if (_driver == null) return;
 
             lblDriverName.Text = _driver.Name;
-            lblWallet.Text = "Ví: " + (_driver.Wallet?.Amount.ToString("N0") ?? "0") + "đ";
-            lblRating.Text = "Sao: " + _driver.AverageRating.ToString("F1") + " *";
+            
+            // Modernize labels into pills/cards with icons
+            lblWallet.Text = $"💰 {_driver.Wallet?.Amount.ToString("N0") ?? "0"}đ";
+            lblWallet.BackColor = Color.FromArgb(232, 245, 233); // Light green
+            lblWallet.ForeColor = Color.FromArgb(46, 125, 50);
+            lblWallet.Padding = new Padding(8, 4, 8, 4);
 
-            btnToggleStatus.Text = _driver.IsOffline() ? "Bắt đầu hoạt động" : "Tắt hoạt động";
-            btnToggleStatus.BackColor = _driver.IsOffline() ? Color.FromArgb(0, 150, 136) : Color.FromArgb(211, 47, 47);
+            lblRating.Text = $"⭐ {_driver.AverageRating.ToString("F1")}";
+            lblRating.BackColor = Color.FromArgb(255, 248, 225); // Light amber
+            lblRating.ForeColor = Color.FromArgb(255, 143, 0);
+            lblRating.Padding = new Padding(8, 4, 8, 4);
+
+            btnToggleStatus.Text = _driver.IsOffline() ? "Bắt đầu hoạt động" : "Nghỉ ngơi";
+            btnToggleStatus.BackColor = _driver.IsOffline() ? Presentation.Constants.UiConstants.Colors.Primary : Presentation.Constants.UiConstants.Colors.Danger;
+            
+            // Style the grid if it's initialized
+            if (dgvRequests != null)
+            {
+                dgvRequests.BackgroundColor = Color.White;
+                dgvRequests.GridColor = Presentation.Constants.UiConstants.Colors.BorderSubtle;
+                dgvRequests.RowTemplate.Height = 40;
+                dgvRequests.DefaultCellStyle.SelectionBackColor = Color.FromArgb(224, 242, 241);
+                dgvRequests.DefaultCellStyle.SelectionForeColor = Color.Black;
+            }
         }
 
-        public async void ToggleActive()
+        // Fix [Medium 2]: Changed signature to private async void with event params
+        private async void ToggleActive(object sender, EventArgs e)
         {
             if (_driver == null) return;
 

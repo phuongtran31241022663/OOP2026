@@ -34,6 +34,8 @@ namespace Presentation
                 IReviewService reviewService = services.ReviewService;
                 IMapService mapService = services.MapService;
                 Domain.Repositories.IVehicleRepository vehicleRepository = services.VehicleRepository;
+                Infrastructure.Repositories.DriverRepository driverRepository = new Infrastructure.Repositories.DriverRepository();
+                Infrastructure.Repositories.PassengerRepository passengerRepository = new Infrastructure.Repositories.PassengerRepository();
 
                 // Start simulation service for auto-matching
                 simulationService.StartSimulation();
@@ -47,7 +49,9 @@ namespace Presentation
                     adminService,
                     matchingService,
                     reviewService,
-                    vehicleRepository);
+                    vehicleRepository,
+                    driverRepository,
+                    passengerRepository);
                 System.Windows.Forms.Application.Run(shell);
             }
             catch (InvalidOperationException ex)
@@ -92,8 +96,8 @@ namespace Presentation
             if (e.Exception is InvalidOperationException)
             {
                 MessageBox.Show(
-                    "Thao tac hien tai khong hop le. Vui long thu lai.",
-                    "Loi thao tac",
+                    "Thao tác hiện tại không hợp lệ. Vui lòng thử lại.",
+                    "Lỗi thao tác",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
                 return;
@@ -102,16 +106,16 @@ namespace Presentation
             if (e.Exception is FormatException)
             {
                 MessageBox.Show(
-                    "Du lieu nhap vao khong dung dinh dang. Vui long kiem tra lai.",
-                    "Loi dinh dang",
+                    "Dữ liệu nhập vào không đúng định dạng. Vui lòng kiểm tra lại.",
+                    "Lỗi định dạng",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
                 return;
             }
 
             MessageBox.Show(
-                "Ung dung gap loi khong mong muon tren giao dien.\nChi tiet: " + e.Exception.Message,
-                "Loi he thong",
+                "Ứng dụng gặp lỗi không mong muốn trên giao diện.\nChi tiết: " + e.Exception.Message,
+                "Lỗi hệ thống",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
@@ -119,11 +123,11 @@ namespace Presentation
         private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = e?.ExceptionObject as Exception;
-            string detail = ex != null ? ex.Message : "Khong xac dinh duoc chi tiet loi.";
+            string detail = ex != null ? ex.Message : "Không xác định được chi tiết lỗi.";
 
             MessageBox.Show(
-                "Ung dung vua gap loi nghiem trong.\nChi tiet: " + detail,
-                "Loi nghiem trong",
+                "Ứng dụng vừa gặp lỗi nghiêm trọng.\nChi tiết: " + detail,
+                "Lỗi nghiêm trọng",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
@@ -137,8 +141,8 @@ namespace Presentation
             }
 
             MessageBox.Show(
-                "Tac vu nen gap loi.\nChi tiet: " + ex.GetBaseException().Message,
-                "Loi tac vu nen",
+                "Tác vụ nền gặp lỗi.\nChi tiết: " + ex.GetBaseException().Message,
+                "Lỗi tác vụ nền",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
 

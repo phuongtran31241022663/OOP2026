@@ -57,5 +57,20 @@ namespace UnitTest.Mocks
         {
             _route = route;
         }
+
+        public Task<List<Location>> GetPOIsAsync(double minLat, double minLon, double maxLat, double maxLon)
+        {
+            return Task.FromResult(new List<Location>());
+        }
+
+        public Task<Location> GetIpLocationAsync()
+        {
+            return Task.FromResult<Location>(null);
+        }
+
+        public Task<Location> GeocodeNominatimAsync(string query)
+        {
+            return Task.FromResult<Location>(null);
+        }
     }
 }

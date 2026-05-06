@@ -17,7 +17,7 @@ namespace Domain.Entities
         private readonly Guid _driverId;
         private readonly Guid _passengerId;
         private readonly Guid _tripId;
-        private int _rating;
+        private int _star;
         private string _comment;
         private readonly DateTime _createdAt;
 
@@ -44,15 +44,15 @@ namespace Domain.Entities
         /// Số sao đánh giá (từ 1 đến 5).
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Ném ra khi số sao nằm ngoài khoảng [1, 5].</exception>
-        public int Rating
+        public int Star
         {
-            get => _rating;
+            get => _star;
             private set
             {
                 if (value < 1 || value > 5)
-                    throw new ArgumentOutOfRangeException(nameof(Rating), "Đánh giá phải từ 1 đến 5.");
+                    throw new ArgumentOutOfRangeException(nameof(Star), "Đánh giá phải từ 1 đến 5.");
 
-                _rating = value;
+                _star = value;
             }
         }
 
@@ -83,7 +83,7 @@ namespace Domain.Entities
         /// <param name="rating">Số sao đánh giá (1-5).</param>
         /// <param name="comment">Nội dung bình luận.</param>
         /// <exception cref="ArgumentException">Ném ra khi một trong các ID không hợp lệ.</exception>
-        public Review(Guid driverId, Guid passengerId, Guid tripId, int rating, string comment) : base(Guid.NewGuid())
+        public Review(Guid driverId, Guid passengerId, Guid tripId, int star, string comment) : base(Guid.NewGuid())
         {
             if (driverId == Guid.Empty)
                 throw new ArgumentException("Id tài xế không hợp lệ.", nameof(driverId));
@@ -95,10 +95,10 @@ namespace Domain.Entities
             _driverId = driverId;
             _passengerId = passengerId;
             _tripId = tripId;
-            Rating = rating;
+            Star = star;
             Comment = comment;
             _createdAt = DateTime.UtcNow;
-            AddEvent(new ReviewCreatedEvent(Id, _driverId, _passengerId, Rating, Comment));
+            AddEvent(new ReviewCreatedEvent(Id, _driverId, _passengerId, Star, Comment));
         }
 
         #endregion
@@ -110,9 +110,9 @@ namespace Domain.Entities
         /// </summary>
         /// <param name="rating">Số sao đánh giá mới (1-5).</param>
         /// <param name="comment">Nội dung bình luận mới.</param>
-        public void UpdateReview(int rating, string comment)
+        public void UpdateReview(int star, string comment)
         {
-            Rating = rating;
+            Star = star;
             Comment = comment;
         }
 

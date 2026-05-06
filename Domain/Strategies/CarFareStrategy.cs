@@ -4,10 +4,14 @@ using System;
 
 namespace Domain.Strategies
 {
-    /// <summary>
-    /// Concrete strategy for car fare calculation.
-    /// </summary>
-    public class CarFareStrategy : IFareCalculationStrategy
+/// <summary>
+/// Concrete strategy for car fare calculation.
+/// </summary>
+/// <remarks>
+/// Thread-safe: Stateless class with readonly FareRule dependency. Pure delegation.
+/// Supports concurrent calls from multiple threads.
+/// </remarks>
+public class CarFareStrategy : IFareCalculationStrategy
     {
         private readonly FareRule _fareRule;
 
@@ -16,6 +20,7 @@ namespace Domain.Strategies
             _fareRule = fareRule ?? throw new ArgumentNullException(nameof(fareRule));
         }
 
+[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public Fare CalculateFare(double distanceKm)
         {
             return _fareRule.CalculateFare(distanceKm);

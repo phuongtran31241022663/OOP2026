@@ -1,28 +1,25 @@
-namespace Presentation.UserControls
+﻿
+
+
+
+
+
+namespace Presentation.Components
 {
     partial class UcTripDetail
     {
         private System.ComponentModel.IContainer components = null;
 
         private System.Windows.Forms.TableLayoutPanel tableLayout;
-        private System.Windows.Forms.Label lblTripId;
-        private System.Windows.Forms.Label lblPickup;
-        private System.Windows.Forms.Label lblDestination;
-        private System.Windows.Forms.Label lblStatus;
+protected System.Windows.Forms.Label lblTripId;
+protected System.Windows.Forms.Label lblPickup;
+protected System.Windows.Forms.Label lblDestination;
+protected System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Label lblVehicleType;
         private System.Windows.Forms.Label lblFare;
         private System.Windows.Forms.Label lblDriverName;
         private System.Windows.Forms.Label lblPassengerName;
         private System.Windows.Forms.Label lblRequestTime;
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
 
         private void InitializeComponent()
         {
@@ -42,7 +39,7 @@ namespace Presentation.UserControls
             // tableLayout
             // 
             this.tableLayout.ColumnCount = 1;
-            this.tableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayout.Controls.Add(this.lblTripId, 0, 0);
             this.tableLayout.Controls.Add(this.lblStatus, 0, 1);
             this.tableLayout.Controls.Add(this.lblPickup, 0, 2);
@@ -145,3 +142,8 @@ namespace Presentation.UserControls
         }
     }
 }
+
+
+
+
+

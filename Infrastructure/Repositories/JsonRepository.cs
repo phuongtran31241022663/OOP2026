@@ -1,5 +1,4 @@
-﻿﻿﻿﻿﻿// Infrastructure/Repositories/JsonRepository.cs
-using Domain.Repositories;
+﻿using Domain.Repositories;
 using Domain.SharedKernel;
 using Newtonsoft.Json;
 using System;
@@ -7,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+﻿﻿﻿﻿// Infrastructure/Repositories/JsonRepository.cs
 
 namespace Infrastructure.Repositories
 {
@@ -231,3 +231,4 @@ namespace Infrastructure.Repositories
         }
     }
 }
+

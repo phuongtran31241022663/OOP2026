@@ -1,12 +1,11 @@
-﻿using Domain.Enums;
-using Domain.Entities;
+﻿using Domain.Entities;
 using System.Threading.Tasks;
 
 namespace Domain.Repositories
 {
     public interface IFareRuleRepository : IRepository<FareRule>
     {
-        Task<FareRule> GetByVehicleTypeAsync(VehicleType vehicleType);
+        Task<FareRule> GetByVehicleTypeAsync(string vehicleType);
         Task EnsureSeededAsync();
     }
 }

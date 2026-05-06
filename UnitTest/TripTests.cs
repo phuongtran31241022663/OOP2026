@@ -1,9 +1,10 @@
-using Domain.Entities;
-using Domain.Enums;
+﻿using Domain.Entities;
 using Domain.States;
 using Domain.ValueObjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+
+
 
 namespace UnitTest
 {
@@ -19,7 +20,8 @@ namespace UnitTest
             Guid passengerId = Guid.NewGuid();
             Route route = CreateValidRoute();
             Fare fare = new Fare(new Money(50000m), new Money(7500m));
-            VehicleType vehicleType = VehicleType.Car;
+            string vehicleType = "Car";
+
 
             // Act
             Trip trip = new Trip(passengerId, route, fare, vehicleType);
@@ -587,3 +589,4 @@ namespace UnitTest
         #endregion
     }
 }
+

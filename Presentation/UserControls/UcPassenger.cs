@@ -2,25 +2,24 @@ using Application.Interfaces;
 using Application.Events;
 using Domain.Entities;
 using Domain.Entities.Users;
-using Domain.Enums;
 using Domain.ValueObjects;
 using Presentation.Components;
 using Presentation.Constants;
-using Presentation.Shells;
+using Presentation.UserControls;
 using System;
-using System.Drawing;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Presentation;
+
+using Presentation.Base;
 
 namespace Presentation.UserControls
 {
-    // nên thêm panel hay gì đó của đặt xe là 1 thằng trong menu, mà chữ menu không nên nằm chung ngang hàng dọc với từng chức năng, khó phân biệt
     public partial class UcPassenger : BaseUserControl
     {
         private readonly Passenger _passenger;
+
         private readonly ITripService _tripService;
         private readonly IUserService _userService;
         private readonly IMapService _mapService;
@@ -42,8 +41,10 @@ namespace Presentation.UserControls
 
         // Integrated unused controls
         private FlowLayoutPanel _flowHistory;
-        private UcRating _ucRating;
-        private List<UcTripCard> _tripCards = new List<UcTripCard>();
+        private UcReview _ucRating;
+private List<UcTripCard> _tripCards = new List<UcTripCard>();
+        private Presentation.Components.UcVehicleFareSelector vehicleFareSelector;
+        private string _selectedVehicleType;
 
         private void ShowStage(string status)
         {
@@ -53,22 +54,32 @@ namespace Presentation.UserControls
             pnlPayment.Visible = false;
             pnlHistory.Visible = false;
 
+            Panel activePanel = null;
+
             if (status == null || status == "Idle" || status == "Timeout" || status == "Cancelled")
             {
                 pnlBooking.Visible = true;
                 lblStatus.Text = "Sẵn sàng đặt xe";
+                lblStatus.ForeColor = UiConstants.Colors.TextMuted;
+                activePanel = pnlBooking;
                 _currentTrip = null;
+                ShowStageIdle();
             }
+
             else if (status == "Searching")
             {
                 pnlSearching.Visible = true;
                 lblStatus.Text = "Đang tìm tài xế…";
+                lblStatus.ForeColor = UiConstants.Colors.Warning;
+                activePanel = pnlSearching;
             }
             else if (status == "Matched" || status == "Arrived" || status == "Started")
             {
                 pnlTracking.Visible = true;
                 btnCancelTrip.Enabled = (status != "Started");
                 lblStatus.Text = "Trạng thái: " + status;
+                lblStatus.ForeColor = UiConstants.Colors.Info;
+                activePanel = pnlTracking;
             }
             else if (status == "Completed")
             {
@@ -76,6 +87,13 @@ namespace Presentation.UserControls
                 if (_currentTrip != null && _currentTrip.TripFare != null)
                     lblTotalAmount.Text = _currentTrip.TripFare.TotalAmount.Amount.ToString("N0") + "đ";
                 lblStatus.Text = "Chuyến đi đã hoàn thành";
+                lblStatus.ForeColor = UiConstants.Colors.Success;
+                activePanel = pnlPayment;
+            }
+
+            if (activePanel != null)
+            {
+                activePanel.BringToFront();
             }
         }
 
@@ -99,14 +117,32 @@ namespace Presentation.UserControls
             _reviewService = reviewService;
             InitializeComponent();
 
+            // Style headers
+            lblPickup.Font = Presentation.Constants.UiConstants.Typography.Small;
+            lblPickup.ForeColor = Presentation.Constants.UiConstants.Colors.TextMuted;
+            lblDestination.Font = Presentation.Constants.UiConstants.Typography.Small;
+            lblDestination.ForeColor = Presentation.Constants.UiConstants.Colors.TextMuted;
+
+            vehicleFareSelector = new UcVehicleFareSelector();
+            pnlBooking.Controls.Add(vehicleFareSelector);
+            vehicleFareSelector.Dock = DockStyle.Top;
+            vehicleFareSelector.Height = 300;
+            vehicleFareSelector.BringToFront(); // Ensure cards are visible
+            vehicleFareSelector.SetServices(_mapService, _fareService);
+            vehicleFareSelector.VehicleSelected += OnVehicleSelected;
+            vehicleFareSelector.VehicleTypeChanged += (type) => OnVehicleSelected(null, type);
+
             // Initialize integrated unused controls
             InitializeIntegratedControls();
-            
+
             // Populate location pickers
             pickupPicker.SetMapService(_mapService);
             destinationPicker.SetMapService(_mapService);
             pickupPicker.PopulateDropdown(_passenger.Id.ToString());
             destinationPicker.PopulateDropdown(_passenger.Id.ToString());
+
+            // Initialize map control with map service for POI and IP location
+            mapControl.SetMapService(_mapService);
 
             lblPassengerName.Text = "Xin chào, " + _passenger.Name;
 
@@ -122,8 +158,15 @@ namespace Presentation.UserControls
             // Subscribe map click for location selection
             mapControl.MapClicked += OnMapClicked;
 
-            // Subscribe vehicle type change for fare estimation
-            cmbVehicleType.SelectedIndexChanged += OnVehicleTypeChanged;
+            // Subscribe map drag events for interactive UI
+            mapControl.MapDragStarted += (s, e) => {
+                if (pnlBooking.Visible) pnlBooking.Hide();
+            };
+            mapControl.MapDragEnded += (s, e) => {
+                if (!pnlBooking.Visible && _currentTrip == null) pnlBooking.Show();
+            };
+
+
 
             btnBook.Click += btnBook_Click;
             btnHistory.Click += btnHistory_Click;
@@ -132,15 +175,20 @@ namespace Presentation.UserControls
             btnMenu.Click += btnMenu_Click;
             btnRateDriver.Click += (s, e) => ShowRatingForm();
 
+            // Style Sidebar Buttons
+            StyleSidebarButtons();
+
             _tripService.TripStatusChanged += OnTripStatusChanged;
-            Disposed += (s, e) =>
-            {
-                _tripService.TripStatusChanged -= OnTripStatusChanged;
-                pickupPicker.LocationSelected -= OnLocationSelected;
-                destinationPicker.LocationSelected -= OnLocationSelected;
-                cmbVehicleType.SelectedIndexChanged -= OnVehicleTypeChanged;
-                mapControl.MapClicked -= OnMapClicked;
-            };
+                Disposed += (s, e) =>
+                {
+                    _tripService.TripStatusChanged -= OnTripStatusChanged;
+                    pickupPicker.LocationSelected -= OnLocationSelected;
+                    destinationPicker.LocationSelected -= OnLocationSelected;
+                    if (vehicleFareSelector != null)
+                        vehicleFareSelector.VehicleSelected -= OnVehicleSelected;
+                    mapControl.MapClicked -= OnMapClicked;
+                };
+
 
             // Fix Bug 2: Collapse sidebar ngay khi khởi tạo
             _isSidebarExpanded = true;
@@ -184,7 +232,8 @@ namespace Presentation.UserControls
             if (location == null) return;
 
             // 1. Xác thực: Kiểm tra điểm đón/đến có trùng nhau không
-            var otherLocation = isPickup ? destinationPicker.SelectedLocation : pickupPicker.SelectedLocation;
+            // Fix [High 3]: Explicit type instead of var
+            Location otherLocation = isPickup ? destinationPicker.SelectedLocation : pickupPicker.SelectedLocation;
             if (otherLocation != null && IsSameLocation(location, otherLocation))
             {
                 lblStatus.Text = "Điểm đón và đến không được trùng nhau!";
@@ -242,7 +291,14 @@ namespace Presentation.UserControls
             if (location == null) return;
 
             // Xóa nếu đã tồn tại (đưa lên đầu)
-            _recentLocations.RemoveAll(l => IsSameLocation(l, location));
+            // Fix [Medium 1]: Replace lambda RemoveAll with manual loop
+            for (int i = _recentLocations.Count - 1; i >= 0; i--)
+            {
+                if (IsSameLocation(_recentLocations[i], location))
+                {
+                    _recentLocations.RemoveAt(i);
+                }
+            }
             
             // Thêm vào đầu danh sách
             _recentLocations.Insert(0, location);
@@ -264,59 +320,38 @@ namespace Presentation.UserControls
             destinationPicker.SetRecentLocations(_recentLocations);
         }
 
-        private void OnVehicleTypeChanged(object sender, EventArgs e)
+
+        private void OnVehicleSelected(object sender, string vehicleType)
         {
-            // Cập nhật giá cước khi thay đổi loại xe
-            // Fire-and-forget: không await vì cập nhật UI async, không ảnh hưởng logic chính
-            UpdateFareEstimateAsync();
+            _selectedVehicleType = vehicleType;
+            btnBook.Text = $"Đặt xe {vehicleType}";
+            btnBook.Enabled = true;
+            lblStatus.Text = $"Đã chọn {vehicleType}";
         }
+
+
 
         private async Task UpdateFareEstimateAsync()
         {
-            // Kiểm tra đã chọn đủ 2 điểm và loại xe chưa
             if (pickupPicker.SelectedLocation == null || destinationPicker.SelectedLocation == null)
             {
-                farePanel.ClearFare();
                 return;
             }
+            lblStatus.Text = $"Khoảng cách ước tính sẽ hiển thị khi chọn đầy đủ điểm";
 
-            if (cmbVehicleType.SelectedIndex < 0)
-            {
-                farePanel.ClearFare();
-                return;
-            }
 
             try
             {
-                // Lấy tọa độ và tính khoảng cách
-                var route = await _mapService.GetRouteAsync(
+                await vehicleFareSelector.UpdateFaresAsync(
                     pickupPicker.SelectedLocation,
                     destinationPicker.SelectedLocation);
-
-                // Xác định loại xe
-                VehicleType vehicleType = cmbVehicleType.SelectedIndex == 0
-                    ? VehicleType.Motorbike
-                    : VehicleType.Car;
-
-                // Tính giá cước
-                var fare = await _fareService.CalculateFareAsync(vehicleType, route.Distance);
-
-                // Hiển thị giá
-                RunOnUI(() =>
-                {
-                    farePanel.SetFare(fare.TotalAmount.Amount);
-                    lblStatus.Text = $"Khoảng cách: {route.Distance:F1} km - Thời gian ước tính: {route.Duration.TotalMinutes:F0} phút";
-                });
             }
             catch (Exception ex)
             {
-                RunOnUI(() =>
-                {
-                    farePanel.ClearFare();
-                    lblStatus.Text = "Không thể tính giá cước: " + ex.Message;
-                });
+                lblStatus.Text = "Không thể tính giá cước: " + ex.Message;
             }
         }
+
 
         private void btnLogout_Click(object sender, EventArgs e) => RequestLogout?.Invoke(this, EventArgs.Empty);
         private void btnProfile_Click(object sender, EventArgs e) => RequestShowProfile?.Invoke(this, _passenger);
@@ -338,7 +373,8 @@ namespace Presentation.UserControls
             
             try
             {
-                var trips = await _tripService.GetTripsByPassengerAsync(_passenger.Id);
+                // Fix [High 3]: Explicit type instead of var
+                List<Trip> trips = await _tripService.GetTripsByPassengerAsync(_passenger.Id);
                 _flowHistory.Controls.Clear();
                 _tripCards.Clear();
                 
@@ -348,9 +384,10 @@ namespace Presentation.UserControls
                     return;
                 }
                 
-                foreach (var trip in trips)
+                foreach (Trip trip in trips)
                 {
-                    var tripCard = new UcTripCard();
+                    // Fix [High 3]: Explicit type instead of var
+                    UcTripCard tripCard = new UcTripCard();
                     tripCard.SetTrip(trip);
                     tripCard.Clicked += OnTripCardClicked;
                     _tripCards.Add(tripCard);
@@ -374,6 +411,27 @@ namespace Presentation.UserControls
             }
         }
 
+        private void StyleSidebarButtons()
+        {
+            foreach (Control c in pnlSidebar.Controls)
+            {
+                if (c is Button btn)
+                {
+                    btn.FlatStyle = FlatStyle.Flat;
+                    btn.FlatAppearance.BorderSize = 0;
+                    btn.Font = UiConstants.Typography.Body;
+                    btn.TextAlign = ContentAlignment.MiddleLeft;
+                    btn.Padding = new Padding(10, 0, 0, 0);
+                    btn.ForeColor = UiConstants.Colors.TextPrimary;
+                    
+                    if (btn == btnLogout)
+                    {
+                        btn.ForeColor = UiConstants.Colors.Danger;
+                    }
+                }
+            }
+        }
+
         private void btnMenu_Click(object sender, EventArgs e)
         {
             _isSidebarExpanded = !_isSidebarExpanded;
@@ -384,6 +442,7 @@ namespace Presentation.UserControls
                 btnHistory.Text = "🕒  Lịch sử";
                 btnProfile.Text = "👤  Hồ sơ";
                 btnLogout.Text = "⏻  Thoát";
+                btnMenu.TextAlign = ContentAlignment.MiddleLeft;
             }
             else
             {
@@ -392,6 +451,7 @@ namespace Presentation.UserControls
                 btnHistory.Text = "🕒";
                 btnProfile.Text = "👤";
                 btnLogout.Text = "⏻";
+                btnMenu.TextAlign = ContentAlignment.MiddleCenter;
             }
         }
         private async void btnBook_Click(object sender, EventArgs e)
@@ -406,15 +466,11 @@ namespace Presentation.UserControls
                 ShowWarning("Vui lòng chọn điểm đến.");
                 return;
             }
-            if (cmbVehicleType.SelectedIndex < 0)
+            if (string.IsNullOrEmpty(_selectedVehicleType))
             {
                 ShowWarning("Vui lòng chọn loại xe.");
                 return;
             }
-
-            VehicleType vehicleType = cmbVehicleType.SelectedIndex == 0
-                ? VehicleType.Motorbike
-                : VehicleType.Car;
 
             IsLoading = true;
             try
@@ -423,7 +479,7 @@ namespace Presentation.UserControls
                     _passenger.Id,
                     pickupPicker.SelectedLocation,
                     destinationPicker.SelectedLocation,
-                    vehicleType);
+                    _selectedVehicleType);
 
                 _currentTrip = trip;
                 ShowStage("Searching");
@@ -437,6 +493,18 @@ namespace Presentation.UserControls
                 IsLoading = false;
             }
         }
+
+        private void ShowStageIdle()
+        {
+            _selectedVehicleType = null;
+            btnBook.Text = "Đặt xe";
+            btnBook.Enabled = false;
+            if (vehicleFareSelector != null)
+                vehicleFareSelector.ClearFare();
+
+        }
+
+
 
         private void OnTripStatusChanged(object sender, TripStatusChangedEventArgs e)
         {
@@ -481,12 +549,17 @@ namespace Presentation.UserControls
                 return;
             }
             
-            _ucRating = new UcRating(_reviewService, _currentTrip);
+            // Fix [Critical 2] & [Medium 3]: Overlay instead of clear, and dispose old
+            if (_ucRating != null)
+            {
+                _ucRating.Dispose();
+            }
+            _ucRating = new UcReview(_reviewService, _currentTrip);
             
-            // Add to payment panel
-            pnlPayment.Controls.Clear();
-            pnlPayment.Controls.Add(_ucRating);
+            // Add to payment panel as overlay
             _ucRating.Dock = DockStyle.Fill;
+            pnlPayment.Controls.Add(_ucRating);
+            _ucRating.BringToFront();
         }
 
         private void cmbVehicleType_SelectedIndexChanged(object sender, EventArgs e)

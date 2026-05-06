@@ -1,7 +1,5 @@
-namespace Presentation.UserControls
+﻿namespace Presentation.UserControls
 {
-    using Presentation.Constants;
-    using System.Windows.Forms;
 
     partial class UcDriver
     {
@@ -37,15 +35,6 @@ namespace Presentation.UserControls
         private System.Windows.Forms.Button btnStartTrip;
         private System.Windows.Forms.Button btnCompleteTrip;
         private System.Windows.Forms.Button btnCancelTrip;
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
 
         #region Component Designer generated code
 
@@ -140,7 +129,7 @@ namespace Presentation.UserControls
             this.btnProfile.Name = "btnProfile";
             this.btnProfile.Size = new System.Drawing.Size(90, 36);
             this.btnProfile.TabIndex = 4;
-            this.btnProfile.Text = "Hồ sơ";
+this.btnProfile.Text = "Hồ sơ";
             this.btnProfile.UseVisualStyleBackColor = true;
             // 
             // lblRating
@@ -229,7 +218,7 @@ namespace Presentation.UserControls
             this.btnRejectRequest.Name = "btnRejectRequest";
             this.btnRejectRequest.Size = new System.Drawing.Size(192, 32);
             this.btnRejectRequest.TabIndex = 3;
-            this.btnRejectRequest.Text = "Từ chối";
+this.btnRejectRequest.Text = "Từ chối";
             this.btnRejectRequest.UseVisualStyleBackColor = true;
             // 
             // btnAcceptRequest
@@ -247,7 +236,7 @@ namespace Presentation.UserControls
             this.btnAcceptRequest.Name = "btnAcceptRequest";
             this.btnAcceptRequest.Size = new System.Drawing.Size(192, 32);
             this.btnAcceptRequest.TabIndex = 2;
-            this.btnAcceptRequest.Text = "Chấp nhận";
+this.btnAcceptRequest.Text = "Chấp nhận";
             this.btnAcceptRequest.UseVisualStyleBackColor = false;
             // 
             // dgvRequests
@@ -353,7 +342,7 @@ namespace Presentation.UserControls
             this.btnCancelTrip.Name = "btnCancelTrip";
             this.btnCancelTrip.Size = new System.Drawing.Size(740, 48);
             this.btnCancelTrip.TabIndex = 3;
-            this.btnCancelTrip.Text = "Huỷ chuyến";
+            this.btnCancelTrip.Text = "Hủy chuyến";
             this.btnCancelTrip.UseVisualStyleBackColor = false;
             // 
             // btnCompleteTrip
@@ -455,4 +444,9 @@ namespace Presentation.UserControls
         #endregion
     }
 }
+
+
+
+
+
 

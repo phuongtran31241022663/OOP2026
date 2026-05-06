@@ -1,6 +1,5 @@
 ﻿using Domain.Entities;
 using Domain.Entities.Users;
-using Domain.Enums;
 using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ namespace Application.Interfaces
     public interface IPassengerService
     {
         // Đặt chuyến
-        Task<Trip> RequestTripAsync(Guid passengerId, Location pickup, Location destination, VehicleType vehicleType);
+        Task<Trip> RequestTripAsync(Guid passengerId, Location pickup, Location destination, string vehicleType);
 
         // Hủy chuyến
         Task CancelTripAsync(Guid passengerId, Guid tripId, string reason);
@@ -29,3 +28,4 @@ namespace Application.Interfaces
         Task<Passenger> GetPassengerInfoAsync(Guid passengerId);
     }
 }
+

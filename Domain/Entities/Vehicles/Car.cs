@@ -1,5 +1,4 @@
 using System;
-using Domain.Enums;
 
 namespace Domain.Entities.Vehicles
 {
@@ -11,6 +10,15 @@ namespace Domain.Entities.Vehicles
     /// </remarks>
     public class Car : Vehicle
     {
+        #region Properties
+
+        /// <summary>
+        /// Tên loại phương tiện.
+        /// </summary>
+        public override string TypeName => "Car";
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -25,7 +33,6 @@ namespace Domain.Entities.Vehicles
         public Car(Guid? id, string plateNumber, string brand, string model, string color, int capacity)
             : base(id ?? Guid.NewGuid(), plateNumber, brand, model, color, capacity)
         {
-            Type = VehicleType.Car;
         }
 
         #endregion

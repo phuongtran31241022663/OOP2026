@@ -1,11 +1,11 @@
-﻿﻿// Infrastructure/Repositories/UserRepository.cs
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Entities.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain.Repositories;
+﻿// Infrastructure/Repositories/UserRepository.cs
 
 namespace Infrastructure.Repositories
 {
@@ -98,3 +98,4 @@ namespace Infrastructure.Repositories
         }
     }
 }
+

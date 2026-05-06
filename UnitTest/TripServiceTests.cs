@@ -4,7 +4,6 @@ using Application.Services;
 using Domain.Entities;
 using Domain.Entities.Users;
 using Domain.Entities.Vehicles;
-using Domain.Enums;
 using Domain.Repositories;
 using Domain.ValueObjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,7 +22,7 @@ public class MockMapService : IMapService
         _routeToReturn = route;
     }
 
-    public Task<Route> GetRouteAsync(Location pickupLocation, Location destinationLocation)
+    public Task<Route> GetRouteAsync(Location start, Location end)
     {
         return Task.FromResult(_routeToReturn);
     }
@@ -37,6 +36,21 @@ public class MockMapService : IMapService
     {
         return Task.FromResult(new Location(new Coordinate(latitude, longitude), new Address("Mock", "Address", "District", "City", "Country")));
     }
+
+    public Task<List<Location>> GetPOIsAsync(double minLat, double minLon, double maxLat, double maxLon)
+    {
+        return Task.FromResult(new List<Location>());
+    }
+
+    public Task<Location> GetIpLocationAsync()
+    {
+        return Task.FromResult(new Location(new Coordinate(10.7769, 106.7009), new Address("Mock", "IP Address", "District", "HCMC", "Vietnam")));
+    }
+
+    public Task<Location> GeocodeNominatimAsync(string query)
+    {
+        return Task.FromResult(new Location(new Coordinate(10.7769, 106.7009), new Address("Mock", query, "District", "HCMC", "Vietnam")));
+    }
 }
 
 public class MockFareService : IFareService
@@ -48,7 +62,7 @@ public class MockFareService : IFareService
         _fareToReturn = fare;
     }
 
-    public Task<Fare> CalculateFareAsync(VehicleType vehicleType, double distance)
+    public Task<Fare> CalculateFareAsync(string vehicleType, double distance)
     {
         return Task.FromResult(_fareToReturn);
     }
@@ -90,6 +104,7 @@ namespace UnitTest
             // Initialize mock services
             _mapServiceMock = new MockMapService();
             _fareServiceMock = new MockFareService();
+            var matchingServiceMock = new Mocks.MockMatchingService();
 
             // Create test service
             _tripService = new TripService(
@@ -98,7 +113,8 @@ namespace UnitTest
                 _passengerRepository,
                 _vehicleRepository,
                 _fareServiceMock,
-                _mapServiceMock
+                _mapServiceMock,
+                matchingServiceMock
             );
 
             // Setup test data
@@ -115,7 +131,7 @@ namespace UnitTest
             _testDriver.DepositToWallet(new Money(100000));
             _driverRepository.AddAsync(_testDriver).Wait();
 
-            _testFareRule = new FareRule(VehicleType.Car, new Money(10000), new Money(5000), 0.1m);
+            _testFareRule = new FareRule("Car", new Money(10000), new Money(5000), 0.1m);
             _fareRuleRepository.AddAsync(_testFareRule).Wait();
 
             _testFare = new Fare(new Money(50000), new Money(5000));
@@ -137,7 +153,7 @@ namespace UnitTest
             // Arrange
             var pickupLocation = new Location(new Coordinate(10.7769, 106.7009), new Address("Home", "Pickup St", "District 1", "HCMC", "Vietnam"));
             var destinationLocation = new Location(new Coordinate(10.7869, 106.7109), new Address("Home", "Dest St", "District 2", "HCMC", "Vietnam"));
-            var vehicleType = VehicleType.Car;
+            var vehicleType = "Car";
 
             // Act
             var trip = await _tripService.RequestTripAsync(_testPassenger.Id, pickupLocation, destinationLocation, vehicleType);
@@ -160,7 +176,7 @@ namespace UnitTest
             var nonExistentPassengerId = Guid.NewGuid();
             var pickupLocation = new Location(new Coordinate(10.7769, 106.7009), new Address("Home", "Pickup St", "District 1", "HCMC", "Vietnam"));
             var destinationLocation = new Location(new Coordinate(10.7869, 106.7109), new Address("Home", "Dest St", "District 2", "HCMC", "Vietnam"));
-            var vehicleType = VehicleType.Car;
+            var vehicleType = "Car";
 
             // Act & Assert
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() =>
@@ -173,7 +189,7 @@ namespace UnitTest
             // Arrange
             var pickupLocation = new Location(new Coordinate(10.7769, 106.7009), new Address("Home", "Pickup St", "District 1", "HCMC", "Vietnam"));
             var destinationLocation = new Location(new Coordinate(10.7869, 106.7109), new Address("Home", "Dest St", "District 2", "HCMC", "Vietnam"));
-            var vehicleType = VehicleType.Car;
+            var vehicleType = "Car";
 
             _mapServiceMock.SetRouteToReturn(null);
 
@@ -189,7 +205,7 @@ namespace UnitTest
             var trip = await _tripService.RequestTripAsync(_testPassenger.Id,
                 new Location(new Coordinate(10.7769, 106.7009), new Address("Home", "Pickup St", "District 1", "HCMC", "Vietnam")),
                 new Location(new Coordinate(10.7869, 106.7109), new Address("Home", "Dest St", "District 2", "HCMC", "Vietnam")),
-                VehicleType.Car);
+                "Car");
             _testDriver.SetAvailable();
             await _driverRepository.UpdateAsync(_testDriver);
 

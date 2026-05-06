@@ -1,3 +1,9 @@
+﻿
+
+
+
+
+
 namespace Presentation.Shells
 {
     partial class FrmMultiRole
@@ -70,7 +76,7 @@ namespace Presentation.Shells
             this.Controls.Add(this.splitContainer1);
             this.Font = new System.Drawing.Font("Segoe UI", 9.5F);
             this.Name = "FrmMultiRole";
-            this.Text = "RideGo - Multi-Role View";
+            this.Text = "Multi-Role View";
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
@@ -82,3 +88,7 @@ namespace Presentation.Shells
         #endregion
     }
 }
+
+
+
+

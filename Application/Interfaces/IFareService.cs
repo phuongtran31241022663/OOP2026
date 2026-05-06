@@ -1,4 +1,3 @@
-using Domain.Enums;
 using Domain.ValueObjects;
 using System.Threading.Tasks;
 
@@ -6,6 +5,7 @@ namespace Application.Interfaces
 {
     public interface IFareService
     {
-        Task<Fare> CalculateFareAsync(VehicleType vehicleType, double distanceKM);
+        Task<Fare> CalculateFareAsync(string vehicleType, double distanceKm);
     }
 }
+
