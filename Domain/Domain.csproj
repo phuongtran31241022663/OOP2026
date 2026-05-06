@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3AC87C44-ECAA-4DE9-8B55-7FD2F65911A9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Domain</RootNamespace>
+    <AssemblyName>Domain</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <LangVersion>9.0</LangVersion>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{E3833FC9-876C-4F32-9F03-1FFA44BDF6FD}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Entities\FareRule.cs" />
+    <Compile Include="Entities\Review.cs" />
+    <Compile Include="Entities\Trip.cs" />
+    <Compile Include="Entities\User.cs" />
+    <Compile Include="Entities\Vehicle.cs" />
+    <Compile Include="Entities\Users\Admin.cs" />
+    <Compile Include="Entities\Users\Driver.cs" />
+    <Compile Include="Entities\Users\Passenger.cs" />
+    <Compile Include="Entities\Vehicles\Car.cs" />
+    <Compile Include="Entities\Vehicles\Motorbike.cs" />
+
+
+
+    <Compile Include="Events\DriverLocationUpdatedEvent.cs" />
+    <Compile Include="Events\DriverStatusChangedEvent.cs" />
+    <Compile Include="Events\ReviewCreatedEvent.cs" />
+    <Compile Include="Events\TripArrivedEvent.cs" />
+    <Compile Include="Events\TripCancelledEvent.cs" />
+    <Compile Include="Events\TripCompletedEvent.cs" />
+    <Compile Include="Events\TripMatchedEvent.cs" />
+    <Compile Include="Events\TripPaidEvent.cs" />
+    <Compile Include="Events\TripRequestedEvent.cs" />
+    <Compile Include="Events\TripSearchingEvent.cs" />
+    <Compile Include="Events\TripStartedEvent.cs" />
+    <Compile Include="Events\TripTimeoutEvent.cs" />
+    <Compile Include="Repositories\IDriverRepository.cs" />
+    <Compile Include="Repositories\IFareRuleRepository.cs" />
+    <Compile Include="Repositories\IPassengerRepository.cs" />
+    <Compile Include="Repositories\IRepository.cs" />
+    <Compile Include="Repositories\IReviewRepository.cs" />
+    <Compile Include="Repositories\ITripRepository.cs" />
+    <Compile Include="Repositories\IUserRepository.cs" />
+    <Compile Include="Repositories\IVehicleRepository.cs" />
+    <Compile Include="SharedKernel\DomainEvent.cs" />
+    <Compile Include="SharedKernel\Entity.cs" />
+    <Compile Include="SharedKernel\ValueObject.cs" />
+    <Compile Include="Strategies\IFareCalculationStrategy.cs" />
+    <Compile Include="Strategies\MotorbikeFareStrategy.cs" />
+    <Compile Include="Strategies\CarFareStrategy.cs" />
+    <Compile Include="States\IDriverState.cs" />
+    <Compile Include="States\Drivers\DriverOfflineState.cs" />
+    <Compile Include="States\Drivers\DriverAvailableState.cs" />
+    <Compile Include="States\Drivers\DriverOnTripState.cs" />
+    <Compile Include="States\ArrivedState.cs" />
+    <Compile Include="States\CancelledState.cs" />
+    <Compile Include="States\CompletedState.cs" />
+    <Compile Include="States\ITripState.cs" />
+    <Compile Include="States\MatchedState.cs" />
+    <Compile Include="States\RequestedState.cs" />
+    <Compile Include="States\SearchingState.cs" />
+    <Compile Include="States\StartedState.cs" />
+    <Compile Include="States\TimeoutState.cs" />
+    <Compile Include="ValueObjects\Address.cs" />
+    <Compile Include="ValueObjects\Coordinate.cs" />
+    <Compile Include="ValueObjects\Fare.cs" />
+    <Compile Include="ValueObjects\Location.cs" />
+    <Compile Include="ValueObjects\Money.cs" />
+    <Compile Include="ValueObjects\Route.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
