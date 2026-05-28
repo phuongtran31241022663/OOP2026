@@ -1,619 +1,225 @@
 # Tài liệu chung nhất
 
 > **Phạm vi:** WinForms .NET Framework 4.8 · GMap.NET · Dữ liệu JSON
+> **Single source of truth:** File này là tài liệu chính. `docs/FINAL.md` chỉ là bản dẫn hướng rút gọn và phải trỏ về file này khi có khác biệt.
+
+## Mục lục
+
+- [1. Nguyên lý thiết kế giao diện](#1-nguyên-lý-thiết-kế-giao-diện)
+- [2. Tổng quan kiến trúc hệ thống](#2-tổng-quan-kiến-trúc-hệ-thống)
+- [3. Kiến Trúc Domain (Behavioral & Structural)](#3-kiến-trúc-domain-behavioral--structural)
+- [4. Kiến Trúc Application (Orchestration)](#4-kiến-trúc-application-orchestration)
+- [5. Kiến Trúc Infrastructure (Data & External)](#5-kiến-trúc-infrastructure-data--external)
+- [6. Kiến Trúc Presentation Layer](#6-kiến-trúc-presentation-layer)
+- [7. Quy Tắc Modal vs. Inline](#7-quy-tắc-modal-vs-inline)
+- [8. Cơ Chế Real-time & Sự Kiện](#8-cơ-chế-real-time--sự-kiện)
+- [9. Quy Tắc Layout & Responsive](#9-quy-tắc-layout--responsive)
+- [10. Luồng Nghiệp Vụ Chi Tiết](#10-luồng-nghiệp-vụ-chi-tiết)
+- [11. Bài Học Từ DEVLOG](#11-bài-học-từ-devlog)
+- [12. Use Cases](#12-use-cases)
+- [13. Ràng Buộc Kỹ Thuật](#13-ràng-buộc-kỹ-thuật)
+- [14. Tổng Kết](#14-tổng-kết)
+- [15. Tham Khảo](#15-tham-khảo)
 
 ---
 
-## 1. Nguyên Lý Thiết Kế Giao Diện
+## 1. Nguyên lý thiết kế giao diện
+
 
 Bốn nguyên tắc dưới đây chi phối **mọi** quyết định giao diện. Bất kỳ thành phần nào vi phạm một trong bốn nguyên tắc này đều cần được xem xét lại.
 
 | #   | Nguyên tắc                   | Hệ quả thực tế                                                                                                                                                                     |
 | --- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | **Tối thiểu Form**           | Chỉ tạo `Form` mới khi cần ngữ cảnh làm việc hoàn toàn biệt lập. Mọi điều hướng còn lại dùng `UserControl`.                                                                        |
-| 2   | **Single-Form Shell**        | Một `FrmMain` duy nhất làm khung nền. Chuyển cảnh = hoán đổi `UserControl` bên trong Shell, không đóng/mở cửa sổ.                                                                  |
+| 2   | **Single-Form Shell**        | Một `FrmMultiRole` duy nhất làm khung nền. Chuyển cảnh = hoán đổi `UserControl` bên trong Shell, không đóng/mở cửa sổ.                                                                  |
 | 3   | **Container theo nghiệp vụ** | Chọn loại container xuất phát từ câu hỏi: _"Người dùng tương tác với màn hình này như thế nào?"_, không phải từ sở thích cá nhân.                                                  |
-| 4   | **Tái sử dụng tối đa**       | Các component dùng chung (`UcMap`, `UcLocationPicker`, `UcTripStatus`, `UcDriverCard`, `UcVehicleFareSelector`…) phải được tái sử dụng, không được viết lại với mục đích tương tự. |
+| 4   | **Tái sử dụng tối đa**       | Các component dùng chung (`ucMap`, `ucLocationPicker`, `ucTripStatus`, `ucDriverCard`, `ucFareSelector`…) phải được tái sử dụng, không được viết lại với mục đích tương tự. |
 
 ---
 
-## 2. Tổng Quan Kiến Trúc Hệ Thống
+## 2. Tổng quan kiến trúc hệ thống
 
-### 2.1 Sơ Đồ Layer
 
-Hệ thống RideGo sử dụng **5-Layer Architecture** (Layered — không phải Clean Architecture thuần; có vi phạm dependency đã được ghi nhận).
+### 2.1 Sơ đồ layer
 
-```
-Common → Domain → Application → Infrastructure → Presentation
-```
 
-| Layer          | Project                                | Output  | Phụ thuộc                                   |
-| -------------- | -------------------------------------- | ------- | ------------------------------------------- |
-| Common         | `Common/Common.csproj`                 | Library | —                                           |
-| Domain         | `Domain/Domain.csproj`                 | Library | Common                                      |
-| Application    | `Application/Application.csproj`       | Library | Common, Domain                              |
-| Infrastructure | `Infrastructure/Infrastructure.csproj` | Library | Application, Common, Domain                 |
-| Presentation   | `Presentation/Presentation.csproj`     | WinExe  | Application, Common, Domain, Infrastructure |
-
-> **Vi phạm kiến trúc (đã ghi nhận trong DEVLOG):** Presentation → Domain/Infrastructure trực tiếp (nên chỉ phụ thuộc Application). Đây là technical debt cần giải quyết trong phiên bản tới.
-
-### 2.2 Sơ Đồ Phân Cấp UI
+Hệ thống OOP sử dụng **Single Project Architecture** với code được tổ chức theo nguyên tắc phân tầng logic bên trong một project duy nhất.
 
 ```
-FrmMain  (1 Form duy nhất – khung nền)
-├── FrmMultiRole  (Form phụ – hỗ trợ đa vai trò)
-│
-└── [UserControl được nạp động vào Shell]
-    ├── UcAuth          ← Màn hình đầu tiên (Login / Register)
-    ├── UcPassenger     ← Sau khi đăng nhập với vai trò Passenger
-    ├── UcDriver        ← Sau khi đăng nhập với vai trò Driver
-    └── UcAdmin         ← Sau khi đăng nhập với vai trò Admin
-
-[UserControl phụ – dùng bên trong các UC chính hoặc trong Form]
-├── UcReview         ← Đánh giá sau chuyến
-├── UcProfile        ← Hồ sơ cá nhân / Nạp ví
-├── UcTripDetail     ← Chi tiết một chuyến đi
-├── UcMap            ← Bản đồ GMap.NET
-├── UcLocationPicker ← Chọn địa điểm trên bản đồ
-├── UcTripStatus     ← Hiển thị trạng thái chuyến
-├── UcTripCard       ← Card hiển thị thông tin chuyến
-├── UcDriverCard     ← Card hiển thị thông tin tài xế
-└── UcVehicleFareSelector ← Chọn loại xe và xem giá
+Entity.cs + ValueObject.cs + Pattern.cs → Interface.cs → Service.cs → Repository.cs → Form/*.cs + UserControl/*.cs
 ```
 
-### 2.3 Bảng Tổng Hợp Thành Phần UI
+| Layer          | File chính                                      | Vai trò                                  |
+| -------------- | ----------------------------------------------- | ---------------------------------------- |
+| Domain         | `Entity.cs`, `ValueObject.cs`, `Pattern.cs`     | Entities, Value Objects, State Pattern  |
+| Application    | `Interface.cs`, `Service.cs`                    | Service Interfaces và Implementations   |
+| Infrastructure | `Repository.cs`, `DataSeeder.cs`, `Service.cs`  | JSON persistence, seed data, Map API    |
+| Presentation   | `Form/*.cs`, `UserControl/*.cs`, `UIHelper.cs`  | WinForms UI, Forms, UserControls        |
 
-| Thành phần              | Loại        | Actor                    | Mô tả ngắn                                                                      |
+> **Ghi chú:** Đây là cấu trúc đơn giản hóa phù hợp với đồ án học phần OOP. Các layer được phân tách theo file chứ không theo project.
+
+### 2.2 Sơ đồ phân cấp UI
+
+
+```
+Program.Main
+└── FrmMultiRole  (shell thực tế cho passenger/driver/admin trong phiên demo)
+    ├── ucPassengerHome  ← khu vực passenger
+    │   ├── ucBooking
+    │   ├── ucMap
+    │   ├── ucHistory / ucHistoryCard
+    │   ├── ucReview
+    │   └── ucProfile
+    ├── ucDriverHome     ← khu vực driver
+    │   ├── ucRequest
+    │   ├── ucTripStatus
+    │   ├── ucDriverStatus
+    │   ├── ucWallet
+    │   └── ucTripCard
+    └── FrmAdmin         ← form quản trị mở từ shell
+
+[Auth/Form phụ]
+├── FrmAuth / FrmPassengerAuth / FrmDriverAuth
+├── FrmPassenger / FrmDriver
+└── Form1 là form mặc định còn lại, không phải shell chính
+```
+
+
+| Thành phần thực tế      | Loại        | Actor                    | Mô tả ngắn                                                                      |
 | ----------------------- | ----------- | ------------------------ | ------------------------------------------------------------------------------- |
-| `FrmMain`               | Form        | Tất cả                   | Khung nền duy nhất; quản lý nạp/đổi UC, đăng ký event cấp ứng dụng              |
-| `FrmMultiRole`          | Form        | Driver, Passenger        | Hộp thoại dùng chung cho mọi tác vụ cần sự tập trung (CRUD, đánh giá, hồ sơ)    |
-| `UcAuth`                | UserControl | Tất cả                   | Gộp Login + Register; sau đăng nhập thành công → Shell nạp UC theo vai trò      |
-| `UcPassenger`           | UserControl | Passenger                | Toàn bộ vòng đời đặt xe: Đặt → Theo dõi → Thanh toán                            |
-| `UcDriver`              | UserControl | Driver                   | Bật/tắt trạng thái, nhận/từ chối chuyến, cập nhật tiến trình                    |
-| `UcAdmin`               | UserControl | Admin                    | Quản lý Users/Trips/FareRules + Thống kê                                        |
-| `UcReview`              | UserControl | Passenger                | Form đánh giá 5 sao + comment; mở trong `FrmMultiRole`                          |
-| `UcProfile`             | UserControl | Passenger, Driver        | Xem/sửa hồ sơ, nạp ví; mở trong `FrmMultiRole`                                  |
-| `UcTripDetail`          | UserControl | Admin, Passenger, Driver | Chi tiết một chuyến đi; dùng trong Tab (Admin) hoặc Modal (các vai trò còn lại) |
-| `UcMap`                 | UserControl | Passenger, Driver        | Hiển thị bản đồ GMap.NET với markers và routes                                  |
-| `UcLocationPicker`      | UserControl | Passenger                | Cho phép chọn điểm đón/đến trên bản đồ                                          |
-| `UcTripStatus`          | UserControl | Passenger, Driver        | Hiển thị trạng thái hiện tại của chuyến                                         |
-| `UcTripCard`            | UserControl | Passenger, Driver        | Card hiển thị thông tin chuyến trong danh sách                                  |
-| `UcDriverCard`          | UserControl | Passenger                | Card hiển thị thông tin tài xế (tên, sao, loại xe, biển số)                     |
-| `UcVehicleFareSelector` | UserControl | Passenger                | Chọn loại dịch vụ (Car/Motorbike) và xem giá dự kiến                            |
+| `FrmMultiRole`          | Form        | Driver, Passenger, Admin | Shell demo chính; chứa passenger/driver panels và mở `FrmAdmin`                 |
+| `FrmAuth`               | Form        | Tất cả                   | Form đăng nhập/đăng ký; tách thêm `FrmPassengerAuth` và `FrmDriverAuth`         |
+| `FrmAdmin`              | Form        | Admin                    | Quản lý Users/Trips/Policy + Thống kê                                           |
+| `ucPassengerHome`       | UserControl | Passenger                | Khu vực đặt chuyến, bản đồ, lịch sử, hồ sơ                                      |
+| `ucDriverHome`          | UserControl | Driver                   | Bật/tắt trạng thái, nhận/từ chối chuyến, cập nhật tiến trình                    |
+| `ucBooking`             | UserControl | Passenger                | Nhập pickup/dropoff, chọn xe, gọi map/fare/request trip                         |
+| `ucReview`              | UserControl | Passenger                | Form đánh giá sao + comment                                                     |
+| `ucProfile`             | UserControl | Passenger, Driver        | Xem/sửa hồ sơ                                                                   |
+| `ucTrip`                | UserControl | Admin, Passenger, Driver | Chi tiết một chuyến đi                                                          |
+| `ucMap`                 | UserControl | Passenger, Driver        | Hiển thị bản đồ GMap.NET với markers và routes                                  |
+| `ucLocationPicker`      | UserControl | Passenger                | Cho phép chọn điểm đón/đến trên bản đồ                                          |
+| `ucTripStatus`          | UserControl | Passenger, Driver        | Hiển thị trạng thái hiện tại của chuyến                                         |
+| `ucTripCard`            | UserControl | Passenger, Driver        | Card hiển thị thông tin chuyến trong danh sách                                  |
+| `ucDriverCard`          | UserControl | Passenger                | Card hiển thị thông tin tài xế                                                  |
+| `ucFareSelector`        | UserControl | Passenger                | Chọn loại dịch vụ (Car/Motorbike) và xem giá dự kiến                            |
 
 ---
 
-## 3. Kiến Trúc Domain
-
-### 3.1 Entities Chính
-
-#### 3.1.1 Trip (Aggregate Root)
-
-**File:** `Domain/Entities/Trip.cs`
-
-**Mục đích:** Quản lý lifecycle chuyến đi (State Pattern)
-
-**Thuộc tính:**
-
-- `string Status` {get; private set} - Derived từ ITripState (Requested, Searching, Matched, Arrived, Started, Completed, Cancelled, Timeout)
-- `Guid PassengerId` {get; private set}
-- `Guid? DriverId` {get}
-- `VehicleType TripVehicleType` {get; private set}
-- `Route TripRoute` {get; private set}
-- `Fare TripFare` {get; private set}
-- `double? Distance` {get} - from Route
-- `double? Duration` {get} - from Route (seconds)
-- `bool IsPaid` {get}
-- `DateTime RequestAt` {get; private set}
-
-**Phương thức (public behavior - delegated to state):**
-
-- `SetSearching() : void` - Transition to SearchingState
-- `MatchDriver(Guid) : void` - Transition to MatchedState
-- `MarkAsArrived() : void` - Transition to ArrivedState
-- `StartTrip() : void` - Transition to StartedState
-- `CompleteTrip() : void` - Transition to CompletedState
-- `Cancel(string reason) : void` - Transition to CancelledState
-- `MarkTimeout() : void` - Transition to TimeoutState
-- `ConfirmPayment() : void` - Mark paid, throw nếu đã paid
-- `IsSearching() : bool`, `IsMatched() : bool`, `IsArrived() : bool`, `IsStarted() : bool`, `IsCompleted() : bool`, `IsCancelled() : bool`, `IsTimeout() : bool` - State check helpers
-- `IsTerminal() : bool` - True nếu Completed, Cancelled, hoặc Timeout
-
-**Constructors:**
-
-- `Trip(Guid, Route, Fare, VehicleType)` - Business constructor
-- `[JsonConstructor] Trip(...)` - Persistence constructor
-
-**Thread Safety:** Uses `Interlocked.Exchange` for atomic state transitions (per DEVLOG Section 3.3)
-
-**Sự kiện:** TripRequestedEvent, TripSearchingEvent, TripMatchedEvent, TripArrivedEvent, TripStartedEvent, TripCompletedEvent, TripCancelledEvent, TripPaidEvent, TripTimeoutEvent
-
-**Ràng buộc nghiệp vụ:**
-
-- PassengerId != Empty
-- Route/Fare không null
-- VehicleType != 0
-- Không thể ConfirmPayment 2 lần
-- State pattern enforce: cannot Start before Arrived, etc.
-
-#### 3.1.2 User (Abstract Entity)
-
-**File:** `Domain/Entities/User.cs`
-
-**Mục đích:** Base user (Passenger/Driver/Admin inheritance)
-
-**Thuộc tính:**
-
-- `string Name` {get; protected set} - validate not empty
-- `string Phone` {get; protected set} - validate not empty
-- `string Password` {get} - hashed
-
-**Phương thức:**
-
-- `UpdateName(string) : void`
-- `UpdatePhone(string) : void`
-- `ChangePassword(string oldRaw, string newRaw) : void` - verify old, validate new
-- `VerifyPassword(string raw) : bool`
-- `virtual string GetInfo() : string`
-
-**Constructors:**
-
-- `User(string, string, string)` - Business constructor (hashes password)
-- `[JsonConstructor] User(Guid, string, string, string)` - Persistence constructor
-
-**Phụ thuộc:** PasswordHasher
-
-#### 3.1.3 Driver
-
-**File:** `Domain/Entities/Users/Driver.cs`
-
-**Mục đích:** Tài xế với state pattern + financial tracking
-
-**Thread Safety:** Uses `Interlocked.Exchange` for atomic state transitions (per DEVLOG Section 3.3)
-
-**Thuộc tính:**
-
-- `string Status` {get; private set} - Derived từ IDriverState (Offline, Available, OnTrip)
-- `Location Position` {get; private set}
-- `string LicenseNumber` {get; private set}
-- `Guid VehicleId` {get; private set}
-- `Money Wallet` {get; private set}
-- `Money Income` {get; private set}
-- `int TotalTrips` {get; private set}
-- `int RatingSum` {get; private set}
-- `int TotalReviews` {get; private set}
-- `decimal AverageRating` {get} - computed
-
-**Phương thức:**
-
-- `SetAvailable() : void` - Transition to DriverAvailableState
-- `SetOnTrip() : void` - Transition to DriverOnTripState
-- `SetOffline() : void` - Transition to DriverOfflineState; Không thể nếu đang OnTrip
-- `IsAvailable() : bool`
-- `IsOnTrip() : bool`
-- `IsOffline() : bool`
-- `UpdatePosition(Location) : void`
-- `AddTrip() : void`
-- `UpdateReviews(int) : void` - Rating 1-5
-- `DepositToWallet(Money) : void`
-- `PayCommission(Fare) : void` - Trừ wallet, cộng income
-
-**Ràng buộc nghiệp vụ:** Không thể Offline khi OnTrip; Wallet ≥ Commission để PayCommission
-
-#### 3.1.4 Passenger
-
-**File:** `Domain/Entities/Users/Passenger.cs`
-
-**Thuộc tính:** `int TotalTrips` {get; private set}
-
-**Phương thức:** `AddTrip() : void`, `override GetInfo()`
-
-#### 3.1.5 Admin
-
-**File:** `Domain/Entities/Users/Admin.cs`
-
-**Phương thức:** `override GetInfo()`
-
-#### 3.1.6 FareRule
-
-**File:** `Domain/Entities/FareRule.cs`
-
-**Mục đích:** Quy định giá cước theo loại xe
-
-**Thuộc tính:**
-
-- `VehicleType` {get}
-- `Money BaseFare` {get}
-- `Money PricePerKm` {get}
-- `decimal CommissionRate` {get}
-- `DateTime UpdatedAt` {get}
-
-**Phương thức:**
-
-- `CalculateFare(double distanceKm) : Fare` - Tính tổng cước + hoa hồng
-- `UpdateRule(VehicleType, Money, Money, decimal) : void` - Update và validate (tạo rule mới)
-
-**Ràng buộc nghiệp vụ:** BaseFare ≥ 0, PricePerKm ≥ 0, CommissionRate ∈ [0,1]
-
-#### 3.1.7 Vehicle (Abstract Entity)
-
-**File:** `Domain/Entities/Vehicle.cs`
-
-**Mục đích:** Base vehicle (polymorphism)
-
-**Thuộc tính:** PlateNumber, Brand, Model, Color, Capacity, Type
-
-**Phương thức (abstract):** `GetAvgSpeed() : double`
-
-#### 3.1.8 Motorbike / Car
-
-**Files:** `Domain/Entities/Vehicles/Motorbike.cs`, `Car.cs`
-
-**Mục đích:** Concrete vehicle types
-
-**Motorbike:** Capacity=2, AvgSpeed=40km/h
-
-**Car:** Capacity variable, AvgSpeed=60km/h
-
-#### 3.1.9 Review
-
-**File:** `Domain/Entities/Review.cs`
-
-**Mục đích:** Đánh giá chuyến đi
-
-**Thuộc tính:**
-
-- `Guid DriverId, PassengerId, TripId` {get}
-- `int Star` {get; private set} - 1-5
-- `string Comment` {get; private set}
-- `DateTime CreatedAt` {get}
-
-**Phương thức:** `UpdateReview(int, string) : void`
-
-### 3.2 Value Objects
-
-#### 3.2.1 Money
-
-**File:** `Domain/ValueObjects/Money.cs`
-
-**Thuộc tính:** `Amount` (decimal), `Currency` (string, default "VND")
-
-**Operators:** +, -, <, >, <=, >= (đảm bảo cùng currency)
-
-#### 3.2.2 Location
-
-**File:** `Domain/ValueObjects/Location.cs`
-
-**Thuộc tính:** `Coordinate`, `Address`
-
-**Phụ thuộc:** Coordinate, Address
-
-#### 3.2.3 Coordinate
-
-**File:** `Domain/ValueObjects/Coordinate.cs`
-
-**Thuộc tính:** `Latitude`, `Longitude` (double)
-
-#### 3.2.4 Address
-
-**File:** `Domain/ValueObjects/Address.cs`
-
-**Thuộc tính:** Name, Street, District, City, Country, HouseNumber, Osm_Value, Locality
-
-#### 3.2.5 Route
-
-**File:** `Domain/ValueObjects/Route.cs`
-
-**Thuộc tính:** Pickup, Destination (Location), Distance (km), Duration (TimeSpan), Polyline
-
-**Ràng buộc:** Distance > 0, Duration >= 0
-
-#### 3.2.6 Fare
-
-**File:** `Domain/ValueObjects/Fare.cs`
-
-**Thuộc tính:** TotalAmount, Commission, DriverIncome (Money)
-
-**Ràng buộc:** Commission <= TotalAmount
-
-### 3.3 State Pattern
-
-#### 3.3.1 Trip States (ITripState)
-
-**Interface:** `Domain/States/ITripState.cs`
-
-**Interface:** 7 methods: SetSearching, MatchDriver, MarkAsArrived, StartTrip, CompleteTrip, Cancel, MarkTimeout
-
-**Concrete States (8 classes):**
-
-| Class          | File                              | Mô tả                                      |
-| -------------- | --------------------------------- | ------------------------------------------ |
-| RequestedState | `Domain/States/RequestedState.cs` | Cho phép: SetSearching, Cancel             |
-| SearchingState | `Domain/States/SearchingState.cs` | Cho phép: MatchDriver, Cancel, MarkTimeout |
-| MatchedState   | `Domain/States/MatchedState.cs`   | Cho phép: MarkAsArrived, Cancel            |
-| ArrivedState   | `Domain/States/ArrivedState.cs`   | Cho phép: StartTrip, Cancel                |
-| StartedState   | `Domain/States/StartedState.cs`   | Cho phép: CompleteTrip, Cancel             |
-| CompletedState | `Domain/States/CompletedState.cs` | Không cho phép gì (final)                  |
-| CancelledState | `Domain/States/CancelledState.cs` | Không cho phép gì (final)                  |
-| TimeoutState   | `Domain/States/TimeoutState.cs`   | Không cho phép gì (final)                  |
-
-#### 3.3.2 Driver States (IDriverState)
-
-**Interface:** `Domain/States/IDriverState.cs`
-
-**Interface:** 3 methods: SetAvailable, SetOnTrip, SetOffline
-
-**Driver Concrete States (3 classes):**
-
-| Class                | File                                            | Mô tả                           |
-| -------------------- | ----------------------------------------------- | ------------------------------- |
-| DriverOfflineState   | `Domain/States/Drivers/DriverOfflineState.cs`   | Cho phép: SetAvailable          |
-| DriverAvailableState | `Domain/States/Drivers/DriverAvailableState.cs` | Cho phép: SetOnTrip, SetOffline |
-| DriverOnTripState    | `Domain/States/Drivers/DriverOnTripState.cs`    | Cho phép: SetAvailable          |
-
-**Pattern:** Mỗi state gọi `driver.TransitionTo(new XxxState())` + `driver.AddEvent()` nếu hợp lệ; throw `InvalidOperationException` nếu transition không hợp lệ. **Trip và Driver đều dùng State Pattern.**
-
-### 3.4 Domain Events
-
-| Event                      | File                                   | Payload                                               |
-| -------------------------- | -------------------------------------- | ----------------------------------------------------- |
-| TripRequestedEvent         | `Events/TripRequestedEvent.cs`         | TripId, PassengerId, Pickup, Destination, VehicleType |
-| TripSearchingEvent         | `Events/TripSearchingEvent.cs`         | TripId, AttemptNumber                                 |
-| TripMatchedEvent           | `Events/TripMatchedEvent.cs`           | TripId, DriverId                                      |
-| TripArrivedEvent           | `Events/TripArrivedEvent.cs`           | TripId                                                |
-| TripStartedEvent           | `Events/TripStartedEvent.cs`           | TripId                                                |
-| TripCompletedEvent         | `Events/TripCompletedEvent.cs`         | TripId, PassengerId, DriverId, Fare                   |
-| TripCancelledEvent         | `Events/TripCancelledEvent.cs`         | TripId, Reason                                        |
-| TripPaidEvent              | `Events/TripPaidEvent.cs`              | TripId, PassengerId, DriverId, TotalAmount, PaidAt    |
-| TripTimeoutEvent           | `Events/TripTimeoutEvent.cs`           | TripId                                                |
-| DriverStatusChangedEvent   | `Events/DriverStatusChangedEvent.cs`   | DriverId, OldStatus, NewStatus                        |
-| DriverLocationUpdatedEvent | `Events/DriverLocationUpdatedEvent.cs` | DriverId, NewLocation                                 |
-| ReviewCreatedEvent         | `Events/ReviewCreatedEvent.cs`         | ReviewId, DriverId, RiderId, Rating, Comment          |
-
-### 3.5 Repository Interfaces
-
-#### 3.5.1 IRepository<T>
-
-**File:** `Domain/Repositories/IRepository.cs`
-
-**Extends:** `IReadRepository<T>` (GetByIdAsync, GetAllAsync)
-
-**Phương thức:** InitializeAsync, SaveChangesAsync, AddAsync, UpdateAsync, DeleteAsync
-
-#### 3.5.2 Specialized Interfaces
-
-| Interface            | File                      | Extra Methods                                                                                      |
-| -------------------- | ------------------------- | -------------------------------------------------------------------------------------------------- |
-| ITripRepository      | `ITripRepository.cs`      | GetByDriverIdAsync, GetByPassengerIdAsync                                                          |
-| IDriverRepository    | `IDriverRepository.cs`    | GetByPhoneAsync, GetAvailableDriversAsync, ExistsByPhoneAsync                                      |
-| IPassengerRepository | `IPassengerRepository.cs` | GetByPhoneAsync, ExistsByPhoneAsync                                                                |
-| IUserRepository      | `IUserRepository.cs`      | GetDriverByIdAsync, GetByPhoneAsync, GetDriversAsync, GetPassengersAsync, GetAvailableDriversAsync |
-| IFareRuleRepository  | `IFareRuleRepository.cs`  | GetByVehicleTypeAsync, EnsureSeededAsync                                                           |
-| IReviewRepository    | `IReviewRepository.cs`    | GetByDriverIdAsync, GetByTripIdAsync                                                               |
-| IVehicleRepository   | `IVehicleRepository.cs`   | GetByTypeAsync                                                                                     |
+## 3. Kiến Trúc Domain (Behavioral & Structural)
+
+### 3.1 Vòng Đời Chuyến Đi (Trip Lifecycle & State Machine)
+
+Chuyến đi (`Trip`) là trung tâm của hệ thống, được quản lý chặt chẽ bởi **State Pattern**. Mỗi trạng thái là một lớp kế thừa `ITripState`, đảm bảo chỉ các chuyển đổi hợp lệ mới được thực thi.
+
+#### 3.1.1 Các Trạng Thái (State Machine)
+- **TripPendingState**: Hành khách vừa tạo yêu cầu. Cho phép: `StartSearching`, `Cancel`.
+- **TripSearchingState**: Hệ thống đang tìm tài xế. Cho phép: `AssignDriver`, `Cancel`, `Timeout`.
+- **TripMatchedState**: Đã tìm được tài xế. Tài xế đang di chuyển đến điểm đón. Cho phép: `DriverArrived`, `Cancel`.
+- **TripArrivedState**: Tài xế đã đến điểm đón. Cho phép: `StartTrip`, `Cancel`.
+- **TripStartedState**: Chuyến đi đang diễn ra. Cho phép: `CompleteTrip`, `Cancel`.
+- **TripDropOffState**: Đã đến điểm trả khách. Cho phép: `ConfirmPayment`.
+- **TripCompletedState** (Terminal): Chuyến đi kết thúc thành công.
+- **TripCancelledState** (Terminal): Chuyến đi bị hủy.
+- **TripTimeoutState** (Terminal): Không tìm thấy tài xế sau một khoảng thời gian.
+
+#### 3.1.2 Quy tắc Chuyển Trạng Thái (Guardrails)
+- Không thể `StartTrip` nếu chưa `Arrived`.
+- Không thể `CompleteTrip` nếu chưa `Started`.
+- Thanh toán (`ConfirmPayment`) chỉ được thực hiện ở trạng thái `DropOff`.
+- Mọi chuyển đổi trạng thái đều phát ra **Domain Event** tương ứng (ví dụ: `TripStartedEvent`).
+
+### 3.2 Cơ Chế Ghép Tài Xế (Matching Logic)
+
+Nằm trong `MatchingService`, luồng ghép tài xế hoạt động như sau:
+
+1. **Spatial Indexing**: Sử dụng `InMemoryDriverGrid` để phân vùng bản đồ thành các ô lưới (~1km).
+2. **Lọc Tài Xế**:
+   - Vị trí: Chỉ lấy tài xế trong ô lưới hiện tại và 8 ô xung quanh của điểm đón.
+   - Trạng thái: Phải là `Online`.
+   - Phương tiện: Loại xe của tài xế phải khớp với yêu cầu (`VehicleType`).
+   - Tài chính: `Driver.PayCommission(Fare)` có guard `Wallet >= Commission`, nhưng `MatchingService` hiện **chưa** lọc điều kiện này trước khi propose/assign.
+3. **Đề xuất (Propose)**: Gửi thông báo đến tối đa 3 tài xế gần nhất.
+4. **Chấp nhận (Accept)**: Tài xế đầu tiên chấp nhận sẽ được gán vào chuyến đi. Trạng thái Trip chuyển sang `Matched`, Driver chuyển sang `OnTrip`.
+
+### 3.3 Tính Giá Cước (Fare Calculation)
+
+Nằm trong `FareService` và `Policy`, giá cước được tính khi Hành khách tạo yêu cầu:
+
+1. **Tra cứu Policy**: Lấy quy tắc giá mới nhất cho loại xe (`Car`/`Motorbike`).
+2. **Công thức**:
+   - `TotalAmount = BaseFare + (PricePerKm * DistanceKm)`
+   - `Commission = TotalAmount * CommissionRate`
+   - `DriverIncome = TotalAmount - Commission`
+3. **Lưu trữ**: Giá cước được đóng gói vào đối tượng `Fare` (Value Object) và gắn vào `Trip`.
+
+### 3.4 Thực Thể (Entities) & Đối Tượng Giá Trị (Value Objects)
+
+#### 3.4.1 Driver (Tài xế)
+- Quản lý trạng thái: `Offline`, `Online`, `OnTrip` (State Pattern).
+- Tài chính: `Wallet` (tiền nạp), `Income` (tổng thu nhập từ chuyến đi).
+- Đánh giá: Tự động cập nhật `AverageRating` mỗi khi có `Review` mới.
+
+#### 3.4.2 User Hierarchy
+- `Usr` (Abstract): Chứa thông tin cơ bản (Name, Phone, Password hash).
+- `Psg`, `Drv`, `Adm`: Các vai trò cụ thể với hành vi riêng.
+
+#### 3.4.3 Value Objects (Bất biến)
+- `Loc`: Gồm tọa độ (`Coord`) và địa chỉ (`Addr`).
+- `Route`: Gồm điểm đón, điểm trả, quãng đường, thời gian dự kiến và chuỗi Polyline để vẽ bản đồ.
 
 ---
 
-## 4. Kiến Trúc Application Layer
-
-### 4.1 Service Interfaces
-
-#### 4.1.1 ITripService
-
-**File:** `Application/Interfaces/ITripService.cs`
-
-**Sự kiện:** `TripStatusChanged : EventHandler<TripStatusChangedEventArgs>` (Observer pattern)
-
-**Phương thức:**
-
-- `CreateTripAsync(Guid, Route, Fare, VehicleType) : Task<Trip>` - Tạo chuyến
-- `MatchDriverAsync(Guid, Guid) : Task` - Ghép tài xế (có SemaphoreSlim lock + wallet check)
-- `MarkAsArrivedAsync(Guid) : Task`
-- `StartTripAsync(Guid) : Task`
-- `CompleteTripAsync(Guid) : Task`
-- `CancelTripAsync(Guid, string) : Task`
-- `GetTripAsync(Guid) : Task<Trip>`
-- `GetActiveTripForDriverAsync(Guid) : Task<Trip>`
-- `GetActiveTripForPassengerAsync(Guid) : Task<Trip>`
-- `GetPendingTripsAsync() : Task<List<Trip>>`
-- `GetTripsByDriverAsync(Guid) : Task<List<Trip>>`
-- `GetTripsByPassengerAsync(Guid) : Task<List<Trip>>`
-- `CanTripBeCancelledAsync(Guid) : Task<bool>`
-
-#### 4.1.2 IDriverService
-
-**File:** `Application/Interfaces/IDriverService.cs`
-
-**Phương thức:** GetDriverAsync, UpdateLocationAsync, SetAvailableAsync, SetOfflineAsync, GetAvailableDriversAsync
-
-#### 4.1.3 IPassengerService
-
-**File:** `Application/Interfaces/IPassengerService.cs`
-
-**Phương thức:**
-
-- `RequestTripAsync(Guid, Location, Location, VehicleType) : Task<Trip>` - Tính route + fare + create
-- `CancelTripAsync(Guid, Guid, string) : Task`
-- `GetTripHistoryAsync(Guid) : Task<List<Trip>>`
-- `GetActiveTripAsync(Guid) : Task<Trip>`
-- `RateDriverAsync(Guid, Guid, int, string) : Task`
-- `GetPassengerInfoAsync(Guid) : Task<Passenger>`
-
-#### 4.1.4 IUserService
-
-**File:** `Application/Interfaces/IUserService.cs`
-
-**Phương thức:** LoginAsync, RegisterDriverAsync, RegisterPassengerAsync, GetDriverByIdAsync, GetPassengerByIdAsync, UpdateDriverStatusAsync, UpdateDriverLocationAsync, GetAvailableDriversAsync, DriverExistsAsync
-
-#### 4.1.5 IAdminService
-
-**File:** `Application/Interfaces/IAdminService.cs`
-
-**Phương thức:** GetAllUsersAsync, GetAllDriversAsync, GetAllPassengersAsync, GetAllTripsAsync, GetTripsByStatusAsync(string status), GetFareRulesAsync, CreateFareRuleAsync, UpdateFareRuleAsync, GetTotalGMVAsync, GetTotalNTRAsync, GetCompletionRateAsync, GetAverageSatisfactionAsync
-
-#### 4.1.6 IFareService
-
-**File:** `Application/Interfaces/IFareService.cs`
-
-**Phương thức:** `CalculateFare(VehicleType, double) : Task<Fare>`
-
-#### 4.1.7 IMapService
-
-**File:** `Application/Interfaces/IMapService.cs`
-
-**Phương thức:** GetRouteAsync, SearchLocationAsync, ReverseGeocodeAsync
-
-#### 4.1.8 IMatchingService
-
-**File:** `Application/Interfaces/IMatchingService.cs`
-
-**Phương thức:** `MatchDriverToTripAsync(Guid, Guid) : Task<bool>` - Validate + match (có SemaphoreSlim + wallet check)
-
-#### 4.1.9 IReviewService
-
-**File:** `Application/Interfaces/IReviewService.cs`
-
-**Phương thức:** AddReviewAsync, GetReviewsForDriverAsync
-
-#### 4.1.10 ISimulationService
-
-**File:** `Application/Interfaces/ISimulationService.cs`
-
-**Phương thức:** StartSimulation, StopSimulation, StartTripSimulation, IsTripSimulating, Tick, SimulateTripProgress
-
-### 4.2 Service Implementations
-
-#### 4.2.1 TripService
-
-**File:** `Application/Services/TripService.cs`
-
-**Phụ thuộc:** ITripRepository, IDriverRepository, IPassengerRepository
-
-**Phương thức:** Implement ITripService - orchestrate trip workflow + publish TripStatusChanged events
-
-**Thread safety:** SemaphoreSlim `_matchLock` trong `MatchDriverAsync` để tránh 2 tài xế cùng nhận 1 chuyến
-
-#### 4.2.2 DriverService
-
-**File:** `Application/Services/DriverService.cs`
-
-**Phụ thuộc:** IDriverRepository
-
-#### 4.2.3 PassengerService
-
-**File:** `Application/Services/PassengerService.cs`
-
-**Phụ thuộc:** IPassengerRepository, ITripService, IReviewService, IMapService, IFareService
-
-**Flow RequestTripAsync:** Validate passenger → GetRoute (MapService) → CalculateFare → CreateTrip
-
-#### 4.2.4 UserService
-
-**File:** `Application/Services/UserService.cs`
-
-**Phụ thuộc:** IDriverRepository, IPassengerRepository
-
-**Flow LoginAsync:** Check Driver → Check Passenger → VerifyPassword
-
-#### 4.2.5 AdminService
-
-**File:** `Application/Services/AdminService.cs`
-
-**Phụ thuộc:** IDriverRepository, IPassengerRepository, ITripRepository, IFareRuleRepository, IReviewRepository
-
-**Stats:** GMV (total completed fares), NTR (commission), CompletionRate, AverageRating
-
-#### 4.2.6 FareService
-
-**File:** `Application/Services/FareService.cs`
-
-**Phụ thuộc:** IFareRuleRepository
-
-**Phương thức:** CalculateFare (lookup rule → rule.CalculateFare)
-
-#### 4.2.7 MapService
-
-**File:** `Application/Services/MapService.cs`
-
-**Phụ thuộc:** IGMapService (decorator/wrapper)
-
-#### 4.2.8 MatchingService
-
-**File:** `Application/Services/MatchingService.cs`
-
-**Phụ thuộc:** ITripRepository, IDriverRepository, IVehicleRepository
-
-**Flow MatchDriverToTripAsync:** Validate trip (Searching) → Validate driver (Available) → Validate vehicle type → Validate wallet ≥ commission → trip.MatchDriver + driver.SetOnTrip → Save both
-
-**Thread safety:** SemaphoreSlim `_matchLock` để tránh race condition
-
-#### 4.2.9 ReviewService
-
-**File:** `Application/Services/ReviewService.cs`
-
-**Phụ thuộc:** IReviewRepository, IDriverRepository, ITripRepository
-
-**Flow AddReviewAsync:** Validate trip+driver+passenger match → Create Review → Save → Update driver stats
-
-#### 4.2.10 SimulationService
-
-**File:** `Application/Services/SimulationService.cs`
-
-**Mục đích:** Trip simulation với System.Threading.Timer
-
-**Phương thức:** StartSimulation (khởi động timer), StopSimulation, StartTripSimulation, IsTripSimulating, Tick, SimulateTripProgress
-
-#### 4.2.11 AppServiceBundle
-
-**File:** `Application/Services/AppServiceBundle.cs`
-
-**Mục đích:** Service locator / DI container
-
-**Phương thức:** `CreateDefaultAsync() : Task<AppServiceBundle>` - Wire-up tất cả services với JSON repos (async)
-
-**Phụ thuộc:** All repositories + services
+## 4. Kiến Trúc Application (Orchestration)
+
+### 4.1 Dependency Injection & Khởi Tạo
+Hệ thống sử dụng **Manual Dependency Injection** tập trung tại `AppServiceBundle`. Khi ứng dụng khởi động:
+1. Khởi tạo các Repositories (đọc dữ liệu từ JSON).
+2. Khởi tạo các Services (truyền Repository vào constructor).
+3. Đăng ký các sự kiện chéo giữa các Service (ví dụ: `TripService` lắng nghe `MapService`).
+
+### 4.2 Xử lý Real-time (Event-driven UI)
+- UI không chủ động hỏi trạng thái (polling).
+- Khi một Service thay đổi trạng thái Entity (ví dụ: `Trip.Status`), nó phát ra một sự kiện C# (`EventHandler`).
+- Các `UserControl` đăng ký sự kiện này và tự cập nhật giao diện (ví dụ: `UcTripStatus` tự đổi text khi trạng thái Trip thay đổi).
+
+### 4.3 Thread Safety (An toàn đa luồng)
+Vì ứng dụng chạy trên WinForms (Single Threaded UI) nhưng các tác vụ I/O và Simulation chạy trên luồng phụ:
+- `SemaphoreSlim`: Dùng trong `TripService`, `MatchingService` để tránh race condition khi 2 tài xế cùng nhận 1 chuyến.
+- `Control.Invoke`: Dùng trong Presentation layer để đảm bảo cập nhật UI luôn diễn ra trên UI thread.
+- `JsonRepository`: Sử dụng khóa tệp (file lock) để đảm bảo không có 2 luồng cùng ghi vào 1 file JSON cùng lúc.
 
 ---
 
-## 5. Kiến Trúc Infrastructure Layer
+## 5. Kiến Trúc Infrastructure (Data & External)
+
 
 ### 5.1 Repositories
 
 #### 5.1.1 JsonRepository<T>
 
-**File:** `Infrastructure/Repositories/JsonRepository.cs`
+**File:** `OOP2026/Repository.cs`
 
-**Mục đích:** Generic JSON file-based repository với thread-safe file mutex
+**Mục đích:** Generic JSON file-based repository với thread-safe file mutex (`SemaphoreSlim`)
 
 **File:** `Data/{filename}.json`
 
-**Phương thức:** InitializeAsync, SaveChangesAsync, GetByIdAsync, GetAllAsync, AddAsync, UpdateAsync, DeleteAsync
+**Phương thức:** ReadAsync, GetByIdAsync, CreateAsync, UpdateAsync, DeleteAsync
 
-**Phụ thuộc:** Newtonsoft.Json
+**Phụ thuộc:** System.Text.Json
 
-#### 5.1.2 JsonStorage<T>
+#### 5.1.2 Concrete Repositories (Tất cả định nghĩa trong `OOP2026/Repository.cs`)
 
-**File:** `Infrastructure/Repositories/JsonStorage.cs`
-
-**Mục đích:** Simple JSON storage cho Presentation DI
-
-**Phương thức:** InitializeAsync, SaveAsync
-
-#### 5.1.3 Concrete Repositories
-
-| Class               | File                     | Base Class                | Extra                                     |
-| ------------------- | ------------------------ | ------------------------- | ----------------------------------------- |
-| TripRepository      | `TripRepository.cs`      | JsonRepository<Trip>      | GetByDriverIdAsync, GetByPassengerIdAsync |
-| DriverRepository    | `DriverRepository.cs`    | JsonRepository<Driver>    | GetByPhoneAsync, GetAvailableDriversAsync |
-| PassengerRepository | `PassengerRepository.cs` | JsonRepository<Passenger> | GetByPhoneAsync                           |
-| UserRepository      | `UserRepository.cs`      | JsonRepository<User>      | GetDriverByIdAsync, GetDriversAsync...    |
-| FareRuleRepository  | `FareRuleRepository.cs`  | JsonRepository<FareRule>  | GetByVehicleTypeAsync, EnsureSeededAsync  |
-| ReviewRepository    | `ReviewRepository.cs`    | JsonRepository<Review>    | GetByDriverIdAsync, GetByTripIdAsync      |
-| VehicleRepository   | `VehicleRepository.cs`   | JsonRepository<Vehicle>   | GetByTypeAsync                            |
+| Class               | Base Class                | Extra                                     |
+| ------------------- | ------------------------- | ----------------------------------------- |
+| TripRepo            | JsonRepository<Trip>      | GetByDriverIdAsync, GetByPassengerIdAsync |
+| UsrRepo             | JsonRepository<Usr>       | GetByPhoneAsync, GetPassengerByIdAsync, GetDriverByIdAsync |
+| PolRepo             | JsonRepository<Pol>       | GetLatestByVehicleTypeAsync               |
+| RevRepo             | JsonRepository<Rev>       | GetByDriverIdAsync, GetByTripIdAsync      |
+| VehRepo             | JsonRepository<Veh>       | GetByTypeAsync                            |
 
 #### 5.1.4 FileStorage (static)
 
-**File:** `Infrastructure/Repositories/FileStorage.cs`
+**File:** `OOP2026/Repository.cs`
 
 **Phương thức:** LoadAsync<T>, SaveAsync<T>
 
@@ -621,7 +227,7 @@ FrmMain  (1 Form duy nhất – khung nền)
 
 #### 5.2.1 GMapService
 
-**File:** `Infrastructure/ExternalServices/GMapService.cs`
+**File:** `OOP2026/Service.cs`
 
 **Mục đích:** Map rendering (GMap.NET)
 
@@ -629,55 +235,31 @@ FrmMain  (1 Form duy nhất – khung nền)
 
 **Phụ thuộc:** GMap.NET, IGMapService
 
-#### 5.2.2 MapApiService
+#### 5.2.2 MapService
 
-**File:** `Infrastructure/ExternalServices/MapApiService.cs`
+**File:** `OOP2026/Service.cs`
 
 **Mục đích:** HTTP-based routing/geocoding (Photon + OSRM)
 
-**Phương thức:** SearchLocation, ReverseGeocodeAsync, GetDistanceAsync, GetRouteAsync
+**Phương thức:** SearchAsync, GetAddressAsync, GetDirectionsAsync, EnsureLocationAsync
 
-**Phụ thuộc:** HttpClient, Newtonsoft.Json, PhotonResponse DTOs, OsrmResponse DTOs
+**Phụ thuộc:** HttpClient, System.Text.Json
 
 ---
 
 ## 6. Kiến Trúc Presentation Layer
 
-### 6.1 Base Classes
+### 6.1 Forms Chính
 
-#### 6.1.1 BaseForm
+#### 6.1.1 FrmMultiRole
 
-**File:** `Presentation/Base/BaseForm.cs`
+**File:** `OOP2026/Form/FrmMultiRole.cs`
 
-**Mục đích:** Base cho dialog/screen forms (non-shell)
+**Mục đích:** Shell chính cho hành khách/tài xế/admin trong phiên demo.
 
-**Features:** Loading state, Escape key, MessageBox helpers, Invoke helper
+#### 6.1.2 FrmAuth
 
-**Phương thức:** ShowInfo, ShowWarning, ShowError, Confirm, ShowWaitCursor, RunOnUI
-
-#### 6.1.2 BaseUserControl
-
-**File:** `Presentation/Base/BaseUserControl.cs`
-
-**Mục đích:** Base cho reusable controls
-
-**Features:** Loading state, MessageBox helpers, Invoke helper
-
-### 6.2 Forms Chính
-
-#### 6.2.1 FrmMain
-
-**File:** `Presentation/Forms/FrmMain.cs`
-
-**Mục đích:** Entry window - Login/Register/Dual mode
-
-**Phụ thuộc:** IUserService, factories cho LoginForm/RegisterForm/PassengerShell/DriverShell
-
-**Flow:** ButtonLogin → LoginForm.ShowDialog → Passenger/Driver Shell
-
-#### 6.2.2 FrmMultiRole
-
-**File:** `Presentation/Forms/FrmMultiRole.cs`
+**File:** `OOP2026/Form/FrmAuth.cs`
 
 **Mục đích:** Shell cho hành khách/tài xế/admin
 
@@ -687,29 +269,9 @@ FrmMain  (1 Form duy nhất – khung nền)
 
 **Navigation:** RegisterScreens → NavigateTo(key)
 
-### 6.3 UserControls Chính
+### 6.2 UserControls Chính
 
-#### 6.3.1 UcAuth – Xác Thực Tập Trung
-
-**Container chính:** `TableLayoutPanel` (1 cột, 3 hàng: Logo · Form · Footer)
-
-**Lý do:** Cần căn giữa theo cả chiều ngang lẫn dọc khi Shell co giãn. `TableLayoutPanel` với `Anchor = None` và `AutoSize` trên ô giữa cho phép điều này mà không cần tọa độ cứng.
-
-```
-UcAuth (Dock Fill)
-└── TableLayoutPanel (1 cột × 3 hàng, Row 2 = Fill)
-    ├── Row 1 – Logo / Tên ứng dụng (cố định Height)
-    ├── Row 2 – Panel trung tâm (Fill, căn giữa ngang)
-    │   └── Panel "pnlCenter" (AutoSize, Anchor = None)
-    │       ├── pnlLogin  (Label, TextBox phone, TextBox password, Button "Đăng nhập", LinkLabel "→ Đăng ký")
-    │       └── pnlRegister (TextBox name/phone/password, ComboBox Role, Button "Tạo tài khoản", LinkLabel "→ Đăng nhập")
-    │           [Hai panel ẩn/hiện luân phiên – KHÔNG dùng TabControl]
-    └── Row 3 – Footer nhỏ (cố định Height)
-```
-
-> **Quyết định thiết kế:** Dùng hai `Panel` ẩn/hiện thay vì `TabControl` vì tab bar của `TabControl` tạo ra affordance "người dùng có thể tự chọn tab", điều không phù hợp với flow xác thực tuyến tính.
-
-#### 6.3.2 UcPassenger – Vòng Đời Đặt Xe
+#### 6.2.1 ucPassengerHome – Vòng Đời Đặt Xe
 
 **Container chính:** `SplitContainer` (Vertical – bản đồ trái, bảng điều khiển phải)
 
@@ -752,7 +314,7 @@ UcPassenger (Dock Fill)
 
 > **Cơ chế chuyển Panel:** `TripStatusChanged` event → Shell hoặc `UcPassenger` gọi helper `ShowStage(TripStatus status)` → ẩn tất cả panel con, hiện đúng panel tương ứng. Không dùng `TabControl` vì người dùng không được phép tự chuyển tab.
 
-#### 6.3.3 UcDriver – Trạm Chỉ Huy Tài Xế
+#### 6.2.2 ucDriverHome – Trạm Chỉ Huy Tài Xế
 
 **Container chính:** `TableLayoutPanel` (ngoài) + `SplitContainer` (trong)
 
@@ -794,7 +356,7 @@ UcDriver (Dock Fill)
 
 > **Quyết định thiết kế:** Các nút hành động cao 80px là bắt buộc – tài xế thao tác trong khi lái xe (hoặc vừa dừng xe), diện tích bấm nhỏ là lỗi nghiêm trọng về UX.
 
-#### 6.3.4 UcAdmin – Trung Tâm Quản Trị
+#### 6.2.3 FrmAdmin – Trung Tâm Quản Trị
 
 **Container chính:** `TabControl` (Dock Fill)
 
@@ -833,11 +395,11 @@ UcAdmin (Dock Fill)
             [Button "Làm mới dữ liệu" ở góc trên phải]
 ```
 
-### 6.4 UserControls Phụ
+### 6.3 UserControls Phụ
 
 #### 6.4.1 UcMap – Bản Đồ
 
-**File:** `Presentation/Components/UcMap.cs`
+**File:** `OOP2026/UserControl/ucMap.cs`
 
 **Mục đích:** Hiển thị bản đồ GMap.NET với markers và routes
 
@@ -851,7 +413,7 @@ UcAdmin (Dock Fill)
 
 #### 6.4.2 UcLocationPicker – Chọn Địa Điểm
 
-**File:** `Presentation/Components/UcLocationPicker.cs`
+**File:** `OOP2026/UserControl/ucLocationPicker.cs`
 
 **Mục đích:** Cho phép người dùng chọn điểm đón/đến trên bản đồ hoặc nhập địa chỉ
 
@@ -863,24 +425,25 @@ UcAdmin (Dock Fill)
 
 #### 6.4.3 UcTripStatus – Trạng Thái Chuyến
 
-**File:** `Presentation/Components/UcTripStatus.cs`
+**File:** `OOP2026/UserControl/ucTripStatus.cs`
 
 **Mục đích:** Hiển thị trạng thái hiện tại của chuyến đi
 
 **States hiển thị:**
 
-- Requested: "Đang chờ xử lý..."
+- Pending: "Đang chờ xử lý..."
 - Searching: "Đang tìm tài xế..."
 - Matched: "Đã tìm được tài xế"
 - Arrived: "Tài xế đã đến điểm đón"
 - Started: "Đang di chuyển..."
+- DropOff: "Đã đến điểm trả khách"
 - Completed: "Chuyến đi hoàn thành"
 - Cancelled: "Chuyến đi đã hủy"
 - Timeout: "Hết thời gian chờ"
 
 #### 6.4.4 UcDriverCard – Thông Tin Tài Xế
 
-**File:** `Presentation/Components/UcDriverCard.cs`
+**File:** `OOP2026/UserControl/ucDriverCard.cs`
 
 **Mục đích:** Hiển thị thông tin tài xế (tên, sao, loại xe, biển số)
 
@@ -894,7 +457,7 @@ UcAdmin (Dock Fill)
 
 #### 6.4.5 UcTripCard – Card Chuyến Đi
 
-**File:** `Presentation/Components/UcTripCard.cs`
+**File:** `OOP2026/UserControl/ucTripCard.cs`
 
 **Mục đích:** Hiển thị thông tin chuyến trong danh sách
 
@@ -906,9 +469,9 @@ UcAdmin (Dock Fill)
 - Trạng thái (màu sắc theo trạng thái)
 - Giá tiền
 
-#### 6.4.6 UcVehicleFareSelector – Chọn Dịch Vụ Và Giá
+#### 6.4.6 UcFareSelector – Chọn Dịch Vụ Và Giá
 
-**File:** `Presentation/Components/UcVehicleFareSelector.cs`
+**File:** `OOP2026/UserControl/ucFareSelector.cs`
 
 **Mục đích:** Chọn loại dịch vụ (Car/Motorbike) và xem giá dự kiến
 
@@ -921,7 +484,7 @@ UcAdmin (Dock Fill)
 
 #### 6.4.7 UcReview – Đánh Giá
 
-**File:** `Presentation/Components/UcReview.cs`
+**File:** `OOP2026/UserControl/ucReview.cs`
 
 **Mục đích:** Form đánh giá 5 sao + comment sau chuyến
 
@@ -934,7 +497,7 @@ UcAdmin (Dock Fill)
 
 #### 6.4.8 UcProfile – Hồ Sơ Cá Nhân
 
-**File:** `Presentation/Components/UcProfile.cs`
+**File:** `OOP2026/UserControl/ucProfile.cs`
 
 **Mục đích:** Xem/sửa hồ sơ, nạp ví
 
@@ -946,9 +509,9 @@ UcAdmin (Dock Fill)
 - Button nạp tiền
 - Lịch sử giao dịch (nếu cần)
 
-#### 6.4.9 UcTripDetail – Chi Tiết Chuyến
+#### 6.4.9 UcTrip – Chi Tiết Chuyến
 
-**File:** `Presentation/Components/UcTripDetail.cs`
+**File:** `OOP2026/UserControl/ucTrip.cs`
 
 **Mục đích:** Xem chi tiết một chuyến đi
 
@@ -1037,7 +600,7 @@ Mọi control phải tuân theo các quy tắc sau để tránh tọa độ cứ
 
 [System - TripMatchingWorker] Poll trips đang Searching (dùng trip.IsSearching())
     → MatchingService.MatchDriverToTripAsync(tripId, driverId)
-        → lọc driver: Status == Available AND VehicleType match AND Wallet >= Commission
+        → lọc driver: Status == Online AND VehicleType match AND Wallet >= Commission
         → trip.MatchDriver(driverId)                       // emit TripMatchedEvent
         → driver.SetOnTrip()                               // emit DriverStatusChangedEvent
         → save Trip + Driver
@@ -1056,7 +619,7 @@ Mọi control phải tuân theo các quy tắc sau để tránh tọa độ cứ
         → trip.CompleteTrip()                              // emit TripCompletedEvent
         → trip.ConfirmPayment()                            // emit TripPaidEvent
         → driver.PayCommission(fare)
-        → driver.SetAvailable()
+        → driver.SetOnline()
         → passenger.AddTrip()
         → save all
 
@@ -1094,7 +657,7 @@ FareRule.CalculateFare(distanceKm):
 | #   | Ngày       | Ngữ cảnh     | Vấn đề                                                                       | Nguyên nhân                                                                                                                  | Hướng nghĩ                                                                                                                                                              |
 | --- | ---------- | ------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | P01 | 2026-04-24 | Matching     | Race condition: hai trip Searching có thể cùng nhận một driver               | `MatchDriverAsync` không có lock — không có `SemaphoreSlim`                                                                  | Đã thêm `SemaphoreSlim(1,1)` trong `MatchingService` và `TripService` để tránh double-assignment                                                                        |
-| P02 | 2026-04-24 | Matching     | Thuật toán lọc driver chưa đầy đủ                                            | Chỉ lọc `Status == Available` + `VehicleType` match; chưa lọc: địa chỉ hành chính (phường→quận→thành phố), số dư `Wallet` đủ | Đã thêm kiểm tra `Wallet >= Commission` trong `MatchingService`; bỏ `MaxPickupDistance` khỏi Vehicle hierarchy (dùng `SimulationConstants.MaxPickupDistanceKm` nếu cần) |
+| P02 | 2026-04-24 | Matching     | Thuật toán lọc driver chưa đầy đủ                                            | Chỉ lọc `Status == Online` + `VehicleType` match; chưa lọc: địa chỉ hành chính (phường→quận→thành phố), số dư `Wallet` đủ | Đã thêm kiểm tra `Wallet >= Commission` trong `MatchingService`; bỏ `MaxPickupDistance` khỏi Vehicle hierarchy (dùng `SimulationConstants.MaxPickupDistanceKm` nếu cần) |
 | P03 | 2026-04-24 | Architecture | Presentation phụ thuộc trực tiếp vào Domain và Infrastructure                | Vi phạm Clean Architecture — Presentation nên chỉ phụ thuộc Application                                                      | Về lâu dài: tách DTO layer, chỉ expose Application interfaces ra Presentation. Trước mắt: ghi nhận, không block MVP                                                     |
 | P04 | 2026-04-24 | Async        | `TripService` mix sync và async (`.Result` usage) trong một số call chain    | `RequestTrip()` là sync nhưng gọi async internals — `.Result` có thể gây deadlock trong WinForms message loop                | Tách hẳn sync và async path; hoặc dùng `Task.Run()` bọc ở Presentation, không gọi `.Result` trực tiếp                                                                   |
 | P05 | 2026-04-24 | Map          | Polyline decoding chưa hoàn chỉnh — route không hiển thị trên MapControl     | OSRM trả về encoded polyline string; GMapRoute cần list Coordinate; chưa implement decoder                                   | Đã thêm `DecodePolyline` trong `MapControl`; chưa test tích hợp đầy đủ                                                                                                  |
@@ -1117,9 +680,9 @@ FareRule.CalculateFare(distanceKm):
 | #   | Ngày       | Phạm vi                | Quyết định                                                                                            | Lý do                                                                                                                                                                                   | Ảnh hưởng                                                                                                       |
 | --- | ---------- | ---------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | D02 | 2026-04-24 | Domain / Trip          | Dùng **State Pattern** (`ITripState` + 8 state classes) thay vì switch-case trên `TripStatus` enum    | Đảm bảo chỉ chuyển trạng thái hợp lệ; dễ thêm state mới không sửa Trip class; tách biệt behavior theo trạng thái                                                                        | Mọi transition phải đi qua state object → không thể bypass business rule từ bên ngoài.                          |
-| D03 | 2026-05-01 | Domain / Driver        | Chuyển từ `DriverStateMachine` sang **State Pattern** (`IDriverState` + 3 states)                     | Đồng bộ kiến trúc với Trip; State Pattern giúp quản lý behavior (SetAvailable, SetOnTrip, SetOffline) sạch hơn static dictionary; hỗ trợ tốt hơn cho persistence                        | Loại bỏ `DriverStateMachine` hoàn toàn; Driver class giờ chỉ delegate hành vi sang `_currentState`.             |
+| D03 | 2026-05-01 | Domain / Driver        | Chuyển từ `DriverStateMachine` sang **State Pattern** (`IDriverState` + 3 states)                     | Đồng bộ kiến trúc với Trip; State Pattern giúp quản lý behavior (SetOnline, SetOnTrip, SetOffline) sạch hơn static dictionary; hỗ trợ tốt hơn cho persistence                        | Loại bỏ `DriverStateMachine` hoàn toàn; Driver class giờ chỉ delegate hành vi sang `_currentState`.             |
 | D04 | 2026-04-24 | Domain / Persistence   | Driver tham chiếu `VehicleId` (Guid) thay vì embed `Vehicle` object                                   | Giữ Vehicle là Aggregate riêng, tránh circular dependency; Vehicle có vòng đời độc lập (có thể đổi xe)                                                                                  | Query thông tin xe phải join qua VehicleRepository — 2 query thay vì 1                                          |
-| D05 | 2026-04-24 | Infrastructure         | JSON file storage với `TypeNameHandling.All` (Newtonsoft.Json)                                        | Ràng buộc giáo khoa không dùng SQL; `TypeNameHandling.All` cần thiết để deserialized `List<User>` giữ đúng subtype (Driver / Passenger)                                                 | Dữ liệu JSON lưu thêm `$type` field — coupling với Newtonsoft; migration sang DB sau này cần rewrite repository |
+| D05 | 2026-04-24 | Infrastructure         | JSON file storage với `JsonDerivedType` (System.Text.Json)                                            | Ràng buộc giáo khoa không dùng SQL; `JsonDerivedType` cần thiết để deserialized `List<Usr>` giữ đúng subtype (Drv / Psg / Adm)                                                         | Dữ liệu JSON lưu thêm `$type` field — chuẩn hóa theo System.Text.Json; dễ dàng bảo trì và tương thích.          |
 | D06 | 2026-04-24 | Application / Event    | `ITripService.TripStatusChanged` là `EventHandler<TripStatusChangedEventArgs>` declare trên interface | Cho phép UI subscribe qua interface mà không cần cast sang `TripService` concrete — decoupling giữa Presentation và Application                                                         | UI Forms phải unsubscribe khi close để tránh memory leak                                                        |
 | D07 | 2026-04-24 | Application / Matching | Không implement `InMemoryDriverCache`, không có `Policies/` (EligibilityPolicy, AssignmentPolicy)     | MVP scope — inline logic trong `MatchingService` đủ; cache và policy object là over-engineering cho project đơn luồng                                                                   | Khi scale lên (nhiều concurrent request), cần extract policy và cache                                           |
 | D08 | 2026-04-24 | Infrastructure / Map   | Dùng Photon (geocoding) + OSRM (routing) thay vì Google Maps API                                      | Google Maps yêu cầu API key có phí; Photon + OSRM là open-source, không cần key                                                                                                         | OSRM trả về encoded polyline — đã thêm decoder trong `MapControl` (chưa test đầy đủ)                            |
@@ -1137,30 +700,30 @@ FareRule.CalculateFare(distanceKm):
 
 ## 12. Use Cases
 
-| ID   | Tên                      | Tác nhân         | Mô tả                                                                                                      | Trạng thái |
-| ---- | ------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------- | ---------- |
-| UC1  | Đăng nhập                | User             | Phone + password → `UserService.Login()`                                                                   | ✅         |
-| UC2  | Đăng ký tài xế           | Driver           | Tạo Driver + Vehicle → `UserService.RegisterDriver()`                                                      | ✅         |
-| UC3  | Đăng ký hành khách       | Passenger        | Tạo Passenger → `UserService.RegisterPassenger()`                                                          | ✅         |
-| UC4  | Đặt chuyến               | Passenger        | Nhập pickup/dest/vehicleType → `TripService.RequestTrip()` (sync)                                          | ✅         |
-| UC5  | Ghép tài xế              | System           | Lọc driver Available + VehicleType match + Wallet đủ hoa hồng → `MatchingService.MatchDriverToTripAsync()` | ✅         |
-| UC6  | Đến điểm đón             | Driver           | → `TripService.ArriveAtPickup()`                                                                           | ✅         |
-| UC7  | Bắt đầu chuyến           | Driver           | → `TripService.StartTrip()`                                                                                | ✅         |
-| UC8  | Hoàn thành chuyến        | Driver           | → `TripService.CompleteTrip()` + payment inline                                                            | ✅         |
-| UC9  | Đánh giá tài xế          | Passenger        | → `ReviewService.AddReviewAsync()` → cập nhật AverageRating                                                | ✅         |
-| UC10 | Hủy chuyến               | Passenger/Driver | → `TripService.CancelTrip()` — được phép trước Started                                                     | ✅         |
-| UC11 | Lịch sử chuyến           | Passenger/Driver | → `TripRepository.GetByPassengerId/DriverId`                                                               | ✅         |
-| UC12 | Thông tin tài xế matched | Passenger        | Trip DTO chứa DriverId → UI hiển thị thông tin                                                             | ✅         |
-| UC13 | Bật/tắt trạng thái       | Driver           | Offline ↔ Available → `UserService.UpdateDriverStatus()`                                                   | ✅         |
-| UC14 | Nhận thông tin chuyến    | Driver           | → `TripService.GetTripAsync()`                                                                             | ✅         |
-| UC15 | Chấp nhận/Từ chối chuyến | Driver           | `AcceptTripHandler` tồn tại; UI flow chưa hoàn chỉnh                                                       | ⚠️         |
-| UC16 | Admin theo dõi real-time | Admin            | AdminShell + DataGridView; chưa có live map                                                                | ⚠️         |
-| UC17 | Cấu hình FareRule        | Admin            | `AdminService.CreateFareRuleAsync/UpdateFareRuleAsync`                                                     | ✅         |
-| UC18 | Driver Radar (proximity) | Passenger        | Chưa implement proximity search                                                                            | ❌         |
-| UC19 | Thu nhập tài xế          | Driver           | Driver entity có Income + Wallet (Money)                                                                   | ✅         |
-| UC20 | Báo cáo thống kê         | Admin            | GMV, NTR, CompletionRate, AverageSatisfaction                                                              | ✅         |
-| UC21 | Dẫn đường (routing)      | Driver           | MapControl hiển thị route nếu có polyline; routing chưa integrated                                         | ⚠️         |
-| UC22 | Sửa thông tin cá nhân    | User             | `UserService` có methods; UI partial                                                                       | ⚠️         |
+| ID   | Tên                      | Tác nhân         | Mapping code thật                                                                                                  | Trạng thái |
+| ---- | ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------- | ---------- |
+| UC1  | Đăng nhập                | User             | `UserService.LoginAsync()` trong `OOP2026/Service.cs`; UI: `FrmAuth`                                                | ✅         |
+| UC2  | Đăng ký tài xế           | Driver           | `UserService.RegisterDriverAsync()` + `VehicleFactory.CreateVehicle()`                                              | ✅         |
+| UC3  | Đăng ký hành khách       | Passenger        | `UserService.RegisterPassengerAsync()`                                                                              | ✅         |
+| UC4  | Đặt chuyến               | Passenger        | `ucBooking` → `PassengerService.RequestTripAsync()` → `TripCommandService.CreateTripAsync()`                        | ✅         |
+| UC5  | Ghép tài xế              | System           | `MatchingService.FindBestDriversAsync()` → `ProposeDriversForTripAsync()` → `TryAssignDriverAsync()`               | ⚠️ wallet filter chưa có trong matching |
+| UC6  | Đến điểm đón             | Driver           | `TripCommandService.DriverArrivedAtPickupAsync()` → `Trip.DriverArrived()`                                          | ✅         |
+| UC7  | Bắt đầu chuyến           | Driver           | `TripCommandService.StartTripAsync()` → `Trip.BeginTrip()`                                                          | ✅         |
+| UC8  | Hoàn thành chuyến        | Driver           | `TripCommandService.DriverArrivedAtDropoffAsync()` → `CompleteTripAsync()` → `Trip.ConfirmPayment()`                | ✅         |
+| UC9  | Đánh giá tài xế          | Passenger        | `ReviewService.CreateReviewAsync()`; UI: `ucReview`                                                                | ✅         |
+| UC10 | Hủy chuyến               | Passenger/Driver | `PassengerService.CancelTripAsync()` hoặc `TripCommandService.CancelTripAsync()`                                    | ✅         |
+| UC11 | Lịch sử chuyến           | Passenger/Driver | `TripRepository.GetByPassengerIdAsync()` / `GetByDriverIdAsync()`; UI: `ucHistory`, `ucHistoryCard`, `ucTripCard`  | ✅         |
+| UC12 | Thông tin tài xế matched | Passenger        | `Trip.DriverId` + `UserRepository.GetDriverByIdAsync()` + `VehicleRepository.GetByIdAsync()`                       | ✅         |
+| UC13 | Bật/tắt trạng thái       | Driver           | `DriverCommandService.GoOnlineAsync()` / `GoOfflineAsync()`                                                        | ✅         |
+| UC14 | Nhận thông tin chuyến    | Driver           | `TripQueryService.GetTripByIdAsync()` / `GetActiveTripForDriverAsync()`                                            | ✅         |
+| UC15 | Chấp nhận/Từ chối chuyến | Driver           | `DriverCommandService.AcceptTripAsync()` / `RejectTripAsync()`; UI: `ucRequest`, `ucDriverHome`                    | ✅         |
+| UC16 | Admin theo dõi dữ liệu   | Admin            | `FrmAdmin` + `AdminService.GetAllUsersAsync/GetAllTripsAsync/GetAllPoliciesAsync/GetAllReviewsAsync()`             | ✅         |
+| UC17 | Cấu hình Policy giá      | Admin            | `AdminService.CreatePolicyAsync()`; repo: `PolicyRepository`                                                       | ✅ create; update/delete chưa có contract |
+| UC18 | Driver Radar proximity   | Passenger        | `DriverQueryService.GetNearbyDriversAsync()` tồn tại; passenger radar UI chuyên biệt chưa có                       | ⚠️         |
+| UC19 | Thu nhập tài xế          | Driver           | `DriverWalletService.GetIncomeAsync()` + `Driver.AddIncome()`                                                      | ✅         |
+| UC20 | Báo cáo thống kê         | Admin            | `AdminService.GetTripStatisticsAsync()`, `GetTotalRevenueAsync()`, `GetTotalCommissionAsync()`                     | ✅         |
+| UC21 | Dẫn đường (routing)      | Driver/Passenger | `MapService.GetDirectionsAsync()` + `Route.Polyline`; UI: `ucMap`                                                  | ✅ cơ bản  |
+| UC22 | Sửa thông tin cá nhân    | User             | `UserService.UpdateProfileAsync()`; UI: `ucProfile`                                                                | ⚠️ UI phụ thuộc flow |
 
 ---
 
@@ -1168,13 +731,10 @@ FareRule.CalculateFare(distanceKm):
 
 > **Áp dụng cho tất cả code, tài liệu, và câu trả lời từ AI.**
 
-- **Môi trường:** .NET Framework 4.8, C# 8.0, WinForms (Windows).
-- **Cấm các tính năng C# 8.0+:** `Nullable reference types` (`string?`), `using var`, `await foreach`, `IAsyncEnumerable<T>`, `record`, `init`, `with`, `target-typed new`, `global using`, file-scoped namespaces, `required`.
-  - **Lưu ý:** `switch expression` (`x switch { ... }`) hiện **ĐƯỢC PHÉP**.
-- **Cấm thư viện/Pattern:**
-  - **Dependency Injection (DI):** Không dùng container (`Microsoft.Extensions.DependencyInjection`, v.v.). Tự quản lý dependency (truyền qua constructor hoặc `new` trực tiếp).
-  - **LINQ:** Không dùng `Where`, `Select`, `OrderBy`, ... (dùng `foreach` + `if` truyền thống).
-  - **`var`:** Không dùng `var`. Phải khai báo kiểu tường minh.
+- **Môi trường:** .NET Framework 4.8, C# Latest, WinForms (Windows).
+- **Tính năng ngôn ngữ:** Sử dụng `Nullable reference types`, `var`, `LINQ`, `switch expression`.
+- **Quản lý Dependency:**
+  - **Manual Dependency Injection:** Không dùng container (`Microsoft.Extensions.DependencyInjection`, v.v.). Tự quản lý dependency (truyền qua constructor hoặc `new` trực tiếp).
 - **Ràng buộc khác:** Không tự ý sửa `.csproj`/`.sln` (NuGet, LangVersion) khi chưa duyệt.
 
 ---
@@ -1185,13 +745,13 @@ FareRule.CalculateFare(distanceKm):
 
 | Hạng mục             | Số lượng | Danh sách                                                                                                                                   |
 | -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Form                 | 2        | `FrmMain`, `FrmMultiRole`                                                                                                                   |
-| UserControl chính    | 4        | `UcAuth`, `UcPassenger`, `UcDriver`, `UcAdmin`                                                                                              |
-| UserControl phụ      | 9        | `UcReview`, `UcProfile`, `UcTripDetail`, `UcMap`, `UcLocationPicker`, `UcTripStatus`, `UcTripCard`, `UcDriverCard`, `UcVehicleFareSelector` |
-| Domain Entities      | 9        | `Trip`, `User`, `Driver`, `Passenger`, `Admin`, `FareRule`, `Vehicle`, `Motorbike`, `Car`, `Review`                                         |
-| Value Objects        | 6        | `Money`, `Location`, `Coordinate`, `Address`, `Route`, `Fare`                                                                               |
-| Trip States          | 8        | `RequestedState`, `SearchingState`, `MatchedState`, `ArrivedState`, `StartedState`, `CompletedState`, `CancelledState`, `TimeoutState`      |
-| Driver States        | 3        | `DriverOfflineState`, `DriverAvailableState`, `DriverOnTripState`                                                                           |
+| Form                 | 8        | `FrmMultiRole`, `FrmAdmin`, `FrmAuth`, `FrmDriver`, `FrmDriverAuth`, `FrmPassenger`, `FrmPassengerAuth`, `Form1`                               |
+| UserControl chính    | 2        | `ucPassengerHome`, `ucDriverHome`                                                                                                           |
+| UserControl phụ      | 12       | `ucBooking`, `ucMap`, `ucHistory`, `ucHistoryCard`, `ucReview`, `ucProfile`, `ucTrip`, `ucLocationPicker`, `ucTripStatus`, `ucTripCard`, `ucDriverCard`, `ucFareSelector` |
+| Domain Entities      | 10       | `Trip`, `Usr`, `Drv`, `Psg`, `Adm`, `Pol`, `Veh`, `Moto`, `Car`, `Rev`                                                                        |
+| Value Objects        | 5        | `Loc`, `Coord`, `Addr`, `Route`, `Fare`                                                                                                         |
+| Trip States          | 9        | `TripPendingState`, `TripSearchingState`, `TripMatchedState`, `TripArrivedState`, `TripStartedState`, `TripDropOffState`, `TripCompletedState`, `TripCancelledState`, `TripTimeoutState` |
+| Driver States        | 3        | `DriverOfflineState`, `DriverOnlineState`, `DriverOnTripState`                                                                           |
 | Domain Events        | 12       | Trip (9) + Driver (2) + Review (1)                                                                                                          |
 | Application Services | 11       | Trip, Driver, Passenger, User, Admin, Fare, Map, Matching, Review, Simulation, AppServiceBundle                                             |
 | Repositories         | 7        | Trip, Driver, Passenger, User, FareRule, Review, Vehicle                                                                                    |
@@ -1211,7 +771,7 @@ FareRule.CalculateFare(distanceKm):
 - **Frontend:** Windows Forms (WinForms)
 - **Database:** JSON file storage (`Data/` folder)
 - **Map:** GMap.NET 2.1.7 (`GMap.NET.WinForms` ở Presentation, `GMap.NET.Core` ở Infrastructure); Provider: Photon (geocoding) + OSRM (routing)
-- **Serialization:** Newtonsoft.Json
+- **Serialization:** System.Text.Json
 - **Service Composition:** Manual — khởi tạo bằng `new` trong `Program.cs` (không dùng DI container)
 
 ---
@@ -1224,7 +784,7 @@ FareRule.CalculateFare(distanceKm):
 | R02 | Photon Geocoding API                     | https://photon.komoot.io                                                           | Geocoding địa chỉ tiếng Việt → Coordinate                                            |
 | R03 | GMap.NET GitHub                          | https://github.com/judero01pol/GMap.NET                                            | Tích hợp bản đồ vào WinForms, overlay, marker, route                                 |
 | R04 | Google Encoded Polyline Algorithm        | https://developers.google.com/maps/documentation/utilities/polylinealgorithm       | Decode polyline string từ OSRM response → List\<PointLatLng\>                        |
-| R05 | Newtonsoft.Json TypeNameHandling         | https://www.newtonsoft.com/json/help/html/SerializeTypeNameHandling.htm            | Serialize/Deserialize đa hình (List\<User\> giữ Driver / Passenger subtype)          |
+| R05 | System.Text.Json Polymorphism            | https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/polymorphism | Serialize/Deserialize đa hình (List\<Usr\> giữ Drv / Psg / Adm subtype)              |
 | R06 | Microsoft.Extensions.DependencyInjection | https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection      | DI container cho .NET Framework 4.8                                                  |
 | R07 | Haversine Formula                        | https://en.wikipedia.org/wiki/Haversine_formula                                    | Tính khoảng cách giữa 2 Coordinate (dùng trong TripService + MatchingService filter) |
 | R08 | ReaderWriterLockSlim (.NET)              | https://learn.microsoft.com/en-us/dotnet/api/system.threading.readerwriterlockslim | Thread-safe read/write cho JsonStorage                                               |
@@ -1234,5 +794,5 @@ FareRule.CalculateFare(distanceKm):
 
 ---
 
-> **Tài liệu được cập nhật lần cuối:** 2026-05-06  
+> **Tài liệu được cập nhật lần cuối:** 2026-05-26
 > **Người cập nhật:** Agent

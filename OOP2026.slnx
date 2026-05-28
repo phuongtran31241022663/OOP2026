@@ -1,7 +1,4 @@
 <Solution>
-  <Project Path="Application/Application.csproj" Id="a2503eb9-b7a2-4594-8d42-17a4812fd173" />
-  <Project Path="Common/Common.csproj" Id="e3833fc9-876c-4f32-9f03-1ffa44bdf6fd" />
-  <Project Path="Domain/Domain.csproj" Id="3ac87c44-ecaa-4de9-8b55-7fd2f65911a9" />
-  <Project Path="Infrastructure/Infrastructure.csproj" Id="99f69e98-68f0-44a9-bb36-9b26151904db" />
-  <Project Path="Presentation/Presentation.csproj" Id="ec4603fb-0d6a-4a26-b497-fe53f3278929" />
+  <Project Path="OOP2026/OOP2026.csproj" Id="443fe615-e06e-4602-8b26-da803e6d95ba" />
 </Solution>
+
