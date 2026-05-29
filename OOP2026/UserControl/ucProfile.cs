@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -49,23 +49,23 @@ namespace OOP2026
             // Đa hình: phân nhánh theo loại tài khoản
             if (_user is Psg p)
             {
-                lblTrips.Text = $"🧭 Tổng chuyến đi: {p.TotTrip} chuyến";
+                lblTrips.Text = $"📊 Tổng chuyến đi: {p.TotTrip} chuyến";
                 lblLicense.Visible = false;
                 lblRating.Visible = false;
-                btnEdit.BackColor = Colors.Green;
+                btnEdit.BackColor = Color.White;
             }
             else if (_user is Drv d)
             {
-                lblTrips.Text = $"🧭 Tổng chuyến đi: {d.TotTrip}";
+                lblTrips.Text = $"📊 Tổng chuyến đi: {d.TotTrip}";
                 lblLicense.Text = $"🪪 Số GPLX: {d.LicNo}";
                 lblLicense.Visible = true;
                 lblRating.Text = $"⭐ Đánh giá: {d.AvgRat:F1} ({d.TotalReviews} đánh giá)";
                 lblRating.Visible = true;
-                btnEdit.BackColor = Colors.Orange;
+                btnEdit.BackColor = Color.White;
             }
             else
             {
-                lblTrips.Text = "🧭 Tổng chuyến đi: N/A";
+                lblTrips.Text = "📊 Tổng chuyến đi: N/A";
                 lblLicense.Visible = false;
                 lblRating.Visible = false;
             }
@@ -114,7 +114,7 @@ namespace OOP2026
 
                 _isEditMode = false;
                 btnEdit.Text = "✏️ Chỉnh sửa thông tin";
-                btnEdit.BackColor = (_user is Drv) ? Colors.Orange : Colors.Green;
+                btnEdit.BackColor = Color.White;
                 txtName.Visible = false;
                 txtPhone.Visible = false;
                 lblName.Visible = true;

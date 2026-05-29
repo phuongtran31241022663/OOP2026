@@ -101,6 +101,7 @@ namespace OOP2026
             this.numCapacity = new System.Windows.Forms.NumericUpDown();
             this.btnRegister = new System.Windows.Forms.Button();
             this.linkToLogin = new System.Windows.Forms.LinkLabel();
+            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.tblMain.SuspendLayout();
             this.pnlCenter.SuspendLayout();
             this.pnlLogin.SuspendLayout();
@@ -111,6 +112,10 @@ namespace OOP2026
             this.pnlVehicleInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numCapacity)).BeginInit();
             this.SuspendLayout();
+            // 
+            // errorProvider
+            // 
+            this.errorProvider.ContainerControl = this;
             // 
             // tblMain
             // 
@@ -134,9 +139,9 @@ namespace OOP2026
             this.lblLogo.AutoSize = true;
             this.lblLogo.Font = new System.Drawing.Font("Segoe UI", 24F, System.Drawing.FontStyle.Bold);
             this.lblLogo.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(13)))), ((int)(((byte)(192)))), ((int)(((byte)(123)))));
-            this.lblLogo.Location = new System.Drawing.Point(390, 22);
+            this.lblLogo.Location = new System.Drawing.Point(387, 20);
             this.lblLogo.Name = "lblLogo";
-            this.lblLogo.Size = new System.Drawing.Size(101, 50);
+            this.lblLogo.Size = new System.Drawing.Size(108, 54);
             this.lblLogo.TabIndex = 0;
             this.lblLogo.Text = "OOP";
             this.lblLogo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -255,7 +260,7 @@ namespace OOP2026
             this.txtLoginPassword.Location = new System.Drawing.Point(0, 0);
             this.txtLoginPassword.Name = "txtLoginPassword";
             this.txtLoginPassword.PasswordChar = '*';
-            this.txtLoginPassword.Size = new System.Drawing.Size(462, 34);
+            this.txtLoginPassword.Size = new System.Drawing.Size(461, 34);
             this.txtLoginPassword.TabIndex = 4;
             // 
             // btnToggleLoginPassword
@@ -263,15 +268,15 @@ namespace OOP2026
             this.btnToggleLoginPassword.BackColor = System.Drawing.Color.White;
             this.btnToggleLoginPassword.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnToggleLoginPassword.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnToggleLoginPassword.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnToggleLoginPassword.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.btnToggleLoginPassword.Location = new System.Drawing.Point(462, 0);
+            this.btnToggleLoginPassword.Location = new System.Drawing.Point(461, 0);
             this.btnToggleLoginPassword.Name = "btnToggleLoginPassword";
-            this.btnToggleLoginPassword.Size = new System.Drawing.Size(39, 40);
+            this.btnToggleLoginPassword.Size = new System.Drawing.Size(40, 40);
             this.btnToggleLoginPassword.TabIndex = 5;
             this.btnToggleLoginPassword.Text = "👁️";
             this.btnToggleLoginPassword.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btnToggleLoginPassword.UseVisualStyleBackColor = false;
+            this.btnToggleLoginPassword.Click += new System.EventHandler(this.btnToggleLoginPassword_Click);
             // 
             // btnLogin
             // 
@@ -302,6 +307,7 @@ namespace OOP2026
             this.linkToRegister.TabIndex = 7;
             this.linkToRegister.TabStop = true;
             this.linkToRegister.Text = "Chưa có tài khoản? Đăng ký";
+            this.linkToRegister.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkToRegister_LinkClicked);
             // 
             // lblDemoTitle
             // 
@@ -504,7 +510,6 @@ namespace OOP2026
             this.btnToggleRegPassword.BackColor = System.Drawing.Color.White;
             this.btnToggleRegPassword.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnToggleRegPassword.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnToggleRegPassword.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnToggleRegPassword.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.btnToggleRegPassword.Location = new System.Drawing.Point(462, 0);
             this.btnToggleRegPassword.Name = "btnToggleRegPassword";
@@ -540,6 +545,7 @@ namespace OOP2026
             this.cmbRole.Name = "cmbRole";
             this.cmbRole.Size = new System.Drawing.Size(495, 36);
             this.cmbRole.TabIndex = 9;
+            this.cmbRole.SelectedIndexChanged += new System.EventHandler(this.cmbRole_SelectedIndexChanged);
             // 
             // pnlVehicleInfo
             // 
@@ -602,6 +608,7 @@ namespace OOP2026
             this.cmbVehicleType.Name = "cmbVehicleType";
             this.cmbVehicleType.Size = new System.Drawing.Size(316, 31);
             this.cmbVehicleType.TabIndex = 1;
+            this.cmbVehicleType.SelectedIndexChanged += new System.EventHandler(this.cmbRole_SelectedIndexChanged);
             // 
             // lblPlate
             // 
@@ -755,11 +762,11 @@ namespace OOP2026
             // 
             // FrmAuth
             // 
+            this.AcceptButton = this.btnLogin;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(882, 518);
             this.Controls.Add(this.tblMain);
-            this.AcceptButton = this.btnLogin;
             this.Name = "FrmAuth";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();

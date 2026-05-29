@@ -12,7 +12,7 @@ namespace OOP2026
         private ITripCmd _tripCmd;
         private ITripQry _tripQuery;
         private Trip _currentTrip;
-        private INotificationSvc _notificationSvc;
+        private INotiSvc _notificationSvc;
 
         public event EventHandler<Trip> TripAccepted;
         public event EventHandler<Trip> TripRejected;
@@ -24,7 +24,7 @@ namespace OOP2026
         }
 
         public void Initialize(Drv driver, IDrvCmd driverCmd, ITripCmd tripCmd,
-                               ITripQry tripQuery, INotificationSvc notificationSvc)
+                               ITripQry tripQuery, INotiSvc notificationSvc)
         {
             _driver = driver ?? throw new ArgumentNullException(nameof(driver));
             _driverCmd = driverCmd ?? throw new ArgumentNullException(nameof(driverCmd));
@@ -175,10 +175,10 @@ namespace OOP2026
             if (_currentTrip == null || _tripCmd == null) return;
             try
             {
-                await _tripCmd.DriverArrivedAtPickupAsync(_currentTrip.Id);
+                await _tripCmd.ArrivedPickupAtPickupAsync(_currentTrip.Id);
                 await _driverCmd.UpdateLocationAsync(_driver.Id, _currentTrip.TripRoute.Pickup);
                 MessageBox.Show(
-                    _notificationSvc.GetDriverArrivedPickupMessage(),
+                    _notificationSvc.GetArrivedPickupPickupMessage(),
                     "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 await LoadActiveTripFromService();
             }
@@ -212,7 +212,7 @@ namespace OOP2026
             {
                 if (_currentTrip.IsStarted())
                 {
-                    await _tripCmd.DriverArrivedAtDropoffAsync(_currentTrip.Id);
+                    await _tripCmd.ArrivedPickupAtDropoffAsync(_currentTrip.Id);
                     _currentTrip = await _tripQuery.GetActiveTripForDriverAsync(_driver.Id);
                 }
 
@@ -273,21 +273,41 @@ namespace OOP2026
         {
             if (_currentTrip == null || e.TripId != _currentTrip.Id) return;
 
+            // Xử lý thông báo riêng cho tài xế khi khách hủy
+            if (e.NewStatus == TripStatus.Cancelled)
+            {
+                string cancelMsg = _notificationSvc.GetDriverCancelledMessage();
+                if (this.InvokeRequired)
+                {
+                    this.BeginInvoke(new Action(() =>
+                        MessageBox.Show(cancelMsg, "Chuyến đi bị hủy",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning)));
+                }
+                else
+                {
+                    MessageBox.Show(cancelMsg, "Chuyến đi bị hủy",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+
             // Reload data trên background thread trước
             await LoadActiveTripFromService();
 
-            // Sau đó marshal thông báo về UI thread
-            string message = _notificationSvc.GetPassengerNotificationMessage(e);
-            if (this.InvokeRequired)
+            // Các trạng thái khác vẫn hiện thông báo chung
+            if (e.NewStatus != TripStatus.Cancelled)
             {
-                this.BeginInvoke(new Action(() =>
+                string message = _notificationSvc.GetPassengerNotificationMessage(e);
+                if (this.InvokeRequired)
+                {
+                    this.BeginInvoke(new Action(() =>
+                        MessageBox.Show(message, "Thông báo chuyến đi",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information)));
+                }
+                else
+                {
                     MessageBox.Show(message, "Thông báo chuyến đi",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information)));
-            }
-            else
-            {
-                MessageBox.Show(message, "Thông báo chuyến đi",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
         }
 

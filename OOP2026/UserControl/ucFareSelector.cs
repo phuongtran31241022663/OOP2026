@@ -21,11 +21,7 @@ namespace OOP2026
             {
                 if (_selectedType == value) return;
                 _selectedType = value;
-
-                // Cập nhật lại trạng thái hiển thị của các Panel
                 UpdateVisualState();
-
-                // Kích hoạt sự kiện thông báo ra tầng cha
                 SelectionChanged?.Invoke(this, _selectedType);
             }
         }
@@ -33,16 +29,14 @@ namespace OOP2026
         public ucFareSelector()
         {
             InitializeComponent();
-            // Tận dụng hàm cập nhật tập trung để thiết lập trạng thái ban đầu
             UpdateVisualState();
         }
 
         /// <summary>
-        /// Cập nhật an toàn giá tiền từ luồng bất đồng bộ của Map/Fare Service
+        /// Cập nhật giá tiền hiển thị cho cả hai loại xe.
         /// </summary>
         public void SetPrices(decimal motorbikePrice, decimal carPrice)
         {
-            // SỬA LỖI CRASH: Kiểm tra nếu hàm bị gọi từ một luồng ngầm không phải UI Thread
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => SetPrices(motorbikePrice, carPrice)));
@@ -52,24 +46,25 @@ namespace OOP2026
             lblMotorbikePrice.Text = $"{motorbikePrice:N0}đ";
             lblCarPrice.Text = $"{carPrice:N0}đ";
         }
+
         private void UpdateVisualState()
         {
             bool isMotorbike = (_selectedType == VehicleType.Moto);
 
-            // Thay đổi màu nền tùy theo trạng thái được chọn
-            pnlMotorbike.BackColor = isMotorbike ? Colors.LightGreen : System.Drawing.Color.White;
-            pnlCar.BackColor = !isMotorbike ? Colors.LightGreen : System.Drawing.Color.White;
+            // Màu nền của panel khi được chọn: xanh lá nhạt (LightGreen)
+            pnlMotorbike.BackColor = isMotorbike ? Color.LightGreen : System.Drawing.Color.White;
+            pnlCar.BackColor = !isMotorbike ? Color.LightGreen : System.Drawing.Color.White;
 
-            // UX Tối ưu: Đổi màu chữ Icon/Title để tạo độ tương phản tốt hơn khi được Select
-            lblMotorbikeIcon.ForeColor = isMotorbike ? System.Drawing.Color.DarkGreen : System.Drawing.Color.Black;
-            lblCarIcon.ForeColor = !isMotorbike ? System.Drawing.Color.DarkGreen : System.Drawing.Color.Black;
+            // Màu chữ của icon/tên xe
+            lblMotorbikeIcon.ForeColor = isMotorbike ? Color.DarkGreen : System.Drawing.Color.Black;
+            lblCarIcon.ForeColor = !isMotorbike ? Color.DarkGreen : System.Drawing.Color.Black;
 
-            // Ép làm tươi đồ họa vùng chọn
+            // Làm mới giao diện
             pnlMotorbike.Invalidate();
             pnlCar.Invalidate();
         }
 
-        // ========== EVENT HANDLERS (GIAO DIỆN THUẦN TÚY) ==========
+        // ========== EVENT HANDLERS ==========
 
         private void OnMotorbikeClick(object sender, EventArgs e)
         {

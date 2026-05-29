@@ -58,7 +58,7 @@ namespace OOP2026
             // 
             // pnlBalanceCard
             // 
-            this.pnlBalanceCard.BackColor = OOP2026.Colors.Orange;
+            this.pnlBalanceCard.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(140)))), ((int)(((byte)(5)))));
             this.pnlBalanceCard.ColumnCount = 1;
             this.pnlBalanceCard.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.pnlBalanceCard.Controls.Add(this.lblBalanceTitle, 0, 0);
@@ -78,7 +78,7 @@ namespace OOP2026
             // 
             this.lblBalanceTitle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblBalanceTitle.AutoSize = true;
-            this.lblBalanceTitle.Font = OOP2026.Typography.Font10Regular;
+            this.lblBalanceTitle.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.lblBalanceTitle.ForeColor = System.Drawing.Color.White;
             this.lblBalanceTitle.Location = new System.Drawing.Point(19, 23);
             this.lblBalanceTitle.Name = "lblBalanceTitle";
@@ -90,11 +90,11 @@ namespace OOP2026
             // 
             this.lblBalance.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblBalance.AutoSize = true;
-            this.lblBalance.Font = OOP2026.Typography.Font14Bold;
+            this.lblBalance.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
             this.lblBalance.ForeColor = System.Drawing.Color.White;
-            this.lblBalance.Location = new System.Drawing.Point(19, 46);
+            this.lblBalance.Location = new System.Drawing.Point(19, 47);
             this.lblBalance.Name = "lblBalance";
-            this.lblBalance.Size = new System.Drawing.Size(34, 35);
+            this.lblBalance.Size = new System.Drawing.Size(29, 32);
             this.lblBalance.TabIndex = 1;
             this.lblBalance.Text = "d";
             // 
@@ -122,11 +122,11 @@ namespace OOP2026
             // 
             this.lblIncomeTitle.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblIncomeTitle.AutoSize = true;
-            this.lblIncomeTitle.Font = OOP2026.Typography.Font9Regular;
+            this.lblIncomeTitle.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.lblIncomeTitle.ForeColor = System.Drawing.Color.Gray;
             this.lblIncomeTitle.Location = new System.Drawing.Point(13, 5);
             this.lblIncomeTitle.Name = "lblIncomeTitle";
-            this.lblIncomeTitle.Size = new System.Drawing.Size(125, 19);
+            this.lblIncomeTitle.Size = new System.Drawing.Size(131, 20);
             this.lblIncomeTitle.TabIndex = 0;
             this.lblIncomeTitle.Text = "Thu nhập hôm nay";
             // 
@@ -134,11 +134,11 @@ namespace OOP2026
             // 
             this.lblIncomeValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblIncomeValue.AutoSize = true;
-            this.lblIncomeValue.Font = OOP2026.Typography.Font14Bold;
+            this.lblIncomeValue.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
             this.lblIncomeValue.ForeColor = System.Drawing.Color.Black;
-            this.lblIncomeValue.Location = new System.Drawing.Point(13, 34);
+            this.lblIncomeValue.Location = new System.Drawing.Point(13, 32);
             this.lblIncomeValue.Name = "lblIncomeValue";
-            this.lblIncomeValue.Size = new System.Drawing.Size(37, 28);
+            this.lblIncomeValue.Size = new System.Drawing.Size(43, 32);
             this.lblIncomeValue.TabIndex = 1;
             this.lblIncomeValue.Text = "0d";
             // 
@@ -146,11 +146,11 @@ namespace OOP2026
             // 
             this.lblTripsTitle.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblTripsTitle.AutoSize = true;
-            this.lblTripsTitle.Font = OOP2026.Typography.Font9Regular;
+            this.lblTripsTitle.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.lblTripsTitle.ForeColor = System.Drawing.Color.Gray;
             this.lblTripsTitle.Location = new System.Drawing.Point(170, 5);
             this.lblTripsTitle.Name = "lblTripsTitle";
-            this.lblTripsTitle.Size = new System.Drawing.Size(88, 19);
+            this.lblTripsTitle.Size = new System.Drawing.Size(93, 20);
             this.lblTripsTitle.TabIndex = 2;
             this.lblTripsTitle.Text = "Tổng chuyến";
             // 
@@ -158,11 +158,11 @@ namespace OOP2026
             // 
             this.lblTripsValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.lblTripsValue.AutoSize = true;
-            this.lblTripsValue.Font = OOP2026.Typography.Font14Bold;
+            this.lblTripsValue.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
             this.lblTripsValue.ForeColor = System.Drawing.Color.Black;
-            this.lblTripsValue.Location = new System.Drawing.Point(170, 34);
+            this.lblTripsValue.Location = new System.Drawing.Point(170, 32);
             this.lblTripsValue.Name = "lblTripsValue";
-            this.lblTripsValue.Size = new System.Drawing.Size(24, 28);
+            this.lblTripsValue.Size = new System.Drawing.Size(28, 32);
             this.lblTripsValue.TabIndex = 3;
             this.lblTripsValue.Text = "0";
             // 
@@ -228,11 +228,11 @@ namespace OOP2026
             // 
             // btn50k
             // 
-            this.btn50k.BackColor = OOP2026.Colors.White;
+            this.btn50k.BackColor = System.Drawing.Color.White;
             this.btn50k.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn50k.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(220, 225, 230);
+            this.btn50k.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(225)))), ((int)(((byte)(230)))));
             this.btn50k.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btn50k.Font = OOP2026.Typography.Font10Regular;
+            this.btn50k.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.btn50k.ForeColor = System.Drawing.Color.Black;
             this.btn50k.Location = new System.Drawing.Point(3, 3);
             this.btn50k.Margin = new System.Windows.Forms.Padding(3, 3, 5, 3);
@@ -245,28 +245,28 @@ namespace OOP2026
             // 
             // btn100k
             // 
-            this.btn100k.BackColor = OOP2026.Colors.White;
+            this.btn100k.BackColor = System.Drawing.Color.White;
             this.btn100k.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn100k.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(220, 225, 230);
+            this.btn100k.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(225)))), ((int)(((byte)(230)))));
             this.btn100k.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btn100k.Font = OOP2026.Typography.Font10Regular;
+            this.btn100k.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.btn100k.ForeColor = System.Drawing.Color.Black;
             this.btn100k.Location = new System.Drawing.Point(106, 3);
             this.btn100k.Margin = new System.Windows.Forms.Padding(3, 3, 5, 3);
             this.btn100k.Name = "btn100k";
             this.btn100k.Size = new System.Drawing.Size(95, 44);
             this.btn100k.TabIndex = 1;
-            this.btn100k.Text = "100.000d";
+            this.btn100k.Text = "100.000";
             this.btn100k.UseVisualStyleBackColor = false;
             this.btn100k.Click += new System.EventHandler(this.btn100k_Click);
             // 
             // btn200k
             // 
-            this.btn200k.BackColor = OOP2026.Colors.White;
+            this.btn200k.BackColor = System.Drawing.Color.White;
             this.btn200k.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn200k.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(220, 225, 230);
+            this.btn200k.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(225)))), ((int)(((byte)(230)))));
             this.btn200k.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btn200k.Font = OOP2026.Typography.Font10Regular;
+            this.btn200k.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.btn200k.ForeColor = System.Drawing.Color.Black;
             this.btn200k.Location = new System.Drawing.Point(211, 3);
             this.btn200k.Margin = new System.Windows.Forms.Padding(5, 3, 3, 3);
@@ -280,12 +280,13 @@ namespace OOP2026
             // txtCustomAmount
             // 
             this.txtCustomAmount.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtCustomAmount.Font = OOP2026.Typography.Font10Regular;
+            this.txtCustomAmount.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtCustomAmount.Location = new System.Drawing.Point(3, 85);
             this.txtCustomAmount.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
             this.txtCustomAmount.Name = "txtCustomAmount";
             this.txtCustomAmount.Size = new System.Drawing.Size(304, 30);
             this.txtCustomAmount.TabIndex = 2;
+            this.txtCustomAmount.Text = "0";
             this.txtCustomAmount.TextChanged += new System.EventHandler(this.txtCustomAmount_TextChanged);
             this.txtCustomAmount.Enter += new System.EventHandler(this.txtCustomAmount_Enter);
             this.txtCustomAmount.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtCustomAmount_KeyPress);
@@ -293,12 +294,12 @@ namespace OOP2026
             // 
             // btnTopup
             // 
-            this.btnTopup.BackColor = OOP2026.Colors.Orange;
+            this.btnTopup.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(140)))), ((int)(((byte)(5)))));
             this.btnTopup.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnTopup.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.btnTopup.FlatAppearance.BorderSize = 0;
             this.btnTopup.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnTopup.Font = OOP2026.Typography.Font10Bold;
+            this.btnTopup.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnTopup.ForeColor = System.Drawing.Color.White;
             this.btnTopup.Location = new System.Drawing.Point(3, 135);
             this.btnTopup.Margin = new System.Windows.Forms.Padding(3, 5, 3, 3);
@@ -313,9 +314,9 @@ namespace OOP2026
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 23F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = OOP2026.Colors.White;
+            this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.tlpMain);
-            this.Font = OOP2026.Typography.Font10Regular;
+            this.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.Name = "ucWallet";
             this.Padding = new System.Windows.Forms.Padding(20);
             this.Size = new System.Drawing.Size(380, 600);

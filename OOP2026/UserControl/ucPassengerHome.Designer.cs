@@ -1,6 +1,3 @@
-using System;
-using System.Windows.Forms;
-
 namespace OOP2026
 {
     partial class ucPassengerHome
@@ -20,191 +17,165 @@ namespace OOP2026
         private void InitializeComponent()
         {
             this.pnlTop = new System.Windows.Forms.Panel();
+            this.tlpHeaderLayout = new System.Windows.Forms.TableLayoutPanel();
             this.lblName = new System.Windows.Forms.Label();
             this.lblPhone = new System.Windows.Forms.Label();
             this.lblTrips = new System.Windows.Forms.Label();
-            this.pnlMenu = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnBooking = new System.Windows.Forms.Button();
-            this.btnTrip = new System.Windows.Forms.Button();
-            this.btnHistory = new System.Windows.Forms.Button();
-            this.btnProfile = new System.Windows.Forms.Button();
-            this.pnlContent = new System.Windows.Forms.Panel();
+            this.tab = new System.Windows.Forms.TabControl();
+            this.tabDatxe = new System.Windows.Forms.TabPage();
+            this.tabChuyendi = new System.Windows.Forms.TabPage();
+            this.tabLichsu = new System.Windows.Forms.TabPage();
+            this.tabHoso = new System.Windows.Forms.TabPage();
             this.pnlTop.SuspendLayout();
-            this.pnlMenu.SuspendLayout();
+            this.tlpHeaderLayout.SuspendLayout();
+            this.tab.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // pnlTop
-            // 
-            this.pnlTop.BackColor = OOP2026.Colors.Green;
-            this.pnlTop.Controls.Add(this.lblName);
-            this.pnlTop.Controls.Add(this.lblPhone);
-            this.pnlTop.Controls.Add(this.lblTrips);
+
+            // ── pnlTop (Thanh thông tin phía trên - Tông màu xanh lá công nghệ) ──
+            this.pnlTop.BackColor = System.Drawing.Color.FromArgb(13, 192, 123); // Giữ nguyên màu xanh thương hiệu cực đẹp
+            this.pnlTop.Controls.Add(this.tlpHeaderLayout);
             this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTop.Location = new System.Drawing.Point(0, 0);
             this.pnlTop.Name = "pnlTop";
-            this.pnlTop.Padding = new System.Windows.Forms.Padding(20, 15, 20, 15);
-            this.pnlTop.Size = new System.Drawing.Size(300, 110);
+            this.pnlTop.Padding = new System.Windows.Forms.Padding(20, 16, 20, 12); // Tinh chỉnh khoảng đệm bảo vệ viền
+            this.pnlTop.Size = new System.Drawing.Size(300, 115); // Tăng nhẹ 5px để không gian thở thoải mái hơn
             this.pnlTop.TabIndex = 0;
-            // 
-            // lblName
-            // 
+
+            // ── tlpHeaderLayout (Giải pháp chống đè chữ khi đổi tên dài) ──
+            this.tlpHeaderLayout.BackColor = System.Drawing.Color.Transparent;
+            this.tlpHeaderLayout.ColumnCount = 1;
+            this.tlpHeaderLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpHeaderLayout.Controls.Add(this.lblName, 0, 0);
+            this.tlpHeaderLayout.Controls.Add(this.lblPhone, 0, 1);
+            this.tlpHeaderLayout.Controls.Add(this.lblTrips, 0, 2);
+            this.tlpHeaderLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tlpHeaderLayout.Location = new System.Drawing.Point(20, 16);
+            this.tlpHeaderLayout.Margin = new System.Windows.Forms.Padding(0);
+            this.tlpHeaderLayout.Name = "tlpHeaderLayout";
+            this.tlpHeaderLayout.RowCount = 3;
+            this.tlpHeaderLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize)); // Hàng tên hành khách
+            this.tlpHeaderLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize)); // Hàng số điện thoại
+            this.tlpHeaderLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F)); // Hàng số chuyến đi chiếm đáy
+            this.tlpHeaderLayout.Size = new System.Drawing.Size(260, 87);
+            this.tlpHeaderLayout.TabIndex = 0;
+
+            // ── lblName (Nhãn hiển thị tên Hành khách) ─────────────────
             this.lblName.AutoSize = true;
-            this.lblName.Font = OOP2026.Typography.Font14Bold;
-            this.lblName.ForeColor = OOP2026.Colors.White;
-            this.lblName.Location = new System.Drawing.Point(20, 15);
+            this.lblName.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblName.Font = new System.Drawing.Font("Segoe UI", 13.5F, System.Drawing.FontStyle.Bold); // Khóa font cứng thay thế biến tĩnh tránh lỗi designer
+            this.lblName.ForeColor = System.Drawing.Color.White;
+            this.lblName.Location = new System.Drawing.Point(0, 0);
+            this.lblName.Margin = new System.Windows.Forms.Padding(0, 0, 0, 2);
             this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(203, 32);
-            this.lblName.TabIndex = 0;
-            this.lblName.Text = "Psg Name";
-            // 
-            // lblPhone
-            // 
+            this.lblName.Size = new System.Drawing.Size(260, 31);
+            this.lblName.Text = "Hành khách";
+            this.lblName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+
+            // ── lblPhone (Nhãn hiển thị SĐT) ───────────────────────────
             this.lblPhone.AutoSize = true;
-            this.lblPhone.Font = OOP2026.Typography.Font9Regular;
-            this.lblPhone.ForeColor = OOP2026.Colors.LightGreen;
-            this.lblPhone.Location = new System.Drawing.Point(20, 45);
+            this.lblPhone.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblPhone.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.lblPhone.ForeColor = System.Drawing.Color.FromArgb(220, 252, 231); // Đổi sang tông xanh mint nhạt cực sang
+            this.lblPhone.Location = new System.Drawing.Point(0, 33);
+            this.lblPhone.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
             this.lblPhone.Name = "lblPhone";
-            this.lblPhone.Size = new System.Drawing.Size(50, 20);
-            this.lblPhone.TabIndex = 1;
-            this.lblPhone.Text = "Phone";
-            // 
-            // lblTrips
-            // 
+            this.lblPhone.Size = new System.Drawing.Size(260, 20);
+            this.lblPhone.Text = "0901234567";
+            this.lblPhone.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+
+            // ── lblTrips (Nhãn hiển thị số chuyến tích lũy) ──────────────
             this.lblTrips.AutoSize = true;
-            this.lblTrips.Font = OOP2026.Typography.Font10Bold;
-            this.lblTrips.ForeColor = OOP2026.Colors.White;
-            this.lblTrips.Location = new System.Drawing.Point(20, 65);
+            this.lblTrips.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblTrips.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            this.lblTrips.ForeColor = System.Drawing.Color.White;
+            this.lblTrips.Location = new System.Drawing.Point(0, 57);
+            this.lblTrips.Margin = new System.Windows.Forms.Padding(0);
             this.lblTrips.Name = "lblTrips";
-            this.lblTrips.Size = new System.Drawing.Size(37, 19);
-            this.lblTrips.TabIndex = 2;
-            this.lblTrips.Text = "Trips";
-            // 
-            // pnlMenu
-            // 
-            this.pnlMenu.BackColor = OOP2026.Colors.White;
-            this.pnlMenu.Controls.Add(this.btnBooking);
-            this.pnlMenu.Controls.Add(this.btnTrip);
-            this.pnlMenu.Controls.Add(this.btnHistory);
-            this.pnlMenu.Controls.Add(this.btnProfile);
-            this.pnlMenu.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlMenu.Location = new System.Drawing.Point(0, 100);
-            this.pnlMenu.Name = "pnlMenu";
-            this.pnlMenu.Size = new System.Drawing.Size(300, 60);
-            this.pnlMenu.TabIndex = 1;
-            this.pnlMenu.WrapContents = false;
-            // 
-            // btnBooking
-            // 
-            this.btnBooking.BackColor = OOP2026.Colors.White;
-            this.btnBooking.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnBooking.FlatAppearance.BorderSize = 0;
-            this.btnBooking.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnBooking.Font = OOP2026.Typography.Font10Regular;
-            this.btnBooking.ForeColor = OOP2026.Colors.Gray;
-            this.btnBooking.Location = new System.Drawing.Point(0, 0);
-            this.btnBooking.Margin = new System.Windows.Forms.Padding(0);
-            this.btnBooking.Name = "btnBooking";
-            this.btnBooking.Size = new System.Drawing.Size(75, 50);
-            this.btnBooking.TabIndex = 0;
-            this.btnBooking.Tag = "Booking";
-            this.btnBooking.Text = "Đặt xe";
-            this.btnBooking.UseVisualStyleBackColor = false;
-            this.btnBooking.Click += new System.EventHandler(this.Tab_Click);
-            // 
-            // btnTrip
-            // 
-            this.btnTrip.BackColor = OOP2026.Colors.White;
-            this.btnTrip.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnTrip.FlatAppearance.BorderSize = 0;
-            this.btnTrip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnTrip.Font = OOP2026.Typography.Font10Regular;
-            this.btnTrip.ForeColor = OOP2026.Colors.Gray;
-            this.btnTrip.Location = new System.Drawing.Point(75, 0);
-            this.btnTrip.Margin = new System.Windows.Forms.Padding(0);
-            this.btnTrip.Name = "btnTrip";
-            this.btnTrip.Size = new System.Drawing.Size(75, 50);
-            this.btnTrip.TabIndex = 1;
-            this.btnTrip.Tag = "Trip";
-            this.btnTrip.Text = "Chuyến";
-            this.btnTrip.UseVisualStyleBackColor = false;
-            this.btnTrip.Click += new System.EventHandler(this.Tab_Click);
-            // 
-            // btnHistory
-            // 
-            this.btnHistory.BackColor = OOP2026.Colors.White;
-            this.btnHistory.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnHistory.FlatAppearance.BorderSize = 0;
-            this.btnHistory.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnHistory.Font = OOP2026.Typography.Font10Regular;
-            this.btnHistory.ForeColor = OOP2026.Colors.Gray;
-            this.btnHistory.Location = new System.Drawing.Point(150, 0);
-            this.btnHistory.Margin = new System.Windows.Forms.Padding(0);
-            this.btnHistory.Name = "btnHistory";
-            this.btnHistory.Size = new System.Drawing.Size(75, 50);
-            this.btnHistory.TabIndex = 2;
-            this.btnHistory.Tag = "History";
-            this.btnHistory.Text = "Lịch sử";
-            this.btnHistory.UseVisualStyleBackColor = false;
-            this.btnHistory.Click += new System.EventHandler(this.Tab_Click);
-            // 
-            // btnProfile
-            // 
-            this.btnProfile.BackColor = OOP2026.Colors.White;
-            this.btnProfile.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnProfile.FlatAppearance.BorderSize = 0;
-            this.btnProfile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnProfile.Font = OOP2026.Typography.Font10Regular;
-            this.btnProfile.ForeColor = OOP2026.Colors.Gray;
-            this.btnProfile.Location = new System.Drawing.Point(225, 0);
-            this.btnProfile.Margin = new System.Windows.Forms.Padding(0);
-            this.btnProfile.Name = "btnProfile";
-            this.btnProfile.Size = new System.Drawing.Size(75, 50);
-            this.btnProfile.TabIndex = 3;
-            this.btnProfile.Tag = "Profile";
-            this.btnProfile.Text = "Hồ sơ";
-            this.btnProfile.UseVisualStyleBackColor = false;
-            this.btnProfile.Click += new System.EventHandler(this.Tab_Click);
-            // 
-            // pnlContent
-            // 
-            this.pnlContent.AutoScroll = true;
-            this.pnlContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlContent.Location = new System.Drawing.Point(0, 170);
-            this.pnlContent.Name = "pnlContent";
-            this.pnlContent.Padding = new System.Windows.Forms.Padding(12);
-            this.pnlContent.Size = new System.Drawing.Size(300, 450);
-            this.pnlContent.TabIndex = 2;
-            // 
-            // ucPassengerHome
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.lblTrips.Size = new System.Drawing.Size(260, 30);
+            this.lblTrips.Text = "✨ Tích lũy: 0 chuyến";
+            this.lblTrips.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+
+            // ── tab (Hệ thống điều hướng chính điều khiển TabControl) ──
+            this.tab.Controls.Add(this.tabDatxe);
+            this.tab.Controls.Add(this.tabChuyendi);
+            this.tab.Controls.Add(this.tabLichsu);
+            this.tab.Controls.Add(this.tabHoso);
+            this.tab.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tab.Font = new System.Drawing.Font("Segoe UI", 9.5F); // Đồng bộ font chữ hệ thống Tab điều hướng
+            this.tab.Location = new System.Drawing.Point(0, 115);
+            this.tab.Margin = new System.Windows.Forms.Padding(0);
+            this.tab.Name = "tab";
+            this.tab.SelectedIndex = 0;
+            this.tab.Size = new System.Drawing.Size(300, 485);
+            this.tab.TabIndex = 1;
+            this.tab.SelectedIndexChanged += new System.EventHandler(this.Tab_SelectedIndexChanged);
+
+            // ── tabDatxe (Tab Nghiệp vụ đặt chuyến mới) ─────────────────
+            this.tabDatxe.BackColor = System.Drawing.Color.White;
+            this.tabDatxe.Location = new System.Drawing.Point(4, 30);
+            this.tabDatxe.Name = "tabDatxe";
+            this.tabDatxe.Padding = new System.Windows.Forms.Padding(12); // Tăng padding lên 12px rông rãi cho các Control con lồng vào sau này
+            this.tabDatxe.Size = new System.Drawing.Size(292, 451);
+            this.tabDatxe.TabIndex = 0;
+            this.tabDatxe.Text = "Đặt xe";
+
+            // ── tabChuyendi (Tab Theo dõi trạng thái chuyến đi hiện tại) ──
+            this.tabChuyendi.BackColor = System.Drawing.Color.White;
+            this.tabChuyendi.Location = new System.Drawing.Point(4, 30);
+            this.tabChuyendi.Name = "tabChuyendi";
+            this.tabChuyendi.Padding = new System.Windows.Forms.Padding(12);
+            this.tabChuyendi.Size = new System.Drawing.Size(292, 451);
+            this.tabChuyendi.TabIndex = 1;
+            this.tabChuyendi.Text = "Chuyến đi";
+
+            // ── tabLichsu (Tab Xem danh sách chuyến đi trong quá khứ) ──
+            this.tabLichsu.BackColor = System.Drawing.Color.White;
+            this.tabLichsu.Location = new System.Drawing.Point(4, 30);
+            this.tabLichsu.Name = "tabLichsu";
+            this.tabLichsu.Padding = new System.Windows.Forms.Padding(12);
+            this.tabLichsu.Size = new System.Drawing.Size(292, 451);
+            this.tabLichsu.TabIndex = 2;
+            this.tabLichsu.Text = "Lịch sử";
+
+            // ── tabHoso (Tab Chỉnh sửa thông tin cá nhân & Đổi mật khẩu) ──
+            this.tabHoso.BackColor = System.Drawing.Color.White;
+            this.tabHoso.Location = new System.Drawing.Point(4, 30);
+            this.tabHoso.Name = "tabHoso";
+            this.tabHoso.Padding = new System.Windows.Forms.Padding(12);
+            this.tabHoso.Size = new System.Drawing.Size(292, 451);
+            this.tabHoso.TabIndex = 3;
+            this.tabHoso.Text = "Hồ sơ";
+
+            // ── ucPassengerHome (Cấu hình tổng thể UserControl chính) ──
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = OOP2026.Colors.White;
-            this.Controls.Add(this.pnlContent);
-            this.Controls.Add(this.pnlMenu);
+            this.BackColor = System.Drawing.Color.White;
+            this.Controls.Add(this.tab);
             this.Controls.Add(this.pnlTop);
-            this.Font = OOP2026.Typography.Font10Regular;
-            this.MinimumSize = new System.Drawing.Size(300, 480);
+            this.Font = new System.Drawing.Font("Segoe UI", 9.75F);
+            this.MinimumSize = new System.Drawing.Size(300, 500);
             this.Name = "ucPassengerHome";
             this.Size = new System.Drawing.Size(300, 600);
             this.pnlTop.ResumeLayout(false);
-            this.pnlTop.PerformLayout();
-            this.pnlMenu.ResumeLayout(false);
+            this.tlpHeaderLayout.ResumeLayout(false);
+            this.tlpHeaderLayout.PerformLayout();
+            this.tab.ResumeLayout(false);
             this.ResumeLayout(false);
         }
         #endregion
 
         #region Controls declaration
         private System.Windows.Forms.Panel pnlTop;
+        private System.Windows.Forms.TableLayoutPanel tlpHeaderLayout;
         private System.Windows.Forms.Label lblName;
+        private System.Windows.Forms.Panel pnlTopSpacer;
         private System.Windows.Forms.Label lblPhone;
         private System.Windows.Forms.Label lblTrips;
-        private System.Windows.Forms.FlowLayoutPanel pnlMenu;
-        private System.Windows.Forms.Button btnBooking;
-        private System.Windows.Forms.Button btnTrip;
-        private System.Windows.Forms.Button btnHistory;
-        private System.Windows.Forms.Button btnProfile;
-        private System.Windows.Forms.Panel pnlContent;
+        private System.Windows.Forms.TabControl tab;
+        private System.Windows.Forms.TabPage tabDatxe;
+        private System.Windows.Forms.TabPage tabChuyendi;
+        private System.Windows.Forms.TabPage tabLichsu;
+        private System.Windows.Forms.TabPage tabHoso;
         #endregion
     }
 }

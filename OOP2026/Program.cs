@@ -1,14 +1,21 @@
-using System.Net.Http;
+global using System.Net.Http;
+global using System.Text.Json.Serialization;
 
 namespace OOP2026
 {
-    #region Enums
+    /// <summary>
+    /// Trạng thái hoạt động của tài xế
+    /// </summary>
     public enum DriverStatus
     {
         Offline = 0,
         Online = 1,
         OnTrip = 2
     }
+
+    /// <summary>
+    /// Trạng thái của chuyến đi
+    /// </summary>
     public enum TripStatus
     {
         Pending = 0,
@@ -21,57 +28,41 @@ namespace OOP2026
         Cancelled = 7,
         Timeout = 8
     }
+
+    /// <summary>
+    /// Loại phương tiện
+    /// </summary>
     public enum VehicleType
     {
         Moto = 1,
-        Car = 2,
+        Car = 2
     }
-    #endregion
 
     #region Photon API Classes
-    public class PhotonResponse
-    {
-        public List<Feature> Features { get; set; } = new();
-    }
-
-    public class Feature
-    {
-        public Geometry Geometry { get; set; } = new();
-        public Properties Properties { get; set; } = new();
-    }
-
-    public class Geometry
-    {
-        public List<double> Coordinates { get; set; } = new(); // [Longitude, Latitude]
-    }
-
+    public class PhotonResponse { public List<Feature> Features { get; set; } }
+    public class Feature { public Geometry Geometry { get; set; } public Properties Properties { get; set; } }
+    public class Geometry { public List<double> Coordinates { get; set; } }
     public class Properties
     {
-        public string? OsmValue { get; set; }
-        public string? HouseNumber { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string? Street { get; set; }
-        public string? Locality { get; set; }
-        public string? District { get; set; }
-        public string City { get; set; } = string.Empty;
-        public string Country { get; set; } = string.Empty;
+        public string OsmValue { get; set; }
+        public string HouseNumber { get; set; }
+        public string Name { get; set; }
+        public string Street { get; set; }
+        public string Locality { get; set; }
+        public string District { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
     }
-
     #endregion
 
     #region OSRM API Classes
-    public class OsrmResponse
-    {
-        public List<OsrmRoute> Routes { get; set; } = new();
-    }
-
+    public class OsrmResponse { public List<OsrmRoute> Routes { get; set; } }
     public class OsrmRoute
     {
-        public double Distance { get; set; }
-        public double Duration { get; set; }
-        public string Geometry { get; set; } = string.Empty;
+        public double Distance { get; set; }   // meters
+        public double Duration { get; set; }   // seconds
+        public string Geometry { get; set; }
     }
-
     #endregion
 
     static class Program
@@ -102,9 +93,9 @@ namespace OOP2026
             MatchSvc matchingService = new MatchSvc(driverGrid, tripRepo, userRepo, vehicleRepo);
 
             // Trip Services
-            TripQry tripQuery = new TripQry(tripRepo);
+            TripQry tripQuery = new TripQry(tripRepo, matchingService);
             TripCmd tripCmd = new TripCmd(
-                tripRepo, userRepo, vehicleRepo, fareService, mapService, matchingService
+                tripRepo, userRepo, vehicleRepo, fareService, mapService, matchingService, driverGrid
             );
 
             // Drv & Usr Services
@@ -114,25 +105,31 @@ namespace OOP2026
             WalletSvc walletService = new WalletSvc(userRepo, tripQuery);
             RevSvc reviewService = new RevSvc(reviewRepo, userRepo, tripRepo);
             PsgSvc passengerService = new PsgSvc(userRepo, tripCmd, tripQuery, reviewService, mapService, fareService);
-            INotificationSvc notificationSvc = new NotificationSvc();
+            INotiSvc notificationSvc = new NotificationSvc();
             AdmSvc adminService = new AdmSvc(userRepo, tripRepo, policyRepo, reviewRepo, vehicleRepo);
 
             // --- 4. Seed tài khoản demo từ DataSeeder để đồng bộ với DB/file JSON ---
             // Mục tiêu: không tạo user/driver/passenger rời rạc trong Program.cs
             DataSeeder.SeedAsync(userRepo, vehicleRepo, tripRepo, policyRepo).GetAwaiter().GetResult();
 
-            // --- 5. Chạy ứng dụng ---
+            // --- 5. Khởi tạo & Chạy Simulation (Tự động teleport tài xế khi có yêu cầu) ---
+            Simulation simulation = new Simulation(
+                driverQuery, tripCmd, tripQuery, matchingService, userRepo, driverGrid
+            );
+            simulation.Start();
+
+            // --- 6. Chạy ứng dụng ---
 
             // LỰA CHỌN CHẾ ĐỘ CHẠY:
 
             // CHẾ ĐỘ 1: Chạy màn hình Đăng nhập (Mặc định)
-            // Application.Run(new FrmAuth(userService, vehicleRepo, userRepo, tripRepo, policyRepo, reviewRepo, tripCmd, tripQuery, driverCmd, driverQuery, mapService, fareService, reviewService, walletService, passengerService, adminService, notificationSvc));
+            Application.Run(new FrmAuth(userService, vehicleRepo, userRepo, tripRepo, policyRepo, reviewRepo, tripCmd, tripQuery, driverCmd, driverQuery, mapService, fareService, reviewService, walletService, passengerService, adminService, notificationSvc));
 
             // CHẾ ĐỘ 2: Chạy thẳng vào Giao diện Mô phỏng Đa vai trò (Dùng để Test/Demo nhanh)
-            Application.Run(new FrmMultiRole(
-                userService, vehicleRepo, userRepo, tripRepo, policyRepo, reviewRepo, 
-                tripCmd, tripQuery, driverCmd, driverQuery, mapService, fareService, reviewService, 
-                walletService, passengerService, adminService, notificationSvc));
+            //Application.Run(new FrmMultiRole(
+            //    userService, vehicleRepo, userRepo, tripRepo, policyRepo, reviewRepo,
+            //    tripCmd, tripQuery, driverCmd, driverQuery, mapService, fareService, reviewService,
+            //    walletService, passengerService, adminService, notificationSvc));
         }
     }
 }

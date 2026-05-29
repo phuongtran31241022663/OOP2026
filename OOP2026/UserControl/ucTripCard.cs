@@ -41,6 +41,11 @@ namespace OOP2026
             this.DoubleBuffered = true;
         }
 
+        public void SetTrip(Trip trip)
+        {
+            this.Trip = trip;
+        }
+
         // ========== PHÁT ĐI SỰ KIỆN KHI NGƯỜI DÙNG CLICK ==========
 
         private void BtnReject_Click(object sender, EventArgs e)

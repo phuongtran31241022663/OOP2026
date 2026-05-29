@@ -215,7 +215,7 @@ namespace OOP2026
             // 
             // btnLogin
             // 
-            this.btnLogin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(159)))), ((int)(((byte)(28)))));
+            this.btnLogin.BackColor = System.Drawing.Color.FromArgb(255, 159, 28);
             this.pnlLogin.SetColumnSpan(this.btnLogin, 2);
             this.btnLogin.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnLogin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -239,6 +239,7 @@ namespace OOP2026
             this.linkToRegister.TabIndex = 7;
             this.linkToRegister.TabStop = true;
             this.linkToRegister.Text = "Chưa có tài khoản? Đăng ký";
+            this.linkToRegister.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkToRegister_LinkClicked);
             // 
             // pnlRegister
             // 
@@ -574,7 +575,7 @@ namespace OOP2026
             // 
             // btnRegister
             // 
-            this.btnRegister.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(159)))), ((int)(((byte)(28)))));
+            this.btnRegister.BackColor = System.Drawing.Color.FromArgb(255, 159, 28);
             this.pnlRegister.SetColumnSpan(this.btnRegister, 2);
             this.btnRegister.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnRegister.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

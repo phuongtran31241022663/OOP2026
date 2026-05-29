@@ -1,3 +1,8 @@
+using System;
+using System.Drawing;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
 namespace OOP2026
 {
     public partial class ucPassengerHome : UserControl
@@ -10,18 +15,13 @@ namespace OOP2026
         private IFareSvc _fareService;
         private IMapSvc _mapService;
         private IPsgSvc _passengerService;
-        private INotificationSvc _notificationSvc;
+        private INotiSvc _notificationSvc;
         private ucMap _map;
-
-        // Định nghĩa tập hợp các nút tab để dùng vòng lặp for chỉ mục (Khử LINQ tối ưu hiệu năng)
-        private Button[] _tabButtons;
 
         private ucBooking ucBooking;
         private ucTrip ucTrip;
         private ucHistory ucHistory;
         private ucProfile ucProfile;
-
-        private Button _currentTabButton;
 
         public ucPassengerHome()
         {
@@ -45,7 +45,7 @@ namespace OOP2026
                                  IFareSvc fareService,
                                  IMapSvc mapService,
                                  IPsgSvc passengerService,
-                                 INotificationSvc notificationSvc)
+                                 INotiSvc notificationSvc)
         {
             _passenger = passenger ?? throw new ArgumentNullException(nameof(passenger));
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
@@ -57,8 +57,6 @@ namespace OOP2026
             _passengerService = passengerService ?? throw new ArgumentNullException(nameof(passengerService));
             _notificationSvc = notificationSvc ?? throw new ArgumentNullException(nameof(notificationSvc));
 
-            // Khởi tạo mảng nút điều hướng cố định sau khi các nút thành phần đã nạp xong từ designer
-            _tabButtons = new Button[] { btnBooking, btnTrip, btnHistory, btnProfile };
 
             LoadPassengerInfo();
             InitializeTabContents();
@@ -76,6 +74,11 @@ namespace OOP2026
             ucTrip.Dock = DockStyle.Fill;
             ucHistory.Dock = DockStyle.Fill;
             ucProfile.Dock = DockStyle.Fill;
+
+            tabDatxe.Controls.Add(ucBooking);
+            tabChuyendi.Controls.Add(ucTrip);
+            tabLichsu.Controls.Add(ucHistory);
+            tabHoso.Controls.Add(ucProfile);
         }
 
         private void InitializeTabContents()
@@ -118,19 +121,31 @@ namespace OOP2026
             ShowTab("Booking");
         }
 
+        private void Tab_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TabPage selected = tab.SelectedTab;
+            if (selected == tabChuyendi)
+            {
+                _ = ucTrip.RefreshAsync();
+            }
+            else if (selected == tabLichsu)
+            {
+                _ = ucHistory.RefreshAsync();
+            }
+            else if (selected == tabHoso)
+            {
+                _ = ucProfile.RefreshProfileAsync();
+            }
+        }
+
         private async Task RefreshAfterTripChange()
         {
             await LoadPassengerInfoAsync();
 
-            // Ép chạy an toàn bất đồng bộ tùy theo ngữ cảnh Tab đang được bật
-            if (_currentTabButton == btnTrip)
-            {
                 await ucTrip.RefreshAsync();
-            }
-            else if (_currentTabButton == btnHistory)
-            {
+          
                 await ucHistory.RefreshAsync();
-            }
+            
         }
 
         private void LoadPassengerInfo()
@@ -167,19 +182,8 @@ namespace OOP2026
             }
         }
 
-        private void Tab_Click(object sender, EventArgs e)
-        {
-            if (sender is not Button btn) return;
-
-            string tabName = btn.Tag?.ToString() ?? string.Empty;
-            if (!string.IsNullOrEmpty(tabName))
-            {
-                ShowTab(tabName);
-            }
-        }
-
         /// <summary>
-        /// Bộ điều phối Tab thông minh - Giải phóng vùng nhớ hiển thị tránh Overlap Layout
+        /// Bộ điều phối Tab thông minh
         /// </summary>
         public void ShowTab(string tabName)
         {
@@ -189,86 +193,31 @@ namespace OOP2026
                 return;
             }
 
-            ResetTabStyles();
-
-            Button activeButton = null;
-            UserControl activeControl = null;
-
             switch (tabName)
             {
                 case "Booking":
-                    activeButton = btnBooking;
-                    activeControl = ucBooking;
+                    tab.SelectedTab = tabDatxe;
                     break;
                 case "Trip":
-                    activeButton = btnTrip;
-                    activeControl = ucTrip;
+                    tab.SelectedTab = tabChuyendi;
                     break;
                 case "History":
-                    activeButton = btnHistory;
-                    activeControl = ucHistory;
+                    tab.SelectedTab = tabLichsu;
                     break;
                 case "Profile":
-                    activeButton = btnProfile;
-                    activeControl = ucProfile;
+                    tab.SelectedTab = tabHoso;
                     break;
-                default:
-                    return;
-            }
-
-            // Đổi phong cách giao diện hiển thị cho nút đang hoạt động (Đồng bộ Colors.Green với Panel tiêu đề)
-            activeButton.BackColor = System.Drawing.Color.FromArgb(13, 190, 123);
-            activeButton.ForeColor = Color.White;
-            _currentTabButton = activeButton;
-
-            // FIX UI OVERLAP: Dọn sạch các tiến trình giao diện cũ đang neo trên khung nội dung trước khi nạp mới
-            if (pnlContent != null)
-            {
-                pnlContent.Controls.Clear();
-                pnlContent.Controls.Add(activeControl);
-            }
-
-            // Kích hoạt nạp lại luồng dữ liệu tức thời tương ứng với từng UserControl đích bất đồng bộ
-            if (activeControl == ucTrip)
-            {
-                _ = ucTrip.RefreshAsync();
-            }
-            else if (activeControl == ucHistory)
-            {
-                _ = ucHistory.RefreshAsync();
-            }
-            else if (activeControl == ucProfile)
-            {
-                _ = ucProfile.RefreshProfileAsync();
-            }
-        }
-
-        private void ResetTabStyles()
-        {
-            if (_tabButtons == null) return;
-
-            // Duyệt vòng lặp truyền thống để cấu trúc màu sắc sạch, loại bỏ hoàn toàn LINQ
-            for (int i = 0; i < _tabButtons.Length; i++)
-            {
-                if (_tabButtons[i] != null)
-                {
-                    _tabButtons[i].BackColor = Color.White;
-                    _tabButtons[i].ForeColor = Color.Gray;
-                }
             }
         }
 
         public async Task RefreshPanelAsync()
         {
             await LoadPassengerInfoAsync();
-            if (_currentTabButton == btnTrip)
-            {
+           
                 await ucTrip.RefreshAsync();
-            }
-            else if (_currentTabButton == btnHistory)
-            {
+          
                 await ucHistory.RefreshAsync();
-            }
+            
         }
 
         // ========== BỘ TIÊU HỦY ĐỒ HỌA CHỦ ĐỘNG KHI KHÔNG CÒN SỬ DỤNG MÀN HÌNH ==========

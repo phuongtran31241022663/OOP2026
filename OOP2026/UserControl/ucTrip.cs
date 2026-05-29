@@ -15,7 +15,7 @@ namespace OOP2026
         private ITripCmd _tripCmd;
         private ITripQry _tripQuery;
         private IUsrSvc _userService;
-        private INotificationSvc _notificationSvc;
+        private INotiSvc _notificationSvc;
 
         public event EventHandler? TripCancelled;
         public event EventHandler? TripCompleted;
@@ -36,7 +36,7 @@ namespace OOP2026
                                 ITripCmd tripCmd,
                                 ITripQry tripQuery,
                                 IUsrSvc userService,
-                                INotificationSvc notificationSvc)
+                                INotiSvc notificationSvc)
         {
             _passenger = passenger ?? throw new ArgumentNullException(nameof(passenger));
             _tripCmd = tripCmd ?? throw new ArgumentNullException(nameof(tripCmd));
@@ -96,7 +96,7 @@ namespace OOP2026
             lblPickup.Text = "      Từ: " + (trip.Pickup.Addr?.Name ?? "Điểm đón");
             lblDropoff.Text = "      Đến: " + (trip.Dropoff.Addr?.Name ?? "Điểm đến");
 
-            lblFare.Text = $"Giá: {trip.TripFare.TotalAmount:N0}đ";
+            lblFarePrice.Text = $"Giá: {trip.TripFare.TotalAmount:N0}đ";
 
             if (trip.DriverId.HasValue)
             {
@@ -136,6 +136,13 @@ namespace OOP2026
         {
             if (_currentTrip == null || _tripCmd == null) return;
 
+            // Khớp React PassengerPanel: chỉ cho phép hủy khi searching/matched/arrived
+            if (!new[] { TripStatus.Searching, TripStatus.Matched, TripStatus.Arrived }.Contains(_currentTrip.Status))
+            {
+                MessageBox.Show("Không thể hủy chuyến ở trạng thái hiện tại.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             var confirm = MessageBox.Show("Bạn có chắc chắn muốn hủy chuyến đi này không?",
                 "Xác nhận hủy", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
@@ -157,11 +164,26 @@ namespace OOP2026
 
         private void UcTripStatus_RateClicked(object? sender, EventArgs e)
         {
+            // Khớp React PassengerPanel: chỉ mở luồng đánh giá khi completed
+            if (_currentTrip == null || _currentTrip.Status != TripStatus.Completed)
+            {
+                MessageBox.Show("Chuyến này chưa hoàn thành hoặc không hợp lệ để đánh giá.",
+                    "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             TripCompleted?.Invoke(this, EventArgs.Empty);
         }
 
         private async void UcTripStatus_RetryClicked(object? sender, EventArgs e)
         {
+            // Khớp React PassengerPanel: retry khi cancelled/timeout (hoặc không có chuyến active)
+            if (_currentTrip != null && _currentTrip.Status != TripStatus.Cancelled && _currentTrip.Status != TripStatus.Timeout)
+            {
+                MessageBox.Show("Không thể thử lại ở trạng thái hiện tại.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             RequestNewTripRequired?.Invoke(this, EventArgs.Empty);
             await RefreshAsync();
         }

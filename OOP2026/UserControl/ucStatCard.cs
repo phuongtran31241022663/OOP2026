@@ -1,6 +1,4 @@
-using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 namespace OOP2026
@@ -13,12 +11,27 @@ namespace OOP2026
         }
 
         /// <summary>
-        /// Nạp dữ liệu thống kê an toàn đa luồng
+        /// Nạp dữ liệu vào thẻ
         /// </summary>
-        public void SetData(string title, string value)
+        /// <param name="title">Tiêu đề (ví dụ: Tổng doanh thu)</param>
+        /// <param name="value">Giá trị (ví dụ: 1.200.000đ)</param>
+        /// <param name="description">Mô tả (ví dụ: từ chuyến hoàn thành)</param>
+        public void SetData(string title, string value, string description)
         {
             lblTitle.Text = title;
             lblValue.Text = value;
+            lblDescription.Text = description;
+        }
+
+        /// <summary>
+        /// Thiết lập màu sắc (Theme) cho thẻ
+        /// </summary>
+        public void SetTheme(Color backColor, Color titleColor, Color valueColor, Color descColor)
+        {
+            this.BackColor = backColor;
+            lblTitle.ForeColor = titleColor;
+            lblValue.ForeColor = valueColor;
+            lblDescription.ForeColor = descColor;
         }
     }
 }

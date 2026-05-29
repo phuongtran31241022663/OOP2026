@@ -5,12 +5,6 @@ namespace OOP2026
 {
     public partial class FrmAuth : Form
     {
-        protected override void OnCreateControl()
-        {
-            base.OnCreateControl();
-            this.Font = new System.Drawing.Font("Segoe UI", 9F);
-        }
-
         private readonly IUsrSvc _usrSrv;
         private readonly IVehRepo _vehRepo;
         private readonly IUsrRepo _usrRepo;
@@ -27,7 +21,7 @@ namespace OOP2026
         private readonly IWalletSvc _walletSvc;
         private readonly IPsgSvc _psgSvc;
         private readonly IAdmSvc _admSvc;
-        private readonly INotificationSvc _notiSvc;
+        private readonly INotiSvc _notiSvc;
 
         public event EventHandler<Usr> LoginSucceeded;
         public event EventHandler<Usr> RegisterSucceeded;
@@ -52,7 +46,7 @@ namespace OOP2026
             IWalletSvc walletSvc,
             IPsgSvc psgSvc,
             IAdmSvc admSvc,
-            INotificationSvc notiSvc)
+            INotiSvc notiSvc)
         {
             _usrSrv = usrSrv ?? throw new ArgumentNullException(nameof(usrSrv));
             _vehRepo = vehRepo ?? throw new ArgumentNullException(nameof(vehRepo));
@@ -74,21 +68,12 @@ namespace OOP2026
 
             InitializeComponent();
             SetupEvents();
-            ShowLoginPanel();
         }
 
         private void SetupEvents()
         {
             btnLogin.Click += async (s, e) => await OnLoginClicked();
             btnRegister.Click += async (s, e) => await OnRegisterClicked();
-            linkToRegister.Click += (s, e) => ShowRegisterPanel();
-            linkToLogin.Click += (s, e) => ShowLoginPanel();
-
-            btnToggleLoginPassword.Click += (s, e) => ToggleLoginPassword();
-            btnToggleRegPassword.Click += (s, e) => ToggleRegPassword();
-
-            cmbRole.SelectedIndexChanged += (s, e) => OnRoleChanged();
-            cmbVehicleType.SelectedIndexChanged += (s, e) => OnVehicleTypeChanged();
 
             // Demo buttons - Quick login (chỉ fill field)
             btnDemoPassenger.Click += (s, e) => DemoLogin("0911111111", "123456");
@@ -100,17 +85,6 @@ namespace OOP2026
             txtRegName.KeyDown += OnAuthKeyDown;
             txtRegPhone.KeyDown += OnAuthKeyDown;
             txtRegPassword.KeyDown += OnAuthKeyDown;
-
-            txtLoginPhone.TextChanged += (s, e) => ValidateLoginFields();
-            txtLoginPassword.TextChanged += (s, e) => ValidateLoginFields();
-            txtRegName.TextChanged += (s, e) => ValidateRegisterFields();
-            txtRegPhone.TextChanged += (s, e) => ValidateRegisterFields();
-            txtRegPassword.TextChanged += (s, e) => ValidateRegisterFields();
-            txtPlate.TextChanged += (s, e) => ValidateRegisterFields();
-            txtBrand.TextChanged += (s, e) => ValidateRegisterFields();
-            txtModel.TextChanged += (s, e) => ValidateRegisterFields();
-            txtColor.TextChanged += (s, e) => ValidateRegisterFields();
-            numCapacity.ValueChanged += (s, e) => ValidateRegisterFields();
         }
 
         private static string GetText(TextBox textBox)
@@ -146,66 +120,6 @@ namespace OOP2026
                 btnRegister.PerformClick();
             }
         }
-
-        private void ShowLoginPanel()
-        {
-            pnlLogin.Visible = true;
-            pnlRegister.Visible = false;
-            txtLoginPhone.Focus();
-        }
-
-        private void ShowRegisterPanel()
-        {
-            pnlLogin.Visible = false;
-            pnlRegister.Visible = true;
-            cmbRole.SelectedIndex = 0;
-            OnRoleChanged();
-            txtRegName.Focus();
-        }
-
-        private void ToggleLoginPassword()
-        {
-            _loginPasswordVisible = !_loginPasswordVisible;
-            txtLoginPassword.PasswordChar = _loginPasswordVisible ? '\0' : '*';
-            btnToggleLoginPassword.Text = _loginPasswordVisible ? "👁️" : "🙈";
-        }
-
-        private void ToggleRegPassword()
-        {
-            _regPasswordVisible = !_regPasswordVisible;
-            txtRegPassword.PasswordChar = _regPasswordVisible ? '\0' : '*';
-            btnToggleRegPassword.Text = _regPasswordVisible ? "👁️" : "🙈";
-        }
-
-        private void OnRoleChanged()
-        {
-            bool isDriver = cmbRole.SelectedIndex == 1;
-            pnlVehicleInfo.Visible = isDriver;
-
-            if (!isDriver)
-            {
-                return;
-            }
-
-            cmbVehicleType.SelectedIndex = 0;
-            OnVehicleTypeChanged();
-        }
-
-        private void OnVehicleTypeChanged()
-        {
-            if (cmbVehicleType.SelectedIndex == 0)
-            {
-                numCapacity.Value = 2;
-                numCapacity.Enabled = false;
-                return;
-            }
-
-            numCapacity.Minimum = 4;
-            numCapacity.Maximum = 7;
-            numCapacity.Value = 4;
-            numCapacity.Enabled = true;
-        }
-
         private async Task OnLoginClicked()
         {
             string phone = GetText(txtLoginPhone);
@@ -263,22 +177,6 @@ namespace OOP2026
                     string color = txtColor.Text.Trim();
                     int capacity = (int)numCapacity.Value;
 
-                    Veh vehicle = null;
-
-                    try
-                    {
-                        vehicle = VehicleFactory.CreateVehicle(
-                            cmbVehicleType.SelectedIndex == 0 ? VehicleType.Moto : VehicleType.Car,
-                            plate, brand, model, color,
-                            cmbVehicleType.SelectedIndex == 0 ? 2 : capacity);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new FormatException("Thông tin xe không hợp lệ: " + ex.Message);
-                    }
-
-                    await _vehRepo.CreateAsync(vehicle);
-
                     Loc defaultLoc = new Loc(
                         new Coord(10.7769, 106.7009),
                         new Addr("District 1", string.Empty, "District 1", "Ho Chi Minh", "Vietnam"));
@@ -288,12 +186,12 @@ namespace OOP2026
                         phone,
                         password,
                         "GPLX-" + Guid.NewGuid().ToString("N").Substring(0, 8),
+                        cmbVehicleType.SelectedIndex == 0 ? VehicleType.Moto : VehicleType.Car,
                         plate,
                         brand,
                         model,
                         color,
                         capacity,
-                        cmbVehicleType.SelectedIndex == 0 ? VehicleType.Moto : VehicleType.Car,
                         defaultLoc);
                 }
                 else
@@ -336,7 +234,7 @@ namespace OOP2026
             if (usr is Psg psg)
             {
                 nextForm = new FrmPassenger(
-                    psg, _usrSrv, _tripCmd, _tripQry, _usrRepo, _vehRepo,
+                    psg, _usrSrv, _tripCmd, _tripQry,
                     _revSvc, _fareSvc, _mapSvc, _psgSvc, _notiSvc);
             }
             else if (usr is Drv drv)
@@ -363,72 +261,43 @@ namespace OOP2026
             }
         }
 
-        private void ValidateControl(Control control, bool isValid, string errorMessage)
+        private void linkToRegister_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (isValid)
-            {
-                errorProvider.SetError(control, string.Empty);
-                control.BackColor = SystemColors.Window;
-            }
-            else
-            {
-                errorProvider.SetError(control, errorMessage);
-                control.BackColor = Color.MistyRose;
-            }
+            pnlLogin.Visible = false;
+            pnlRegister.Visible = true;
+            cmbRole.SelectedIndex = 0;
+            txtRegName.Focus();
+        }
+        private void linkToLogin_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            pnlLogin.Visible = true;
+            pnlRegister.Visible = false;
+            txtLoginPhone.Focus();
         }
 
-        private void ValidateLoginFields()
+        private void btnToggleLoginPassword_Click(object sender, EventArgs e)
         {
-            string phone = GetText(txtLoginPhone);
-            string password = GetText(txtLoginPassword);
-
-            bool phoneValid = !string.IsNullOrWhiteSpace(phone);
-            bool passwordValid = !string.IsNullOrWhiteSpace(password);
-
-            ValidateControl(txtLoginPhone, phoneValid, "Nhập số điện thoại.");
-            ValidateControl(txtLoginPassword, passwordValid, "Nhập mật khẩu.");
-
-            btnLogin.Enabled = phoneValid && passwordValid;
+            _regPasswordVisible = !_regPasswordVisible;
+            btnToggleRegPassword.Text = _regPasswordVisible ? "👁️" : "🙈";
         }
-
-        private void ValidateRegisterFields()
+        private void cmbRole_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string name = GetText(txtRegName);
-            string phone = GetText(txtRegPhone);
-            string password = GetText(txtRegPassword);
-            bool isDriver = cmbRole.SelectedIndex == 1;
-
-            bool nameValid = !string.IsNullOrWhiteSpace(name);
-            bool phoneValid = Regex.IsMatch(phone, "^[0-9]{9,11}$");
-            bool passwordValid = !string.IsNullOrWhiteSpace(password) && password.Length >= 6;
-
-            ValidateControl(txtRegName, nameValid, "Nhập họ và tên.");
-            ValidateControl(txtRegPhone, phoneValid, "Số điện thoại không hợp lệ.");
-            ValidateControl(txtRegPassword, passwordValid, "Mật khẩu tối thiểu 6 ký tự.");
-
-            if (!isDriver)
+            pnlVehicleInfo.Visible = true;
+            cmbVehicleType.SelectedIndex = 0;
+        }
+        private void cmbVehicleType_SelectedIndexChanged (object sender, EventArgs e)
+        {
+            if (cmbVehicleType.SelectedIndex == 0)
             {
-                ValidateControl(txtPlate, true, string.Empty);
-                ValidateControl(txtBrand, true, string.Empty);
-                ValidateControl(txtModel, true, string.Empty);
-                ValidateControl(txtColor, true, string.Empty);
-
-                btnRegister.Enabled = nameValid && phoneValid && passwordValid;
+                numCapacity.Value = 2;
+                numCapacity.Enabled = false;
                 return;
             }
 
-            bool plateValid = !string.IsNullOrWhiteSpace(txtPlate.Text);
-            bool brandValid = !string.IsNullOrWhiteSpace(txtBrand.Text);
-            bool modelValid = !string.IsNullOrWhiteSpace(txtModel.Text);
-            bool colorValid = !string.IsNullOrWhiteSpace(txtColor.Text);
-
-            ValidateControl(txtPlate, plateValid, "Nhập biển số xe.");
-            ValidateControl(txtBrand, brandValid, "Nhập hãng xe.");
-            ValidateControl(txtModel, modelValid, "Nhập mẫu xe.");
-            ValidateControl(txtColor, colorValid, "Nhập màu xe.");
-
-            btnRegister.Enabled = nameValid && phoneValid && passwordValid &&
-                                plateValid && brandValid && modelValid && colorValid;
+            numCapacity.Minimum = 4;
+            numCapacity.Maximum = 7;
+            numCapacity.Value = 4;
+            numCapacity.Enabled = true;
         }
     }
 }

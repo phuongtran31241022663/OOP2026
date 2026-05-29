@@ -62,7 +62,9 @@ public class UsrSvc : IUsrSvc
 		await _userRepo.CreateAsync(passenger).ConfigureAwait(false);
 		return passenger;
 	}
-	public async Task<Drv> RegisterDriverAsync(string name, string phone, string password, string licenseNumber, string plate, string brand, string model, string color, int capacity, VehicleType vehicleType, Loc initialPosition)
+	public async Task<Drv> RegisterDriverAsync(string name, string phone, string password, string licenseNumber,
+		VehicleType vehicleType, string plate, string brand, string model, string color, int capacity,
+		Loc initialPosition)
 	{
 		if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Tên tài xế không được để trống.");
 		if (string.IsNullOrWhiteSpace(phone)) throw new ArgumentException("Số điện thoại không được để trống.");
@@ -70,15 +72,15 @@ public class UsrSvc : IUsrSvc
 			throw new ArgumentException("Mật khẩu tài xế phải từ 6 ký tự trở lên.");
 		if (string.IsNullOrWhiteSpace(licenseNumber)) throw new ArgumentException("Số giấy phép lái xe không hợp lệ.");
 		if (initialPosition == null) throw new ArgumentNullException(nameof(initialPosition), "Vị trí khởi tạo không được null.");
-		
+
 		Usr? existingUser = await GetUserByPhoneAsync(phone).ConfigureAwait(false);
 		if (existingUser != null)
 			throw new InvalidOperationException("Số điện thoại này đã được một tài xế hoặc hành khách khác sử dụng.");
-		
+
 		// 1. Tạo phương tiện trước thông qua Factory
 		var vehicle = VehicleFactory.CreateVehicle(vehicleType, plate.Trim(), brand.Trim(), model.Trim(), color.Trim(), capacity);
 		await _vehicleRepo.CreateAsync(vehicle).ConfigureAwait(false);
-		
+
 		// 2. Khởi tạo thực thể Tài xế thông qua Factory với vehicleId vừa tạo
 		var driver = UserFactory.CreateDriver(name.Trim(), phone.Trim(), password, licenseNumber.Trim(), vehicle.Id, initialPosition) as Drv;
 		if (driver == null)
@@ -87,7 +89,11 @@ public class UsrSvc : IUsrSvc
 			await _vehicleRepo.DeleteAsync(vehicle.Id).ConfigureAwait(false);
 			throw new InvalidOperationException("Hệ thống khởi tạo tài khoản Tài xế thất bại.");
 		}
-		
+
+		// 3. Liên kết ngược tài xế vào phương tiện (Theo logic mới: Xe có trước, tài xế gán sau)
+		vehicle.LinkDriver(driver.Id);
+		await _vehicleRepo.UpdateAsync(vehicle).ConfigureAwait(false);
+
 		await _userRepo.CreateAsync(driver).ConfigureAwait(false);
 		return driver;
 	}
@@ -154,6 +160,48 @@ public class UsrSvc : IUsrSvc
 		return $"{driver.Name} - {vehicle.Brand} {vehicle.Model} ({vehicle.Plate})";
 	}
 }
+
+public class VehSvc : IVehSvc
+{
+	private readonly IVehRepo _vehicleRepo;
+	private readonly IUsrRepo _userRepo;
+
+	public VehSvc(IVehRepo vehicleRepo, IUsrRepo userRepo)
+	{
+		_vehicleRepo = vehicleRepo ?? throw new ArgumentNullException(nameof(vehicleRepo));
+		_userRepo = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
+	}
+
+	public async Task<Veh> CreateVehicleAsync(Guid driverId, VehicleType type, string plateNumber, string brand, string model, string color, int capacity)
+	{
+		if (string.IsNullOrWhiteSpace(plateNumber)) throw new ArgumentException("Biển số xe không được để trống.");
+
+		var vehicle = VehicleFactory.CreateVehicle(type, plateNumber.Trim(), brand.Trim(), model.Trim(), color.Trim(), capacity);
+		if (driverId != Guid.Empty)
+		{
+			vehicle.LinkDriver(driverId);
+		}
+
+		await _vehicleRepo.CreateAsync(vehicle).ConfigureAwait(false);
+		return vehicle;
+	}
+
+	public async Task<List<Veh>> GetVehiclesByDriverAsync(Guid driverId)
+	{
+		if (driverId == Guid.Empty) return new List<Veh>();
+		var allVehicles = await _vehicleRepo.ReadAsync().ConfigureAwait(false);
+		var driverVehicles = new List<Veh>();
+		foreach (var v in allVehicles)
+		{
+			if (v.DriverId == driverId)
+			{
+				driverVehicles.Add(v);
+			}
+		}
+		return driverVehicles;
+	}
+}
+
 public class AdmSvc : IAdmSvc
 {
 	#region Fields and Constructor
@@ -220,13 +268,15 @@ public class AdmSvc : IAdmSvc
 	#endregion
 
 	#region Thống kê chuyến đi
-	public async Task<(int Total, int Completed, int Cancelled, double CompletionRate)> GetTripStatisticsAsync()
+	public async Task<(int Total, int Completed, int Cancelled, int Timeout, int Active, double CompletionRate)> GetTripStatisticsAsync()
 	{
 		var trips = await _tripRepository.ReadAsync().ConfigureAwait(false);
 
 		int total = trips.Count;
 		int completed = 0;
 		int cancelled = 0;
+		int timeout = 0;
+		int active = 0;
 
 		foreach (Trip t in trips)
 		{
@@ -234,11 +284,13 @@ public class AdmSvc : IAdmSvc
 			{
 				if (t.IsCompleted()) completed++;
 				else if (t.IsCancelled()) cancelled++;
+				else if (t.Status == TripStatus.Timeout) timeout++;
+				else if (t.Status == TripStatus.Matched || t.Status == TripStatus.Arrived || t.Status == TripStatus.Started) active++;
 			}
 		}
 
 		double rate = total == 0 ? 0 : (double)completed / total * 100;
-		return (total, completed, cancelled, rate);
+		return (total, completed, cancelled, timeout, active, rate);
 	}
 	#endregion
 }
@@ -335,153 +387,191 @@ public class PsgSvc : IPsgSvc
 }
 public class MatchSvc : IMatchSvc
 {
-	#region Fields and Constructor
-	private readonly InMemoryDriverGrid _driverGrid;
-	private readonly ITripRepo _tripRepository;
-	private readonly IUsrRepo _userRepo;
-	private readonly IVehRepo _vehicleRepo;
-	private readonly SemaphoreSlim _matchLock = new(1, 1);
+    #region Fields and Constructor
+    private readonly InMemoryDriverGrid _driverGrid;
+    private readonly ITripRepo _tripRepository;
+    private readonly IUsrRepo _userRepo;
+    private readonly IVehRepo _vehicleRepo;
+    private readonly SemaphoreSlim _matchLock = new(1, 1);
+    private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, DateTime>> _pendingProposals = new();
 
-	public MatchSvc(InMemoryDriverGrid driverGrid, ITripRepo tripRepository,
-		IUsrRepo userRepository, IVehRepo vehicleRepository)
-	{
-		_driverGrid = driverGrid ?? throw new ArgumentNullException(nameof(driverGrid));
-		_tripRepository = tripRepository ?? throw new ArgumentNullException(nameof(tripRepository));
-		_userRepo = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-		_vehicleRepo = vehicleRepository ?? throw new ArgumentNullException(nameof(vehicleRepository));
-	}
-	#endregion
-	public async Task<List<Drv>> FindBestDriversAsync(Guid tripId)
-	{
-		if (tripId == Guid.Empty) return new List<Drv>();
+    public MatchSvc(
+        InMemoryDriverGrid driverGrid,
+        ITripRepo tripRepository,
+        IUsrRepo userRepo,
+        IVehRepo vehicleRepo)
+    {
+        _driverGrid = driverGrid ?? throw new ArgumentNullException(nameof(driverGrid));
+        _tripRepository = tripRepository ?? throw new ArgumentNullException(nameof(tripRepository));
+        _userRepo = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
+        _vehicleRepo = vehicleRepo ?? throw new ArgumentNullException(nameof(vehicleRepo));
+    }
+    #endregion
 
-		var trip = await _tripRepository.GetByIdAsync(tripId).ConfigureAwait(false);
-		if (trip == null || !trip.IsSearching())
-			return new List<Drv>();
+    public bool IsPendingDriver(Guid tripId, Guid driverId)
+    {
+        if (_pendingProposals.TryGetValue(tripId, out ConcurrentDictionary<Guid, DateTime> drivers))
+        {
+            if (drivers.TryGetValue(driverId, out DateTime expiry))
+            {
+                if (expiry > DateTime.UtcNow) return true;
+                drivers.TryRemove(driverId, out _);
+            }
+        }
+        return false;
+    }
 
-		var pickup = trip.TripRoute.Pickup.Coord;
+    public int GetPendingCount(Guid tripId)
+    {
+        if (_pendingProposals.TryGetValue(tripId, out ConcurrentDictionary<Guid, DateTime> drivers))
+        {
+            DateTime now = DateTime.UtcNow;
+            foreach (KeyValuePair<Guid, DateTime> kv in drivers)
+            {
+                if (kv.Value < now) drivers.TryRemove(kv.Key, out _);
+            }
+            return drivers.Count;
+        }
+        return 0;
+    }
 
-		// Lấy danh sách ID tài xế trong các ô lưới lân cận ( Spatial Indexing )
-		var nearbyDriverIds = _driverGrid.GetDriversInCellAndNeighbors(
-			pickup.Latitude,
-			pickup.Longitude,
-			radiusCells: 2);
+    public void ClearPendingDrivers(Guid tripId)
+    {
+        _pendingProposals.TryRemove(tripId, out _);
+    }
 
-		if (nearbyDriverIds == null) return new List<Drv>();
+    public void RemovePendingDriver(Guid tripId, Guid driverId)
+    {
+        if (_pendingProposals.TryGetValue(tripId, out ConcurrentDictionary<Guid, DateTime> drivers))
+        {
+            drivers.TryRemove(driverId, out _);
+        }
+    }
 
-		bool hasDriversXungQuanh = false;
-		foreach (var id in nearbyDriverIds)
-		{
-			hasDriversXungQuanh = true;
-			break; // Có ít nhất 1 phần tử là đạt yêu cầu, dừng vòng lặp ngay
-		}
-		if (!hasDriversXungQuanh) return new List<Drv>();
-		// CHIẾN LƯỢC TỐI ƯU: Đọc toàn bộ danh sách 1 lần duy nhất để tránh nghẽn I/O đọc file JSON nhiều lần
-		var allUsers = await _userRepo.ReadAsync().ConfigureAwait(false);
-		var allVehicles = await _vehicleRepo.ReadAsync().ConfigureAwait(false);
+    public async Task<List<Drv>> FindBestDriversAsync(Guid tripId)
+    {
+        if (tripId == Guid.Empty) return new List<Drv>();
 
-		var eligibleDrivers = new List<Drv>();
+        Trip? trip = await _tripRepository.GetByIdAsync(tripId).ConfigureAwait(false);
+        if (trip == null || !trip.IsSearching())
+            return new List<Drv>();
 
-		// Vòng lặp viết tay thay thế hoàn toàn cho LINQ .Where() và .Select()
-		foreach (var driverId in nearbyDriverIds)
-		{
-			// 1. Tìm thực thể Drv tương ứng từ danh sách bộ nhớ đệm
-			Drv? currentDriver = null;
-			foreach (var user in allUsers)
-			{
-				if (user is Drv d && d.Id == driverId)
-				{
-					currentDriver = d;
-					break;
-				}
-			}
+        Coord pickup = trip.TripRoute.Pickup.Coord;
 
-			// Kiểm tra điều kiện: Phải tồn tại tài xế và tài xế đang trực tuyến (Online)
-			if (currentDriver == null || currentDriver.Status != DriverStatus.Online)
-				continue;
+        IEnumerable<Guid>? nearbyDriverIds = _driverGrid.GetDriversInCellAndNeighbors(
+            pickup.Latitude,
+            pickup.Longitude,
+            radiusCells: 2);
 
-			// 2. Tìm thực thể Xe (Veh) liên kết với tài xế này
-			Veh? currentVehicle = null;
-			foreach (var vehicle in allVehicles)
-			{
-				if (vehicle != null && vehicle.Id == currentDriver.VehId)
-				{
-					currentVehicle = vehicle;
-					break;
-				}
-			}
+        if (nearbyDriverIds == null) return new List<Drv>();
 
-			// Kiểm tra điều kiện cấu hình: Loại xe của tài xế phải khớp chính xác với loại xe khách đặt
-			if (currentVehicle != null && currentVehicle.Type == trip.TripVehicleType)
-			{
-				eligibleDrivers.Add(currentDriver);
-			}
-		}
+        bool hasDriversXungQuanh = false;
+        foreach (Guid id in nearbyDriverIds)
+        {
+            hasDriversXungQuanh = true;
+            break;
+        }
+        if (!hasDriversXungQuanh) return new List<Drv>();
 
-		return eligibleDrivers;
-	}
-	public async Task ProposeDriversForTripAsync(Guid tripId, int maxDrivers = 3)
-	{
-		if (tripId == Guid.Empty) return;
+        List<Usr> allUsers = await _userRepo.ReadAsync().ConfigureAwait(false);
+        List<Veh> allVehicles = await _vehicleRepo.ReadAsync().ConfigureAwait(false);
 
-		var trip = await _tripRepository.GetByIdAsync(tripId).ConfigureAwait(false);
-		if (trip == null || !trip.IsSearching()) return;
+        Dictionary<Guid, Drv> driverMap = new Dictionary<Guid, Drv>();
+        foreach (Usr user in allUsers)
+        {
+            if (user is Drv d) driverMap[d.Id] = d;
+        }
 
-		// Tìm danh sách tài xế phù hợp xung quanh
-		List<Drv> drivers = await FindBestDriversAsync(tripId).ConfigureAwait(false);
-		if (drivers.Count == 0) return;
+        Dictionary<Guid, Veh> vehicleMap = new Dictionary<Guid, Veh>();
+        foreach (Veh vehicle in allVehicles)
+        {
+            if (vehicle != null) vehicleMap[vehicle.Id] = vehicle;
+        }
 
-		var topDriverIds = new List<Guid>();
-		int limit = drivers.Count < maxDrivers ? drivers.Count : maxDrivers;
+        List<Drv> eligibleDrivers = new List<Drv>();
 
-		for (int i = 0; i < limit; i++)
-		{
-			if (drivers[i] != null)
-			{
-				topDriverIds.Add(drivers[i].Id);
-			}
-		}
+        foreach (Guid driverId in nearbyDriverIds)
+        {
+            if (driverMap.TryGetValue(driverId, out Drv currentDriver))
+            {
+                if (currentDriver.Status != DriverStatus.Online)
+                    continue;
 
-		if (topDriverIds.Count == 0) return;
+                if (vehicleMap.TryGetValue(currentDriver.VehId, out Veh currentVehicle))
+                {
+                    if (currentVehicle.Type == trip.TripVehicleType)
+                    {
+                        eligibleDrivers.Add(currentDriver);
+                    }
+                }
+            }
+        }
 
-		// Gọi đề xuất cuốc xe đến các tài xế được chọn trong thời gian quy định
-		trip.ProposeDrivers(topDriverIds, expirySeconds: 60);
-		await _tripRepository.UpdateAsync(trip).ConfigureAwait(false);
-	}
-	public async Task<bool> TryAssignDriverAsync(Guid tripId, Guid driverId)
-	{
-		if (tripId == Guid.Empty || driverId == Guid.Empty) return false;
+        return eligibleDrivers;
+    }
 
-		await _matchLock.WaitAsync().ConfigureAwait(false);
-		try
-		{
-			var trip = await _tripRepository.GetByIdAsync(tripId).ConfigureAwait(false);
-			if (trip == null || !trip.IsSearching()) return false;
-			if (!trip.IsPendingDriver(driverId)) return false;
+    public async Task ProposeDriversForTripAsync(Guid tripId, int maxDrivers = 3)
+    {
+        if (tripId == Guid.Empty) return;
 
-			var user = await _userRepo.GetByIdAsync(driverId).ConfigureAwait(false);
-			if (user is not Drv driver || driver.Status != DriverStatus.Online) return false;
+        Trip? trip = await _tripRepository.GetByIdAsync(tripId).ConfigureAwait(false);
+        if (trip == null || !trip.IsSearching()) return;
 
-			// Thực hiện các thay đổi trạng thái mang tính nguyên tử (Atomic state transition)
-			trip.TryAssignFromPending(driverId);
-			driver.SetOnTrip();
+        List<Drv> drivers = await FindBestDriversAsync(tripId).ConfigureAwait(false);
+        if (drivers.Count == 0) return;
 
-			// ĐỒNG BỘ LƯỚI: Xóa tài xế ra khỏi bản đồ tìm kiếm ngay lập tức vì họ đã nhận chuyến, tránh bị spam cuốc xe khác
-			_driverGrid.RemoveDriver(driverId);
+        List<Guid> topDriverIds = new List<Guid>();
+        int limit = drivers.Count < maxDrivers ? drivers.Count : maxDrivers;
 
-			// Lưu các thay đổi xuống tệp lưu trữ cục bộ
-			await _tripRepository.UpdateAsync(trip).ConfigureAwait(false);
-			await _userRepo.UpdateAsync(driver).ConfigureAwait(false);
+        for (int i = 0; i < limit; i++)
+        {
+            if (drivers[i] != null)
+            {
+                topDriverIds.Add(drivers[i].Id);
+            }
+        }
 
-			return true;
-		}
-		finally
-		{
-			_matchLock.Release();
-		}
-	}
+        if (topDriverIds.Count == 0) return;
+
+        DateTime expiry = DateTime.UtcNow.AddSeconds(60);
+        ConcurrentDictionary<Guid, DateTime> proposal = _pendingProposals.GetOrAdd(tripId, _ => new ConcurrentDictionary<Guid, DateTime>());
+        proposal.Clear();
+        foreach (Guid id in topDriverIds) proposal.TryAdd(id, expiry);
+
+        await _tripRepository.UpdateAsync(trip).ConfigureAwait(false);
+    }
+
+    public async Task<bool> TryAssignDriverAsync(Guid tripId, Guid driverId)
+    {
+        if (tripId == Guid.Empty || driverId == Guid.Empty) return false;
+
+        await _matchLock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            Trip? trip = await _tripRepository.GetByIdAsync(tripId).ConfigureAwait(false);
+            if (trip == null || !trip.IsSearching()) return false;
+            if (!IsPendingDriver(tripId, driverId)) return false;
+
+            Usr? user = await _userRepo.GetByIdAsync(driverId).ConfigureAwait(false);
+            if (user is not Drv driver || driver.Status != DriverStatus.Online) return false;
+
+            ClearPendingDrivers(tripId);
+            trip.AssignDriver(driverId);
+            driver.SetOnTrip();
+
+            _driverGrid.RemoveDriver(driverId);
+
+            await _tripRepository.UpdateAsync(trip).ConfigureAwait(false);
+            await _userRepo.UpdateAsync(driver).ConfigureAwait(false);
+
+            return true;
+        }
+        finally
+        {
+            _matchLock.Release();
+        }
+    }
 }
-
 public class DrvCmd : IDrvCmd
 {
 	#region Fields and Constructor
@@ -541,14 +631,12 @@ public class DrvCmd : IDrvCmd
 		var trip = await _tripRepository.GetByIdAsync(tripId).ConfigureAwait(false);
 		if (trip == null) return;
 
-		if (trip.RemovePendingDriver(driverId))
-		{
-			await _tripRepository.UpdateAsync(trip).ConfigureAwait(false);
+		_matchingService.RemovePendingDriver(tripId, driverId);
+		await _tripRepository.UpdateAsync(trip).ConfigureAwait(false);
 
-			if (trip.PendingCount == 0 && trip.Status == TripStatus.Searching)
-			{
-				await _matchingService.ProposeDriversForTripAsync(tripId).ConfigureAwait(false);
-			}
+		if (_matchingService.GetPendingCount(tripId) == 0 && trip.Status == TripStatus.Searching)
+		{
+			await _matchingService.ProposeDriversForTripAsync(tripId).ConfigureAwait(false);
 		}
 	}
 	public async Task UpdateLocationAsync(Guid driverId, Loc newLocation)
@@ -659,6 +747,8 @@ public class WalletSvc : IWalletSvc
 {
 	private readonly IUsrRepo _userRepo;
 
+	public event EventHandler<WalletChangedEventArgs>? WalletChanged;
+
 	public WalletSvc(IUsrRepo userRepository, ITripQry tripQueryService)
 	{
 		_userRepo = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -684,6 +774,8 @@ public class WalletSvc : IWalletSvc
 
 		driver.Deposit(amount);
 		await _userRepo.UpdateAsync(driver).ConfigureAwait(false);
+
+		WalletChanged?.Invoke(this, new WalletChangedEventArgs(driverId, driver.Wallet));
 	}
 }
 public class MapSvc : IMapSvc
@@ -841,19 +933,28 @@ public class MapSvc : IMapSvc
     }
 	public async Task<Loc> EnsureLocationAsync(string address, double? lat = null, double? lng = null)
 	{
-		string finalName = string.IsNullOrWhiteSpace(address) ? "Địa điểm đã chọn" : address;
-		
-		if (lat.HasValue && lng.HasValue) 
-			return new Loc(new Coord(lat.Value, lng.Value), new Addr(finalName, address, "", "", ""));
-
-		var res = await SearchAsync(address).ConfigureAwait(false);
-
-		if (res != null && res.Count > 0)
+		// Nếu có tọa độ nhưng thiếu địa chỉ chi tiết, thực hiện Reverse Geocode
+		if (lat.HasValue && lng.HasValue)
 		{
-			return res[0];
+			if (string.IsNullOrWhiteSpace(address) || address == "Unknown")
+			{
+				var resolved = await GetAddressAsync(lat.Value, lng.Value).ConfigureAwait(false);
+				if (resolved != null) return resolved;
+			}
+			
+			string finalName = string.IsNullOrWhiteSpace(address) ? "Địa điểm đã chọn" : address;
+			return new Loc(new Coord(lat.Value, lng.Value), new Addr(finalName, address, "", "", ""));
 		}
 
-		return new Loc(new Coord(10.762622, 106.660172), new Addr(finalName, address, "", "", ""));
+		// Nếu chỉ có text, thực hiện tìm kiếm
+		if (!string.IsNullOrWhiteSpace(address))
+		{
+			var res = await SearchAsync(address).ConfigureAwait(false);
+			if (res != null && res.Count > 0) return res[0];
+		}
+
+		// Mặc định trả về trung tâm TP.HCM nếu không xác định được
+		return new Loc(new Coord(10.762622, 106.660172), new Addr("Thành phố Hồ Chí Minh", "Trung tâm", "", "Hồ Chí Minh", "Việt Nam"));
 	}
 }
 
@@ -867,7 +968,7 @@ public class TripCmd : ITripCmd
 	private readonly IFareSvc _fareService;
 	private readonly IMapSvc _mapService;
 	private readonly IMatchSvc _matchingService;
-	private readonly Stack<Trip> _recentTrips = new();
+	private readonly InMemoryDriverGrid _driverGrid;
 
 	public event EventHandler<TripStatusChangedEventArgs>? TripStatusChanged;
 
@@ -877,7 +978,8 @@ public class TripCmd : ITripCmd
 		IVehRepo vehicleRepository,
 		IFareSvc fareService,
 		IMapSvc mapService,
-		IMatchSvc matchingService)
+		IMatchSvc matchingService,
+		InMemoryDriverGrid driverGrid)
 	{
 		_tripRepository = tripRepository ?? throw new ArgumentNullException(nameof(tripRepository));
 		_userRepo = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -885,6 +987,7 @@ public class TripCmd : ITripCmd
 		_fareService = fareService ?? throw new ArgumentNullException(nameof(fareService));
 		_mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
 		_matchingService = matchingService ?? throw new ArgumentNullException(nameof(matchingService));
+		_driverGrid = driverGrid ?? throw new ArgumentNullException(nameof(driverGrid));
 	}
 	#endregion
 	private void AttachTripToEvents(Trip trip)
@@ -944,7 +1047,6 @@ public class TripCmd : ITripCmd
 		    }
 		});
 
-		_recentTrips.Push(trip);
 		return trip;
 	}
 
@@ -955,7 +1057,7 @@ public class TripCmd : ITripCmd
 			throw new InvalidOperationException("Không thể gán tài xế cho chuyến đi này.");
 	}
 
-	public async Task DriverArrivedAtPickupAsync(Guid tripId)
+	public async Task ArrivedPickupAtPickupAsync(Guid tripId)
 	{
 		await _tripCommandLock.WaitAsync().ConfigureAwait(false);
 		try
@@ -963,7 +1065,7 @@ public class TripCmd : ITripCmd
 			Trip trip = await _tripRepository.GetByIdAsync(tripId).ConfigureAwait(false)
 				?? throw new InvalidOperationException("Không tìm thấy chuyến.");
 			AttachTripToEvents(trip);
-			trip.DriverArrived();
+			trip.ArrivedPickup();
 			await _tripRepository.UpdateAsync(trip).ConfigureAwait(false);
 		}
 		finally { _tripCommandLock.Release(); }
@@ -983,7 +1085,7 @@ public class TripCmd : ITripCmd
 		finally { _tripCommandLock.Release(); }
 	}
 
-	public async Task DriverArrivedAtDropoffAsync(Guid tripId)
+	public async Task ArrivedPickupAtDropoffAsync(Guid tripId)
 	{
 		await _tripCommandLock.WaitAsync().ConfigureAwait(false);
 		try
@@ -991,7 +1093,7 @@ public class TripCmd : ITripCmd
 			Trip trip = await _tripRepository.GetByIdAsync(tripId).ConfigureAwait(false)
 				?? throw new InvalidOperationException("Không tìm thấy chuyến.");
 			AttachTripToEvents(trip);
-			trip.FinishTrip();
+			trip.ArrivedDropoff();
 			if (!trip.IsDropOff())
 				throw new InvalidOperationException("Trạng thái không hợp lệ sau khi đến điểm trả.");
 			await _tripRepository.UpdateAsync(trip).ConfigureAwait(false);
@@ -1019,9 +1121,16 @@ public class TripCmd : ITripCmd
 				?? throw new InvalidOperationException("Không tìm thấy hành khách.");
 
 			driver.AddIncome(trip.TripFare.DriverIncome);
-			driver.SetOnline();
 			driver.IncrementTotalTrips();
 			passenger.IncrementTotalTrips();
+
+			// ĐỒNG BỘ LƯỚI: Đưa tài xế quay lại bản đồ tìm kiếm vì họ đã rảnh
+			if (driver.Position != null)
+			{
+				_driverGrid.UpdateDriverLocation(driver.Id,
+					driver.Position.Coord.Latitude,
+					driver.Position.Coord.Longitude);
+			}
 
 			trip.ConfirmPayment();
 
@@ -1043,13 +1152,22 @@ public class TripCmd : ITripCmd
 
 			AttachTripToEvents(trip);
 			trip.Cancel(reason);
+			_matchingService.ClearPendingDrivers(tripId);
 
-			if (trip.DriverId.HasValue)
+			if (trip.DriverId.HasValue && trip.DriverId.Value != Guid.Empty)
 			{
 				if (await _userRepo.GetByIdAsync(trip.DriverId.Value).ConfigureAwait(false) is Drv driver)
 				{
 					driver.SetOnline();
 					await _userRepo.UpdateAsync(driver).ConfigureAwait(false);
+					
+					// ĐỒNG BỘ LƯỚI: Đưa tài xế quay lại bản đồ tìm kiếm vì họ đã rảnh
+					if (driver.Position != null)
+					{
+						_driverGrid.UpdateDriverLocation(driver.Id,
+							driver.Position.Coord.Latitude,
+							driver.Position.Coord.Longitude);
+					}
 				}
 			}
 			await _tripRepository.UpdateAsync(trip).ConfigureAwait(false);
@@ -1060,24 +1178,17 @@ public class TripCmd : ITripCmd
 		}
 	}
 
-	public IEnumerable<Trip> GetRecentTrips()
-	{
-		var list = new List<Trip>();
-		foreach (var trip in _recentTrips)
-		{
-			if (trip != null) list.Add(trip);
-		}
-		return list;
-	}
 }
 
 public class TripQry : ITripQry
 {
 	private readonly ITripRepo _tripRepository;
+	private readonly IMatchSvc _matchingService;
 
-	public TripQry(ITripRepo tripRepository)
+	public TripQry(ITripRepo tripRepository, IMatchSvc matchingService)
 	{
 		_tripRepository = tripRepository ?? throw new ArgumentNullException(nameof(tripRepository));
+		_matchingService = matchingService ?? throw new ArgumentNullException(nameof(matchingService));
 	}
 	public async Task<Trip?> GetTripByIdAsync(Guid tripId)
 	{
@@ -1128,7 +1239,7 @@ public class TripQry : ITripQry
 
 		foreach (var t in allTrips)
 		{
-			if (t != null && t.Status == TripStatus.Searching && t.IsPendingDriver(driverId))
+			if (t != null && t.Status == TripStatus.Searching && _matchingService.IsPendingDriver(t.Id, driverId))
 			{
 				filteredTrips.Add(t);
 			}
@@ -1229,6 +1340,8 @@ public class RevSvc : IRevSvc
 	private readonly IUsrRepo _userRepo;
 	private readonly ITripRepo _tripRepo;
 
+	public event EventHandler<TripReviewedEventArgs>? TripReviewed;
+
 	public RevSvc(IRevRepo reviewRepo, IUsrRepo userRepo, ITripRepo tripRepo)
 	{
 		_reviewRepo = reviewRepo ?? throw new ArgumentNullException(nameof(reviewRepo));
@@ -1241,13 +1354,24 @@ public class RevSvc : IRevSvc
 		var review = new Rev(driverId, passengerId, tripId, rating, comment);
 		await _reviewRepo.CreateAsync(review).ConfigureAwait(false);
 
-		// Update driver rating
+		// 1. Cập nhật trạng thái chuyến đi thành "Đã đánh giá"
+		var trip = await _tripRepo.GetByIdAsync(tripId).ConfigureAwait(false);
+		if (trip != null)
+		{
+			trip.MarkAsReviewed();
+			await _tripRepo.UpdateAsync(trip).ConfigureAwait(false);
+		}
+
+		// 2. Cập nhật điểm xếp hạng tài xế
 		var driver = await _userRepo.GetDriverByIdAsync(driverId).ConfigureAwait(false);
 		if (driver != null)
 		{
 			driver.AddReview(rating);
 			await _userRepo.UpdateAsync(driver).ConfigureAwait(false);
 		}
+
+		// 3. Phát sự kiện để các UI khác có thể cập nhật
+		TripReviewed?.Invoke(this, new TripReviewedEventArgs(tripId, driverId, rating));
 	}
 
 	public async Task UpdateReviewAsync(Guid reviewId, int rating, string comment)
@@ -1265,7 +1389,7 @@ public class RevSvc : IRevSvc
 	}
 }
 
-public class NotificationSvc : INotificationSvc
+public class NotificationSvc : INotiSvc
 {
 	public string GetDriverNotificationMessage(DriverStatusChangedEventArgs e)
 	{
@@ -1289,12 +1413,13 @@ public class NotificationSvc : INotificationSvc
 	}
 
 	public string GetDriverAcceptedMessage() => "Bạn đã nhận chuyến đi thành công.";
-	public string GetDriverArrivedPickupMessage() => "Bạn đã đến điểm đón khách.";
+	public string GetDriverCancelledMessage() => "Chuyến đi đã bị hủy bởi Hành khách.";
+	public string GetArrivedPickupPickupMessage() => "Bạn đã đến điểm đón khách.";
 	public string GetDriverStartTripMessage() => "Chuyến đi đã bắt đầu.";
 	public string GetDriverCompleteTripMessage() => "Bạn đã hoàn thành chuyến đi.";
 	public string GetPassengerRequestSentMessage() => "Yêu cầu của bạn đã được gửi đi.";
 	public string GetPassengerDriverFoundMessage() => "Tài xế đã nhận lời mời của bạn.";
-	public string GetPassengerDriverArrivedMessage() => "Tài xế đang đợi bạn ở điểm đón.";
+	public string GetPassengerArrivedPickupMessage() => "Tài xế đang đợi bạn ở điểm đón.";
 	public string GetPassengerTripStartedMessage() => "Chuyến đi của bạn đã bắt đầu.";
 	public string GetPassengerTripCompletedMessage() => "Chúc mừng! Bạn đã hoàn thành chuyến đi.";
 }
