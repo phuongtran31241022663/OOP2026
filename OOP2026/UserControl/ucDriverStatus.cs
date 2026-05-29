@@ -33,6 +33,10 @@ namespace OOP2026
             {
                 _driver.StatusChanged -= OnDriverStatusChanged;
             }
+            if (_walletService != null)
+            {
+                _walletService.WalletChanged -= OnWalletChangedGlobal;
+            }
 
             _driver = driver ?? throw new ArgumentNullException(nameof(driver));
             _driverCmd = driverCmd ?? throw new ArgumentNullException(nameof(driverCmd));
@@ -41,6 +45,7 @@ namespace OOP2026
             _walletService = walletService ?? throw new ArgumentNullException(nameof(walletService));
 
             _driver.StatusChanged += OnDriverStatusChanged;
+            _walletService.WalletChanged += OnWalletChangedGlobal;
 
             if (_refreshTimer == null)
             {
@@ -51,6 +56,18 @@ namespace OOP2026
             _refreshTimer.Stop();
             _refreshTimer.Start();
 
+            _ = RefreshStatusAsync();
+        }
+
+        private void OnWalletChangedGlobal(object sender, WalletChangedEventArgs e)
+        {
+            if (e.DriverId != _driver.Id) return;
+
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => OnWalletChangedGlobal(sender, e)));
+                return;
+            }
             _ = RefreshStatusAsync();
         }
 
@@ -96,15 +113,10 @@ namespace OOP2026
                     _driver = freshDriver;
                 }
 
-                chkToggleStatus.CheckedChanged -= ChkToggleStatus_CheckedChanged;
-
                 bool isOnline = (_driver.Status == DriverStatus.Online);
-                chkToggleStatus.Checked = isOnline;
-                chkToggleStatus.Text = isOnline ? "Đang nhận cuốc" : "Đang tắt nhận cuốc";
-                chkToggleStatus.BackColor = isOnline ? Colors.LightYellow : Colors.Gray;
-                chkToggleStatus.ForeColor = isOnline ? Colors.Black : Colors.White;
-
-                chkToggleStatus.CheckedChanged += ChkToggleStatus_CheckedChanged;
+                btnToggleStatus.Text = isOnline ? "Đang nhận cuốc" : "Đang tắt nhận cuốc";
+                btnToggleStatus.BackColor = isOnline ? Colors.LightYellow : Colors.Gray;
+                btnToggleStatus.ForeColor = isOnline ? Colors.Black : Colors.White;
 
                 decimal wallet = await _walletService.GetWalletAsync(_driver.Id);
                 decimal income = await _walletService.GetIncomeAsync(_driver.Id);
@@ -150,19 +162,19 @@ namespace OOP2026
             lblVehicleType.Text = "Loại xe: -";
         }
 
-        private async void ChkToggleStatus_CheckedChanged(object sender, EventArgs e)
+        private async void BtnToggleStatus_Click(object sender, EventArgs e)
         {
             if (_driverCmd == null || _isRefreshing) return;
 
             try
             {
-                if (chkToggleStatus.Checked)
+                if (_driver.IsOnline())
                 {
-                    await _driverCmd.GoOnlineAsync(_driver.Id);
+                    await _driverCmd.GoOfflineAsync(_driver.Id);
                 }
                 else
                 {
-                    await _driverCmd.GoOfflineAsync(_driver.Id);
+                    await _driverCmd.GoOnlineAsync(_driver.Id);
                 }
 
                 await RefreshStatusAsync();
@@ -170,10 +182,6 @@ namespace OOP2026
             catch (Exception ex)
             {
                 MessageBox.Show($"Thay đổi trạng thái thất bại: {ex.Message}", "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                chkToggleStatus.CheckedChanged -= ChkToggleStatus_CheckedChanged;
-                chkToggleStatus.Checked = !chkToggleStatus.Checked;
-                chkToggleStatus.CheckedChanged += ChkToggleStatus_CheckedChanged;
             }
         }
 
@@ -182,6 +190,10 @@ namespace OOP2026
             if (_driver != null)
             {
                 _driver.StatusChanged -= OnDriverStatusChanged;
+            }
+            if (_walletService != null)
+            {
+                _walletService.WalletChanged -= OnWalletChangedGlobal;
             }
 
             if (_refreshTimer != null)

@@ -42,6 +42,7 @@ namespace OOP20262026
             this.spl = new System.Windows.Forms.SplitContainer();
             this.pnl = new System.Windows.Forms.Panel();
             this.btn = new System.Windows.Forms.Button();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tab.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.spl)).BeginInit();
@@ -139,7 +140,7 @@ namespace OOP20262026
             // 
             // spl
             // 
-            this.spl.Location = new System.Drawing.Point(258, 19);
+            this.spl.Location = new System.Drawing.Point(490, 44);
             this.spl.Name = "spl";
             this.spl.Size = new System.Drawing.Size(150, 100);
             this.spl.TabIndex = 7;
@@ -164,11 +165,24 @@ namespace OOP20262026
             this.btn.UseVisualStyleBackColor = true;
             this.btn.Click += new System.EventHandler(this.btn_Click);
             // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.ColumnCount = 2;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(488, 194);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 1;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(200, 100);
+            this.tableLayoutPanel2.TabIndex = 10;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.btn);
             this.Controls.Add(this.pnl);
             this.Controls.Add(this.spl);
@@ -203,6 +217,7 @@ namespace OOP20262026
         private SplitContainer spl;
         private Panel pnl;
         private Button btn;
+        private TableLayoutPanel tableLayoutPanel2;
     }
 }
 

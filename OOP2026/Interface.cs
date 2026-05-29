@@ -35,14 +35,15 @@ public interface IUsrRepo : IJsonRepository<Usr>
 }
 public interface IVehRepo : IJsonRepository<Veh>
 {
-    Task<List<Veh>> GetByTypeAsync(VehicleType type);
 }
 // Service Interfaces
 public interface IUsrSvc
 {
     Task<Usr> LoginAsync(string phone, string password);
     Task<Psg> RegisterPassengerAsync(string name, string phone, string password);
-    Task<Drv> RegisterDriverAsync(string name, string phone, string password, string licenseNumber, string plate, string brand, string model, string color, int capacity, VehicleType vehicleType, Loc initialPosition);
+    Task<Drv> RegisterDriverAsync(string name, string phone, string password, string licenseNumber,
+        VehicleType vehicleType, string plate, string brand, string model, string color, int capacity,
+        Loc initialPosition);
     Task ChangePasswordAsync(Guid userId, string oldPassword, string newPassword);
     Task UpdateProfileAsync(Guid userId, string name, string phone);
     Task<Usr?> GetUserByIdAsync(Guid userId);
@@ -54,9 +55,9 @@ public interface ITripCmd
     event EventHandler<TripStatusChangedEventArgs>? TripStatusChanged;
     Task<Trip> CreateTripAsync(Guid passengerId, Route route, Fare fare, VehicleType vehicleType);
     Task AssignDriverAsync(Guid tripId, Guid driverId);
-    Task DriverArrivedAtPickupAsync(Guid tripId);
+    Task ArrivedPickupAtPickupAsync(Guid tripId);
     Task StartTripAsync(Guid tripId);
-    Task DriverArrivedAtDropoffAsync(Guid tripId);
+    Task ArrivedPickupAtDropoffAsync(Guid tripId);
     Task CompleteTripAsync(Guid tripId);
     Task CancelTripAsync(Guid tripId, string reason);
 }
@@ -90,13 +91,25 @@ public interface IDrvQry
     Task<Veh?> GetVehicleByIdAsync(Guid vehicleId);
     //Task<decimal> GetIncomeAsync(Guid driverId);
 }
+public class WalletChangedEventArgs : EventArgs
+{
+    public Guid DriverId { get; }
+    public decimal NewBalance { get; }
+    public WalletChangedEventArgs(Guid driverId, decimal newBalance)
+    {
+        DriverId = driverId;
+        NewBalance = newBalance;
+    }
+}
+
 public interface IWalletSvc
 {
+    event EventHandler<WalletChangedEventArgs>? WalletChanged;
     Task<decimal> GetWalletAsync(Guid driverId);
     Task<decimal> GetIncomeAsync(Guid driverId);
     Task DepositAsync(Guid driverId, decimal amount);
 }
-public interface IVehicleService
+public interface IVehSvc
 {
     Task<Veh> CreateVehicleAsync(Guid driverId, VehicleType type, string plateNumber, string brand, string model, string color, int capacity);
     Task<List<Veh>> GetVehiclesByDriverAsync(Guid driverId);
@@ -104,7 +117,7 @@ public interface IVehicleService
 public interface IAdmSvc
 {
     Task<Pol> CreatePolicyAsync(VehicleType vehicleType, decimal baseFare, decimal pricePerKm, decimal commissionRate);
-    Task<(int Total, int Completed, int Cancelled, double CompletionRate)> GetTripStatisticsAsync();
+    Task<(int Total, int Completed, int Cancelled, int Timeout, int Active, double CompletionRate)> GetTripStatisticsAsync();
 
     Task<decimal> GetTotalRevenueAsync();
     Task<decimal> GetTotalCommissionAsync();
@@ -132,25 +145,44 @@ public interface IMatchSvc
     Task<List<Drv>> FindBestDriversAsync(Guid tripId);
     Task ProposeDriversForTripAsync(Guid tripId, int maxDrivers = 3);
     Task<bool> TryAssignDriverAsync(Guid tripId, Guid driverId);
+    bool IsPendingDriver(Guid tripId, Guid driverId);
+    int GetPendingCount(Guid tripId);
+    void ClearPendingDrivers(Guid tripId);
+    void RemovePendingDriver(Guid tripId, Guid driverId);
 }
+public class TripReviewedEventArgs : EventArgs
+{
+    public Guid TripId { get; }
+    public Guid DriverId { get; }
+    public int Rating { get; }
+    public TripReviewedEventArgs(Guid tripId, Guid driverId, int rating)
+    {
+        TripId = tripId;
+        DriverId = driverId;
+        Rating = rating;
+    }
+}
+
 public interface IRevSvc
 {
+    event EventHandler<TripReviewedEventArgs>? TripReviewed;
     Task CreateReviewAsync(Guid driverId, Guid passengerId, Guid tripId, int rating, string comment);
     Task UpdateReviewAsync(Guid reviewId, int rating, string comment);
     Task DeleteReviewAsync(Guid reviewId);
 }
 
-public interface INotificationSvc
+public interface INotiSvc
 {
     string GetDriverNotificationMessage(DriverStatusChangedEventArgs e);
     string GetPassengerNotificationMessage(TripStatusChangedEventArgs e);
     string GetDriverAcceptedMessage();
-    string GetDriverArrivedPickupMessage();
+    string GetDriverCancelledMessage();
+    string GetArrivedPickupPickupMessage();
     string GetDriverStartTripMessage();
     string GetDriverCompleteTripMessage();
     string GetPassengerRequestSentMessage();
     string GetPassengerDriverFoundMessage();
-    string GetPassengerDriverArrivedMessage();
+    string GetPassengerArrivedPickupMessage();
     string GetPassengerTripStartedMessage();
     string GetPassengerTripCompletedMessage();
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,8 +12,8 @@ namespace OOP2026
         private Guid _tripId;
         private IRevSvc _reviewService;
 
-        private int _selectedStars = 5;
-        private readonly List<Label> _starLabels = new List<Label>();
+        private int _selectedStars = 5;                // mặc định 5 sao
+        private Label[] _starLabels;                  // mảng tham chiếu tới các Label sao tĩnh
 
         public event EventHandler ReviewSubmitted;
         public event EventHandler ReviewCancelled;
@@ -25,6 +24,11 @@ namespace OOP2026
         public ucReview()
         {
             InitializeComponent();
+
+            // Gán mảng sao từ Designer
+            _starLabels = new[] { lblStar1, lblStar2, lblStar3, lblStar4, lblStar5 };
+            UpdateStarsUI();   // hiển thị 5 sao vàng ban đầu
+
             this.Disposed += UcReview_Disposed;
         }
 
@@ -36,64 +40,62 @@ namespace OOP2026
             _reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
         }
 
-        // ─────────────────────────────────────────────────────
-        //  SỬA: Render star sau khi Layout hoàn tất để pnlStars.Width > 0
-        // ─────────────────────────────────────────────────────
-        protected override void OnLayout(LayoutEventArgs levent)
-        {
-            base.OnLayout(levent);
-            if (_starLabels.Count == 0 && pnlStars.Width > 0)
-                RenderStars();
-        }
-
-        private void RenderStars()
-        {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(RenderStars));
-                return;
-            }
-
-            ClearAndDisposeStars();
-
-            int starSize = 36;
-            int startX = Math.Max(0, (pnlStars.Width - 5 * starSize) / 2);
-
-            for (int i = 0; i < 5; i++)
-            {
-                var lbl = new Label
-                {
-                    Text = "⭐",
-                    Font = new Font("Segoe UI Emoji", 20F, FontStyle.Regular),
-                    Size = new Size(starSize, starSize),
-                    Location = new Point(startX + i * starSize, (pnlStars.Height - starSize) / 2),
-                    Cursor = Cursors.Hand,
-                    Tag = i + 1,
-                    TextAlign = ContentAlignment.MiddleCenter
-                };
-                lbl.Click += Star_Click;
-                _starLabels.Add(lbl);
-                pnlStars.Controls.Add(lbl);
-            }
-            UpdateStarsUI();
-        }
-
+        // ──────────────────────── Star handlers ────────────────────────
         private void Star_Click(object sender, EventArgs e)
         {
-            if (sender is Label lbl && lbl.Tag is int stars)
+            Label clickedStar = sender as Label;
+            if (clickedStar == null) return;
+
+            // Xác định chỉ số sao (1‑5)
+            int starIndex = Array.IndexOf(_starLabels, clickedStar) + 1;
+            if (starIndex > 0)
             {
-                _selectedStars = stars;
+                _selectedStars = starIndex;
                 UpdateStarsUI();
             }
         }
 
+        private void Star_MouseEnter(object sender, EventArgs e)
+        {
+            // Chỉ hiệu ứng hover khi chưa có sao nào được chọn
+            if (_selectedStars > 0) return;
+
+            Label hoveredStar = sender as Label;
+            if (hoveredStar == null) return;
+
+            int hoverIndex = Array.IndexOf(_starLabels, hoveredStar) + 1;
+            for (int i = 0; i < _starLabels.Length; i++)
+            {
+                _starLabels[i].ForeColor = (i < hoverIndex)
+                    ? Color.FromArgb(250, 204, 21)   // vàng
+                    : Color.FromArgb(209, 213, 219); // xám
+            }
+        }
+
+        private void Star_MouseLeave(object sender, EventArgs e)
+        {
+            // Trả về trạng thái thực tế (0 sao -> tất cả xám)
+            UpdateStarsUI();
+        }
+
         private void UpdateStarsUI()
         {
-            for (int i = 0; i < _starLabels.Count; i++)
+            Color gold = Color.FromArgb(250, 204, 21);
+            Color gray = Color.FromArgb(209, 213, 219);
+
+            for (int i = 0; i < _starLabels.Length; i++)
             {
-                bool lit = (i + 1) <= _selectedStars;
-                _starLabels[i].ForeColor = lit ? Colors.Orange : Color.FromArgb(209, 213, 219);
+                _starLabels[i].ForeColor = (i < _selectedStars) ? gold : gray;
+                // Giữ nguyên text "★" không cần thay đổi
             }
+        }
+
+        // ──────────────────────── Button handlers ──────────────────────
+        private void btnSkip_Click(object sender, EventArgs e)
+        {
+            ReviewCancelled?.Invoke(this, EventArgs.Empty);
+            // Ẩn control (tuỳ ngữ cảnh, có thể xoá khỏi parent)
+            this.Parent?.Controls.Remove(this);
         }
 
         private async void btnSubmit_Click(object sender, EventArgs e)
@@ -124,7 +126,6 @@ namespace OOP2026
                 await _reviewService.CreateReviewAsync(_driverId, _passengerId, _tripId,
                                                        _selectedStars, commentText);
 
-                // ĐÃ SỬA: MessageBox.Show(text, caption) — đúng thứ tự tham số
                 MessageBox.Show(
                     "Cảm ơn bạn đã đóng góp ý kiến giúp cải thiện dịch vụ!",
                     "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -151,22 +152,9 @@ namespace OOP2026
             txtComment.Clear();
         }
 
-        private void ClearAndDisposeStars()
-        {
-            for (int i = _starLabels.Count - 1; i >= 0; i--)
-            {
-                var lbl = _starLabels[i];
-                lbl.Click -= Star_Click;
-                if (pnlStars.Controls.Contains(lbl))
-                    pnlStars.Controls.Remove(lbl);
-                lbl.Dispose();
-            }
-            _starLabels.Clear();
-        }
-
         private void UcReview_Disposed(object sender, EventArgs e)
         {
-            ClearAndDisposeStars();
+            // Không cần dọn dẹp sao vì chúng là thành phần tĩnh
         }
     }
 }

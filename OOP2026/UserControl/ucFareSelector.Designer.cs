@@ -13,6 +13,7 @@ namespace OOP2026
                 components.Dispose();
             base.Dispose(disposing);
         }
+
         private void InitializeComponent()
         {
             this.tlpMain = new System.Windows.Forms.TableLayoutPanel();
@@ -43,7 +44,6 @@ namespace OOP2026
             this.tlpMain.Location = new System.Drawing.Point(10, 10);
             this.tlpMain.Name = "tlpMain";
             this.tlpMain.RowCount = 2;
-            // FIX: Chia d?u 50-50 thay vì gán c?ng Absolute d? tri?t tiêu vi?c l?ch pixel
             this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpMain.Size = new System.Drawing.Size(380, 90);
@@ -52,12 +52,12 @@ namespace OOP2026
             // 
             // pnlMotorbike
             // 
-            this.pnlMotorbike.BackColor = OOP2026.Colors.White;
+            this.pnlMotorbike.BackColor = System.Drawing.Color.White;
             this.pnlMotorbike.Controls.Add(this.tlpMotorbike);
             this.pnlMotorbike.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pnlMotorbike.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlMotorbike.Location = new System.Drawing.Point(0, 0);
-            this.pnlMotorbike.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4); // Kho?ng cách du?i 4px
+            this.pnlMotorbike.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
             this.pnlMotorbike.Name = "pnlMotorbike";
             this.pnlMotorbike.Size = new System.Drawing.Size(380, 41);
             this.pnlMotorbike.TabIndex = 0;
@@ -85,12 +85,12 @@ namespace OOP2026
             // 
             this.lblMotorbikeIcon.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblMotorbikeIcon.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblMotorbikeIcon.ForeColor = OOP2026.Colors.Black;
+            this.lblMotorbikeIcon.ForeColor = System.Drawing.Color.Black;
             this.lblMotorbikeIcon.Location = new System.Drawing.Point(11, 0);
             this.lblMotorbikeIcon.Name = "lblMotorbikeIcon";
             this.lblMotorbikeIcon.Size = new System.Drawing.Size(228, 41);
             this.lblMotorbikeIcon.TabIndex = 0;
-            this.lblMotorbikeIcon.Text = "???   Xe máy";
+            this.lblMotorbikeIcon.Text = "🏍️ Xe máy";
             this.lblMotorbikeIcon.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblMotorbikeIcon.Click += new System.EventHandler(this.OnMotorbikeClick);
 
@@ -99,24 +99,24 @@ namespace OOP2026
             // 
             this.lblMotorbikePrice.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblMotorbikePrice.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
-            this.lblMotorbikePrice.ForeColor = Colors.Green;
+            this.lblMotorbikePrice.ForeColor = System.Drawing.Color.FromArgb(22, 163, 74); // Màu xanh lá
             this.lblMotorbikePrice.Location = new System.Drawing.Point(245, 0);
             this.lblMotorbikePrice.Name = "lblMotorbikePrice";
             this.lblMotorbikePrice.Size = new System.Drawing.Size(120, 41);
             this.lblMotorbikePrice.TabIndex = 1;
-            this.lblMotorbikePrice.Text = "0d";
+            this.lblMotorbikePrice.Text = "0đ";
             this.lblMotorbikePrice.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.lblMotorbikePrice.Click += new System.EventHandler(this.OnMotorbikeClick);
 
             // 
             // pnlCar
             // 
-            this.pnlCar.BackColor = OOP2026.Colors.White;
+            this.pnlCar.BackColor = System.Drawing.Color.White;
             this.pnlCar.Controls.Add(this.tlpCar);
             this.pnlCar.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pnlCar.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlCar.Location = new System.Drawing.Point(0, 45);
-            this.pnlCar.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0); // Kho?ng cách trên 4px d? t?o kho?ng cách gi?a 2 xe
+            this.pnlCar.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
             this.pnlCar.Name = "pnlCar";
             this.pnlCar.Size = new System.Drawing.Size(380, 41);
             this.pnlCar.TabIndex = 1;
@@ -144,12 +144,12 @@ namespace OOP2026
             // 
             this.lblCarIcon.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblCarIcon.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.lblCarIcon.ForeColor = OOP2026.Colors.Black;
+            this.lblCarIcon.ForeColor = System.Drawing.Color.Black;
             this.lblCarIcon.Location = new System.Drawing.Point(11, 0);
             this.lblCarIcon.Name = "lblCarIcon";
             this.lblCarIcon.Size = new System.Drawing.Size(228, 41);
             this.lblCarIcon.TabIndex = 0;
-            this.lblCarIcon.Text = "??   Xe ô tô";
+            this.lblCarIcon.Text = "🚕 Xe ô tô";
             this.lblCarIcon.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblCarIcon.Click += new System.EventHandler(this.OnCarClick);
 
@@ -158,12 +158,12 @@ namespace OOP2026
             // 
             this.lblCarPrice.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblCarPrice.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
-            this.lblCarPrice.ForeColor = Colors.Green;
+            this.lblCarPrice.ForeColor = System.Drawing.Color.FromArgb(22, 163, 74);
             this.lblCarPrice.Location = new System.Drawing.Point(245, 0);
             this.lblCarPrice.Name = "lblCarPrice";
             this.lblCarPrice.Size = new System.Drawing.Size(120, 41);
             this.lblCarPrice.TabIndex = 1;
-            this.lblCarPrice.Text = "0d";
+            this.lblCarPrice.Text = "0đ";
             this.lblCarPrice.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.lblCarPrice.Click += new System.EventHandler(this.OnCarClick);
 
@@ -172,7 +172,7 @@ namespace OOP2026
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 23F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = OOP2026.Colors.White;
+            this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.tlpMain);
             this.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.MinimumSize = new System.Drawing.Size(300, 110);

@@ -17,16 +17,33 @@ namespace OOP2026
         public ucWallet()
         {
             InitializeComponent();
+            this.Disposed += UcWallet_Disposed;
         }
 
         public void Initialize(Drv driver, IWalletSvc walletService, IDrvQry driverQuery, ITripQry tripQuery)
         {
+            if (_walletService != null) _walletService.WalletChanged -= OnWalletChangedGlobal;
+
             _driver = driver ?? throw new ArgumentNullException(nameof(driver));
             _walletService = walletService ?? throw new ArgumentNullException(nameof(walletService));
             _driverQuery = driverQuery ?? throw new ArgumentNullException(nameof(driverQuery));
             _tripQuery = tripQuery ?? throw new ArgumentNullException(nameof(tripQuery));
 
+            _walletService.WalletChanged += OnWalletChangedGlobal;
+
             txtCustomAmount.MaxLength = 9; // Tối đa 999.999.999 VNĐ
+            _ = LoadWalletDataAsync();
+        }
+
+        private void OnWalletChangedGlobal(object sender, WalletChangedEventArgs e)
+        {
+            if (e.DriverId != _driver.Id) return;
+            
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => OnWalletChangedGlobal(sender, e)));
+                return;
+            }
             _ = LoadWalletDataAsync();
         }
 
@@ -177,13 +194,18 @@ namespace OOP2026
         private void UpdateWalletLabels(Drv driver, int totalTrips)
         {
             lblBalance.Text = $"{driver.Wallet:N0}đ";
-            lblIncomeValue.Text = $"💰 Thu nhập: {driver.Income:N0}đ";
-            lblTripsValue.Text = $"📊 Tổng chuyến: {totalTrips}";
+            lblIncomeValue.Text = $"💰 {driver.Income:N0}đ";
+            lblTripsValue.Text = $"📊 {totalTrips}";
         }
-
         public async Task RefreshWalletAsync()
         {
             await LoadWalletDataAsync();
+        }
+
+        private void UcWallet_Disposed(object sender, EventArgs e)
+        {
+            if (_walletService != null)
+                _walletService.WalletChanged -= OnWalletChangedGlobal;
         }
     }
 }

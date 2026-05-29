@@ -25,7 +25,7 @@ namespace OOP2026
         private readonly IUsrRepo _userRepo;
         private readonly IVehRepo _vehicleRepo;
         private readonly IPsgSvc _passengerService;
-        private readonly INotificationSvc _notificationSvc;
+        private readonly INotiSvc _notificationSvc;
 
         private readonly ITripRepo _tripRepo;
         private readonly IPolRepo _policyRepo;
@@ -51,7 +51,7 @@ namespace OOP2026
             IWalletSvc ws,
             IPsgSvc ps,
             IAdmSvc ads,
-            INotificationSvc ns)
+            INotiSvc ns)
         {
             _userService = us;
             _vehicleRepo = vr;

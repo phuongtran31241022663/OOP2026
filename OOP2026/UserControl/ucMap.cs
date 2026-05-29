@@ -68,9 +68,13 @@ namespace OOP2026
             // Register mouse interaction events
             _gMapControl.OnMarkerClick += OnMarkerClick;
             _gMapControl.OnMapDrag += OnMapDrag;
+
+            // Mouse events (GMap.NET có thể nuốt sự kiện chuột của WinForms)
             _gMapControl.MouseDown += OnMapMouseDown;
             _gMapControl.MouseUp += OnMapMouseUp;
             _gMapControl.MouseClick += OnMapMouseClick;
+            _gMapControl.MouseMove += OnMapMouseMove;
+
 
             // Initialize overlays
             _pickupOverlay = new GMapOverlay("pickup");
@@ -230,15 +234,27 @@ namespace OOP2026
             }
         }
 
+        private void OnMapMouseMove(object sender, MouseEventArgs e)
+        {
+            // Nếu user đang bấm chuột và di chuyển => coi là drag để chặn click selection
+            if (_isSelectingLocation && e.Button == MouseButtons.Left)
+            {
+                _isDragging = true;
+            }
+        }
+
+
         private void OnMarkerClick(GMapMarker item, MouseEventArgs e) { }
 
         private void OnMapMouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            // reset drag flag khi nhấn chuột
+            if (_isSelectingLocation)
             {
                 _isDragging = false;
             }
         }
+
 
         private void OnMapMouseUp(object sender, MouseEventArgs e)
         {
@@ -247,33 +263,42 @@ namespace OOP2026
                 _isDragging = false;
                 MapDragEnded?.Invoke(this, EventArgs.Empty);
             }
+            else
+            {
+                _isDragging = false;
+            }
         }
+
 
         private async void OnMapMouseClick(object sender, MouseEventArgs e)
         {
             // Handle map click in selection mode to get address from coordinates
-            if (_isSelectingLocation && (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right))
+            if (!_isSelectingLocation)
+                return;
+
+            if (e.Button != MouseButtons.Left && e.Button != MouseButtons.Right)
+                return;
+
+            // Nếu đang kéo bản đồ thì bỏ qua click
+            if (_isDragging)
+                return;
+
+            PointLatLng point = _gMapControl.FromLocalToLatLng(e.X, e.Y);
+
+            Loc location = null;
+            if (_mapService != null)
             {
-                PointLatLng point = _gMapControl.FromLocalToLatLng(e.X, e.Y);
-                
-                Loc location;
-                if (_mapService != null)
-                {
-                    location = await _mapService.GetAddressAsync(point.Lat, point.Lng);
-                }
-                else
-                {
-                    location = null;
-                }
-
-                if (location == null)
-                {
-                    location = new Loc(new Coord(point.Lat, point.Lng), new Addr("Selected Location", "", "", "", ""));
-                }
-
-                MapClicked?.Invoke(this, location);
-                LocationSelected?.Invoke(point);
+                location = await _mapService.EnsureLocationAsync(null, point.Lat, point.Lng);
             }
+
+            if (location == null)
+            {
+                location = new Loc(new Coord(point.Lat, point.Lng), new Addr("Selected Location", "", "", "", ""));
+            }
+
+            MapClicked?.Invoke(this, location);
+            LocationSelected?.Invoke(point);
         }
+
     }
 }

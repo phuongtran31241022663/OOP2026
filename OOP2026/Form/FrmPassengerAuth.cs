@@ -19,10 +19,9 @@ namespace OOP2026
             _vehicleRepo = vehicleRepo;
 
             InitializeComponent();
-            ShowLoginPanel();
         }
 
-        private void ShowLoginPanel()
+        private void BtnTabLogin_Click(object sender, EventArgs e)
         {
             pnlLogin.Visible = true;
             pnlRegister.Visible = false;
@@ -30,8 +29,7 @@ namespace OOP2026
             btnTabRegister.BackColor = Color.Transparent;
             txtLoginPhone.Focus();
         }
-
-        private void ShowRegisterPanel()
+        private void BtnTabRegister_Click(object sender, EventArgs e)
         {
             pnlLogin.Visible = false;
             pnlRegister.Visible = true;
@@ -39,19 +37,14 @@ namespace OOP2026
             btnTabRegister.BackColor = Colors.White;
             txtRegName.Focus();
         }
-
-        private void BtnTabLogin_Click(object sender, EventArgs e) => ShowLoginPanel();
-        private void BtnTabRegister_Click(object sender, EventArgs e) => ShowRegisterPanel();
         private void BtnClose_Click(object sender, EventArgs e) => this.Close();
 
-        private void PnlDemoAccount_Click(object sender, EventArgs e) => FillDemoAccount();
-
-        private void FillDemoAccount()
+        private void PnlDemoAccount_Click(object sender, EventArgs e)
         {
             txtLoginPhone.Text = "0911111111";
             txtLoginPassword.Text = "123456";
-        }
 
+        }
         private async void BtnLogin_Click(object sender, EventArgs e)
         {
             btnLogin.Enabled = false;
@@ -61,8 +54,6 @@ namespace OOP2026
                 string password = txtLoginPassword.Text;
 
                 Usr? user = await _userService.LoginAsync(phone, password);
-                if (user == null)
-                    throw new InvalidOperationException("Số điện thoại hoặc mật khẩu không chính xác.");
 
                 LoginSucceeded?.Invoke(this, user);
             }

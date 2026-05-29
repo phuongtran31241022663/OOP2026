@@ -49,11 +49,7 @@ namespace OOP2026
         public double Latitude { get; private set; }
         public double Longitude { get; private set; }
 
-        public Coord()
-        {
-            Latitude = 0;
-            Longitude = 0;
-        }
+        public Coord() : this(0, 0) { }
 
         [JsonConstructor]
         public Coord(double latitude, double longitude)
@@ -85,28 +81,18 @@ namespace OOP2026
         public string? HouseNumber { get; private set; }
         public string? Locality { get; private set; }
 
-        public Addr()
-        {
-            Name = "Unknown Location";
-            Street = string.Empty;
-            District = string.Empty;
-            City = string.Empty;
-            Country = string.Empty;
-            OsmValue = null;
-            HouseNumber = null;
-            Locality = null;
-        }
+        public Addr() : this("Unknown", string.Empty, string.Empty, string.Empty, string.Empty) { }
+
 
         [JsonConstructor]
         public Addr(string name, string street, string district, string city, string country,
-                       string? houseNumber = null, string? osmValue = null, string? locality = null)
+                    string? houseNumber = null, string? osmValue = null, string? locality = null)
         {
-            // Fallback for empty name to prevent crashes
-            Name = string.IsNullOrWhiteSpace(name) ? (string.IsNullOrWhiteSpace(street) ? "Vị trí không xác định" : street) : name;
-            Street = street;
-            District = district;
-            City = city;
-            Country = country;
+            Name = name ?? "Unknown";
+            Street = street ?? string.Empty;
+            District = district ?? string.Empty;
+            City = city ?? string.Empty;
+            Country = country ?? string.Empty;
             HouseNumber = houseNumber;
             OsmValue = osmValue;
             Locality = locality;
@@ -128,13 +114,12 @@ namespace OOP2026
         {
             List<string> parts = new List<string>();
 
-            if (!string.IsNullOrWhiteSpace(Name) && Name != "Unknown" && Name != "Vị trí không xác định")
-                parts.Add(Name);
-
             if (!string.IsNullOrWhiteSpace(HouseNumber))
-                parts.Add(HouseNumber ?? string.Empty);
+                parts.Add(HouseNumber);
             if (!string.IsNullOrWhiteSpace(Street))
-                parts.Add(Street ?? string.Empty);
+                parts.Add(Street);
+            if (!string.IsNullOrWhiteSpace(Locality))
+                parts.Add(Locality);
             if (!string.IsNullOrWhiteSpace(District))
                 parts.Add(District);
             if (!string.IsNullOrWhiteSpace(City))
@@ -154,11 +139,7 @@ namespace OOP2026
         public Coord Coord { get; private set; }
         public Addr Addr { get; private set; }
 
-        public Loc()
-        {
-            Coord = new Coord();
-            Addr = new Addr();
-        }
+        public Loc() : this(new Coord(), new Addr()) { }
 
         [JsonConstructor]
         public Loc(Coord coord, Addr addr)
@@ -171,11 +152,6 @@ namespace OOP2026
         {
             yield return Coord;
             yield return Addr;
-        }
-
-        public override string ToString()
-        {
-            return string.Format("{0} ({1:F6}, {2:F6})", Addr, Coord.Latitude, Coord.Longitude);
         }
     }
 
@@ -203,8 +179,10 @@ namespace OOP2026
             Pickup = pickup ?? throw new ArgumentNullException(nameof(pickup));
             Dropoff = dropoff ?? throw new ArgumentNullException(nameof(dropoff));
 
-            if (distance <= 0)
-                throw new ArgumentOutOfRangeException(nameof(distance), "Khoảng cách phải lớn hơn 0.");
+            if (distance < 0)
+                throw new ArgumentOutOfRangeException(nameof(distance), "Khoảng cách không thể âm.");
+            if (distance == 0)
+                throw new ArgumentOutOfRangeException(nameof(distance), "Khoảng cách phải lớn hơn 0 để tính toán tuyến đường.");
             if (duration.TotalSeconds < 0)
                 throw new ArgumentOutOfRangeException(nameof(duration), "Thời gian phải lớn hơn hoặc bằng 0.");
 
@@ -229,20 +207,15 @@ namespace OOP2026
         public decimal Commission { get; private set; }
         public decimal DriverIncome { get; private set; }
 
-        public Fare()
-        {
-            TotalAmount = 0;
-            Commission = 0;
-            DriverIncome = 0;
-        }
+        public Fare() : this(0, 0) { }
 
         [JsonConstructor]
         public Fare(decimal totalAmount, decimal commission)
         {
             if (totalAmount < 0)
-                throw new ArgumentOutOfRangeException(nameof(totalAmount));
+                throw new ArgumentOutOfRangeException(nameof(totalAmount), "Tổng tiền không thể âm.");
             if (commission < 0)
-                throw new ArgumentOutOfRangeException(nameof(commission));
+                throw new ArgumentOutOfRangeException(nameof(commission), "Hoa hồng không thể âm.");
             if (commission > totalAmount)
                 throw new ArgumentException("Hoa hồng không thể lớn hơn tổng cước.", nameof(commission));
 

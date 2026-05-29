@@ -6,7 +6,6 @@ namespace OOP2026
 {
     public partial class FrmDriver : Form
     {
-        // 1. Chỉ định nghĩa các Field Readonly để đảm bảo tính bất biến
         private readonly Drv _driver;
         private readonly IDrvCmd _driverCmd;
         private readonly IDrvQry _driverQuery;
@@ -17,12 +16,12 @@ namespace OOP2026
         private readonly IUsrRepo _userRepo;
         private readonly IVehRepo _vehicleRepo;
         private readonly IMapSvc _mapService;
-        private readonly INotificationSvc _notificationSvc;
+        private readonly INotiSvc _notificationSvc;
 
         public FrmDriver(Drv d, IUsrSvc us, IDrvCmd dc, IDrvQry dq,
                           ITripQry tq, ITripCmd tc, IWalletSvc ws,
                           IMapSvc ms, IUsrRepo ur, IVehRepo vr,
-                          INotificationSvc ns)
+                          INotiSvc ns)
         {
             // Kiểm tra null chặt chẽ
             _driver = d ?? throw new ArgumentNullException(nameof(d));

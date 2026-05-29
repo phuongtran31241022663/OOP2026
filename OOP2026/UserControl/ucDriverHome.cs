@@ -15,7 +15,7 @@ namespace OOP2026
         private IWalletSvc _walletService;
         private IUsrSvc _userService;
         private ucMap _map;
-        private INotificationSvc _notificationSvc;
+        private INotiSvc _notificationSvc;
 
         private ucDriverStatus _statusControl;
         private ucRequest _requestControl;
@@ -23,15 +23,12 @@ namespace OOP2026
         private ucHistory _historyControl;
         private ucProfile _profileControl;
 
-        private Control _currentControl;
         private System.Windows.Forms.Timer _refreshRequestsTimer;
 
         public ucDriverHome()
         {
             InitializeComponent();
             InitializeChildControls();
-
-            // Đăng ký sự kiện hủy hệ thống để giải phóng RAM triệt để
             this.Disposed += UcDriverHome_Disposed;
         }
 
@@ -43,18 +40,23 @@ namespace OOP2026
             _historyControl = new ucHistory();
             _profileControl = new ucProfile();
 
+            _statusControl.Dock = DockStyle.Fill;
             _requestControl.Dock = DockStyle.Fill;
             _walletControl.Dock = DockStyle.Fill;
             _historyControl.Dock = DockStyle.Fill;
             _profileControl.Dock = DockStyle.Fill;
+
+            tabStatus.Controls.Add(_statusControl);
+            tabRequests.Controls.Add(_requestControl);
+            tabWallet.Controls.Add(_walletControl);
+            tabHistory.Controls.Add(_historyControl);
+            tabProfile.Controls.Add(_profileControl);
         }
 
-        /// <summary>
-        /// Khởi tạo màn hình chính tài xế - SỬA CHÀO MỪNG: Khử hoàn toàn IUsrRepo và IVehRepo
-        /// </summary>
+        // ĐÃ SỬA: tham số INotiSvc → INotificationSvc
         public void Initialize(Drv d, IDrvCmd dc, IDrvQry dq,
-                                 ITripQry tq, ITripCmd tc, IWalletSvc ws,
-                                 IUsrSvc us, ucMap map, INotificationSvc notificationSvc)
+                               ITripQry tq, ITripCmd tc, IWalletSvc ws,
+                               IUsrSvc us, ucMap map, INotiSvc notificationSvc)
         {
             _driver = d ?? throw new ArgumentNullException(nameof(d));
             _driverCmd = dc ?? throw new ArgumentNullException(nameof(dc));
@@ -69,10 +71,9 @@ namespace OOP2026
             BindDriverData();
             InitializeDependencies();
 
-            // Đăng ký sự kiện thay đổi trạng thái từ lõi Domain
             _driver.StatusChanged += OnDriverStatusChanged;
+            //if (_reviewService != null) _reviewService.TripReviewed += OnTripReviewedGlobal;
 
-            // Thiết lập đồng bộ hẹn giờ quét cuốc xe mới định kỳ 5 giây
             _refreshRequestsTimer = new System.Windows.Forms.Timer { Interval = 5000 };
             _refreshRequestsTimer.Tick += OnRefreshRequestsTick;
             _refreshRequestsTimer.Start();
@@ -82,26 +83,16 @@ namespace OOP2026
 
         private void InitializeDependencies()
         {
-            // ĐỒNG BỘ KIẾN TRÚC: Gọi hàm nạp ucDriverStatus mới đã lược bỏ 2 Repository
             _statusControl.Initialize(_driver, _driverCmd, _driverQuery, _tripQuery, _walletService);
-
             _requestControl.Initialize(_driver, _driverCmd, _tripCmd, _tripQuery, _notificationSvc);
             _walletControl.Initialize(_driver, _walletService, _driverQuery, _tripQuery);
             _historyControl.InitializeDriver(_driver, _tripQuery);
             _profileControl.Initialize(_driver, _userService);
 
-            // KHỬ LAMBDA: Thay thế bằng hàm đăng ký sự kiện tường minh để chặn dừng lại Task Leak
             _requestControl.TripAccepted += OnDriverTripAcceptedEvent;
-
-            if (tlpDriverContent != null)
-            {
-                tlpDriverContent.Controls.Clear();
-                tlpDriverContent.Controls.Add(_requestControl, 0, 0);
-                tlpDriverContent.Controls.Add(_walletControl, 0, 1);
-            }
         }
 
-        private async void OnDriverTripAcceptedEvent(object? sender, Trip e)
+        private async void OnDriverTripAcceptedEvent(object sender, Trip e)
         {
             try
             {
@@ -115,10 +106,8 @@ namespace OOP2026
 
         private async void OnRefreshRequestsTick(object sender, EventArgs e)
         {
-            if (_currentControl == tlpDriverContent && _requestControl.Visible)
-            {
+            if (tab.SelectedTab == tabRequests)
                 await RefreshPendingRequestsAsync();
-            }
         }
 
         private async Task RefreshPendingRequestsAsync()
@@ -132,7 +121,7 @@ namespace OOP2026
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Refresh pending error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ucDriverHome] Refresh pending error: {ex.Message}");
             }
         }
 
@@ -140,7 +129,7 @@ namespace OOP2026
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new Action(() => UpdateStatusUI()));
+                this.Invoke(new Action(UpdateStatusUI));
                 return;
             }
             UpdateStatusUI();
@@ -149,7 +138,6 @@ namespace OOP2026
         private void UpdateStatusUI()
         {
             if (_driver == null) return;
-
             bool isOnline = _driver.IsOnline();
             lblStatus.BackColor = isOnline ? Colors.Green : Colors.Gray;
             lblStatus.Text = isOnline ? "Trực tuyến" : "Ngoại tuyến";
@@ -158,39 +146,32 @@ namespace OOP2026
         private void BindDriverData()
         {
             if (_driver == null) return;
-
             lblName.Text = _driver.Name;
             lblPhone.Text = _driver.Phone;
-            lblStats.Text = $"⭐ {_driver.AvgRat:F1} • {_driver.TotTrip} chuyến";
+            lblStats.Text = $"⭐ {_driver.AvgRat:F1}  •  {_driver.TotTrip} chuyến";
             UpdateStatusUI();
         }
 
+        // ── Click nhãn Trạng thái → bật/tắt Online ────────────────────────
         private async void lblStatus_CheckedChanged(object sender, EventArgs e)
         {
             if (_driver == null || _driverCmd == null) return;
-            bool requestedOnline = !_driver.IsOnline();
-
             try
             {
                 lblStatus.Enabled = false;
-
                 if (_driver.IsOnline())
                     await _driverCmd.GoOfflineAsync(_driver.Id);
                 else
                     await _driverCmd.GoOnlineAsync(_driver.Id);
 
-                // SỬA CHÀO MỪNG: Dùng DrvQry thay thế hoàn toàn cho UsrRepo
                 var fresh = await _driverQuery.GetDriverByIdAsync(_driver.Id);
-                if (fresh != null)
-                {
-                    _driver = fresh;
-                }
-
+                if (fresh != null) _driver = fresh;
                 BindDriverData();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Cập nhật trạng thái hoạt động thất bại: {ex.Message}", "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Cập nhật trạng thái thất bại: {ex.Message}",
+                    "Lỗi kết nối", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 UpdateStatusUI();
             }
             finally
@@ -199,97 +180,59 @@ namespace OOP2026
             }
         }
 
-        private void Tab_Click(object sender, EventArgs e)
+        // ── Điều hướng Tab ─────────────────────────────────────────────────
+        private void Tab_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is not Button btn || btn.Tag == null) return;
-            ShowTab(btn.Tag.ToString());
+            TabPage selected = tab.SelectedTab;
+            if (selected == tabStatus)
+                _ = _statusControl.RefreshStatusAsync();
+            else if (selected == tabRequests)
+                _ = RefreshPendingRequestsAsync();
+            else if (selected == tabWallet)
+                _ = _walletControl.RefreshWalletAsync();
+            else if (selected == tabHistory)
+                _ = _historyControl.RefreshAsync();
+            else if (selected == tabProfile)
+                _ = _profileControl.RefreshProfileAsync();
         }
 
         public void ShowTab(string tag)
         {
-            if (flpTabs?.Controls != null)
+            if (this.InvokeRequired)
             {
-                // KHỬ LINQ: Duyệt vòng lặp for/foreach truyền thống quản lý kiểu nút bấm
-                foreach (Control ctrl in flpTabs.Controls)
-                {
-                    if (ctrl is Button btn && btn.Tag != null)
-                    {
-                        bool isSelected = btn.Tag.ToString() == tag;
-                        btn.BackColor = isSelected ? Colors.Orange : Color.White;
-                        btn.ForeColor = isSelected ? Color.White : Color.Gray;
-                    }
-                }
+                this.Invoke(new Action(() => ShowTab(tag)));
+                return;
             }
 
-            // FIX UI OVERLAP: Clear all controls from pnlContent to prevent overlapping
-            if (pnlContent != null)
-            {
-                pnlContent.Controls.Clear();
-            }
-
-            // Hide tlpDriverContent by default
-            if (tlpDriverContent != null)
-            {
-                tlpDriverContent.Visible = false;
-                // Also remove it from pnlContent if it was added there
-                if (pnlContent?.Controls.Contains(tlpDriverContent) == true)
-                {
-                    pnlContent.Controls.Remove(tlpDriverContent);
-                }
-            }
-
-            // Điều phối nạp dữ liệu tức thời theo ngữ cảnh Tab được chọn
             switch (tag)
             {
+                case "Status":
+                    tab.SelectedTab = tabStatus;
+                    break;
                 case "Requests":
-                    _currentControl = tlpDriverContent;
-                    if (tlpDriverContent != null) tlpDriverContent.Visible = true;
-                    _ = RefreshPendingRequestsAsync();
-                    _ = _walletControl.RefreshWalletAsync();
+                    tab.SelectedTab = tabRequests;
                     break;
                 case "Wallet":
-                    _currentControl = _walletControl;
-                    _ = _walletControl.RefreshWalletAsync();
+                    tab.SelectedTab = tabWallet;
                     break;
                 case "History":
-                    _currentControl = _historyControl;
-                    _ = _historyControl.RefreshAsync();
+                    tab.SelectedTab = tabHistory;
                     break;
                 case "Profile":
-                    _currentControl = _profileControl;
-                    _ = _profileControl.RefreshProfileAsync();
+                    tab.SelectedTab = tabProfile;
                     break;
-                default:
-                    return;
-            }
-
-            if (_currentControl != null && !pnlContent.Controls.Contains(_currentControl))
-            {
-                _currentControl.Dock = DockStyle.Fill;
-                pnlContent.Controls.Add(_currentControl);
-                _currentControl.BringToFront();
             }
         }
 
-        /// <summary>
-        /// Đồng bộ hàng loạt dữ liệu của toàn bộ hệ thống màn hình con tài xế
-        /// </summary>
         public async Task RefreshAllAsync()
         {
             if (_driver == null || _driverQuery == null || this.IsDisposed) return;
-
             try
             {
-                // SỬA CHÀO MỪNG: Sử dụng dịch vụ truy vấn DriverQuery thay cho Repo gốc
                 var fresh = await _driverQuery.GetDriverByIdAsync(_driver.Id);
-                if (fresh != null)
-                {
-                    _driver = fresh;
-                }
-
+                if (fresh != null) _driver = fresh;
                 BindDriverData();
 
-                // Chuỗi tác vụ nạp bất đồng bộ an toàn
                 if (_statusControl != null) await _statusControl.RefreshStatusAsync();
                 if (_requestControl != null) await _requestControl.RefreshAsync();
                 if (_walletControl != null) await _walletControl.RefreshWalletAsync();
@@ -298,24 +241,18 @@ namespace OOP2026
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[ucDriverHome] Toàn cục refresh lỗi: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ucDriverHome] RefreshAll error: {ex.Message}");
             }
         }
 
-        // ========== BỘ TIÊU HỦY CHỦ ĐỘNG KHỬ HOÀN TOÀN RÒ RỈ RAM ==========
-
+        // ── Dọn dẹp RAM ───────────────────────────────────────────────────
         private void CleanUpAllResources()
         {
-            // Hủy toàn bộ liên kết sự kiện để dọn sạch con trỏ chết
             if (_driver != null)
-            {
                 _driver.StatusChanged -= OnDriverStatusChanged;
-            }
 
             if (_requestControl != null)
-            {
                 _requestControl.TripAccepted -= OnDriverTripAcceptedEvent;
-            }
 
             if (_refreshRequestsTimer != null)
             {
@@ -325,12 +262,11 @@ namespace OOP2026
                 _refreshRequestsTimer = null;
             }
 
-            // Kích hoạt giải phóng vùng nhớ đồ họa của 5 màn hình con
-            _statusControl?.Dispose();
-            _requestControl?.Dispose();
-            _walletControl?.Dispose();
-            _historyControl?.Dispose();
-            _profileControl?.Dispose();
+            if (_statusControl != null) { _statusControl.Dispose(); _statusControl = null; }
+            if (_requestControl != null) { _requestControl.Dispose(); _requestControl = null; }
+            if (_walletControl != null) { _walletControl.Dispose(); _walletControl = null; }
+            if (_historyControl != null) { _historyControl.Dispose(); _historyControl = null; }
+            if (_profileControl != null) { _profileControl.Dispose(); _profileControl = null; }
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
@@ -339,7 +275,7 @@ namespace OOP2026
             base.OnHandleDestroyed(e);
         }
 
-        private void UcDriverHome_Disposed(object? sender, EventArgs e)
+        private void UcDriverHome_Disposed(object sender, EventArgs e)
         {
             CleanUpAllResources();
         }

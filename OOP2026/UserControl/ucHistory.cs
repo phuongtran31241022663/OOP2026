@@ -22,19 +22,38 @@ namespace OOP2026
 
         public void InitializePassenger(Psg passenger, ITripQry tripQuery, IRevSvc reviewService = null)
         {
+            if (_reviewService != null) _reviewService.TripReviewed -= OnTripReviewedGlobal;
+
             _user = passenger ?? throw new ArgumentNullException(nameof(passenger));
             _tripQuery = tripQuery ?? throw new ArgumentNullException(nameof(tripQuery));
             _reviewService = reviewService;
+
+            if (_reviewService != null) _reviewService.TripReviewed += OnTripReviewedGlobal;
 
             SafeLoadHistoryData();
         }
 
         public void InitializeDriver(Drv driver, ITripQry tripQuery, IRevSvc reviewService = null)
         {
+            if (_reviewService != null) _reviewService.TripReviewed -= OnTripReviewedGlobal;
+
             _user = driver ?? throw new ArgumentNullException(nameof(driver));
             _tripQuery = tripQuery ?? throw new ArgumentNullException(nameof(tripQuery));
             _reviewService = reviewService;
 
+            if (_reviewService != null) _reviewService.TripReviewed += OnTripReviewedGlobal;
+
+            SafeLoadHistoryData();
+        }
+
+        private void OnTripReviewedGlobal(object sender, TripReviewedEventArgs e)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => OnTripReviewedGlobal(sender, e)));
+                return;
+            }
+            // Tự động tải lại lịch sử khi có bất kỳ chuyến đi nào được đánh giá thành công
             SafeLoadHistoryData();
         }
 
@@ -109,7 +128,8 @@ namespace OOP2026
 
                 bool canReview = _reviewService != null &&
                                  _user is Psg &&
-                                 trip.Status == TripStatus.Completed;
+                                 trip.Status == TripStatus.Completed &&
+                                 !trip.IsReviewed;
 
                 Guid driverId = trip.DriverId ?? Guid.Empty;
                 Guid passengerId = trip.PassengerId;
@@ -182,7 +202,8 @@ namespace OOP2026
 
         private void UcHistory_Disposed(object sender, EventArgs e)
         {
-            this.flpTrips.Resize -= FlpTrips_Resize; // Hủy đăng ký sự kiện tránh rò rỉ bộ nhớ
+            this.flpTrips.Resize -= FlpTrips_Resize;
+            if (_reviewService != null) _reviewService.TripReviewed -= OnTripReviewedGlobal;
             ClearAndDisposeAllCards();
         }
     }

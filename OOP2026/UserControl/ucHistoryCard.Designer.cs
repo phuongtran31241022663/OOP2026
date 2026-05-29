@@ -11,6 +11,8 @@ namespace OOP2026
             base.Dispose(disposing);
         }
 
+        #region Component Designer generated code
+
         private void InitializeComponent()
         {
             this.lblDate = new System.Windows.Forms.Label();
@@ -26,10 +28,8 @@ namespace OOP2026
             this.tlpHeader.SuspendLayout();
             this.SuspendLayout();
 
-            // 
-            // tlpMain
-            // 
-            this.tlpMain.AutoSize = true; // BẬT: Để TableLayoutPanel tự nở theo nội dung
+            // ── tlpMain ─────────────────────────────────────────────
+            this.tlpMain.AutoSize = true;
             this.tlpMain.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tlpMain.ColumnCount = 1;
             this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -40,141 +40,124 @@ namespace OOP2026
             this.tlpMain.Margin = new System.Windows.Forms.Padding(0);
             this.tlpMain.Name = "tlpMain";
             this.tlpMain.RowCount = 2;
-            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 70F)); // Header cố định 70px
-            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize)); // SỬA: Tự động co giãn theo Panel Rev
+            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.tlpMain.Size = new System.Drawing.Size(330, 85);
             this.tlpMain.TabIndex = 0;
 
-            // 
-            // tlpHeader
-            // 
+            // ── tlpHeader ───────────────────────────────────────────
             this.tlpHeader.ColumnCount = 2;
-            this.tlpHeader.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70F));
-            this.tlpHeader.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
+            this.tlpHeader.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 72F));
+            this.tlpHeader.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 28F));
             this.tlpHeader.Controls.Add(this.lblDate, 0, 0);
             this.tlpHeader.Controls.Add(this.lblRoute, 0, 1);
             this.tlpHeader.Controls.Add(this.lblStatus, 0, 2);
             this.tlpHeader.Controls.Add(this.lblFare, 1, 1);
             this.tlpHeader.Controls.Add(this.btnReview, 1, 2);
-            this.tlpHeader.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tlpHeader.Dock = System.Windows.Forms.DockStyle.Top;
             this.tlpHeader.Location = new System.Drawing.Point(0, 0);
             this.tlpHeader.Margin = new System.Windows.Forms.Padding(0);
             this.tlpHeader.Name = "tlpHeader";
+            this.tlpHeader.Padding = new System.Windows.Forms.Padding(8, 8, 8, 8);
             this.tlpHeader.RowCount = 3;
             this.tlpHeader.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tlpHeader.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
-            this.tlpHeader.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 22F));
-            this.tlpHeader.Size = new System.Drawing.Size(330, 70);
+            this.tlpHeader.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.tlpHeader.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 34F));
+            this.tlpHeader.Size = new System.Drawing.Size(330, 85);
             this.tlpHeader.TabIndex = 0;
 
-            // 
-            // lblDate
-            // 
+            // ── lblDate ────────────────────────────────────────────
             this.lblDate.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblDate.Font = Typography.Font9Regular;
-            this.lblDate.ForeColor = OOP2026.Colors.Gray;
-            this.lblDate.Location = new System.Drawing.Point(3, 0);
-            this.lblDate.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.lblDate.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.lblDate.ForeColor = System.Drawing.Color.FromArgb(148, 163, 184);
+            this.lblDate.Location = new System.Drawing.Point(11, 8);
             this.lblDate.Name = "lblDate";
-            this.lblDate.Size = new System.Drawing.Size(221, 20);
+            this.lblDate.Size = new System.Drawing.Size(220, 20);
             this.lblDate.TabIndex = 0;
-            this.lblDate.Text = "00/00/0000 00:00";
+            this.lblDate.Text = "28/05/2026 14:30";
             this.lblDate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
-            // 
-            // lblRoute
-            // 
+            // ── lblRoute ────────────────────────────────────────────
+            this.lblRoute.AutoSize = true;
             this.lblRoute.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblRoute.Font = Typography.Font10Bold;
-            this.lblRoute.ForeColor = OOP2026.Colors.Black;
-            this.lblRoute.Location = new System.Drawing.Point(3, 20);
-            this.lblRoute.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.lblRoute.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblRoute.ForeColor = System.Drawing.Color.FromArgb(15, 23, 42);
+            this.lblRoute.Location = new System.Drawing.Point(11, 28);
+            this.lblRoute.Margin = new System.Windows.Forms.Padding(0, 4, 0, 4);
             this.lblRoute.Name = "lblRoute";
-            this.lblRoute.Size = new System.Drawing.Size(221, 28);
-            this.lblRoute.TabIndex = 1;
+            this.lblRoute.Size = new System.Drawing.Size(220, 23);
             this.lblRoute.Text = "Điểm đón • Điểm đến";
             this.lblRoute.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
-            // 
-            // lblStatus
-            // 
+            // ── lblStatus ──────────────────────────────────────────
             this.lblStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblStatus.Font = Typography.Font9Regular;
-            this.lblStatus.ForeColor = OOP2026.Colors.Gray;
-            this.lblStatus.Location = new System.Drawing.Point(3, 48);
-            this.lblStatus.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.lblStatus.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.lblStatus.ForeColor = System.Drawing.Color.FromArgb(71, 85, 105);
+            this.lblStatus.Location = new System.Drawing.Point(11, 55);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(221, 22);
+            this.lblStatus.Size = new System.Drawing.Size(220, 34);
             this.lblStatus.TabIndex = 2;
-            this.lblStatus.Text = "Trạng thái";
+            this.lblStatus.Text = "✓ Đã hoàn thành";
             this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
-            // 
-            // lblFare
-            // 
+            // ── lblFare (Giá tiền màu xanh lá) ─────────────────────
             this.lblFare.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblFare.Font = Typography.Font10Bold;
-            this.lblFare.ForeColor = OOP2026.Colors.Gray;
-            this.lblFare.Location = new System.Drawing.Point(230, 20);
-            this.lblFare.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.lblFare.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            this.lblFare.ForeColor = System.Drawing.Color.FromArgb(22, 163, 74);
+            this.lblFare.Location = new System.Drawing.Point(234, 28);
             this.lblFare.Name = "lblFare";
-            this.lblFare.Size = new System.Drawing.Size(97, 28);
-            this.lblFare.TabIndex = 3;
-            this.lblFare.Text = "0d";
+            this.lblFare.Size = new System.Drawing.Size(88, 27);
+            this.lblFare.Text = "45.000đ";
             this.lblFare.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 
-            // 
-            // btnReview
-            // 
-            this.btnReview.BackColor = OOP2026.Colors.White;
+            // ── btnReview (Nền vàng nhạt, chữ vàng đậm) ───────────
+            this.btnReview.BackColor = System.Drawing.Color.FromArgb(254, 252, 232); // Vàng nhạt
             this.btnReview.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnReview.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnReview.FlatAppearance.BorderColor = OOP2026.Colors.LightGray;
-            this.btnReview.FlatAppearance.BorderSize = 1;
+            this.btnReview.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(234, 225, 184); // Viền vàng nhạt
             this.btnReview.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnReview.Font = Typography.Font10Bold;
-            this.btnReview.ForeColor = OOP2026.Colors.Orange;
-            this.btnReview.Location = new System.Drawing.Point(230, 48);
-            this.btnReview.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.btnReview.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnReview.ForeColor = System.Drawing.Color.FromArgb(184, 134, 11); // Vàng đậm
+            this.btnReview.Location = new System.Drawing.Point(234, 57);
+            this.btnReview.Margin = new System.Windows.Forms.Padding(0, 2, 0, 2);
             this.btnReview.Name = "btnReview";
-            this.btnReview.Size = new System.Drawing.Size(97, 22);
+            this.btnReview.Size = new System.Drawing.Size(88, 30);
             this.btnReview.TabIndex = 4;
             this.btnReview.Text = "Đánh giá";
             this.btnReview.UseVisualStyleBackColor = false;
-            this.btnReview.Click += new System.EventHandler(this.BtnReview_Click); // SỬA: Đăng ký Event rõ ràng
+            this.btnReview.Click += new System.EventHandler(this.BtnReview_Click);
 
-            // 
-            // pnlReview
-            // 
-            this.pnlReview.AutoSize = true; // SỬA: Panel tự nở chiều cao dựa theo control ucReview bên trong
+            // ── pnlReview ──────────────────────────────────────────
+            this.pnlReview.AutoSize = true;
             this.pnlReview.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.pnlReview.Dock = System.Windows.Forms.DockStyle.Fill; // Đổi sang Fill để ăn theo cấu trúc Row của TableLayoutPanel
-            this.pnlReview.Location = new System.Drawing.Point(0, 70);
+            this.pnlReview.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlReview.Location = new System.Drawing.Point(0, 85);
             this.pnlReview.Margin = new System.Windows.Forms.Padding(0);
             this.pnlReview.Name = "pnlReview";
-            this.pnlReview.Size = new System.Drawing.Size(330, 0); // Ban đầu chiều cao bằng 0
+            this.pnlReview.Size = new System.Drawing.Size(330, 0);
             this.pnlReview.TabIndex = 5;
             this.pnlReview.Visible = false;
 
-            // 
-            // ucHistoryCard
-            // 
+            // ── ucHistoryCard ──────────────────────────────────────
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true; // CHỐT HẠ: Ép Card co giãn linh hoạt
+            this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.BackColor = OOP2026.Colors.White; // Đổi từ LightGreen sang White cho tiệm cận màu UI thực tế
+            this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.tlpMain);
             this.Margin = new System.Windows.Forms.Padding(0, 0, 0, 12);
             this.Name = "ucHistoryCard";
-            this.Size = new System.Drawing.Size(330, 70); // Kích thước mặc định chỉ bằng phần Header
-
+            this.Size = new System.Drawing.Size(330, 85);
             this.tlpMain.ResumeLayout(false);
             this.tlpMain.PerformLayout();
             this.tlpHeader.ResumeLayout(false);
+            this.tlpHeader.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
         }
 
-        #region Controls declaration
+        #endregion
+
         private System.Windows.Forms.Label lblDate;
         private System.Windows.Forms.Label lblRoute;
         private System.Windows.Forms.Label lblStatus;
@@ -183,6 +166,5 @@ namespace OOP2026
         private System.Windows.Forms.Panel pnlReview;
         private System.Windows.Forms.TableLayoutPanel tlpMain;
         private System.Windows.Forms.TableLayoutPanel tlpHeader;
-        #endregion
     }
 }

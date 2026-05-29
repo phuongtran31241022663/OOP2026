@@ -105,6 +105,8 @@ public static class DataSeeder
             var vehicle = new Car("51A-12345", "Toyota", "Camry", "Trắng", 4);
             await vehicleRepo.CreateAsync(vehicle);
             var driver = new Drv("Tài xế Test", testDriverPhone, "123456", "GPLX-000000", vehicle.Id, GenerateLocation(999));
+            vehicle.LinkDriver(driver.Id);
+            await vehicleRepo.UpdateAsync(vehicle);
             driver.Deposit(100000);
             driver.SetOnline();
             await userRepo.CreateAsync(driver);
@@ -143,6 +145,8 @@ public static class DataSeeder
                     vehicle.Id,
                     GenerateLocation(i));
 
+                vehicle.LinkDriver(driver.Id);
+                await vehicleRepo.UpdateAsync(vehicle);
                 driver.Deposit(50000);
                 driver.SetOnline();
                 await userRepo.CreateAsync(driver);

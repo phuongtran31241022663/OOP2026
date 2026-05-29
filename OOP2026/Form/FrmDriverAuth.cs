@@ -14,30 +14,11 @@ namespace OOP2026
         private bool _loginPasswordVisible;
         private bool _regPasswordVisible;
 
-        // ĐÃ KHỬ: Vứt bỏ hoàn toàn IVehRepo khởi tạo UI
         public FrmDriverAuth(IUsrSvc userService)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             InitializeComponent();
-            ShowLoginPanel();
         }
-
-        private static string GetText(TextBox textBox) => textBox.Text.Trim();
-
-        private void ShowLoginPanel()
-        {
-            pnlLogin.Visible = true;
-            pnlRegister.Visible = false;
-            txtLoginPhone.Focus();
-        }
-
-        private void ShowRegisterPanel()
-        {
-            pnlLogin.Visible = false;
-            pnlRegister.Visible = true;
-            txtRegName.Focus();
-        }
-
         private void ClearRegisterForm()
         {
             txtRegName.Clear();
@@ -48,22 +29,6 @@ namespace OOP2026
             txtModel.Clear();
             txtColor.Clear();
             numCapacity.Value = 4;
-        }
-
-        // ========== EVENT HANDLERS (GIAO DIỆN THUẦN TÚY) ==========
-
-        private void BtnToggleLoginPassword_Click(object sender, EventArgs e)
-        {
-            _loginPasswordVisible = !_loginPasswordVisible;
-            txtLoginPassword.PasswordChar = _loginPasswordVisible ? '\0' : '*';
-            btnToggleLoginPassword.Text = _loginPasswordVisible ? "👁️" : "🙈";
-        }
-
-        private void BtnToggleRegPassword_Click(object sender, EventArgs e)
-        {
-            _regPasswordVisible = !_regPasswordVisible;
-            txtRegPassword.PasswordChar = _regPasswordVisible ? '\0' : '*';
-            btnToggleRegPassword.Text = _regPasswordVisible ? "👁️" : "🙈";
         }
 
         private void OnAuthKeyDown(object sender, KeyEventArgs e)
@@ -78,23 +43,25 @@ namespace OOP2026
                 btnRegister.PerformClick();
         }
 
-        private void LinkToRegister_Click(object sender, EventArgs e) => ShowRegisterPanel();
 
-        private void lnkToLogin_Click(object sender, EventArgs e) => ShowLoginPanel();
+        private void lnkToLogin_Click(object sender, EventArgs e)
+        {
+            pnlLogin.Visible = true;
+            pnlRegister.Visible = false;
+            txtLoginPhone.Focus();
+        }
 
         private void CmbVehicleType_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Tối ưu UI: Nếu chọn Xe máy (SelectedIndex == 0) thì ẩn hoặc vô hiệu hóa ô nhập số chỗ ngồi
             numCapacity.Enabled = cmbVehicleType.SelectedIndex != 0;
             if (cmbVehicleType.SelectedIndex == 0) numCapacity.Value = 2;
         }
 
-        // ========== XỬ LÝ NGHIỆP VỤ (ĐẨY XUỐNG SERVICE VÀ TRY-CATCH) ==========
 
         private async void BtnLogin_Click(object sender, EventArgs e)
         {
-            string phone = GetText(txtLoginPhone);
-            string password = GetText(txtLoginPassword);
+            string phone = txtLoginPhone.Text;
+            string password = txtLoginPassword.Text;
 
             btnLogin.Enabled = false;
             try
@@ -132,22 +99,21 @@ namespace OOP2026
             try
             {
                 // Thu thập thông tin cá nhân tài xế
-                string name = GetText(txtRegName);
-                string phone = GetText(txtRegPhone);
-                string password = GetText(txtRegPassword);
+                string name = txtRegName.Text;
+                string phone = txtRegPhone.Text;
+                string password = txtRegPassword.Text;
 
                 // Thu thập thông tin phương tiện
-                string plate = GetText(txtPlate);
-                string brand = GetText(txtBrand);
-                string model = GetText(txtModel);
-                string color = GetText(txtColor);
+                string plate = txtPlate.Text;
+                string brand = txtBrand.Text;
+                string model = txtModel.Text;
+                string color = txtColor.Text;
                 int capacity = (int)numCapacity.Value;
                 VehicleType vt = cmbVehicleType.SelectedIndex == 0 ? VehicleType.Moto : VehicleType.Car;
 
-                // CHUẨN DDD: Đẩy toàn bộ thông tin thô xuống UsrSvc. 
-                // UsrSvc sẽ tự lo việc kiểm tra dữ liệu trùng, gọi VehicleFactory, tạo Veh và Drv trong 1 luồng an toàn.
                 await _userService.RegisterDriverAsync(
-                    name, phone, password, plate.Trim(), plate.Trim(), brand.Trim(), model.Trim(), color.Trim(), (int)numCapacity.Value, vt, new Loc(new Coord(10.762, 106.660), new Addr("Vị trí mặc định", "", "", "Hồ Chí Minh", "Việt Nam"))
+                    name, phone, password, plate.Trim(), vt, plate.Trim(), brand.Trim(), model.Trim(), color.Trim(), (int)numCapacity.Value,
+                    new Loc(new Coord(10.762, 106.660), new Addr("Vị trí mặc định", "", "", "Hồ Chí Minh", "Việt Nam"))
                 );
 
                 MessageBox.Show("Thành công", "Đăng ký tài xế thành công!");
@@ -176,6 +142,19 @@ namespace OOP2026
             {
                 btnRegister.Enabled = true;
             }
+        }
+
+        private void btnToggleLoginPassword_Click(object sender, EventArgs e)
+        {
+            _regPasswordVisible = !_regPasswordVisible;
+            btnToggleRegPassword.Text = _regPasswordVisible ? "👁️" : "🙈";
+        }
+
+        private void linkToRegister_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            pnlLogin.Visible = false;
+            pnlRegister.Visible = true;
+            txtRegName.Focus();
         }
     }
 }

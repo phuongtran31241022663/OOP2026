@@ -78,7 +78,7 @@ namespace OOP2026
                 double newLng = pickupCoord.Longitude + radiusDeg * Math.Sin(angle);
 
                 var currentAddress = driver.Position?.Addr
-                    ?? new Addr("V? tr� gi? l?p l�n c?n", "", "", "", "Vi?t Nam");
+                    ?? new Addr("Vị trí giả lập lân cận", "", "", "", "Việt Nam");
 
                 var newLocation = new Loc(new Coord(newLat, newLng), currentAddress);
 

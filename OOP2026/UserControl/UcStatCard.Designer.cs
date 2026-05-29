@@ -13,52 +13,85 @@ namespace OOP2026
             base.Dispose(disposing);
         }
 
+        #region Component Designer generated code
+
         private void InitializeComponent()
         {
+            this.tlpCardLayout = new System.Windows.Forms.TableLayoutPanel();
             this.lblTitle = new System.Windows.Forms.Label();
             this.lblValue = new System.Windows.Forms.Label();
+            this.lblDescription = new System.Windows.Forms.Label(); // Thêm Label mô tả
+
+            this.tlpCardLayout.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // lblTitle
-            // 
-            this.lblTitle.AutoSize = false; // T?t AutoSize d? ki?m soát Dock t?t hon
-            this.lblTitle.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblTitle.Location = new System.Drawing.Point(16, 16);
+
+            // ── tlpCardLayout: Cấu trúc 3 hàng ──────────
+            this.tlpCardLayout.ColumnCount = 1;
+            this.tlpCardLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpCardLayout.RowCount = 3;
+            this.tlpCardLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize)); // Hàng tiêu đề
+            this.tlpCardLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize)); // Hàng giá trị
+            this.tlpCardLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F)); // Hàng mô tả
+
+            this.tlpCardLayout.Controls.Add(this.lblTitle, 0, 0);
+            this.tlpCardLayout.Controls.Add(this.lblValue, 0, 1);
+            this.tlpCardLayout.Controls.Add(this.lblDescription, 0, 2);
+
+            this.tlpCardLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tlpCardLayout.Location = new System.Drawing.Point(16, 14);
+            this.tlpCardLayout.Margin = new System.Windows.Forms.Padding(0);
+            this.tlpCardLayout.Name = "tlpCardLayout";
+            this.tlpCardLayout.Size = new System.Drawing.Size(168, 72);
+            this.tlpCardLayout.TabIndex = 0;
+
+            // ── lblTitle: Tiêu đề ──────────
+            this.lblTitle.AutoSize = true;
+            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.lblTitle.ForeColor = System.Drawing.Color.FromArgb(100, 116, 139);
+            this.lblTitle.Location = new System.Drawing.Point(0, 0);
+            this.lblTitle.Margin = new System.Windows.Forms.Padding(0);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(168, 22);
-            this.lblTitle.TabIndex = 0;
+            this.lblTitle.Size = new System.Drawing.Size(86, 15);
             this.lblTitle.Text = "Tổng thu nhập";
-            this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblTitle.Font = OOP2026.Typography.Font9Regular;
-            this.lblTitle.ForeColor = System.Drawing.Color.FromArgb(107, 114, 128); // Màu xám nh?t hi?n d?i
-            // 
-            // lblValue
-            // 
-            this.lblValue.AutoSize = false;
-            this.lblValue.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblValue.Location = new System.Drawing.Point(16, 38);
+
+            // ── lblValue: Giá trị chính ──────────
+            this.lblValue.AutoSize = true;
+            this.lblValue.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
+            this.lblValue.ForeColor = System.Drawing.Color.FromArgb(15, 23, 42);
+            this.lblValue.Location = new System.Drawing.Point(0, 15);
+            this.lblValue.Margin = new System.Windows.Forms.Padding(0, 0, 0, 2);
             this.lblValue.Name = "lblValue";
-            this.lblValue.Size = new System.Drawing.Size(168, 36);
-            this.lblValue.TabIndex = 1;
-            this.lblValue.Text = "2,450,000d"; // Gi? ch? th? v?i chu?i ti?n t? dài
-            this.lblValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblValue.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
-            this.lblValue.ForeColor = OOP2026.Colors.Black;
-            // 
-            // ucStatCard
-            // 
+            this.lblValue.Size = new System.Drawing.Size(145, 32);
+            this.lblValue.Text = "2.450.000đ";
+
+            // ── lblDescription: Thông tin phụ ──────────
+            this.lblDescription.AutoSize = true;
+            this.lblDescription.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.lblDescription.ForeColor = System.Drawing.Color.FromArgb(148, 163, 184);
+            this.lblDescription.Location = new System.Drawing.Point(0, 49);
+            this.lblDescription.Margin = new System.Windows.Forms.Padding(0);
+            this.lblDescription.Name = "lblDescription";
+            this.lblDescription.Size = new System.Drawing.Size(126, 15);
+            this.lblDescription.Text = "từ chuyến hoàn thành";
+
+            // ── ucStatCard ──────────
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = OOP2026.Colors.White;
-            this.Controls.Add(this.lblValue);
-            this.Controls.Add(this.lblTitle);
+            this.BackColor = System.Drawing.Color.White;
+            this.Controls.Add(this.tlpCardLayout);
             this.Name = "ucStatCard";
-            this.Padding = new System.Windows.Forms.Padding(16); // T?o kho?ng tr?ng vi?n d?u d?n
-            this.Size = new System.Drawing.Size(200, 90);
+            this.Padding = new System.Windows.Forms.Padding(16, 14, 16, 14);
+            this.Size = new System.Drawing.Size(200, 100);
+            this.tlpCardLayout.ResumeLayout(false);
+            this.tlpCardLayout.PerformLayout();
             this.ResumeLayout(false);
         }
 
+        #endregion
+
+        private System.Windows.Forms.TableLayoutPanel tlpCardLayout;
         private System.Windows.Forms.Label lblTitle;
         private System.Windows.Forms.Label lblValue;
+        private System.Windows.Forms.Label lblDescription; // Đừng quên khai báo biến này
     }
 }
